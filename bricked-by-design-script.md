@@ -31,13 +31,13 @@ Spotify's Car Thing, a 90 dollar music player for your car, stopped working in D
 Then there's the Humane AI Pin, which I think is the worst one. It launched at 699 dollars, plus a monthly subscription. In February 2025, after HP bought most of the company, it was cut off from its servers. Only people who'd bought it in the previous 90 days got their money back. So if you were on day 91, you'd paid 699 dollars for a very expensive lapel decoration.
 
 **[Online: Wemo ads, one after another: plug, switch, heater, coffee maker, baby monitor]**
-And the most recent one is from this year. On January 31, Belkin turned off the cloud for most of its Wemo smart home products. More than two dozen of them: smart plugs, light switches, space heaters, coffee makers, baby monitors. Wemo had been around since 2011, so some people had built a big part of their home on it. A baby monitor that needs a company's server to work. Let that sink in.
+And the most recent one is from this year. On January 31, Belkin turned off the cloud for most of its Wemo smart home products. More than two dozen of them: smart plugs, light switches, space heaters, coffee makers, baby monitors. Wemo had been around since 2011, so some people had built a big part of their home on it. Yes, a baby monitor that needs a company's server to work.
 
 **[Screen: Apple Home app. Then Online: Matter logo on a product box]**
 Not every Wemo device died, though. A few models that work with Apple HomeKit carried on, but only if you'd set them up through HomeKit before the shutdown. And four newer models that use a standard called Matter weren't affected at all. Remember that word, I'll need it later.
 
 **[Self: older smart TV at home or a relative's place, an app showing an error or missing from the home screen]**
-Most of us here in India didn't buy these exact devices. But if you have an older smart TV where YouTube or Netflix has gone missing or throws an error, even though the screen is perfectly fine, that's the same thing, just smaller. The TV works. The software has just moved on without it.
+Most of us here in India didn't buy these exact devices. But if you have an older smart TV where YouTube or Netflix has gone missing or throws an error, even though the screen is perfectly fine, that's the same thing, just smaller.
 
 **[TH: point at the device on your desk on "in your house"]**
 What I kept asking while reading all this was why these things need a company's server in the first place. It's in your house. It's on your own Wi-Fi. Why can't it just do its job?
@@ -83,7 +83,9 @@ Governments are paying attention too. India launched a Right to Repair portal in
 Even phones have improved. My Pixel is supposed to get seven years of updates, and not that long ago Pixels got three.
 
 **[TH: straight to camera]**
-But repair rules are mostly about fixing the hardware, and this isn't a hardware problem. Here's what I'd want. If a company switches off a product it sold you, it should do one of three things: refund you properly, let the device keep working locally, or release enough of the software that someone else can keep it alive. Right now the rule is basically "we'll do whatever we want", and the terms and conditions say that's fine.
+But repair rules are mostly about fixing hardware, and this isn't a hardware problem.
+
+Now, I get it. Nobody can run servers forever. That's actually why I think there should be a rule: if a company is going to switch off something it sold you, it should either refund you or let the device keep working without the cloud. That's not a lot to ask.
 
 ## Closing (6:00–7:00)
 
