@@ -1,0 +1,382 @@
+/* Characters layer: Mochi the cat, the treat jar and the plant shelf. Illustration rules only.
+   Structure, type and colour live in system.css; the monochrome treatment is at the bottom of this file. */
+/* ===== Mochi the cat ===== */
+.cat .b-line,.cat .h-line,.cat .leg-line,.cat .t-o,.cat .whisk,.cat .stripe{display:none}
+.cat .ear-o,.cat .paw,.cat .leg,.cat .eye-w{stroke:none}
+.cat .b-fill,.cat .h-fill,.cat .ear-o,.cat .paw,.cat .leg,.cat .gray,.cat .leg.far{fill:#A9AFB9}.cat .t-b,.cat .t-s{stroke:#A9AFB9}
+.cat .ear-i{fill:#F5A3B5}.cat .eye-w{fill:#2B2D33}
+#catGL{position:absolute;left:0;bottom:0;width:100%;height:380px;pointer-events:none;z-index:800;display:none}
+.gl-on #catGL{display:block}
+#desk[data-cat="off"] #catGL{display:none!important}
+.cat.gl .cat-svg,.cat.gl .zzz{visibility:hidden}
+.cat.gl.p-sleep .zzz{visibility:visible}
+.cat{position:absolute;left:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:130px;height:130px;z-index:905;touch-action:none;cursor:pointer;will-change:transform;-webkit-tap-highlight-color:transparent}
+.cat.up{z-index:905}
+.cat.chatting{z-index:970}
+#desk[data-cat="off"] .cat,#desk[data-cat="off"] .jar{display:none}
+.cat-svg{width:100%;height:100%;overflow:visible;display:block}
+.cat-svg *{transform-box:view-box}
+.cat .spr-side{display:none}
+.cat.side .spr-sit{display:none}.cat.side .spr-side{display:inline}
+.cat .spr-side{transform-origin:100px 100px}
+.cat.face-l .spr-side{transform:scaleX(-1)}
+.cat .c-all{transform-origin:100px 190px}
+.cat .c-head{transform-origin:100px 112px;transition:transform .45s cubic-bezier(.3,1.3,.5,1)}
+.cat .c-look{transform-origin:100px 100px;transform:rotate(var(--hr,0deg));transition:transform .3s ease-out}
+.cat .c-body{transform-origin:100px 188px;transition:transform .45s cubic-bezier(.3,1.3,.5,1)}
+.cat .c-tail{transform-origin:142px 180px;transition:transform .5s cubic-bezier(.3,1.3,.5,1)}
+.cat .s-tail{transform-origin:52px 122px}
+.cat .s-all{transform-origin:100px 186px;transition:transform .35s cubic-bezier(.3,1.2,.5,1)}
+.cat .s-head{transform-origin:150px 110px;transition:transform .35s}
+.cat .lg{transition:transform .3s}
+.cat .bf{transform-origin:66px 136px}.cat .ff{transform-origin:130px 136px}.cat .bn{transform-origin:75px 138px}.cat .fn{transform-origin:139px 138px}
+.cat .c-paws{transition:opacity .3s}
+.cat .el{transform-origin:78px 58px;transition:transform .25s}.cat .er{transform-origin:124px 56px;transition:transform .25s}
+.cat .pupil{transform-origin:100px 75px;transform:translate(var(--px,0px),var(--py,0px));transition:transform .15s ease-out}
+.cat .b-fill,.cat .h-fill,.cat .ear-o,.cat .paw,.cat .leg{fill:#F6F1E8}
+.cat .leg.far{fill:#DCD4C7}
+.cat .b-line,.cat .h-line{fill:none;stroke:#1f1c1a;stroke-width:3}
+.cat .ear-o,.cat .paw,.cat .leg{stroke:#1f1c1a;stroke-width:3;stroke-linejoin:round}
+.cat .leg-line,.cat .toe{fill:none;stroke:#1f1c1a;stroke-width:2.4;stroke-linecap:round}
+.cat .ear-i{fill:#EE5B4B}
+.cat .gray{fill:#BEB8AF}
+.cat .stripe{fill:none;stroke:#5E5952;stroke-width:5;stroke-linecap:round}
+.cat .blush{fill:#F3A69C;opacity:.65;transition:opacity .3s}
+.cat .eye-w{fill:#fff;stroke:#1f1c1a;stroke-width:2.6}
+.cat .pupil circle{fill:#1f1c1a}.cat .pupil .hl{fill:#fff}
+.cat .eyes path{fill:none;stroke:#1f1c1a;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.cat .nose{fill:#E8574A;transform-origin:100px 89px}
+.cat .mo-w{fill:none;stroke:#1f1c1a;stroke-width:2;stroke-linecap:round}
+.cat .mo-o{fill:#7A2B2B;stroke:#1f1c1a;stroke-width:2;transform-origin:100px 96px}
+.cat .tongue{fill:#E8574A;display:none}
+.cat .whisk path{stroke:#1f1c1a;stroke-width:1.2;fill:none;opacity:.75}
+.cat .c-shadow{fill:#000;opacity:.13;transform-origin:100px 189px;transition:transform .3s,opacity .3s}
+.cat.up .c-shadow{opacity:.07}
+.cat .t-o,.cat .t-b,.cat .t-s{fill:none;stroke-linecap:round;transition:stroke-width .25s}
+.cat .t-o{stroke:#1f1c1a;stroke-width:21}.cat .t-b{stroke:#BEB8AF;stroke-width:15}.cat .t-s{stroke:#2f2b28;stroke-width:15;stroke-dasharray:7 9;stroke-linecap:butt}
+.cat .e-closed,.cat .e-angry,.cat .e-happy,.cat .mo-o,.cat .gpaw{display:none}
+.cat .gpaw{transform-origin:100px 120px}
+/* sitting poses */
+.cat.p-sit .c-tail,.cat.p-peek .c-tail,.cat.p-groom .c-tail{animation:cat-sway 3.2s ease-in-out infinite}
+.cat.p-sleep .c-head{transform:translate(0,22px) rotate(-4deg)}
+.cat.p-sleep .c-body{transform:scale(1.1,.8);animation:cat-breathe 3s ease-in-out infinite}
+.cat.p-sleep .c-paws,.cat.p-sleep .leg-line{opacity:0}
+.cat.p-sleep .c-tail{transform:rotate(52deg)}
+.cat.p-sleep .c-look{transform:none}
+.cat.p-sleep .e-open{display:none}.cat.p-sleep .e-closed{display:inline}
+.cat.p-peek .c-head{transform:rotate(-9deg) translate(-6px,2px)}
+.cat.p-reach .c-body{transform:scale(.95,1.08)}
+.cat.p-reach .c-head{transform:translate(0,-14px)}
+.cat.p-eat .c-head{transform:translate(0,20px) rotate(6deg)}
+.cat.p-eat .mo-o{display:inline;animation:cat-munch .28s ease-in-out infinite}.cat.p-eat .mo-w{display:none}
+.cat.p-eat .e-open{display:none}.cat.p-eat .e-happy{display:inline}
+.cat.p-eat .c-look,.cat.p-groom .c-look{transform:none}
+.cat.p-groom .c-head{transform:translate(4px,8px) rotate(10deg)}
+.cat.p-groom .gpaw{display:inline;animation:cat-lick .5s ease-in-out infinite}
+.cat.p-groom .p2{opacity:0}
+.cat.p-groom .e-open{display:none}.cat.p-groom .e-closed{display:inline}
+.cat.p-groom .tongue{display:inline;animation:cat-lick .5s ease-in-out infinite}.cat.p-groom .mo-w{display:none}
+/* side poses */
+.cat.p-walk .fn,.cat.p-walk .bf,.cat.p-run .fn,.cat.p-run .bf,.cat.p-sneak .fn,.cat.p-sneak .bf{animation:cat-leg .44s ease-in-out infinite}
+.cat.p-walk .ff,.cat.p-walk .bn,.cat.p-run .ff,.cat.p-run .bn,.cat.p-sneak .ff,.cat.p-sneak .bn{animation:cat-leg .44s ease-in-out -.22s infinite}
+.cat.p-walk .s-all{animation:cat-bob .22s ease-in-out infinite}
+.cat.p-walk .s-tail{animation:cat-sway 1s ease-in-out infinite}
+.cat.p-run .lg{animation-duration:.24s!important}
+.cat.p-run .s-all{transform:translateY(-2px) rotate(-3deg)}
+.cat.p-run .s-tail{transform:rotate(-40deg)}
+.cat.p-sneak .lg{animation-duration:.8s!important}
+.cat.p-sneak .s-all,.cat.p-crouch .s-all{transform:translateY(12px) scaleY(.9)}
+.cat.p-sneak .s-head,.cat.p-crouch .s-head{transform:translateY(8px)}
+.cat.p-crouch .s-tail{animation:cat-wag .5s ease-in-out infinite}
+.cat.p-crouch.m-wiggle .s-all{animation:cat-wiggle-b .16s ease-in-out infinite}
+.cat.p-stretch .s-all{transform:rotate(12deg)}
+.cat.p-stretch .fn,.cat.p-stretch .ff{transform:rotate(-58deg)}
+.cat.p-stretch .s-head{transform:translate(4px,10px)}
+.cat.p-stretch .s-tail{transform:rotate(-30deg)}
+.cat.p-scratch .s-all{transform:rotate(-56deg)}
+.cat.p-scratch .fn{animation:cat-scr .3s ease-in-out infinite}.cat.p-scratch .ff{animation:cat-scr .3s ease-in-out -.15s infinite}
+.cat.p-scratch .s-head{transform:rotate(40deg)}
+.cat.p-scratch .s-all{transform-origin:75px 186px}
+.cat.p-jumpup .s-all{transform:rotate(-20deg)}
+.cat.p-jumpup .fn,.cat.p-jumpup .ff{transform:rotate(-50deg)}.cat.p-jumpup .bn,.cat.p-jumpup .bf{transform:rotate(45deg)}
+.cat.p-jumpdn .s-all{transform:rotate(14deg)}
+.cat.p-jumpdn .fn,.cat.p-jumpdn .ff{transform:rotate(-24deg)}.cat.p-jumpdn .bn,.cat.p-jumpdn .bf{transform:rotate(18deg)}
+.cat.p-jumpup .s-tail,.cat.p-jumpdn .s-tail{transform:rotate(-25deg)}
+.cat.side .c-look{transform:none}
+/* moods */
+.cat.m-blink .e-open,.cat.m-slow .e-open,.cat.m-yawn .e-open{display:none}
+.cat.m-blink .e-closed,.cat.m-slow .e-closed,.cat.m-yawn .e-closed{display:inline}
+.cat.m-yawn .mo-o{display:inline;transform:scale(1.35)}.cat.m-yawn .mo-w{display:none}
+.cat.m-yawn .c-head{transform:translate(0,-4px) rotate(-6deg)}
+.cat.m-angry .e-open,.cat.m-angry .e-closed{display:none}.cat.m-angry .e-angry{display:inline}
+.cat.m-angry .el{transform:rotate(-28deg)}.cat.m-angry .er{transform:rotate(28deg)}
+.cat.m-angry .c-tail{transform:rotate(-38deg);animation:none}
+.cat.m-angry .t-o{stroke-width:28}.cat.m-angry .t-b,.cat.m-angry .t-s{stroke-width:22}
+.cat.m-angry .mo-o{display:inline;transform:scale(.8,.6)}.cat.m-angry .mo-w{display:none}
+.cat.m-happy .e-open,.cat.m-happy .e-closed{display:none}.cat.m-happy .e-happy{display:inline}
+.cat.m-happy .blush{opacity:1}
+.cat.m-happy .c-all{animation:cat-wiggle .5s ease-in-out 2}
+.cat.m-startle .c-all{animation:cat-hop .5s ease-out}
+.cat.m-startle .e-open{display:inline}.cat.m-startle .e-closed{display:none}
+.cat.m-sniff .nose{animation:cat-sniff .22s ease-in-out 5}
+.cat.m-sniff .e-open{display:inline}.cat.m-sniff .e-closed{display:none}
+.cat.m-twitch .er{animation:cat-twitch .35s ease-in-out}
+.cat.m-duck .c-head{transform:translate(6px,18px) rotate(-4deg)}
+.cat.m-away .c-head{transform:rotate(-14deg) translate(-4px,0)}
+.cat.m-away .e-open{display:none}.cat.m-away .e-closed{display:inline}
+/* zzz, bubble, hearts */
+.cat .zzz{position:absolute;left:62%;top:14%;pointer-events:none;display:none}
+.cat.p-sleep .zzz{display:block}
+.cat .zzz span{position:absolute;font-weight:800;color:var(--ink2);opacity:0;animation:cat-zz 2.7s ease-in-out infinite}
+.cat .zzz span:nth-child(2){animation-delay:.9s;font-size:18px}.cat .zzz span:nth-child(3){animation-delay:1.8s;font-size:22px}
+.cat-bubble{position:absolute;left:50%;bottom:90%;transform:translate(-50%,6px) scale(.8);opacity:0;pointer-events:none;background:var(--surface);color:var(--ink);font-weight:700;font-size:13px;padding:6px 11px;border-radius:14px 14px 4px 14px;box-shadow:0 6px 18px rgba(0,0,0,.15);white-space:nowrap;transition:opacity .2s,transform .25s cubic-bezier(.3,1.5,.5,1)}
+.cat-bubble.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.cat.p-peek .cat-bubble{left:auto;right:60%;transform:translate(0,6px) scale(.8)}
+.cat.p-peek .cat-bubble.show{transform:none}
+.cat .heart{position:absolute;left:50%;top:22%;color:#E8574A;font-size:18px;pointer-events:none;animation:cat-heart 1.3s ease-out forwards}
+/* chat */
+.cat-chat{position:absolute;right:30%;bottom:96%;width:min(280px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border-radius:22px 22px 6px 22px;box-shadow:var(--shadow);padding:16px 16px 14px;cursor:default;text-align:left;animation:pop .25s cubic-bezier(.2,1.2,.4,1)}
+.cat-chat.left{right:auto;left:30%;border-radius:22px 22px 22px 6px}
+.cat-chat[hidden]{display:none}
+.cc-msg{margin:0 22px 0 0;font-size:14.5px;line-height:1.45;font-weight:500}
+.cc-msg b{font-weight:700}
+.cc-x{position:absolute;top:8px;right:8px;width:26px;height:26px;border:0;border-radius:50%;background:var(--surface2);color:var(--ink2);font-size:16px;line-height:1}
+.cc-ui{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.cc-ui:empty{display:none}
+.cc-chip{border:1px solid var(--line);background:none;border-radius:99px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink)}
+.cc-chip:hover{background:var(--surface2)}
+.cc-chip.pri{background:var(--primary);color:var(--on-primary);border-color:transparent}
+.cc-form{display:flex;gap:6px;width:100%}
+.cc-form input{flex:1;min-width:0;border:0;border-radius:99px;background:var(--surface2);padding:9px 14px;font:inherit;font-size:14px;color:var(--ink)}
+.cc-form button{border:0;border-radius:99px;background:var(--primary);color:var(--on-primary);font-weight:700;padding:0 14px}
+.cat-talk{position:absolute;top:14%;right:2%;width:30px;height:30px;border:0;border-radius:50%;background:var(--surface);color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.18);display:grid;place-items:center;opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .2s,transform .25s cubic-bezier(.3,1.5,.5,1)}
+.cat-talk svg{width:15px;height:15px}
+.cat.can-talk:hover .cat-talk,.cat.can-talk .cat-talk:focus-visible{opacity:1;transform:none;pointer-events:auto}
+/* treat jar and treat */
+.jar{position:absolute;right:212px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:46px;height:56px;border:0;background:none;padding:0;z-index:800;cursor:grab;touch-action:none;transition:transform .3s cubic-bezier(.3,1.6,.5,1),opacity .3s}
+.jar:hover{transform:rotate(8deg) translateY(-2px)}
+.jar.open{transform:rotate(14deg) translateY(-4px)}
+.jar.full{opacity:.55}
+.jar svg{width:100%;height:100%;display:block;overflow:visible}
+.jar .lid{transition:transform .3s cubic-bezier(.3,1.6,.5,1);transform-origin:36px 10px;transform-box:view-box}
+.jar.open .lid,.jar:hover .lid{transform:rotate(18deg) translateY(-3px)}
+.jar .tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--surface);font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.jar:hover .tip{opacity:1}.jar.open .tip{opacity:0}
+.treat{position:fixed;left:0;top:0;width:34px;height:22px;z-index:2600;pointer-events:none;transform:translate(-50%,-50%) rotate(-12deg);filter:drop-shadow(0 3px 4px rgba(0,0,0,.2))}
+.treat.fall{transition:top .45s cubic-bezier(.55,0,1,.45),transform .45s,opacity .6s;transform:translate(-50%,-50%) rotate(0)}
+.treat.bite{transition:transform 1.4s ease-in,opacity 1.4s ease-in;transform:translate(-50%,-50%) scale(.2);opacity:0}
+.treat.fade{opacity:0}
+.treat svg{width:100%;height:100%;display:block}
+@keyframes cat-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(-13deg)}}
+@keyframes cat-wag{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
+@keyframes cat-breathe{0%,100%{transform:scale(1.1,.8)}50%{transform:scale(1.13,.83)}}
+@keyframes cat-bob{50%{transform:translateY(-2.5px)}}
+@keyframes cat-leg{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-22deg)}}
+@keyframes cat-scr{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(10deg)}}
+@keyframes cat-lick{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes cat-munch{0%,100%{transform:scale(1,.35)}50%{transform:scale(1,1)}}
+@keyframes cat-wiggle{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+@keyframes cat-wiggle-b{50%{transform:translate(-2px,12px) scaleY(.9)}}
+@keyframes cat-hop{30%{transform:translateY(-18px) scale(1.04,.96)}60%{transform:translateY(0) scale(1.05,.95)}}
+@keyframes cat-sniff{50%{transform:scale(1.35)}}
+@keyframes cat-twitch{40%{transform:rotate(14deg)}}
+@keyframes cat-zz{0%{opacity:0;transform:translate(0,0)}25%{opacity:.8}100%{opacity:0;transform:translate(-18px,-38px)}}
+@keyframes cat-heart{0%{opacity:0;transform:translate(-50%,0) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--hx,0px)),-54px) scale(1.2)}}
+@media (max-width:760px){.cat{width:96px;height:96px;bottom:92px}.jar{right:140px;bottom:96px;width:36px;height:44px}}
+@media (prefers-reduced-motion:reduce){.cat *{animation:none!important}}
+.cat .cat-talk,.cat .cat-chat,.cat .cat-bubble{z-index:6}
+@media (hover:none){
+  .cat-talk{width:38px;height:38px;top:4%;right:-4%}
+  .cat-talk svg{width:18px;height:18px}
+  .cat.can-talk .cat-talk{opacity:1;transform:none;pointer-events:auto}
+  .cat.can-talk .cat-bubble.show{pointer-events:auto}
+}
+/* plant shelf */
+.shelfw{position:relative;width:260px;align-self:flex-end;margin-top:4px}
+.shelfw svg{width:100%;display:block;overflow:visible}
+@media (max-height:880px){.shelfw{display:none}}
+.shelfw .plank{fill:#C89B6E}
+.shelfw .plank-shadow{fill:rgba(0,0,0,.12)}
+.shelfw .bracket{fill:#A57A52}
+.shelfw .pot,.shelfw .rim{stroke:none}
+.shelfw .terra{fill:#D9774B}.shelfw .terra-d{fill:#C4623A}.shelfw .cream{fill:#F4EFE6}.shelfw .cream-d{fill:#E3DCCF}.shelfw .teal{fill:#5AA9A0}.shelfw .teal-d{fill:#428F86}
+.shelfw .lf{fill:#3C9A5F}
+.shelfw .l-b,.shelfw .l-d{fill:#4CAF6E}
+.shelfw .slit{stroke:#E8F3EA;stroke-width:1.6;stroke-linecap:round;fill:none}
+.shelfw .cac{fill:#6BAF6B}.shelfw .arm-o{display:none}.shelfw .arm{fill:none;stroke:#6BAF6B;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.shelfw .spines{stroke:#E9F3E3;stroke-width:1.4;stroke-linecap:round}
+.shelfw .lf2,.shelfw .vl{fill:#58B368}.shelfw .lf2:nth-child(2n){fill:#4AA35C}
+.shelfw .vine{fill:none;stroke:#3C8A4E;stroke-width:2.2;stroke-linecap:round}
+.shelfw .plant{cursor:pointer;outline:none}
+.shelfw .plant:focus-visible .pot{filter:drop-shadow(0 0 3px var(--primary))}
+.shelfw .leaves{transform-box:view-box;--gs:1;animation:pl-sway 5s ease-in-out infinite}
+.shelfw [data-p="spike"] .leaves{animation-duration:7s}.shelfw [data-p="pete"] .leaves{animation-delay:-2s}
+.shelfw .plant:hover .leaves{animation-duration:1.4s}
+.shelfw .plant[data-g="1"] .leaves{--gs:1.06}.shelfw .plant[data-g="2"] .leaves{--gs:1.12}.shelfw .plant[data-g="3"] .leaves{--gs:1.18}
+.shelfw .plant[data-g="0"] .g1,.shelfw .plant[data-g="0"] .g2,.shelfw .plant[data-g="0"] .g3,.shelfw .plant[data-g="1"] .g2,.shelfw .plant[data-g="1"] .g3,.shelfw .plant[data-g="2"] .g3{display:none}
+.shelfw .vines[data-g="0"] .v2,.shelfw .vines[data-g="0"] .g2,.shelfw .vines[data-g="0"] .v1,.shelfw .vines[data-g="1"] .v2,.shelfw .vines[data-g="1"] .g2{display:none}
+.shelfw .vines{animation:pl-vine 6s ease-in-out infinite;transform-origin:206px 132px;transform-box:view-box}
+@keyframes pl-sway{0%,100%{transform:scale(var(--gs)) rotate(-1.6deg)}50%{transform:scale(var(--gs)) rotate(1.6deg)}}
+@keyframes pl-vine{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1.2deg)}}
+.shelfw .plant{transform-box:view-box;transition:transform .3s}
+.shelfw .plant.grow{animation:pl-grow .6s cubic-bezier(.3,1.6,.5,1)}
+.shelfw .plant.shake{animation:pl-shake .45s ease-in-out}
+.shelfw [data-p="monty"]{transform-origin:52px 126px}.shelfw [data-p="spike"]{transform-origin:130px 126px}.shelfw [data-p="pete"]{transform-origin:206px 126px}
+@keyframes pl-grow{40%{transform:scale(1.1,.94)}70%{transform:scale(.97,1.05)}}
+@keyframes pl-shake{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.shelfw .can{transition:opacity .25s}
+.shelfw .drop{fill:#6FB6F2;animation:pl-drop .5s ease-in infinite}
+@keyframes pl-drop{from{transform:translateY(0);opacity:1}to{transform:translateY(58px);opacity:0}}
+.plant-bub{position:absolute;top:-6px;transform:translateX(-50%);background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.15);white-space:nowrap;pointer-events:none}
+.plant-bub.show{animation:pop .25s cubic-bezier(.2,1.2,.4,1)}
+:root[data-theme="dark"] .shelfw .plank{fill:#8A6446}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .shelfw .plank{fill:#8A6446}}
+/* ===== Mochi: black cat (flat) ===== */
+.cat .bc{--k:#141416;--eye:#F7C21B}
+:root[data-theme="dark"] .cat .bc{--k:#1D1D22}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc{--k:#1D1D22}}
+:root[data-theme="dark"] .cat .bc .k-all{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc .k-all{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08))}}
+.cat .bc *{transform-box:view-box}
+.cat .bc .k-fill{fill:var(--k)}
+.cat .bc .k-tailp{fill:none;stroke:var(--k);stroke-width:13;stroke-linecap:round}
+.cat .bc .k-shadow{fill:rgba(0,0,0,.2);transform-origin:100px 191px;transition:transform .3s,opacity .3s}
+.cat .bc .k-iris{fill:var(--eye)}.cat .bc .k-pupil{fill:var(--k)}.cat .bc .k-hl{fill:#FFE8A0;opacity:.8}
+.cat .bc .k-lid{fill:var(--k);transform:translateY(-34px);transition:transform .2s}
+.cat .bc .k-shut path,.cat .bc .k-joy path{fill:none;stroke:var(--eye);stroke-width:6;stroke-linecap:round}
+.cat .bc .k-shut,.cat .bc .k-joy,.cat .bc .k-mouth,.cat .bc .k-tongue{display:none}
+.cat .bc .k-mouth{fill:#FF7C8C;transform-origin:101px 103px}.cat .bc .k-tongue{fill:#FFB3BE}
+.cat .bc .k-all{transform-origin:100px 190px}
+.cat .bc .k-head{transform-origin:100px 118px;transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+.cat .bc .k-body{transform-origin:100px 170px;transition:transform .4s}
+.cat .bc .k-arml{transform-origin:72px 112px;transition:transform .3s cubic-bezier(.3,1.4,.5,1)}
+.cat .bc .k-armr{transform-origin:128px 112px;transition:transform .3s cubic-bezier(.3,1.4,.5,1)}
+.cat .bc .k-legl{transform-origin:86px 150px;transition:transform .3s}.cat .bc .k-legr{transform-origin:114px 150px;transition:transform .3s}
+.cat .bc .k-tail{transform-origin:124px 168px;transition:transform .4s}
+.cat .bc .k-earl{transform-origin:78px 40px;transition:transform .25s}.cat .bc .k-earr{transform-origin:128px 38px;transition:transform .25s}
+.cat .bc .k-eyes{transform-origin:100px 76px;transition:transform .12s}
+.cat .bc .k-pupil,.cat .bc .k-hl{transform:translate(var(--px,0px),var(--py,0px));transition:transform .15s ease-out}
+.cat .bc .k-pupil{transform-box:fill-box;transform-origin:center}
+.cat.face-l .bc{transform:scaleX(-1)}
+/* idle life */
+.cat.p-sit .bc .k-body,.cat.p-peek .bc .k-body{animation:k-breathe 3.2s ease-in-out infinite}
+.cat.p-sit .bc .k-tail,.cat.p-peek .bc .k-tail,.cat.p-groom .bc .k-tail,.cat.p-crouch .bc .k-tail{animation:k-tail 3s ease-in-out infinite}
+@keyframes k-breathe{50%{transform:scale(1.02,.985)}}
+@keyframes k-tail{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
+/* sleep: curled loaf */
+.cat.p-sleep .bc .k-all{transform:translateY(18px) scale(1.08,.84)}
+.cat.p-sleep .bc .k-head{transform:translate(0,14px) rotate(-6deg)}
+.cat.p-sleep .bc .k-legl,.cat.p-sleep .bc .k-legr{transform:scaleY(.25)}
+.cat.p-sleep .bc .k-arml{transform:rotate(-12deg) translate(6px,4px)}.cat.p-sleep .bc .k-armr{transform:rotate(12deg) translate(-6px,4px)}
+.cat.p-sleep .bc .k-tail{transform:rotate(58deg)}
+.cat.p-sleep .bc .k-body{animation:k-sleep 3.4s ease-in-out infinite}
+@keyframes k-sleep{50%{transform:scale(1.03,1.05)}}
+.cat.p-sleep .bc .k-eyes,.cat.m-blink .bc .k-eyes,.cat.m-slow .bc .k-eyes,.cat.m-yawn .bc .k-eyes,.cat.p-groom .bc .k-eyes,.cat.p-stretch .bc .k-eyes,.cat.m-away .bc .k-eyes{display:none}
+.cat.p-sleep .bc .k-shut,.cat.m-blink .bc .k-shut,.cat.m-slow .bc .k-shut,.cat.m-yawn .bc .k-shut,.cat.p-groom .bc .k-shut,.cat.p-stretch .bc .k-shut,.cat.m-away .bc .k-shut{display:inline}
+/* walking */
+.cat.p-walk .bc .k-all{animation:k-bob .36s ease-in-out infinite}
+.cat.p-run .bc .k-all{animation:k-bob .2s ease-in-out infinite;transform:rotate(-5deg)}
+.cat.p-sneak .bc .k-all{animation:k-bob .7s ease-in-out infinite}
+.cat.p-walk .bc .k-legl,.cat.p-run .bc .k-legl,.cat.p-sneak .bc .k-legl{animation:k-step .36s ease-in-out infinite}
+.cat.p-walk .bc .k-legr,.cat.p-run .bc .k-legr,.cat.p-sneak .bc .k-legr{animation:k-step .36s ease-in-out -.18s infinite}
+.cat.p-run .bc .k-leg{animation-duration:.2s!important}.cat.p-sneak .bc .k-leg{animation-duration:.7s!important}
+.cat.p-walk .bc .k-arml,.cat.p-run .bc .k-arml{animation:k-swing .36s ease-in-out infinite}
+.cat.p-walk .bc .k-armr,.cat.p-run .bc .k-armr{animation:k-swing .36s ease-in-out -.18s infinite}
+.cat.p-run .bc .k-arm{animation-duration:.2s!important}
+.cat.p-walk .bc .k-tail,.cat.p-run .bc .k-tail{animation:k-tail .7s ease-in-out infinite}
+.cat.p-walk .bc .k-pupil,.cat.p-run .bc .k-pupil,.cat.p-sneak .bc .k-pupil{--px:-5px}
+@keyframes k-bob{50%{transform:translateY(-4px)}}
+@keyframes k-step{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px) scaleY(.92)}}
+@keyframes k-swing{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-12deg)}}
+/* sneak / crouch */
+.cat.p-sneak .bc .k-body,.cat.p-crouch .bc .k-body{transform:scaleY(.9)}
+.cat.p-sneak .bc .k-head,.cat.p-crouch .bc .k-head{transform:translateY(14px)}
+.cat.p-crouch .bc .k-all{transform:scale(1.04,.88)}
+.cat.p-crouch .bc .k-arml{transform:rotate(22deg)}.cat.p-crouch .bc .k-armr{transform:rotate(-22deg)}
+.cat.p-crouch.m-wiggle .bc .k-all{animation:k-wig .16s ease-in-out infinite}
+@keyframes k-wig{0%,100%{transform:scale(1.04,.88) rotate(-2deg)}50%{transform:scale(1.04,.88) rotate(2deg)}}
+/* stretch, scratch, groom, reach, eat, peek, jump */
+.cat.p-stretch .bc .k-arml{transform:rotate(128deg)}.cat.p-stretch .bc .k-armr{transform:rotate(-128deg)}
+.cat.p-stretch .bc .k-all{transform:scale(.96,1.08)}
+.cat.p-scratch .bc .k-arml{animation:k-scrL .28s ease-in-out infinite}.cat.p-scratch .bc .k-armr{animation:k-scrR .28s ease-in-out -.14s infinite}
+.cat.p-scratch .bc .k-all{transform:rotate(-6deg)}
+@keyframes k-scrL{0%,100%{transform:rotate(132deg)}50%{transform:rotate(100deg)}}
+@keyframes k-scrR{0%,100%{transform:rotate(-132deg)}50%{transform:rotate(-100deg)}}
+.cat.p-groom .bc .k-armr{animation:k-lick .45s ease-in-out infinite}
+.cat.p-groom .bc .k-head{transform:rotate(8deg)}
+.cat.p-groom .bc .k-mouth{display:inline;transform:scale(.8)}.cat.p-groom .bc .k-tongue{display:inline;animation:k-munch .45s ease-in-out infinite}
+@keyframes k-lick{0%,100%{transform:rotate(-128deg)}50%{transform:rotate(-112deg)}}
+.cat.p-reach .bc .k-arml{transform:rotate(138deg)}.cat.p-reach .bc .k-armr{transform:rotate(-138deg)}
+.cat.p-reach .bc .k-all{transform:scale(.97,1.07)}.cat.p-reach .bc .k-head{transform:translateY(-6px)}
+.cat.p-reach .bc .k-pupil{--py:-7px}
+.cat.p-eat .bc .k-head{transform:translateY(12px) rotate(4deg)}
+.cat.p-eat .bc .k-eyes{display:none}.cat.p-eat .bc .k-joy{display:inline}
+.cat.p-eat .bc .k-mouth{display:inline;animation:k-munch .28s ease-in-out infinite}
+.cat.p-eat .bc .k-arml{transform:rotate(-24deg)}.cat.p-eat .bc .k-armr{transform:rotate(24deg)}
+@keyframes k-munch{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+.cat.p-peek .bc .k-all{transform:rotate(-8deg)}.cat.p-peek .bc .k-head{transform:translateX(-4px)}
+.cat.p-jumpup .bc .k-legl,.cat.p-jumpup .bc .k-legr{transform:scaleY(.55)}.cat.p-jumpup .bc .k-arml{transform:rotate(130deg)}.cat.p-jumpup .bc .k-armr{transform:rotate(-130deg)}
+.cat.p-jumpdn .bc .k-legl,.cat.p-jumpdn .bc .k-legr{transform:scaleY(1.08)}.cat.p-jumpdn .bc .k-arml{transform:rotate(55deg)}.cat.p-jumpdn .bc .k-armr{transform:rotate(-55deg)}
+.cat.p-jumpup .bc .k-shadow,.cat.p-jumpdn .bc .k-shadow,.cat.up .bc .k-shadow{opacity:.5;transform:scale(.7)}
+/* moods */
+.cat.m-angry .bc .k-lid{transform:translateY(0)}
+.cat.m-angry .bc .k-pupil{transform:translate(var(--px,0px),var(--py,0px)) scale(.7,.8)}
+.cat.m-angry .bc .k-earl{transform:rotate(-32deg)}.cat.m-angry .bc .k-earr{transform:rotate(32deg)}
+.cat.m-angry .bc .k-tail{transform:rotate(-40deg);animation:none}.cat.m-angry .bc .k-tailp{stroke-width:18}
+.cat.m-angry .bc .k-all{animation:k-shake .1s linear 5}
+.cat.m-angry .bc .k-arml{transform:rotate(40deg)}.cat.m-angry .bc .k-armr{transform:rotate(-40deg)}
+@keyframes k-shake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.cat.m-happy .bc .k-eyes{display:none}.cat.m-happy .bc .k-joy{display:inline}
+.cat.m-happy .bc .k-all{animation:k-happy .45s ease-in-out 2}
+@keyframes k-happy{50%{transform:translateY(-8px) rotate(3deg)}}
+.cat.m-startle .bc .k-all{animation:k-hop .5s ease-out}
+.cat.m-startle .bc .k-eyes{transform:scale(1.12)}.cat.m-startle .bc .k-pupil{transform:scale(.45)}
+.cat.m-startle .bc .k-arml{transform:rotate(100deg)}.cat.m-startle .bc .k-armr{transform:rotate(-100deg)}
+@keyframes k-hop{35%{transform:translateY(-22px)}65%{transform:translateY(0) scale(1.06,.94)}}
+.cat.m-yawn .bc .k-mouth{display:inline;transform:scale(1.6,2)}.cat.m-yawn .bc .k-head{transform:rotate(-6deg)}
+.cat.m-sniff .bc .k-head{animation:k-sniff .22s ease-in-out 5}
+@keyframes k-sniff{50%{transform:translateY(-2px) rotate(2deg)}}
+.cat.m-twitch .bc .k-earr{animation:k-twitch .35s ease-in-out}
+@keyframes k-twitch{40%{transform:rotate(16deg)}}
+.cat.m-duck .bc .k-head{transform:translateY(20px)}
+.cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
+.cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
+
+/* ==========================================================================
+   Monochrome treatment. Mochi is already a black cat: give the eyes the paper
+   colour and put everything else in greyscale. Speech uses the system shape
+   (square, hairline, mono caps).
+   ========================================================================== */
+.cat .bc{--eye:#F4F4F4}
+.cat .bc .k-hl{fill:#FFFFFF}
+.cat .bc .k-mouth,.cat .bc .k-tongue{fill:#8A8A8A}
+.cat,.jar,.treat,.shelfw svg{filter:grayscale(1) contrast(1.05)}
+.cat .heart{color:var(--ink)}
+.cat-bubble{padding:8px 10px;border:1px solid var(--line);border-radius:0;box-shadow:none;font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.cat-chat{padding:20px 16px 16px;border:1px solid var(--ink);border-radius:0;box-shadow:var(--lift)}
+.cat-chat.left{border-radius:0}
+.cc-msg{font:400 14px/22px var(--font)}.cc-msg b{font-weight:500}
+.cc-x{top:0;right:0;width:32px;height:32px;border-radius:0;background:none;color:var(--ink);transition:background .12s,color .12s}
+.cc-x:hover{background:var(--ink);color:var(--surface)}
+.cc-chip{padding:7px 12px;border:1px solid var(--line);border-radius:0;font:500 12px/16px var(--font);transition:background .12s,color .12s,border-color .12s}
+.cc-chip:hover{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cc-chip.pri{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cc-form input{padding:9px 12px;border:1px solid var(--line);border-radius:0;background:none;font:400 14px/20px var(--font)}
+.cc-form input:focus{border-color:var(--ink);outline:none}
+.cc-form button{padding:0 14px;border:0;border-radius:0;background:var(--ink);color:var(--surface);font:500 12px/1 var(--font)}
+.cat-talk{border:1px solid var(--line);border-radius:0;box-shadow:none}
+.jar .tip,.plant-bub{border-radius:0;font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.plant-bub{border:1px solid var(--line);box-shadow:none}
+.jar:hover{transform:rotate(4deg)}
+
+/* Dark theme inverts the cat: a white cat on ink, eyes in ink. Same rule as every other object in the system. */
+:root[data-theme="dark"] .cat .bc{--k:#F2F2F2;--eye:#0A0A0A}
+:root[data-theme="dark"] .cat .bc .k-all{filter:none}
+:root[data-theme="dark"] .cat .bc .k-pupil{fill:#000}
+:root[data-theme="dark"] .cat .bc .k-shadow{fill:rgba(255,255,255,.08)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .cat .bc{--k:#F2F2F2;--eye:#0A0A0A}
+  :root:not([data-theme="light"]) .cat .bc .k-all{filter:none}
+  :root:not([data-theme="light"]) .cat .bc .k-pupil{fill:#000}
+  :root:not([data-theme="light"]) .cat .bc .k-shadow{fill:rgba(255,255,255,.08)}
+}

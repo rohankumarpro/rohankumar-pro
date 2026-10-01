@@ -37,3 +37,9 @@
   to = "/404"
   status = 404
   force = true
+
+# Fonts are self-hosted; cache for 30 days
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"

@@ -28,24 +28,41 @@ function iso(d) {
 }
 const mins = (b) => Math.max(1, Math.round(String(b || "").split(/\s+/).length / 220));
 
-const CSS = `:root{color-scheme:light dark;--bg:#fbfaf7;--fg:#1c1b19;--mut:#6b6860;--ln:#e4e1d9;--ac:#1a7f4b}
-@media(prefers-color-scheme:dark){:root{--bg:#161614;--fg:#eceae4;--mut:#9a978e;--ln:#2d2c28;--ac:#5fd39a}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.7 Georgia,'Times New Roman',serif}
-main{max-width:700px;margin:0 auto;padding:32px 20px 80px}nav{font:15px system-ui,sans-serif;margin-bottom:32px}
-nav a{color:var(--mut);text-decoration:none;margin-right:16px}nav a:hover{color:var(--ac)}
-h1{font:700 2rem/1.2 system-ui,sans-serif;margin:.2em 0 .4em}h2,h3{font-family:system-ui,sans-serif;line-height:1.3;margin-top:1.8em}
-.meta{font:14px system-ui,sans-serif;color:var(--mut)}.lead{font-size:1.15rem;color:var(--mut)}
-blockquote{margin:1.4em 0;padding:.2em 1.1em;border-left:3px solid var(--ac);color:var(--mut)}
-a{color:var(--ac)}hr{border:0;border-top:1px solid var(--ln);margin:1.6em 0}
-ol.l{list-style:none;padding:0}ol.l li{padding:18px 0;border-bottom:1px solid var(--ln)}
-ol.l a{font:600 1.15rem system-ui,sans-serif;text-decoration:none;color:var(--fg)}ol.l p{margin:.3em 0;color:var(--mut);font-size:1rem}`;
+const CSS = `@font-face{font-family:"Geist";src:url(/assets/fonts/Geist.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(/assets/fonts/GeistMono.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{color-scheme:light dark;--bg:#fff;--fg:#0a0a0a;--mut:#666;--dim:#9e9e9e;--ln:#dadada;--sans:"Geist","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,Menlo,monospace}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0a0a;--fg:#f4f4f4;--mut:#9a9a9a;--dim:#5c5c5c;--ln:#2a2a2a}}
+*{box-sizing:border-box}::selection{background:var(--fg);color:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 17px/28px var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+header{display:flex;align-items:center;height:40px;padding:0 24px;border-bottom:1px solid var(--ln)}
+nav{display:flex;align-items:center;gap:24px;width:100%}
+nav a{color:var(--fg);text-decoration:none;font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+nav a:first-child{font:500 13px/1 var(--sans);letter-spacing:-.005em;text-transform:none;color:var(--fg);margin-right:auto}
+nav a:hover{color:var(--fg);text-decoration:underline;text-underline-offset:4px}
+main{max-width:1000px;margin:0 auto;padding:72px 24px 120px}
+h1{max-width:18ch;margin:0 0 24px;font:500 clamp(36px,7.2vw,76px)/.98 var(--sans);letter-spacing:-.05em;text-wrap:balance}
+h2,h3{max-width:62ch;font-family:var(--sans);font-weight:500;letter-spacing:-.025em;text-wrap:balance}
+h2{margin:56px 0 12px;font-size:28px;line-height:32px}h3{margin:40px 0 8px;font-size:20px;line-height:28px;letter-spacing:-.015em}
+p,ul,ol,blockquote{max-width:62ch}p{margin:0 0 20px}
+.meta{font:500 11px/16px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.lead{max-width:44ch;margin:0 0 32px;font-size:21px;line-height:30px;color:var(--mut);letter-spacing:-.01em}
+blockquote{max-width:600px;margin:44px 0;padding:16px 0 0;border-top:1px solid var(--fg);font:500 clamp(22px,3.4vw,28px)/1.2 var(--sans);letter-spacing:-.025em}
+blockquote p{margin:0}
+a{color:var(--fg);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}a:hover{text-decoration-thickness:2px}
+strong{font-weight:500}hr{max-width:62ch;margin:32px 0;border:0;border-top:1px solid var(--ln)}
+li{margin:6px 0}li::marker{color:var(--dim);font-family:var(--mono);font-size:13px}
+ol.l{max-width:none;margin:48px 0 0;padding:0;list-style:none;border-top:1px solid var(--fg)}
+ol.l li{margin:0;padding:28px 0;border-bottom:1px solid var(--ln)}
+ol.l a{display:block;max-width:32ch;font:500 clamp(24px,3.6vw,34px)/1.08 var(--sans);letter-spacing:-.035em;text-decoration:none;text-wrap:balance}
+ol.l a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}
+ol.l p{margin:12px 0 14px;max-width:56ch;color:var(--mut);font-size:16px;line-height:24px}`;
 
 function page({ title, desc, path, body, ld, type = "website" }) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${SITE}${path}">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="${type}"><meta property="og:url" content="${SITE}${path}">
-<meta name="twitter:card" content="summary"><style>${CSS}</style>${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` : ""}</head>
-<body><main><nav><a href="/">${NAME}</a><a href="/journal">Journal</a></nav>${body}</main></body></html>`;
+<meta name="twitter:card" content="summary"><meta name="color-scheme" content="light dark"><link rel="preload" href="/assets/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin><style>${CSS}</style>${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` : ""}</head>
+<body><header><nav><a href="/">${NAME}</a><a href="/journal">Journal</a></nav></header><main>${body}</main></body></html>`;
 }
 const html = (statusCode, b) => ({ statusCode, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=60" }, body: b });
 
