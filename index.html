@@ -12,7 +12,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Rohan Kumar","jobTitle":"Brand Designer","url":"https://rohankumar.pro/","sameAs":["https://www.instagram.com/rohankumarpro/","https://www.youtube.com/@rohankumarpro","https://www.figma.com/@rohankumarpro","https://www.behance.net/rohankumarpro","https://www.linkedin.com/in/rohankumarpro/"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>try{var u=(JSON.parse(localStorage.getItem('desk')||'null')||{}).ui;if(u==='notion'||u==='material'||u==='apple')document.documentElement.dataset.ui=u}catch(e){}</script>
 <style>
 :root{
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -25,6 +26,7 @@
   --shadow:0 18px 50px rgba(18,40,30,.20), 0 2px 6px rgba(18,40,30,.08);
   --font:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r-win:28px; --r-win-max:24px; --r-ctl:99px; --ease:cubic-bezier(.2,1.05,.3,1);
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -45,6 +47,95 @@
   --c1:#3C7A61; --c2:#8C5B41; --c3:#5C54A3; --c4:#86702A; --c5:#3B6590; --c6:#8C4969;
   --glyph:#F1F6F2; --shadow:0 18px 50px rgba(0,0,0,.5);
 }
+/* ============ Interface UIs (owner option): Notion / Material / Apple ============
+   Each UI is a full token set. Light under :root[data-ui], dark under the same two
+   dark triggers the base theme uses. [data-sample] lets Settings preview a UI in place. */
+:root[data-ui="notion"],[data-sample="notion"]{
+  --bg:#FFFFFF; --w1:#F1F1EF; --w2:#FAEBDD; --w3:#EAE4F2; --w4:#FBF3DB;
+  --surface:#FFFFFF; --surface2:#F7F6F3; --line:#E9E9E7;
+  --ink:#37352F; --ink2:#787774; --primary:#2383E2; --on-primary:#fff;
+  --c1:#DBEDDB; --c2:#FADEC9; --c3:#E8DEEE; --c4:#FDECC8; --c5:#D3E5EF; --c6:#F5E0E9;
+  --glyph:#37352F;
+  --shadow:0 0 0 1px rgba(15,15,15,.05),0 3px 6px rgba(15,15,15,.10),0 9px 24px rgba(15,15,15,.20);
+  --font:"Inter",ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;
+  --r-win:10px; --r-win-max:8px; --r-ctl:6px; --ease:cubic-bezier(.2,.8,.2,1);
+}
+:root[data-ui="material"],[data-sample="material"]{
+  --bg:#F8F9FC; --w1:#D3E3FD; --w2:#C4EED0; --w3:#E8DEF8; --w4:#FFEFA6;
+  --surface:#FDFCFF; --surface2:#E9EEF6; --line:#C4C7C5;
+  --ink:#1F1F1F; --ink2:#444746; --primary:#0B57D0; --on-primary:#fff;
+  --c1:#C4EED0; --c2:#FFD8B8; --c3:#E8DEF8; --c4:#FFEFA6; --c5:#D3E3FD; --c6:#FFD8E4;
+  --glyph:#1F1F1F;
+  --shadow:0 1px 3px 1px rgba(0,0,0,.15),0 4px 8px 3px rgba(0,0,0,.12);
+  --font:"Google Sans Text","Google Sans",Roboto,system-ui,"Segoe UI",sans-serif;
+  --r-win:28px; --r-win-max:28px; --r-ctl:20px; --ease:cubic-bezier(.2,0,0,1);
+}
+:root[data-ui="apple"],[data-sample="apple"]{
+  --bg:#ECECEE; --w1:#BFD7FF; --w2:#FFD2B8; --w3:#E1CCFF; --w4:#FFE9B0;
+  --surface:#FFFFFF; --surface2:#F5F5F7; --line:#D2D2D7;
+  --ink:#1D1D1F; --ink2:#6E6E73; --primary:#007AFF; --on-primary:#fff;
+  --c1:#D4F4DD; --c2:#FFE3C7; --c3:#E5D9F7; --c4:#FFF1BE; --c5:#D6E8FF; --c6:#FFD9E6;
+  --glyph:#1D1D1F;
+  --shadow:0 0 0 .5px rgba(0,0,0,.28),0 22px 70px 4px rgba(0,0,0,.30);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter",system-ui,sans-serif;
+  --r-win:12px; --r-win-max:0px; --r-ctl:8px; --ease:cubic-bezier(.32,.72,0,1);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-ui="notion"]:not([data-theme="light"]),:root:not([data-theme="light"]) [data-sample="notion"]{
+    --bg:#191919; --w1:#252525; --w2:#3A2E24; --w3:#2F2840; --w4:#3A3524;
+    --surface:#202020; --surface2:#2F2F2F; --line:#373737;
+    --ink:#EBEBEA; --ink2:#9B9B9B; --primary:#529CCA; --on-primary:#0B1A24;
+    --c1:#243D30; --c2:#5C3B23; --c3:#3C2D49; --c4:#56452B; --c5:#1F3A4D; --c6:#4E2C3C;
+    --glyph:#EBEBEA; --shadow:0 0 0 1px rgba(255,255,255,.06),0 12px 32px rgba(0,0,0,.55);
+  }
+  :root[data-ui="material"]:not([data-theme="light"]),:root:not([data-theme="light"]) [data-sample="material"]{
+    --bg:#131314; --w1:#0B2B5C; --w2:#12381F; --w3:#2F2745; --w4:#3B3300;
+    --surface:#1E1F20; --surface2:#282A2C; --line:#444746;
+    --ink:#E3E3E3; --ink2:#C4C7C5; --primary:#A8C7FA; --on-primary:#062E6F;
+    --c1:#0F5223; --c2:#5B3A12; --c3:#4A4458; --c4:#5C4B00; --c5:#0842A0; --c6:#5C2B3C;
+    --glyph:#E3E3E3; --shadow:0 1px 3px 1px rgba(0,0,0,.45),0 4px 8px 3px rgba(0,0,0,.4);
+  }
+  :root[data-ui="apple"]:not([data-theme="light"]),:root:not([data-theme="light"]) [data-sample="apple"]{
+    --bg:#1E1E1E; --w1:#14305E; --w2:#5A3320; --w3:#3A2766; --w4:#4A3E12;
+    --surface:#2C2C2E; --surface2:#3A3A3C; --line:#48484A;
+    --ink:#F5F5F7; --ink2:#98989D; --primary:#0A84FF; --on-primary:#fff;
+    --c1:#1F4F31; --c2:#5A3A12; --c3:#3F2F66; --c4:#5B4A0F; --c5:#17407A; --c6:#5E2A42;
+    --glyph:#F5F5F7; --shadow:0 0 0 .5px rgba(255,255,255,.18),0 22px 70px 4px rgba(0,0,0,.6);
+  }
+}
+:root[data-ui="notion"][data-theme="dark"],:root[data-theme="dark"] [data-sample="notion"]{
+  --bg:#191919; --w1:#252525; --w2:#3A2E24; --w3:#2F2840; --w4:#3A3524;
+  --surface:#202020; --surface2:#2F2F2F; --line:#373737;
+  --ink:#EBEBEA; --ink2:#9B9B9B; --primary:#529CCA; --on-primary:#0B1A24;
+  --c1:#243D30; --c2:#5C3B23; --c3:#3C2D49; --c4:#56452B; --c5:#1F3A4D; --c6:#4E2C3C;
+  --glyph:#EBEBEA; --shadow:0 0 0 1px rgba(255,255,255,.06),0 12px 32px rgba(0,0,0,.55);
+}
+:root[data-ui="material"][data-theme="dark"],:root[data-theme="dark"] [data-sample="material"]{
+  --bg:#131314; --w1:#0B2B5C; --w2:#12381F; --w3:#2F2745; --w4:#3B3300;
+  --surface:#1E1F20; --surface2:#282A2C; --line:#444746;
+  --ink:#E3E3E3; --ink2:#C4C7C5; --primary:#A8C7FA; --on-primary:#062E6F;
+  --c1:#0F5223; --c2:#5B3A12; --c3:#4A4458; --c4:#5C4B00; --c5:#0842A0; --c6:#5C2B3C;
+  --glyph:#E3E3E3; --shadow:0 1px 3px 1px rgba(0,0,0,.45),0 4px 8px 3px rgba(0,0,0,.4);
+}
+:root[data-ui="apple"][data-theme="dark"],:root[data-theme="dark"] [data-sample="apple"]{
+  --bg:#1E1E1E; --w1:#14305E; --w2:#5A3320; --w3:#3A2766; --w4:#4A3E12;
+  --surface:#2C2C2E; --surface2:#3A3A3C; --line:#48484A;
+  --ink:#F5F5F7; --ink2:#98989D; --primary:#0A84FF; --on-primary:#fff;
+  --c1:#1F4F31; --c2:#5A3A12; --c3:#3F2F66; --c4:#5B4A0F; --c5:#17407A; --c6:#5E2A42;
+  --glyph:#F5F5F7; --shadow:0 0 0 .5px rgba(255,255,255,.18),0 22px 70px 4px rgba(0,0,0,.6);
+}
+[data-sample="classic"]{--bg:#E6ECE4;--surface:#FBFCF8;--surface2:#EEF2EC;--line:#DCE3DC;--ink:#17201B;--ink2:#4B5851;--primary:#2E6B57;--shadow:0 18px 50px rgba(18,40,30,.20),0 2px 6px rgba(18,40,30,.08);--font:"Figtree",system-ui,sans-serif;--r-win:28px;--r-ctl:99px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-sample="classic"]{--bg:#0F1512;--surface:#1A211D;--surface2:#232C27;--line:#2E3832;--ink:#E3ECE6;--ink2:#A5B4AB;--primary:#8FD5B8;--shadow:0 18px 50px rgba(0,0,0,.5)}}
+:root[data-theme="dark"] [data-sample="classic"]{--bg:#0F1512;--surface:#1A211D;--surface2:#232C27;--line:#2E3832;--ink:#E3ECE6;--ink2:#A5B4AB;--primary:#8FD5B8;--shadow:0 18px 50px rgba(0,0,0,.5)}
+/* Settings: UI picker cards */
+.uis{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:10px}
+.uis button{display:flex;flex-direction:column;gap:8px;padding:8px;border:2px solid var(--line);background:var(--surface2);border-radius:14px;text-align:left}
+.uis button.on{border-color:var(--primary)}
+.uis .uip{background:var(--bg);color:var(--ink);font-family:var(--font);border-radius:calc(var(--r-win) * .5 + 2px);box-shadow:var(--shadow);padding:0;overflow:hidden;height:74px;display:flex;flex-direction:column}
+.uis .uip i{display:block;height:14px;background:var(--surface2);border-bottom:1px solid var(--line)}
+.uis .uip b{display:block;margin:8px 8px 0;height:6px;width:60%;border-radius:3px;background:var(--ink2);opacity:.55}
+.uis .uip u{display:block;margin:6px 8px 0;height:14px;width:42px;border-radius:var(--r-ctl);background:var(--primary)}
+.uis .lb{font-size:12px;font-weight:700}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -123,7 +214,7 @@ a{color:var(--primary)}
 .wcard b{font-size:15px}.wcard p{margin:6px 0 0;color:var(--ink2);font-size:14px;line-height:1.45}
 
 /* windows */
-.win{position:absolute;display:flex;flex-direction:column;background:var(--surface);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;min-width:300px;min-height:220px}
+.win{position:absolute;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r-win);box-shadow:var(--shadow);overflow:hidden;min-width:300px;min-height:220px}
 .win.popin{animation:pop .22s cubic-bezier(.2,1.2,.4,1)}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(8px)}}
 .win.min{display:none}
@@ -138,7 +229,7 @@ a{color:var(--primary)}
 .win.max .rz,.win.resizing .body{pointer-events:none}.win.max .rz{display:none}
 .win.resizing{user-select:none;transition:none}
 .body{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-.win.max{left:12px!important;top:48px!important;width:calc(100% - 24px)!important;height:calc(100% - 140px)!important;border-radius:24px}
+.win.max{left:12px!important;top:48px!important;width:calc(100% - 24px)!important;height:calc(100% - 140px)!important;border-radius:var(--r-win-max)}
 .bar{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 18px;cursor:grab;user-select:none;touch-action:none}
 .win.max .bar{cursor:default}
 .bar .ttl{flex:1;font-weight:700;font-size:15px}
@@ -209,11 +300,11 @@ a{color:var(--primary)}
 .big-thumb svg{width:80px;height:80px}
 .row{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
 .row small{color:var(--ink2);white-space:nowrap}
-.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:99px;padding:12px 20px;font-weight:700;text-decoration:none;background:var(--primary);color:var(--on-primary)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:var(--r-ctl);padding:12px 20px;font-weight:700;text-decoration:none;background:var(--primary);color:var(--on-primary)}
 .btn.tonal{background:var(--surface2);color:var(--ink)}
 .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.seg{display:inline-flex;background:var(--surface2);border-radius:99px;padding:4px;gap:4px}
-.seg button{border:0;background:none;padding:8px 16px;border-radius:99px;font-weight:600}
+.seg{display:inline-flex;background:var(--surface2);border-radius:var(--r-ctl);padding:4px;gap:4px}
+.seg button{border:0;background:none;padding:8px 16px;border-radius:var(--r-ctl);font-weight:600}
 .seg button.on{background:var(--primary);color:var(--on-primary)}
 .walls{display:flex;gap:12px;flex-wrap:wrap}
 .walls button{width:110px;height:70px;border-radius:18px;border:3px solid transparent}
@@ -2450,11 +2541,17 @@ function contact(){return `<h1>Let's talk</h1><p>Have a project in mind or just 
 <div class="links"><a class="btn" href="${esc(P.booking)}" target="_blank" rel="noopener">Book a call</a><a class="btn tonal" href="mailto:${esc(P.email)}">Email me</a><button class="btn tonal" id="copyMail">Copy email</button></div>
 <div class="links">${P.links.map(l=>`<a class="btn tonal" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>`}
 
+const UIS={classic:'Classic',notion:'Notion UI',material:'Material UI',apple:'Apple UI'};
+function setUI(k){if(!UIS[k])k='classic';if(k==='classic')delete document.documentElement.dataset.ui;else document.documentElement.dataset.ui=k;save()}
+function uiPicker(){const cur=document.documentElement.dataset.ui||'classic';
+  return `<h3>Interface</h3><div class="uis">${Object.keys(UIS).map(k=>`<button data-ui="${k}" aria-pressed="${k===cur}" class="${k===cur?'on':''}"><span class="uip" data-sample="${k}"><i></i><b></b><u></u></span><span class="lb">${UIS[k]}</span></button>`).join('')}</div>`}
 function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
-  body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
+  body.innerHTML=`<h1>Settings</h1>${LIVE.admin?uiPicker():''}<h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
   <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
+  body.querySelectorAll('[data-ui]').forEach(b=>b.onclick=()=>{setUI(b.dataset.ui);SFX.play('pop');settings(body)});
+  if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
   body.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{desk.dataset.motion=b.dataset.mo;save();settings(body)});
   body.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{desk.dataset.status=b.dataset.sw;save();settings(body)});
@@ -2978,8 +3075,8 @@ LS.onkeydown=e=>{if(e.key==="Enter"){const b=L.querySelector('[data-app]');if(b)
 document.addEventListener('keydown',e=>{if(e.key==="Escape")hideLauncher()});
 desk.addEventListener('pointerdown',e=>{if(!L.hidden&&!e.target.closest('#launcher,#lBtn'))hideLauncher()});
 
-function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music}))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music}}catch(e){}}
+function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music,ui:document.documentElement.dataset.ui||'classic'}))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;if(UIS[s.ui])document.documentElement.dataset.ui=s.ui}}catch(e){}}
 
 function tick(){
   const d=new Date();
