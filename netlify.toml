@@ -2,27 +2,54 @@
   publish = "."
   functions = "netlify/functions"
 
-# Friendly address for the functions: /api/auth, /api/notes
+[functions]
+  included_files = ["index.html", "netlify/lib/**", "shared/**"]
+
+# ---- Functions behind friendly addresses ----
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
-# Journal pages and sitemap, rendered on the server for search engines and AI crawlers
+# Pictures and files the owner uploads
 [[redirects]]
-  from = "/journal"
-  to = "/.netlify/functions/journal-page"
+  from = "/u/*"
+  to = "/.netlify/functions/u?f=:splat"
   status = 200
   force = true
+
+# Short links for the Links hub
 [[redirects]]
-  from = "/journal/*"
-  to = "/.netlify/functions/journal-page?slug=:splat"
+  from = "/go/*"
+  to = "/.netlify/functions/go?k=:splat"
   status = 200
   force = true
+
+# Feeds, sitemap and the AI-readable site map
 [[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/feed.xml"
+  to = "/.netlify/functions/feed"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/feed.json"
+  to = "/.netlify/functions/feed"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/llms.txt"
+  to = "/.netlify/functions/llms"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/llms-full.txt"
+  to = "/.netlify/functions/llms"
   status = 200
   force = true
 
@@ -37,3 +64,115 @@
   to = "/404"
   status = 404
   force = true
+
+# ---- Every window has its own address. The server sends the desktop with that page's text already inside it. ----
+[[redirects]]
+  from = "/"
+  to = "/.netlify/functions/page?p=/"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/index.md"
+  to = "/.netlify/functions/page?p=/index.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/about.md"
+  to = "/.netlify/functions/page?p=/about.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/resume.md"
+  to = "/.netlify/functions/page?p=/resume.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/contact.md"
+  to = "/.netlify/functions/page?p=/contact.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/links.md"
+  to = "/.netlify/functions/page?p=/links.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/projects.md"
+  to = "/.netlify/functions/page?p=/projects.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/journal.md"
+  to = "/.netlify/functions/page?p=/journal.md"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/docs/*"
+  to = "/.netlify/functions/page?p=/docs/:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/docs"
+  to = "/.netlify/functions/page?p=/docs"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/notes/*"
+  to = "/.netlify/functions/page?p=/notes/:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/projects/*"
+  to = "/.netlify/functions/page?p=/projects/:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/projects"
+  to = "/.netlify/functions/page?p=/projects"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/journal/*"
+  to = "/.netlify/functions/page?p=/journal/:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/journal"
+  to = "/.netlify/functions/page?p=/journal"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/:page"
+  to = "/.netlify/functions/page?p=/:page"
+  status = 200
+
+# Anything else: the desktop with a "page not found" message (and a real 404 status)
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/page?p=/:splat"
+  status = 404
+
+# ---- Headers ----
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+[[headers]]
+  for = "/shared/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
