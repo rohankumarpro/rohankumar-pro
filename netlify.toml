@@ -9,6 +9,23 @@
   status = 200
   force = true
 
+# Journal pages and sitemap, rendered on the server for search engines and AI crawlers
+[[redirects]]
+  from = "/journal"
+  to = "/.netlify/functions/journal-page"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/journal/*"
+  to = "/.netlify/functions/journal-page?slug=:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+  force = true
+
 # Keep server code and config out of the public site
 [[redirects]]
   from = "/netlify/*"

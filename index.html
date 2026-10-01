@@ -378,6 +378,18 @@ a{color:var(--primary)}
 .dc-vh{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .own-dot{width:34px;height:34px;border-radius:50%;border:0;padding:0;cursor:pointer;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.2);flex:none}
 .own-dot:active{transform:scale(.92)}
+.abar .j-edit,.abar .j-share{border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;background:var(--surface2,#eee);color:inherit;margin-left:6px}
+.j-draft{font-style:normal;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--c4);color:var(--glyph);margin-right:4px}
+.j-ed label{display:flex;flex-direction:column;gap:6px;margin:0 0 14px;font-size:14px;font-weight:600}
+.j-ed label small{font-weight:400;opacity:.65}
+.j-ed input,.j-ed textarea{font:inherit;font-weight:400;font-size:15px;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.35);background:transparent;color:inherit;resize:vertical}
+.j-ed textarea#jeB{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.6}
+.j-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.j-help{font-size:12.5px;opacity:.7;margin:-6px 0 14px}
+.j-ed .j-chk{flex-direction:row;align-items:center;font-weight:500}
+.j-act{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-bottom:8px}
+.j-act button{border:0;border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;cursor:pointer;background:var(--surface2,#eee);color:inherit}
+.j-act .j-save{background:var(--glyph);color:var(--surface,#fff)}.j-act .j-del{margin-right:auto}
 /* icon arranging */
 .icons .dicon{touch-action:none;will-change:transform}
 .icons .dicon.dragging{z-index:10;cursor:grabbing;transition:none!important}
@@ -1918,6 +1930,7 @@ Logos still matter. Simple, unique brandmarks are still possible; they're just h
 
 !! Need a brandmark or a full identity system?`}
 ];
+JOURNAL.forEach((j,i)=>{if(!j.slug)j.slug=["i-feel-so-stupid-for-not-using-ai", "branding-is-a-journey-of-earning-more-goodwill", "every-brands-first-principle-should-be-we-dont-bullsht-you", "ai-is-actually-a-clients-problem-not-a-designers-problem", "why-taste-is-the-one-skill-ai-cant-replace-in-designers-and-how-to-build-it", "why-minimalism-works-cognitive-fluency", "design-to-express-not-to-impress", "why-brandmarks-are-getting-riskier-to-design"][i]||j.title});
 const COVERS = {};
 const CAROUSELS = {};
 const PHOTOS = [
@@ -2177,7 +2190,7 @@ const TIMELINE=[
 ];
 function timeline(body,filter){
   filter=filter||'all';
-  const arts=JOURNAL.map((j,i)=>({status:'done',title:'Published “'+j.title+'”',tag:'Writing',date:j.date,art:i}));
+  const arts=JL().map((j,i)=>({status:'done',title:'Published “'+j.title+'”',tag:'Writing',date:j.date,art:i}));
   const done=TIMELINE.filter(t=>t.status==='done').concat(arts);
   const ord=d=>{const x=jDate(d||'');const m=Object.keys(MONTHS).indexOf(x.m);return (+x.y||0)*400+(m<0?0:m)*31+(+x.d||0)};
   done.sort((a,b)=>ord(b.date)-ord(a.date));
@@ -2519,17 +2532,18 @@ const readTime=j=>Math.max(1,Math.round(j.body.split(/\s+/).length/220))+' min r
 function jDate(d){const p=d.replace(',','').split(' ');return {m:p[0],d:p.length===3?p[1]:'',y:p[p.length-1]}}
 const MONTHS={Jan:'January',Feb:'February',Mar:'March',Apr:'April',May:'May',Jun:'June',Jul:'July',Aug:'August',Sep:'September',Oct:'October',Nov:'November',Dec:'December'};
 function journal(body,tag){
+  if(!LIVE.jLoaded){body.innerHTML='<div class="journal"><h1>Journal</h1><p class="nt-hint">Loading…</p></div>';jLoad().then(()=>journal(body,tag));return}
   tag=tag||'All';
-  const tags=['All',...new Set(JOURNAL.map(j=>j.tag).filter(Boolean))];
-  const list=JOURNAL.map((j,i)=>({j,i})).filter(x=>tag==='All'||x.j.tag===tag);
-  let html=`<header class="jh"><h1>Journal</h1><p>Notes on branding, design, and working with AI. Written as I learn, and updated when I'm wrong.</p>
-  <div class="jtags">${tags.map(t=>`<button class="${t===tag?'on':''}" data-t="${esc(t)}">${esc(t)}${t==='All'?` <span>${JOURNAL.length}</span>`:''}</button>`).join('')}</div></header>`;
+  const tags=['All',...new Set(JL().map(j=>j.tag).filter(Boolean))];
+  const list=JL().map((j,i)=>({j,i})).filter(x=>tag==='All'||x.j.tag===tag);
+  let html=`<header class="jh"><div class="nt-head"><h1>Journal</h1>${LIVE.admin?`<div class="nt-tools"><span class="nt-status">${esc(LIVE.jStatus||'')}</span><button class="j-new">+ New article</button></div>`:''}</div><p>Notes on branding, design, and working with AI. Written as I learn, and updated when I'm wrong.</p>
+  <div class="jtags">${tags.map(t=>`<button class="${t===tag?'on':''}" data-t="${esc(t)}">${esc(t)}${t==='All'?` <span>${JL().length}</span>`:''}</button>`).join('')}</div></header>`;
   let cur='';
   list.forEach(({j,i})=>{
     const dt=jDate(j.date),grp=(MONTHS[dt.m]||dt.m)+' '+dt.y;
     if(grp!==cur){if(cur)html+='</ol>';html+=`<h2 class="jm">${esc(grp)}</h2><ol class="jl">`;cur=grp}
     html+=`<li><button class="je" data-j="${i}"><span class="jd">${dt.d?`<b>${esc(dt.d)}</b>`:'<b>&nbsp;</b>'}<small>${esc(dt.m)}</small></span>
-      <span class="jb"><span class="jt">${esc(j.title)}</span><span class="jx">${esc(j.excerpt)}</span>
+      <span class="jb"><span class="jt">${j.draft?'<em class="j-draft">Draft</em> ':''}${esc(j.title)}</span><span class="jx">${esc(j.excerpt)}</span>
       <span class="jmeta">${esc(j.tag||'')} · ${readTime(j)}${j.cover?' · Carousel':''}${j.updated?' · <em>Updated</em>':''}</span></span></button></li>`;
   });
   if(cur)html+='</ol>';
@@ -2537,20 +2551,62 @@ function journal(body,tag){
   body.scrollTop=0;
   body.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>journal(body,b.dataset.t));
   body.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>readPost(body,+b.dataset.j));
+  const nb=body.querySelector('.j-new');if(nb)nb.onclick=()=>jEdit(body,-1);
 }
 function readPost(body,i){
-  const j=JOURNAL[i],nx=JOURNAL[(i+1)%JOURNAL.length];
-  body.innerHTML=`<div class="abar"><button class="back">‹ All posts</button><div class="rprog"><i></i></div></div>
+  const j=JL()[i],nx=JL()[(i+1)%JL().length];
+  body.innerHTML=`<div class="abar"><button class="back">‹ All posts</button>${LIVE.admin?'<button class="j-edit">Edit</button>':''}${j.slug&&!j.draft?'<button class="j-share">Copy link</button>':''}<div class="rprog"><i></i></div></div>
   <article class="article" style="--qbg:var(--${j.quote||'c3'})">${j.hero&&COVERS[j.hero]?`<img class="ahero" src="${COVERS[j.hero]}" alt="Cover image for ${esc(j.title)}">`:''}<p class="meta">${esc(j.date)} · ${readTime(j)} · ${esc(P.name)}</p>${j.updated?`<span class="upd">${esc(j.updated)}</span>`:''}<h1>${esc(j.title)}</h1><p class="lead">${esc(j.excerpt)}</p><hr>
   ${md(j.body)}
   <div class="afoot"><button class="btn tonal back2">‹ Back to all posts</button>${j.url?`<a class="btn tonal" href="${esc(j.url)}" target="_blank" rel="noopener">Read on ${esc(j.source)}</a>`:''}${(j.more||[]).map(m=>`<a class="btn tonal" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.label)}</a>`).join('')}</div>
-  ${JOURNAL.length>1?`<button class="nextp"><small>Next article</small><b>${esc(nx.title)}</b></button>`:''}</article>`;
+  ${JL().length>1?`<button class="nextp"><small>Next article</small><b>${esc(nx.title)}</b></button>`:''}</article>`;
   body.scrollTop=0;initCarousels(body);
   const bar=body.querySelector('.rprog i');
   body.onscroll=()=>{if(!bar.isConnected){body.onscroll=null;return}const m=body.scrollHeight-body.clientHeight;bar.style.width=(m>0?body.scrollTop/m*100:0)+'%'};
   body.querySelectorAll('.back,.back2').forEach(b=>b.onclick=()=>{body.onscroll=null;journal(body)});
-  const n=body.querySelector('.nextp');if(n)n.onclick=()=>readPost(body,(i+1)%JOURNAL.length);
+  const n=body.querySelector('.nextp');if(n)n.onclick=()=>readPost(body,(i+1)%JL().length);
+  const eb=body.querySelector('.j-edit');if(eb)eb.onclick=()=>{body.onscroll=null;jEdit(body,i)};
+  const sb=body.querySelector('.j-share');if(sb)sb.onclick=async()=>{const u=location.origin+'/journal/'+j.slug;try{await navigator.clipboard.writeText(u);sb.textContent='Copied'}catch(e){prompt('Article link',u)}setTimeout(()=>sb.textContent='Copy link',1500)};
 }
+/* ===== Live Journal: same owner sign-in as Notes; each article also gets its own page at /journal/<slug> ===== */
+function JL(){return (LIVE&&LIVE.posts)||JOURNAL}
+async function jLoad(){try{const r=await fetch('/api/journal',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.posts))LIVE.posts=d.posts.map(p=>{const o=JOURNAL.find(x=>x.slug===p.slug||x.title===p.title);return o?{...o,...p}:p})}}catch(e){}LIVE.jLoaded=true}
+const jSlug=t=>String(t||'').toLowerCase().replace(/\*/g,'').replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80)||'post';
+function jToday(){const d=new Date();return d.toLocaleString('en-US',{month:'short'})+' '+d.getDate()+', '+d.getFullYear()}
+async function jSave(list){LIVE.jStatus='Saving…';
+  try{const r=await fetch('/api/journal',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({posts:list.map(({body,...p})=>({...p,body}))})});
+    if(r.status===401){LIVE.admin=false;LIVE.jStatus='Signed out. Not saved.';return false}
+    if(!r.ok){LIVE.jStatus='Could not save ('+r.status+')';return false}
+    const d=await r.json();LIVE.posts=d.posts.map(p=>{const o=JOURNAL.find(x=>x.slug===p.slug||x.title===p.title);return o?{...o,...p}:p});LIVE.jStatus='Saved';return true}
+  catch(e){LIVE.jStatus='Offline. Could not save';return false}}
+function jEdit(body,i){
+  const isNew=i<0,src=isNew?{title:'',tag:'',date:jToday(),excerpt:'',body:'',draft:true}:JL()[i];
+  body.onscroll=null;body.scrollTop=0;
+  body.innerHTML=`<div class="journal j-ed"><div class="nt-head"><h1>${isNew?'New article':'Edit article'}</h1><div class="nt-tools"><span class="nt-status"></span></div></div>
+  <label>Title<input id="jeT" maxlength="200" value="${esc(src.title)}"></label>
+  <div class="j-row"><label>Tag<input id="jeG" maxlength="40" value="${esc(src.tag||'')}" placeholder="Branding"></label><label>Date<input id="jeD" maxlength="40" value="${esc(src.date||'')}" placeholder="Oct 1, 2026"></label></div>
+  <label>Short summary <small>(shown in lists and in Google results)</small><textarea id="jeX" rows="2" maxlength="400">${esc(src.excerpt||'')}</textarea></label>
+  <label>Article<textarea id="jeB" rows="18">${esc(src.body||'')}</textarea></label>
+  <p class="j-help">Blank line = new paragraph · <b>## </b>Heading · <b>### </b>Subheading · <b>&gt; </b>Quote · <b>- </b>List · <b>**bold**</b> · <i>*italic*</i></p>
+  <label class="j-chk"><input type="checkbox" id="jeDr" ${src.draft?'checked':''}> Draft (only you can see it)</label>
+  <div class="j-act"><button class="j-cancel">Cancel</button>${isNew?'':'<button class="j-del">Delete</button>'}<button class="j-save">${isNew?'Save':'Save changes'}</button></div></div>`;
+  const $=q=>body.querySelector(q),st=$('.nt-status');
+  $('.j-cancel').onclick=()=>isNew?journal(body):readPost(body,i);
+  if(!isNew)$('.j-del').onclick=async()=>{if(!confirm('Delete this article for good?'))return;const list=JL().slice();list.splice(i,1);st.textContent='Deleting…';if(await jSave(list))journal(body);else st.textContent=LIVE.jStatus};
+  $('.j-save').onclick=async()=>{
+    const title=$('#jeT').value.trim();if(!title){st.textContent='Add a title first.';return}
+    const p={...(isNew?{}:src),title,tag:$('#jeG').value.trim(),date:$('#jeD').value.trim()||jToday(),excerpt:$('#jeX').value.trim(),body:$('#jeB').value,draft:$('#jeDr').checked};
+    if(isNew||!p.slug)p.slug=jSlug(title);
+    if(!p.draft)delete p.draft;
+    const list=JL().slice();if(isNew)list.unshift(p);else list[i]=p;
+    st.textContent='Saving…';
+    if(await jSave(list)){const k=JL().findIndex(x=>x.slug===p.slug||x.title===p.title);readPost(body,k<0?0:k)}else st.textContent=LIVE.jStatus};
+  setTimeout(()=>$('#jeT').focus(),30);
+}
+/* Open an article directly: rohankumar.pro/?post=<slug> */
+(function(){try{const sl=new URLSearchParams(location.search).get('post');if(!sl)return;
+  const go=async()=>{await jLoad();const k=JL().findIndex(x=>x.slug===sl);openApp('journal');const w=open.journal;if(w&&k>=0)readPost(w.querySelector('.body'),k)};
+  if(document.readyState==='complete')setTimeout(go,600);else addEventListener('load',()=>setTimeout(go,600))}catch(e){}})();
 const picHTML=(p,big)=>p.src?`<img src="${esc(p.src)}" alt="${esc(p.caption)}">`:`<svg viewBox="0 0 100 100"><path d="${shape(p.shape)}" fill="var(--surface)" opacity=".6"/></svg>`;
 function photos(body){
   body.style.position='relative';
@@ -2568,7 +2624,7 @@ function photos(body){
   }
 }
 /* ===== Live Notes: anyone reads, only the owner edits (Netlify Functions + Blobs) ===== */
-const LIVE={admin:false,notes:null,loaded:false,saveT:null,status:''};
+var LIVE={admin:false,notes:null,loaded:false,saveT:null,status:''};
 async function liveAuth(){try{const r=await fetch('/api/auth',{cache:'no-store'});if(r.ok)LIVE.admin=!!(await r.json()).admin}catch(e){}}
 async function liveLoad(){LIVE.loadErr=false;try{const r=await fetch('/api/notes',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.notes))LIVE.notes=d.notes}else LIVE.loadErr=true}catch(e){LIVE.loadErr=true}LIVE.loaded=true}
 function liveNotes(){return LIVE.notes||NOTES}
@@ -2577,7 +2633,7 @@ function liveSave(){clearTimeout(LIVE.saveT);LIVE.status='Saving…';liveStatus(
     if(r.status===401){LIVE.admin=false;LIVE.status='Signed out. Changes not saved.';refreshNotes();return}
     LIVE.status=r.ok?'Saved':'Could not save'}catch(e){LIVE.status='Offline. Could not save'}liveStatus()},700)}
 function liveStatus(){document.querySelectorAll('.nt-status').forEach(el=>el.textContent=LIVE.status)}
-function refreshNotes(){const w=open.notes;if(w)notes(w.querySelector('.body'))}
+function refreshNotes(){const w=open.notes;if(w)notes(w.querySelector('.body'));LIVE.jLoaded=false;const jw=open.journal;if(jw)journal(jw.querySelector('.body'))}
 function notes(body){
   if(!LIVE.loaded){body.innerHTML='<h1>Notes</h1><p class="nt-hint">Loading…</p>';Promise.all([liveLoad(),liveAuth()]).then(()=>notes(body));return}
   const list=liveNotes(),ed=LIVE.admin;
@@ -2594,7 +2650,7 @@ function notes(body){
   body.querySelectorAll('.nt-c').forEach(b=>b.onclick=()=>{const i=+b.closest('.note').dataset.i;cur()[i].color=b.dataset.c;liveSave();notes(body)});
   body.querySelectorAll('.nt-del').forEach(b=>b.onclick=()=>{const i=+b.closest('.note').dataset.i;if(!confirm('Delete this note?'))return;cur().splice(i,1);liveSave();notes(body)});
   body.querySelector('.nt-add').onclick=()=>{cur().unshift({title:'New note',text:'Write something…',color:'c4'});liveSave();notes(body);const t=body.querySelector('.note [data-f="title"]');if(t){t.focus();document.execCommand&&document.execCommand('selectAll',false,null)}};
-  body.querySelector('.nt-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';notes(body)};
+  body.querySelector('.nt-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';notes(body);LIVE.jLoaded=false;const jw=open.journal;if(jw)journal(jw.querySelector('.body'))};
 }
 /* Owner sign-in: press Ctrl+Shift+E (Cmd+Shift+E on Mac). Visitors never see it. */
 function ownerLogin(){
