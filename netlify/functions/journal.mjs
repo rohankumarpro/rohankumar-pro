@@ -1,12 +1,13 @@
 // /api/journal  GET: anyone reads published articles (owner also sees drafts).  PUT: only the signed-in owner saves.
-import { connectLambda, getStore } from "@netlify/blobs";
+import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { cleanPosts, loadPosts } from "../lib/posts.mjs";
+import { contentStore } from "../lib/store.mjs";
 
 export const handler = async (event) => {
   try {
     connectLambda(event);
-    const store = getStore("site-content");
+    const store = contentStore(event);
     if (event.httpMethod === "GET") {
       const posts = await loadPosts(store);
       return json({ posts: isAdmin(event) ? posts : posts.filter((p) => !p.draft) });

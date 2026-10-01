@@ -1,6 +1,7 @@
 // /journal and /journal/<slug>  Server-rendered pages so Google and AI tools can read the articles.
-import { connectLambda, getStore } from "@netlify/blobs";
+import { connectLambda } from "@netlify/blobs";
 import { loadPosts } from "../lib/posts.mjs";
+import { contentStore } from "../lib/store.mjs";
 
 const SITE = "https://rohankumar.pro", NAME = "Rohan Kumar", BOOKING = "https://cal.com/rohankumarpro";
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -52,7 +53,7 @@ const html = (statusCode, b) => ({ statusCode, headers: { "content-type": "text/
 export const handler = async (event) => {
   try {
     connectLambda(event);
-    const posts = (await loadPosts(getStore("site-content"))).filter((p) => !p.draft);
+    const posts = (await loadPosts(contentStore(event))).filter((p) => !p.draft);
     const slug = decodeURIComponent(event.queryStringParameters?.slug || "").replace(/\/+$/, "");
     if (!slug) {
       const body = `<h1>Journal</h1><p class="lead">Notes on branding, design, and working with AI. Written as I learn, and updated when I'm wrong.</p>
