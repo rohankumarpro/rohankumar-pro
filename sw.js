@@ -1,8 +1,8 @@
 // Service worker: makes the site open instantly, keeps it usable without a connection, and lets it be installed.
 // Pages and the API are always fetched fresh first; only static files are served from the cache.
-const VERSION = "rk-v2";
+const VERSION = "rk-v3";
 const STATIC = `${VERSION}-static`, PAGES = `${VERSION}-pages`;
-const PRECACHE = ["/css/blocks.css", "/css/apps.css", "/js/os-ext.mjs", "/js/lib.mjs", "/shared/blocks.mjs", "/img/avatar.jpg", "/img/icon-192.png", "/manifest.webmanifest"];
+const PRECACHE = ["/css/tokens.css", "/css/core.css", "/css/blocks.css", "/css/apps.css", "/js/os-ext.mjs", "/js/lib.mjs", "/shared/blocks.mjs", "/img/avatar.jpg", "/img/icon-192.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(STATIC).then((c) => c.addAll(PRECACHE).catch(() => {})).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => {

@@ -75,3 +75,9 @@ button .ic,a .ic{pointer-events:none}
 
 /* a picture that could not load: invisible, so the tile behind it shows instead of a broken-image icon */
 img.img-broken{opacity:0}
+
+/* layout guards shared by every UI: long content must never push a window wider than itself */
+.calc,.calc-d{min-width:0;max-width:100%}
+.calc-d{overflow:hidden}
+.body .seg{max-width:100%}
+@media (max-width:760px){.seg{flex-wrap:wrap}}
