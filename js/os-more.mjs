@@ -277,8 +277,9 @@ applyScale();
 
 /* ================= new apps: Services, Book a call ================= */
 const ART_ADD = {
-  docs: `<rect class="l1" x="24" y="20" width="50" height="60" rx="10" fill="#fff" stroke="${IK}" stroke-width="4.5"/><path class="up" d="M35 36h28M35 47h28M35 58h14" stroke="${IK}" stroke-width="4.5" stroke-linecap="round"/><rect class="rise" x="52" y="55" width="26" height="22" rx="6" fill="${IG}" stroke="${IK}" stroke-width="3.5"/><path d="M59 66h12" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
-  documents: `<rect class="l1" x="20" y="30" width="60" height="44" rx="11" fill="${IG}"/><path class="up" d="M24 34 62 21a4 4 0 0 1 5.4 3.8V32" fill="#fff" stroke="${IK}" stroke-width="3.5" stroke-linejoin="round"/><rect x="54" y="46" width="28" height="18" rx="9" fill="#fff"/><circle class="rise" cx="65" cy="55" r="3.6" fill="${IK}"/>`,
+  docs: `<rect class="l1" x="22" y="22" width="40" height="52" rx="9" fill="${IBD}"/><rect class="up" x="36" y="28" width="42" height="50" rx="9" fill="${IB}"/><path d="M46 45h22M46 56h22M46 67h12" stroke="#fff" stroke-width="4.5" stroke-linecap="round" fill="none"/>`,
+  content: `<rect class="l1" x="20" y="30" width="60" height="42" rx="13" fill="${IR}"/><path class="rise" d="M43 41v20l17-10z" fill="#fff"/>`,
+  documents: `<rect class="l1" x="20" y="30" width="60" height="44" rx="11" fill="${IG}"/><path class="up" d="M24 34 62 21a4 4 0 0 1 5.4 3.8V32z" fill="#fff"/><rect x="54" y="46" width="28" height="18" rx="9" fill="#fff"/><circle class="rise" cx="65" cy="55" r="3.6" fill="${IK}"/>`,
   services: `<rect class="l1" x="26" y="38" width="48" height="34" rx="8" fill="${IG}"/><path class="up" d="M41 38v-5a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v5" fill="none" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect x="26" y="52" width="48" height="4" fill="#2a8a45"/><circle class="rise" cx="50" cy="56" r="5" fill="#fff"/>`,
   book: `<rect class="l1" x="24" y="30" width="52" height="46" rx="8" fill="${IR}"/><rect x="24" y="44" width="52" height="32" rx="7" fill="#fff"/><path class="up" d="M36 24v12M64 24v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><g class="dots" fill="${IR}"><circle cx="38" cy="56" r="3.5"/><circle cx="50" cy="56" r="3.5"/><circle cx="62" cy="56" r="3.5"/><circle cx="38" cy="67" r="3.5"/><circle cx="50" cy="67" r="3.5"/></g>`,
 };

@@ -131,6 +131,7 @@ a{color:var(--primary)}
 
 /* widgets */
 .widgets{position:absolute;top:60px;right:28px;display:flex;flex-direction:column;gap:calc(16 * var(--u));align-items:flex-end;z-index:1}
+.widgets .wcard,.widgets .wclock{box-sizing:border-box}.widgets .wcard{width:260px;max-width:260px}
 .wclock{position:relative;width:220px;height:220px;display:grid;place-items:center}
 .wclock svg{position:absolute;inset:0;width:100%;height:100%}
 .wclock svg path{fill:var(--c1)}
@@ -273,6 +274,7 @@ a{color:var(--primary)}
 .qt{font-size:var(--fs-12);font-weight:var(--fw-x);letter-spacing:-.04em;line-height:1}
 .qd{color:var(--ink2);font-weight:var(--fw-m);margin:calc(6 * var(--u)) 0 calc(16 * var(--u))}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:calc(8 * var(--u))}
+.tiles .tile:last-child:nth-child(odd){grid-column:1/-1}
 .tile{display:flex;align-items:center;gap:calc(10 * var(--u));border:0;border-radius:var(--r-7);padding:calc(14 * var(--u));background:var(--surface2);text-align:left;font-weight:var(--fw-b);font-size:var(--fs-4)}
 .tile small{display:block;font-weight:500;color:var(--ink2);font-size:var(--fs-2)}
 .tile.on{background:var(--primary);color:var(--on-primary)}.tile.on small{color:inherit;opacity:.8}
@@ -592,6 +594,8 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 .gbf{display:flex;flex-direction:column;gap:calc(10 * var(--u));background:var(--surface2);padding:calc(16 * var(--u));border-radius:var(--r-7);margin:calc(10 * var(--u)) 0 calc(18 * var(--u))}
 .gbf input,.gbf textarea{font:inherit;font-size:var(--fs-5);border:0;border-radius:var(--r-5);padding:calc(12 * var(--u)) calc(14 * var(--u));background:var(--surface);color:var(--ink);resize:vertical}
 .gbf .r{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--u));flex-wrap:wrap}
+.gbf input,.gbf textarea{box-sizing:border-box;width:100%;max-width:100%}
+.gbf .sw{display:flex;flex-direction:row;flex:none;align-items:center;justify-content:flex-start;gap:calc(8 * var(--u));padding:0;background:none;transition:none}.gbf .sw button{flex:none}.gbf .sw:hover{flex:none}
 .sw{display:flex;gap:calc(6 * var(--u))}.sw button{width:28px;height:28px;border-radius:50%;border:3px solid transparent}
 .sw button.on{border-color:var(--ink)}
 .gbl{columns:2 200px;column-gap:calc(12 * var(--u))}
@@ -2058,7 +2062,7 @@ function glyphSvg(g,size=24){return `<svg viewBox="0 0 24 24" width="${size}" he
 let cpN=0;
 function icon(a){
   const S=window.__ICONSET,ui=document.documentElement.dataset.ui||'material',g=S&&S.a&&S.a[a.id];
-  if(a.photo&&ui==='minimal')return `<span class="ico photo"><img src="${PHOTO}" alt=""></span>`;
+  if(a.photo&&ui==='minimal')return `<span class="ico photo"><img src="${PHOTO}" alt="" draggable="false"></span>`;
   if(a.photo){a={...a,shape:'circle'};const id='cp'+(++cpN);return `<span class="ico photo"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}"><path d="${shape(a.shape)}"/></clipPath></defs><path d="${shape(a.shape)}" fill="#C2FF73"/><g clip-path="url(#${id})"><image class="g-face" href="${PHOTO}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice"/></g></svg></span>`}
   /* Minimal: a thin library glyph in a square outline tile (the tile itself is drawn by css/minimal.css) */
   if(g&&ui==='minimal')return `<span class="ico uitile" data-i="${a.id}"><svg viewBox="${S.vb}" fill="none" stroke="currentColor" stroke-width="${S.sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${g}</svg></span>`;
