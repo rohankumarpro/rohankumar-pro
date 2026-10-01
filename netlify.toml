@@ -2,6 +2,9 @@
   publish = "."
   functions = "netlify/functions"
 
+[functions]
+  included_files = ["index.html", "netlify/lib/**"]
+
 # Friendly address for the functions: /api/auth, /api/notes
 [[redirects]]
   from = "/api/*"
@@ -18,6 +21,16 @@
 [[redirects]]
   from = "/journal/*"
   to = "/.netlify/functions/journal-page?slug=:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/about"
+  to = "/.netlify/functions/profile-page?page=about"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/resume"
+  to = "/.netlify/functions/profile-page?page=resume"
   status = 200
   force = true
 [[redirects]]

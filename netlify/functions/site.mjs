@@ -47,6 +47,7 @@ export function cleanSettings(s) {
     if (q?.hidden) it.hidden = true;
     return it;
   }).filter((q) => q.url);
+  if (s?.gbAuto === true) o.gbAuto = true; // guestbook notes publish without waiting for approval
   o.hiddenApps = (Array.isArray(s?.hiddenApps) ? s.hiddenApps : [])
     .map((x) => str(x, 30)).filter((x) => /^[a-z0-9_-]+$/.test(x) && !KEEP.includes(x)).slice(0, 40);
   return o;

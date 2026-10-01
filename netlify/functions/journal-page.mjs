@@ -2,6 +2,7 @@
 import { connectLambda } from "@netlify/blobs";
 import { loadPosts } from "../lib/posts.mjs";
 import { contentStore } from "../lib/store.mjs";
+import { COVERS, CAROUSELS } from "../lib/media.mjs";
 
 const SITE = "https://rohankumar.pro", NAME = "Rohan Kumar", BOOKING = "https://cal.com/rohankumarpro";
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -16,11 +17,22 @@ function md(src) {
     if (t.startsWith("### ")) return `<h3>${inl(t.slice(4))}</h3>`;
     if (t.startsWith("## ")) return `<h2>${inl(t.slice(3))}</h2>`;
     if (t.startsWith("> ")) return `<blockquote>${inl(t.slice(2))}</blockquote>`;
-    if (/^\[\[carousel:\w+\]\]$/.test(t)) return "";
+    const car = t.match(/^\[\[carousel:(\w+)\]\]$/);
+    if (car) return carousel(car[1]);
     if (t.startsWith("!! ")) return `<p><strong>${inl(t.slice(3))}</strong> <a href="${BOOKING}">Book a call</a></p>`;
     return `<p>${inl(t)}</p>`;
   }).join("\n");
 }
+const slidesOf = (n) => { const c = CAROUSELS[n]; return c ? (Array.isArray(c) ? c : c.slides) : null; };
+function carousel(name) {
+  const S = slidesOf(name);
+  if (!S?.length) return "";
+  const ar = String(CAROUSELS[name]?.ar || "4 / 5").replace(/[^0-9 /.]/g, "");
+  return `<div class="car" style="--ar:${ar}" role="group" aria-label="Slides">${S.map((src, i) =>
+    `<img src="${esc(src)}" alt="Slide ${i + 1} of ${S.length}" loading="lazy">`).join("")}</div>`;
+}
+// The picture shown at the top of an article: its cover, or the first slide of its carousel.
+const coverOf = (p) => (p.hero && COVERS[p.hero]) || (p.cover && slidesOf(p.cover)?.[0]) || null;
 const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 function iso(d) {
   const m = String(d || "").replace(",", "").split(" ");
@@ -39,13 +51,16 @@ h1{font:700 2rem/1.2 system-ui,sans-serif;margin:.2em 0 .4em}h2,h3{font-family:s
 blockquote{margin:1.4em 0;padding:.2em 1.1em;border-left:3px solid var(--ac);color:var(--mut)}
 a{color:var(--ac)}hr{border:0;border-top:1px solid var(--ln);margin:1.6em 0}
 ol.l{list-style:none;padding:0}ol.l li{padding:18px 0;border-bottom:1px solid var(--ln)}
+.cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin:0 0 1.2em}
+.car{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:1.6em 0;border-radius:14px}
+.car img{flex:0 0 100%;max-width:100%;aspect-ratio:var(--ar);object-fit:cover;scroll-snap-align:center;border-radius:14px}
 ol.l a{font:600 1.15rem system-ui,sans-serif;text-decoration:none;color:var(--fg)}ol.l p{margin:.3em 0;color:var(--mut);font-size:1rem}`;
 
-function page({ title, desc, path, body, ld, type = "website" }) {
+function page({ title, desc, path, body, ld, type = "website", image }) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${SITE}${path}">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="${type}"><meta property="og:url" content="${SITE}${path}">
-<meta name="twitter:card" content="summary"><style>${CSS}</style>${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` : ""}</head>
+${image ? `<meta property="og:image" content="${esc(SITE + image)}"><meta name="twitter:card" content="summary_large_image">` : `<meta name="twitter:card" content="summary">`}<style>${CSS}</style>${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` : ""}</head>
 <body><main><nav><a href="/">${NAME}</a><a href="/journal">Journal</a></nav>${body}</main></body></html>`;
 }
 const html = (statusCode, b) => ({ statusCode, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=60" }, body: b });
@@ -57,18 +72,20 @@ export const handler = async (event) => {
     const slug = decodeURIComponent(event.queryStringParameters?.slug || "").replace(/\/+$/, "");
     if (!slug) {
       const body = `<h1>Journal</h1><p class="lead">Notes on branding, design, and working with AI. Written as I learn, and updated when I'm wrong.</p>
-<ol class="l">${posts.map((p) => `<li><a href="/journal/${esc(p.slug)}">${esc(p.title)}</a><p>${esc(p.excerpt)}</p><span class="meta">${esc(p.date)} · ${mins(p.body)} min read</span></li>`).join("")}</ol>`;
+<ol class="l">${posts.map((p) => `<li>${coverOf(p) ? `<img class="cover" src="${esc(coverOf(p))}" alt="" loading="lazy">` : ""}<a href="/journal/${esc(p.slug)}">${esc(p.title)}</a><p>${esc(p.excerpt)}</p><span class="meta">${esc(p.date)} · ${mins(p.body)} min read</span></li>`).join("")}</ol>`;
       return html(200, page({ title: `Journal — ${NAME}`, desc: "Notes on branding, design, and working with AI.", path: "/journal", body,
         ld: { "@context": "https://schema.org", "@type": "Blog", name: `Journal — ${NAME}`, url: `${SITE}/journal`, author: { "@type": "Person", name: NAME } } }));
     }
     const p = posts.find((x) => x.slug === slug);
     if (!p) return html(404, page({ title: `Not found — ${NAME}`, desc: "Article not found.", path: `/journal/${slug}`, body: `<h1>Article not found</h1><p><a href="/journal">See all articles</a></p>` }));
-    const body = `<article><p class="meta">${esc(p.date)} · ${mins(p.body)} min read · ${NAME}</p><h1>${esc(p.title)}</h1><p class="lead">${esc(p.excerpt)}</p><hr>${md(p.body)}
+    const cover = coverOf(p);
+    const body = `<article><p class="meta">${esc(p.date)} · ${mins(p.body)} min read · ${NAME}</p><h1>${esc(p.title)}</h1>${cover ? `<img class="cover" src="${esc(cover)}" alt="Cover image for ${esc(p.title)}">` : ""}<p class="lead">${esc(p.excerpt)}</p><hr>${md(p.body)}
 ${p.url ? `<p><a href="${esc(p.url)}" rel="noopener">Also on ${esc(p.source || "the original")}</a></p>` : ""}<hr><p><a href="/journal">All articles</a> · <a href="${SITE}/">Open the full site</a></p></article>`;
     const ld = { "@context": "https://schema.org", "@type": "Article", headline: p.title, description: p.excerpt, datePublished: iso(p.date),
-      author: { "@type": "Person", name: NAME, url: SITE }, mainEntityOfPage: `${SITE}/journal/${p.slug}`, ...(p.tag ? { articleSection: p.tag } : {}) };
-    return html(200, page({ title: `${p.title} — ${NAME}`, desc: p.excerpt, path: `/journal/${p.slug}`, body, ld, type: "article" }));
+      author: { "@type": "Person", name: NAME, url: SITE }, mainEntityOfPage: `${SITE}/journal/${p.slug}`, ...(p.tag ? { articleSection: p.tag } : {}), ...(cover ? { image: SITE + cover } : {}) };
+    return html(200, page({ title: `${p.title} — ${NAME}`, desc: p.excerpt, path: `/journal/${p.slug}`, body, ld, type: "article", image: cover }));
   } catch (e) {
+    console.error("journal-page", e);
     return html(500, page({ title: "Error", desc: "", path: "/journal", body: `<h1>Something went wrong</h1><p>Please try again.</p>` }));
   }
 };
