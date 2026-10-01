@@ -375,6 +375,9 @@ a{color:var(--primary)}
 .own-card{background:var(--surface,#fff);color:inherit;border-radius:22px;padding:22px;width:min(320px,90vw);display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .own-card input{font:inherit;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 .own-err{margin:0;font-size:13px;min-height:1em;opacity:.8}.own-row{display:flex;justify-content:flex-end;gap:8px}
+.dc-vh{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.own-dot{width:34px;height:34px;border-radius:50%;border:0;padding:0;cursor:pointer;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.2);flex:none}
+.own-dot:active{transform:scale(.92)}
 /* icon arranging */
 .icons .dicon{touch-action:none;will-change:transform}
 .icons .dicon.dragging{z-index:10;cursor:grabbing;transition:none!important}
@@ -2080,10 +2083,10 @@ function documents(body){
     body.focus({preventScroll:true})};
   const vaultView=()=>{body.onkeydown=null;
     const all=[...vault.items.map(x=>({...x,fixed:1})),...vault.local.map((x,i)=>({...x,i}))];
-    body.innerHTML=`<div class="dc"><div class="dc-top"><button class="dc-back" id="dcB">‹ Documents</button><button class="dc-lockb" id="dcL">${glyphSvg(G.lock,16)} Lock</button></div><h1>Personal vault</h1><p class="dc-sub">Unlocked. Locks again when you close this window.</p>
+    body.innerHTML=`<div class="dc"><div class="dc-top"><button class="dc-back" id="dcB">‹ Documents</button><button class="dc-lockb" id="dcL">${glyphSvg(G.lock,16)} Lock</button></div><div class="dc-vh"><h1>Personal vault</h1><button class="own-dot" id="dcO" aria-label="Owner"></button></div><p class="dc-sub">Unlocked. Locks again when you close this window.</p>
       <div class="dc-notes">${all.map(n=>`<div class="dc-note"><b>${esc(n.t)}</b><p>${esc(n.x)}</p>${n.fixed?'':`<button class="dc-del" data-i="${n.i}" aria-label="Delete note">Delete</button>`}</div>`).join('')}</div>
       <h3 class="lk-g">Add a note</h3><form class="dc-add" id="dcF"><input id="dcT" placeholder="Title" maxlength="80" aria-label="Title"><textarea id="dcX" placeholder="Write something private…" rows="3" maxlength="2000" aria-label="Note"></textarea><button type="submit">Save to vault</button></form><p class="dc-sub">Notes you add are encrypted and stay on this device.</p></div>`;
-    body.querySelector('#dcB').onclick=home;body.querySelector('#dcL').onclick=home;
+    body.querySelector('#dcB').onclick=home;body.querySelector('#dcL').onclick=home;body.querySelector('#dcO').onclick=()=>LIVE.admin?openApp('notes'):ownerLogin();
     body.querySelector('#dcF').onsubmit=async e=>{e.preventDefault();const t=body.querySelector('#dcT').value.trim(),x=body.querySelector('#dcX').value.trim();if(!t&&!x)return;vault.local.push({t:t||'Untitled',x});await vaultSaveLocal(vault.key,vault.local);vaultView()};
     body.querySelectorAll('.dc-del').forEach(b=>b.onclick=async()=>{vault.local.splice(+b.dataset.i,1);await vaultSaveLocal(vault.key,vault.local);vaultView()})};
   home();
@@ -2567,7 +2570,7 @@ function photos(body){
 /* ===== Live Notes: anyone reads, only the owner edits (Netlify Functions + Blobs) ===== */
 const LIVE={admin:false,notes:null,loaded:false,saveT:null,status:''};
 async function liveAuth(){try{const r=await fetch('/api/auth',{cache:'no-store'});if(r.ok)LIVE.admin=!!(await r.json()).admin}catch(e){}}
-async function liveLoad(){try{const r=await fetch('/api/notes',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.notes))LIVE.notes=d.notes}}catch(e){}LIVE.loaded=true}
+async function liveLoad(){LIVE.loadErr=false;try{const r=await fetch('/api/notes',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.notes))LIVE.notes=d.notes}else LIVE.loadErr=true}catch(e){LIVE.loadErr=true}LIVE.loaded=true}
 function liveNotes(){return LIVE.notes||NOTES}
 function liveSave(){clearTimeout(LIVE.saveT);LIVE.status='Saving…';liveStatus();
   LIVE.saveT=setTimeout(async()=>{try{const r=await fetch('/api/notes',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({notes:liveNotes()})});
@@ -2584,6 +2587,7 @@ function notes(body){
     <p ${ed?'contenteditable="plaintext-only" spellcheck="true" data-f="text"':''}>${esc(n.text)}</p>
     ${ed?`<div class="nt-row">${['c1','c2','c3','c4','c5','c6'].map(c=>`<button class="nt-c${c===n.color?' on':''}" data-c="${c}" style="background:var(--${c})" aria-label="Color ${c}"></button>`).join('')}<button class="nt-del" aria-label="Delete note">Delete</button></div>`:''}
   </div>`).join('')}</div>`;
+  if(ed&&LIVE.loadErr){const t=body.querySelector('.nt-status');if(t)t.textContent='Could not load saved notes. Edits may overwrite them.'}
   if(!ed)return;
   const cur=()=>{if(!LIVE.notes)LIVE.notes=NOTES.map(n=>({...n}));return LIVE.notes};
   body.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{const i=+el.closest('.note').dataset.i;cur()[i][el.dataset.f]=el.innerText.replace(/\n$/,'');liveSave()}));
@@ -2601,7 +2605,7 @@ function ownerLogin(){
   const close=()=>d.remove();d.querySelector('.own-x').onclick=close;d.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
   f.onsubmit=async e=>{e.preventDefault();err.textContent='Checking…';
     try{const r=await fetch('/api/auth',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:inp.value})});
-      if(r.ok){LIVE.admin=true;LIVE.status='Signed in. Edits save automatically.';close();openApp('notes');refreshNotes()}else err.textContent='Wrong password.'}catch(x){err.textContent='Could not reach the server.'}};
+      if(r.ok){LIVE.admin=true;LIVE.status='Signed in. Edits save automatically.';close();openApp('notes');refreshNotes()}else err.textContent=r.status===401?'Wrong password.':'Server not reachable ('+r.status+'). Try again shortly.'}catch(x){err.textContent='Could not reach the server.'}};
   setTimeout(()=>inp.focus(),30)}
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='E'||e.key==='e')){e.preventDefault();ownerLogin()}},true);
 
