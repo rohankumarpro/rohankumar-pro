@@ -371,6 +371,21 @@ a{color:var(--primary)}
 .nt-c{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}.nt-c.on{border-color:var(--glyph)}
 .nt-del{margin-left:auto;border:0;background:none;font:inherit;font-size:12px;color:var(--glyph);opacity:.75;cursor:pointer}
 .nt-hint{opacity:.6}
+.ownpill{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font:inherit;font-weight:600;border:0;color:inherit}.ownpill i{width:9px;height:9px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 3px rgba(46,204,113,.28)}
+.dicon.hid{opacity:.5}.dicon.hid .lb::after{content:" · hidden";opacity:.8}
+.own-sec{margin-top:26px;padding-top:6px;border-top:1px solid rgba(127,127,127,.3)}.own-sec h2{margin:14px 0 2px}.ow-top{display:flex;justify-content:space-between;gap:10px;margin:0 0 4px;opacity:.8}.ow-st{font-size:13px;min-width:6ch;text-align:right}
+.ow-f{display:flex;flex-direction:column;gap:4px;font-size:13px;margin:8px 0;opacity:.95}.ow-f input{font:inherit;font-size:15px;padding:9px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
+.ow-apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 12px;margin:10px 0}.ow-app{display:flex;align-items:center;gap:8px;font-size:15px;padding:6px 2px;cursor:pointer}.ow-app input{width:18px;height:18px;accent-color:#2ecc71}
+.ow-row{margin:16px 0 8px}
+.ed-btn{float:right;position:sticky;top:0;z-index:5;border:0;border-radius:99px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--primary);color:var(--on-primary);margin:0 0 8px 8px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.ed-card{border:1px solid rgba(127,127,127,.35);border-radius:18px;padding:6px 14px 12px;margin:10px 0}.ed-ctl{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.ed-ctl button{font:inherit;font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;cursor:pointer}.ed-ctl button:disabled{opacity:.35;cursor:default}.ed-ctl .ed-del{margin-left:auto;color:#d33}
+.ed-add{margin:6px 0}.ed-act{position:sticky;bottom:0;display:flex;gap:10px;justify-content:flex-end;padding:12px 0;background:linear-gradient(transparent,var(--surface,#fff) 40%)}
+.ed textarea,.ed select{font:inherit;font-size:15px;padding:9px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;width:100%}
+.ph-st{font-size:13px;opacity:.75}.ph-add{cursor:pointer;padding:9px 16px;font-size:14px}.ph-own{gap:8px;padding-top:0}.ph-own .ph-cap{flex:1;min-width:0;font:inherit;font-size:15px;padding:8px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
+.ph-own button{font:inherit;padding:8px 12px;border-radius:99px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;cursor:pointer}.ph-own button:disabled{opacity:.35;cursor:default}.ph-own .ed-del{color:#d33}
+.pcard.hid,.dc-card.hid{opacity:.55}
+.mi-card{border:1px solid rgba(127,127,127,.35);border-radius:18px;padding:12px 14px;margin:10px 0}.mi-card.new{border-color:#2ecc71}.mi-h{display:flex;align-items:baseline;gap:8px}.mi-h small{margin-left:auto;opacity:.65}.mi-new{background:#2ecc71;color:#06361a;border-radius:99px;font-size:11px;font-weight:700;padding:2px 8px}
+.mi-m,.mi-o{margin:6px 0}.mi-m small,.mi-o small{display:block;opacity:.6;font-size:12px}.mi-o{opacity:.85;font-size:14px}.mi-e{margin:4px 0}.mi-card summary{cursor:pointer;opacity:.75;font-size:14px;margin-top:6px}
 .own-dlg{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(0,0,0,.35)}
 .own-card{background:var(--surface,#fff);color:inherit;border-radius:22px;padding:22px;width:min(320px,90vw);display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .own-card input{font:inherit;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
@@ -2006,7 +2021,7 @@ const APPS=[
   {id:"timeline",title:"Timeline",shape:"sun",color:"c3",glyph:G.tl,w:560,h:640,render:timeline},
   {id:"messages",title:"Messages",shape:"cookie",color:"c1",glyph:G.msg,w:420,h:620,render:messages},
   {id:"links",title:"Links",shape:"squircle",color:"c5",glyph:G.link,w:460,h:680,render:links},
-  {id:"settings",drawer:true,title:"Settings",shape:"circle",color:"c6",glyph:G.gear,w:460,h:440,render:settings}
+  {id:"settings",drawer:true,title:"Settings",shape:"circle",color:"c6",glyph:G.gear,w:460,h:560,render:settings}
 ];
 const RUN=[];
 
@@ -2027,18 +2042,28 @@ async function vaultKey(pin,salt){const km=await crypto.subtle.importKey('raw',n
 async function vaultOpen(pin){const k=await vaultKey(pin,b64b(VAULT_BUNDLE.s));try{const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64b(VAULT_BUNDLE.i)},k,b64b(VAULT_BUNDLE.c));return{key:k,items:JSON.parse(new TextDecoder().decode(pt)).items}}catch(e){return null}}
 async function vaultLoadLocal(k){try{const r=JSON.parse(localStorage.getItem('vaultNotes')||'null');if(!r)return[];const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64b(r.i)},k,b64b(r.c));return JSON.parse(new TextDecoder().decode(pt))}catch(e){return[]}}
 async function vaultSaveLocal(k,arr){try{const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify(arr)));localStorage.setItem('vaultNotes',JSON.stringify({i:bb64(iv),c:bb64(ct)}))}catch(e){}}
+/* QR generator: qrcode-generator 1.4.4, Copyright (c) 2009 Kazuhiko Arase, MIT licence. "QR Code" is a registered trademark of DENSO WAVE INCORPORATED. */
+const QRGEN=(function(){var module,define,exports;var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});;return qrcode})();
+const QR_CACHE={};
+function qrOf(url){const b=Object.values(DOC_QR).find(q=>q.url===url);if(b)return b;if(QR_CACHE[url]!==undefined)return QR_CACHE[url];
+  let r=null;try{const g=QRGEN(0,'M');g.addData(url);g.make();const n=g.getModuleCount();let d='';for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(g.isDark(y,x))d+=`M${x} ${y}h1v1h-1z`;r={n,d}}catch(e){}
+  return QR_CACHE[url]=r}
+const QR_BRAND_LINK={name:'Link',bg:'#3b3b46',ico:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg>'};
+const brandOf=k=>DOC_BRAND[k]||QR_BRAND_LINK;
+const QL=()=>(P.qrs||Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url})));
+const QV=()=>QL().filter(it=>(!it.hidden||LIVE.admin)&&qrOf(it.url));
 function qrSvg(q){const n=q.n;return `<svg viewBox="-3 -3 ${n+6} ${n+6}" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect x="-3" y="-3" width="${n+6}" height="${n+6}" fill="#fff"/><path d="${q.d}" fill="#111"/></svg>`}
-function qrBig(start){
-  const keys=Object.keys(DOC_QR);let i=keys.indexOf(start);
+function qrBig(keys,start){
+  let i=Math.max(0,start|0);
   const host=document.getElementById('desk')||document.body;
   const el=document.createElement('div');el.className='qrbig';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
   const prevFocus=document.activeElement;
-  const draw=()=>{const k=keys[i],q=DOC_QR[k],br=DOC_BRAND[k];
-    let shown=q.url.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');
+  const draw=()=>{const it=keys[i],q=qrOf(it.url),br={...brandOf(it.brand)};if(it.name)br.name=it.name;
+    let shown=it.url.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');
     el.innerHTML=`<div class="qb-card"><div class="qb-head" style="background:${br.bg}"><span class="qb-ico">${br.ico}</span><span>${esc(br.name)}</span></div>
       <div class="qb-qr">${qrSvg(q)}</div>
       <div class="qb-who"><b>${esc(P.name)}</b><span>${esc(P.role)}</span></div>
-      <div class="qb-handle">${esc(br.name)} · ${esc(q.sub)}</div>
+      <div class="qb-handle">${esc(br.name)} · ${esc(it.sub||'')}</div>
       <div class="qb-url">${esc(shown)}</div>
       <p class="qb-hint">Scan with your phone camera</p>
       <div class="qb-nav"><button type="button" id="qbP" aria-label="Previous code">‹</button><span>${i+1} / ${keys.length}</span><button type="button" id="qbN" aria-label="Next code">›</button></div>
@@ -2071,11 +2096,12 @@ function documents(body){
   let vault=null,pin='',busy=false;
   const lockedFor=()=>{try{return Math.max(0,(+sessionStorage.getItem('vUntil')||0)-Date.now())}catch(e){return 0}};
   const home=()=>{vault=null;pin='';
-    const cards=Object.keys(DOC_QR).map(k=>{const q=DOC_QR[k],br=DOC_BRAND[k];
-      return `<div class="dc-card"><div class="dc-badge" style="background:${br.bg}"><span class="dc-bi">${br.ico}</span>${esc(br.name)}</div><button class="dc-qr" data-k="${k}" aria-label="Enlarge ${esc(br.name)} QR code">${qrSvg(q)}<span class="dc-zoom">Tap to enlarge</span></button><div class="dc-meta"><b>${esc(q.sub)}</b><small>${esc(P.name)} on ${esc(br.name)}</small><a class="dc-open" href="${esc(q.url)}" target="_blank" rel="noopener">Open profile</a></div></div>`}).join('');
+    const qv=QV();
+    const cards=qv.map((it,i)=>{const q=qrOf(it.url),br={...brandOf(it.brand)};if(it.name)br.name=it.name;
+      return `<div class="dc-card${it.hidden?' hid':''}"><div class="dc-badge" style="background:${br.bg}"><span class="dc-bi">${br.ico}</span>${esc(br.name)}${it.hidden?' · hidden':''}</div><button class="dc-qr" data-k="${i}" aria-label="Enlarge ${esc(br.name)} QR code">${qrSvg(q)}<span class="dc-zoom">Tap to enlarge</span></button><div class="dc-meta"><b>${esc(it.sub||'')}</b><small>${esc(P.name)} on ${esc(br.name)}</small><a class="dc-open" href="${esc(it.url)}" target="_blank" rel="noopener">Open profile</a></div></div>`}).join('');
     body.innerHTML=`<div class="dc"><h1>Documents</h1><p class="dc-sub">Tap a code to enlarge it, then scan it with your phone camera.</p><h3 class="lk-g">QR codes</h3><div class="dc-grid">${cards}</div><h3 class="lk-g">Private</h3><button class="dc-vault" id="dcV"><span class="dc-vi">${glyphSvg(G.lock,22)}</span><span class="lk-t"><b>Personal vault</b><small>Opens with a PIN</small></span></button></div>`;
     body.querySelector('#dcV').onclick=padView;
-    body.querySelectorAll('.dc-qr').forEach(b=>b.onclick=()=>qrBig(b.dataset.k))};
+    body.querySelectorAll('.dc-qr').forEach(b=>b.onclick=()=>qrBig(qv,+b.dataset.k));if(LIVE.admin)edBtn(body)};
   const padView=()=>{vault=null;pin='';
     body.innerHTML=`<div class="dc dc-pad"><button class="dc-back" id="dcB">‹ Documents</button><div class="dc-lk">${glyphSvg(G.lock,30)}</div><h2>Personal vault</h2><p class="dc-sub" id="dcMsg">Enter your PIN</p><div class="dc-dots" id="dcD"><i></i><i></i><i></i><i></i></div><div class="dc-keys" id="dcK">${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>k===''?'<span></span>':`<button type="button" data-k="${k}" aria-label="${k==='⌫'?'Delete':k}">${k}</button>`).join('')}</div></div>`;
     body.querySelector('#dcB').onclick=home;
@@ -2109,18 +2135,21 @@ function about(){return `<div class="hero"><div class="avwrap pop" role="img" ar
 <p>${esc(P.bio)}</p><h3>What I work with</h3><div class="chips">${P.skills.map(s=>`<span class="chip">${esc(s)}</span>`).join('')}</div>
 <div class="links"><button class="btn" data-open="projects">See my projects</button><button class="btn tonal" data-open="contact">Get in touch</button></div>`}
 
+const PR=()=>P.projects||PROJECTS;
 function projects(body,filter="All"){
-  const cats=["All",...new Set(PROJECTS.map(p=>p.cat))];
-  const list=PROJECTS.filter(p=>filter==="All"||p.cat===filter);
+  const all=PR().map((p,i)=>({p,i})).filter(x=>!x.p.hidden||LIVE.admin);
+  const cats=["All",...new Set(all.map(x=>x.p.cat).filter(Boolean))];
+  const list=all.filter(x=>filter==="All"||x.p.cat===filter);
   body.innerHTML=`<div class="fm"><div class="side">${cats.map(c=>`<button class="${c===filter?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-  <div class="pgrid">${list.map(p=>`<button class="pcard" data-p="${PROJECTS.indexOf(p)}"><div class="thumb" style="background:var(--${p.color})">${glyphSvg(G.spark,44)}</div><b>${esc(p.title)}</b><small>${esc(p.cat)} · ${esc(p.year)}</small></button>`).join('')}</div></div>`;
+  <div class="pgrid">${list.length?list.map(({p,i})=>`<button class="pcard${p.hidden?' hid':''}" data-p="${i}"><div class="thumb" style="background:var(--${p.color||'c2'})">${glyphSvg(G.spark,44)}</div><b>${esc(p.title)}</b><small>${esc(p.cat||'')} · ${esc(p.year||'')}${p.hidden?' · hidden':''}</small></button>`).join(''):'<p class="nt-hint">No projects yet.</p>'}</div></div>`;
   body.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>projects(body,b.dataset.cat));
   body.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
-    const p=PROJECTS[b.dataset.p];
-    body.innerHTML=`<button class="back">‹ All projects</button><h1>${esc(p.title)}</h1><div class="chips"><span class="chip">${esc(p.cat)}</span><span class="chip">${esc(p.year)}</span></div>
-    <div class="big-thumb" style="background:var(--${p.color})">${glyphSvg(G.spark,80)}</div><p>${esc(p.desc)}</p><a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">View project</a>`;
+    const p=PR()[b.dataset.p];
+    body.innerHTML=`<button class="back">‹ All projects</button><h1>${esc(p.title)}</h1><div class="chips"><span class="chip">${esc(p.cat||'')}</span><span class="chip">${esc(p.year||'')}</span></div>
+    <div class="big-thumb" style="background:var(--${p.color||'c2'})">${glyphSvg(G.spark,80)}</div><p>${esc(p.desc||'')}</p>${p.link&&p.link!=='#'?`<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">View project</a>`:''}`;
     body.querySelector('.back').onclick=()=>projects(body,filter);
   });
+  if(LIVE.admin)edBtn(body);
 }
 
 function resume(){return `<h1>Resume</h1><p>${esc(P.role)}</p>${P.experience.map(e=>`<div class="row"><div><b>${esc(e.title)}</b><p style="margin:4px 0 0">${esc(e.text)}</p></div><small>${esc(e.time)}</small></div>`).join('')}
@@ -2431,6 +2460,7 @@ function messages(body){
 function links(body){
   const L=P.linkpage;let grp='',rows='';
   L.forEach((l,i)=>{
+    if(l.app&&!appVisible(l.app))return;
     if(l.group!==grp){grp=l.group;rows+=`<h3 class="lk-g">${esc(grp)}</h3>`}
     const inner=`<span class="lk-i" style="background:var(--${l.color})">${glyphSvg(LI[l.icon]||G.link,22)}</span><span class="lk-t"><b>${esc(l.label)}</b><small>${esc(l.sub||'')}</small></span><svg class="lk-c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${l.app?'m9 6 6 6-6 6':'M8 16 16 8M9 8h7v7'}"/></svg>`;
     rows+=l.app?`<button class="lk${l.primary?' pri':''}" data-app="${esc(l.app)}">${inner}</button>`:`<a class="lk${l.primary?' pri':''}" href="${esc(l.url)}" target="_blank" rel="noopener">${inner}</a>`;
@@ -2464,6 +2494,7 @@ function settings(body){
   body.querySelector('#mwReset').onclick=()=>{desk.dataset.music='on';save();window.resetMusicW&&resetMusicW();settings(body)};
   body.querySelectorAll('[data-gr]').forEach(b=>b.onclick=()=>{desk.dataset.grain=b.dataset.gr;save();settings(body)});
   body.querySelectorAll('[data-wl]').forEach(b=>b.onclick=()=>{setWall(b.dataset.wl);save();settings(body)});
+  if(LIVE.admin)ownerPanel(body);
 }
 
 /* ============ wallpapers ============ */
@@ -2607,20 +2638,60 @@ function jEdit(body,i){
 (function(){try{const sl=new URLSearchParams(location.search).get('post');if(!sl)return;
   const go=async()=>{await jLoad();const k=JL().findIndex(x=>x.slug===sl);openApp('journal');const w=open.journal;if(w&&k>=0)readPost(w.querySelector('.body'),k)};
   if(document.readyState==='complete')setTimeout(go,600);else addEventListener('load',()=>setTimeout(go,600))}catch(e){}})();
-const picHTML=(p,big)=>p.src?`<img src="${esc(p.src)}" alt="${esc(p.caption)}">`:`<svg viewBox="0 0 100 100"><path d="${shape(p.shape)}" fill="var(--surface)" opacity=".6"/></svg>`;
+const picHTML=(p,big)=>p.src?`<img src="${esc(big?p.src:(p.thumb||p.src))}" alt="${esc(p.caption)}" ${big?'':'loading="lazy"'}>`:`<svg viewBox="0 0 100 100"><path d="${shape(p.shape)}" fill="var(--surface)" opacity=".6"/></svg>`;
+/* ===== Photos: visitors browse; the owner adds, captions, reorders and deletes (stage 3) ===== */
+var PH={list:null,loaded:false,status:''};
+const PL=()=>PH.list||PHOTOS;
+const phMap=ps=>ps.map((p,i)=>({id:p.id,caption:p.caption||'',color:'c'+(i%6+1),thumb:p.turl||`/api/photo?id=${p.id}&s=t`,src:p.url||`/api/photo?id=${p.id}&s=f`}));
+async function phLoad(){try{const r=await fetch('/api/photos',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.photos))PH.list=phMap(d.photos)}}catch(e){}PH.loaded=true}
+function phRefresh(){const w=open.photos;if(w)photos(w.querySelector('.body'))}
+async function phSave(remove){PH.status='Saving…';
+  try{const r=await fetch('/api/photos',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({photos:PH.list.map(({id,caption})=>({id,caption})),remove:remove||[]})});
+    if(r.status===401){LIVE.admin=false;PH.status='Signed out. Not saved.';ownerChanged();return false}
+    if(!r.ok){PH.status='Could not save ('+r.status+')';return false}PH.status='Saved';return true}
+  catch(e){PH.status='Offline. Could not save';return false}}
+function phResize(file,max,q){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,max/Math.max(w,h));w=Math.max(1,Math.round(w*k));h=Math.max(1,Math.round(h*k));
+    const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);URL.revokeObjectURL(url);
+    c.toBlob(b=>b?res({blob:b,w,h}):rej(new Error('encode')),'image/jpeg',q)};
+  im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('read'))};im.src=url})}
+const phB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+async function phUpload(files){const list=[...files].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name));let done=0;
+  if(!list.length){PH.status='Choose image files.';phRefresh();return}
+  for(let i=0;i<list.length;i++){PH.status=`Uploading ${i+1} of ${list.length}…`;const st=document.querySelector('.ph-st');if(st)st.textContent=PH.status;
+    try{let f=await phResize(list[i],1600,.82);if(f.blob.size>1800000)f=await phResize(list[i],1280,.7);
+      const t=await phResize(list[i],480,.78);
+      const r=await fetch('/api/photos',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({full:await phB64(f.blob),thumb:await phB64(t.blob),caption:''})});
+      if(r.status===401){LIVE.admin=false;PH.status='Signed out. Not uploaded.';ownerChanged();return}
+      if(!r.ok){let m='';try{m=(await r.json()).error||''}catch(e){}PH.status=`Could not upload "${list[i].name}" (${r.status}${m?': '+m:''})`;phRefresh();return}
+      PH.list=phMap((await r.json()).photos);done++}
+    catch(e){PH.status=e.message==='read'?`Could not read "${list[i].name}". Try a JPEG or PNG.`:`Could not upload "${list[i].name}".`;phRefresh();return}}
+  PH.status=`Added ${done} photo${done===1?'':'s'}`;phRefresh()}
 function photos(body){
+  if(!PH.loaded){body.innerHTML='<h1>Photos</h1><p class="nt-hint">Loading…</p>';phLoad().then(()=>photos(body));return}
   body.style.position='relative';
-  body.innerHTML=`<h1>Photos</h1><div class="pics">${PHOTOS.map((p,i)=>`<button class="pic" data-i="${i}" aria-label="${esc(p.caption)}" style="background:var(--${p.color})">${picHTML(p)}</button>`).join('')}</div>`;
+  const L=PL(),ed=!!LIVE.admin;
+  body.innerHTML=`<div class="nt-head"><h1>Photos</h1>${ed?`<div class="nt-tools"><span class="ph-st">${esc(PH.status)}</span><label class="btn ph-add">+ Add photos<input type="file" accept="image/*" multiple hidden></label></div>`:''}</div>
+  ${ed&&!PH.list?'<p class="hint">These are sample placeholders. Your first upload replaces them.</p>':''}
+  ${L.length?`<div class="pics">${L.map((p,i)=>`<button class="pic" data-i="${i}" aria-label="${esc(p.caption||'Photo')}" style="background:var(--${p.color})">${picHTML(p)}</button>`).join('')}</div>`:'<p class="nt-hint">No photos yet.</p>'}`;
   body.querySelectorAll('.pic').forEach(b=>b.onclick=()=>view(+b.dataset.i));
+  const fi=body.querySelector('.ph-add input');if(fi)fi.onchange=()=>{const fs=[...fi.files];fi.value='';phUpload(fs)};
   function view(i){
     body.querySelector('.viewer')?.remove();
-    const p=PHOTOS[i],v=document.createElement('div');v.className='viewer';
-    v.innerHTML=`<div class="ctl"><button class="back" style="margin:0">‹ All photos</button><small class="meta">${i+1} / ${PHOTOS.length}</small></div><div class="stage" style="background:var(--${p.color})">${picHTML(p,1)}</div>
-    <div class="ctl"><button class="wb" aria-label="Previous">‹</button><span>${esc(p.caption)}</span><button class="wb" aria-label="Next">›</button></div>`;
+    const L=PL(),p=L[i],v=document.createElement('div');v.className='viewer';
+    const own=ed&&p.id?`<div class="ctl ph-own"><input class="ph-cap" maxlength="140" placeholder="Add a caption" value="${esc(p.caption)}" aria-label="Caption"><button data-a="l" ${i===0?'disabled':''} aria-label="Move earlier">←</button><button data-a="r" ${i===L.length-1?'disabled':''} aria-label="Move later">→</button><button data-a="d" class="ed-del">Delete</button></div>`:'';
+    v.innerHTML=`<div class="ctl"><button class="back" style="margin:0">‹ All photos</button><small class="meta">${i+1} / ${L.length}</small></div><div class="stage" style="background:var(--${p.color})">${picHTML(p,1)}</div>${own}
+    <div class="ctl nav"><button class="wb" aria-label="Previous">‹</button><span>${esc(p.caption)}</span><button class="wb" aria-label="Next">›</button></div>`;
     body.appendChild(v);body.scrollTop=0;
     v.querySelector('.back').onclick=()=>v.remove();
-    const [pr,nx]=v.querySelectorAll('.ctl:last-child .wb');
-    pr.onclick=()=>view((i-1+PHOTOS.length)%PHOTOS.length);nx.onclick=()=>view((i+1)%PHOTOS.length);
+    const [pr,nx]=v.querySelectorAll('.nav .wb');
+    pr.onclick=()=>view((i-1+L.length)%L.length);nx.onclick=()=>view((i+1)%L.length);
+    if(own){const cp=v.querySelector('.ph-cap');
+      const setCap=async()=>{if(cp.value.trim()===p.caption)return;p.caption=cp.value.trim();v.querySelector('.nav span').textContent=p.caption;await phSave();const st=body.querySelector('.ph-st');if(st)st.textContent=PH.status};
+      cp.onchange=setCap;cp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();cp.blur()}};
+      v.querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{const a=b.dataset.a;
+        if(a==='d'){if(!confirm('Delete this photo for good?'))return;const [gone]=PH.list.splice(i,1);await phSave([gone.id]);phRefresh();return}
+        const j=a==='l'?i-1:i+1;[PH.list[i],PH.list[j]]=[PH.list[j],PH.list[i]];await phSave();photos(body);view(j)})}
   }
 }
 /* ===== Live Notes: anyone reads, only the owner edits (Netlify Functions + Blobs) ===== */
@@ -2650,7 +2721,7 @@ function notes(body){
   body.querySelectorAll('.nt-c').forEach(b=>b.onclick=()=>{const i=+b.closest('.note').dataset.i;cur()[i].color=b.dataset.c;liveSave();notes(body)});
   body.querySelectorAll('.nt-del').forEach(b=>b.onclick=()=>{const i=+b.closest('.note').dataset.i;if(!confirm('Delete this note?'))return;cur().splice(i,1);liveSave();notes(body)});
   body.querySelector('.nt-add').onclick=()=>{cur().unshift({title:'New note',text:'Write something…',color:'c4'});liveSave();notes(body);const t=body.querySelector('.note [data-f="title"]');if(t){t.focus();document.execCommand&&document.execCommand('selectAll',false,null)}};
-  body.querySelector('.nt-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';notes(body);LIVE.jLoaded=false;const jw=open.journal;if(jw)journal(jw.querySelector('.body'))};
+  body.querySelector('.nt-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';ownerChanged();notes(body);LIVE.jLoaded=false;const jw=open.journal;if(jw)journal(jw.querySelector('.body'))};
 }
 /* Owner sign-in: press Ctrl+Shift+E (Cmd+Shift+E on Mac). Visitors never see it. */
 function ownerLogin(){
@@ -2661,9 +2732,140 @@ function ownerLogin(){
   const close=()=>d.remove();d.querySelector('.own-x').onclick=close;d.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
   f.onsubmit=async e=>{e.preventDefault();err.textContent='Checking…';
     try{const r=await fetch('/api/auth',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:inp.value})});
-      if(r.ok){LIVE.admin=true;LIVE.status='Signed in. Edits save automatically.';close();openApp('notes');refreshNotes()}else err.textContent=r.status===401?'Wrong password.':'Server not reachable ('+r.status+'). Try again shortly.'}catch(x){err.textContent='Could not reach the server.'}};
+      if(r.ok){LIVE.admin=true;LIVE.status='Signed in. Edits save automatically.';close();ownerChanged();openApp('notes');refreshNotes()}else err.textContent=r.status===401?'Wrong password.':'Server not reachable ('+r.status+'). Try again shortly.'}catch(x){err.textContent='Could not reach the server.'}};
   setTimeout(()=>inp.focus(),30)}
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='E'||e.key==='e')){e.preventDefault();ownerLogin()}},true);
+
+/* ===== Owner mode (stage 1): site settings the owner edits live; visitors see them read-only ===== */
+var HIDDEN=new Set();
+var SITE={s:null,saveT:null,status:''};
+const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
+const NEVER_HIDE=['settings','notes'];
+function appVisible(id){return !HIDDEN.has(id)||!!LIVE.admin}
+function applyText(){const s=SITE.s||{};
+  P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=s.now||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
+  const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=s.bio||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.qrs=A('qrs');
+  const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
+  document.title=`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
+function applyHidden(){HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
+async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings}}catch(e){}}
+async function siteInit(){await Promise.all([liveAuth(),siteLoad()]);applyText();applyHidden();ownerChanged()}
+/* Runs whenever the owner signs in or out: pill in the top bar, hidden apps shown dimmed or removed. */
+function ownerChanged(){
+  let p=document.getElementById('ownPill');
+  if(LIVE.admin){if(!p){p=document.createElement('button');p.id='ownPill';p.className='pill topbtn ownpill';p.innerHTML='<i></i>Owner mode';p.title='Open System Settings';p.onclick=()=>openApp('settings');const tb=document.querySelector('.topbar');tb.insertBefore(p,tb.lastElementChild)}}
+  else if(p)p.remove();
+  desk.classList.toggle('owner',!!LIVE.admin);
+  renderIcons();
+  const sw=open.settings;if(sw)settings(sw.querySelector('.body'));
+  EDITABLE.concat('photos').forEach(rerenderApp)}
+function siteSave(){clearTimeout(SITE.saveT);SITE.status='Saving…';siteStatus();
+  SITE.saveT=setTimeout(async()=>{try{const r=await fetch('/api/site',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({settings:SITE.s})});
+    if(r.status===401){LIVE.admin=false;SITE.status='Signed out. Changes not saved.';ownerChanged();return}
+    SITE.status=r.ok?'Saved':'Could not save ('+r.status+')'}catch(e){SITE.status='Offline. Could not save'}siteStatus()},600)}
+function siteStatus(){document.querySelectorAll('.ow-st').forEach(el=>el.textContent=SITE.status)}
+function ownerPanel(body){
+  const hid=new Set((SITE.s&&SITE.s.hiddenApps)||[]);
+  const f=(k,label,val,max)=>`<label class="ow-f">${label}<input data-k="${k}" maxlength="${max}" value="${esc(val)}"></label>`;
+  const apps=APPS.filter(a=>!NEVER_HIDE.includes(a.id));
+  const sec=document.createElement('div');sec.className='own-sec';
+  sec.innerHTML=`<h2>System settings</h2><p class="ow-top"><small>Owner only. Changes save automatically and show for every visitor.</small><span class="ow-st">${esc(SITE.status)}</span></p>
+  <h3>About you</h3>${f('name','Name',P.name,60)}${f('role','Role',P.role,80)}${f('status','Status (desktop widget and Links)',P.status,80)}${f('now','What you are up to now',P.now,300)}
+  <h3>On repeat</h3>${f('song','Song',P.music.song,80)}${f('artist','Artist',P.music.artist,80)}
+  <h3>Apps visible to visitors</h3><p class="hint">Switch an app off to hide it from visitors. You will still see it, dimmed.</p>
+  <div class="ow-apps">${apps.map(a=>`<label class="ow-app"><input type="checkbox" data-a="${a.id}" ${hid.has(a.id)?'':'checked'}><span>${esc(a.title)}</span></label>`).join('')}</div>
+  <h3>Mochi's inbox</h3><p class="hint">What visitors tell Mochi: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
+  <div class="ow-row"><button class="btn tonal ow-out">Sign out</button></div>`;
+  body.appendChild(sec);
+  const cur=()=>{if(!SITE.s)SITE.s={hiddenApps:[]};return SITE.s};
+  sec.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{const s=cur(),v=i.value.trim();if(v)s[i.dataset.k]=v;else delete s[i.dataset.k];applyText();siteSave()});
+  sec.querySelectorAll('[data-a]').forEach(c=>c.onchange=()=>{const s=cur(),set=new Set(s.hiddenApps||[]);if(c.checked)set.delete(c.dataset.a);else set.add(c.dataset.a);s.hiddenApps=[...set];applyHidden();siteSave()});
+  const ib=sec.querySelector('.ow-inbox');ib.onclick=()=>mochiInbox(body);
+  fetch('/api/mochi',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(!d)return;let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}const n=d.visitors.filter(v=>(v.updated||0)>seen).length;if(n)ib.textContent=`Open inbox (${n} new)`}).catch(()=>{});
+  sec.querySelector('.ow-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';SITE.status='';ownerChanged();refreshNotes()}}
+
+
+/* ===== Mochi's inbox (owner only; the server checks the sign-in on every request) ===== */
+async function mochiInbox(body){
+  body.innerHTML='<div class="ed"><h1>Mochi\'s inbox</h1><p class="nt-hint">Loading…</p></div>';
+  let d=null;try{const r=await fetch('/api/mochi',{cache:'no-store'});if(r.status===401){LIVE.admin=false;ownerChanged();return}if(r.ok)d=await r.json()}catch(e){}
+  if(!d){body.innerHTML='<div class="ed"><button class="dc-back">‹ Settings</button><h1>Mochi\'s inbox</h1><p class="hint">Could not load the inbox. Try again shortly.</p></div>';body.querySelector('.dc-back').onclick=()=>settings(body);return}
+  let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}
+  const KEY=new Set(['message','question-for-rohan']);
+  const when=t=>t?new Date(t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'';
+  const card=v=>{const imp=v.answers.filter(a=>KEY.has(a.q)||/email$/.test(a.q)),rest=v.answers.filter(a=>!imp.includes(a));
+    return `<div class="mi-card${(v.updated||0)>seen?' new':''}" data-v="${esc(v.vid)}"><div class="mi-h"><b>${esc(v.name||'Anonymous')}</b>${(v.updated||0)>seen?'<span class="mi-new">new</span>':''}<small>${esc(when(v.updated))}</small></div>
+      ${v.email?`<p class="mi-e"><a href="mailto:${esc(v.email)}">${esc(v.email)}</a></p>`:''}
+      ${imp.map(a=>`<p class="mi-m"><small>${esc(a.q)}</small>${esc(a.a)}</p>`).join('')}
+      ${rest.length?`<details><summary>${rest.length} other answer${rest.length===1?'':'s'}</summary>${rest.map(a=>`<p class="mi-o"><small>${esc(a.q)}</small>${esc(a.a)}</p>`).join('')}</details>`:''}
+      <div class="ed-ctl"><button type="button" class="ed-del mi-del">Delete</button></div></div>`};
+  body.innerHTML=`<div class="ed"><button class="dc-back">‹ Settings</button><h1>Mochi's inbox</h1><p class="ow-top"><small>${d.visitors.length} visitor${d.visitors.length===1?'':'s'}, newest first.</small></p>${d.visitors.length?d.visitors.map(card).join(''):'<p class="hint">Nothing yet. When a visitor chats with Mochi, it shows up here.</p>'}</div>`;
+  body.scrollTop=0;
+  try{localStorage.setItem('mochiSeen',String(Math.max(0,...d.visitors.map(v=>v.updated||0))||Date.now()))}catch(e){}
+  body.querySelector('.dc-back').onclick=()=>settings(body);
+  body.querySelectorAll('.mi-del').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this visitor and everything they told Mochi?'))return;const c=b.closest('.mi-card');
+    try{const r=await fetch('/api/mochi?vid='+encodeURIComponent(c.dataset.v),{method:'DELETE'});if(r.ok)c.remove()}catch(e){}})}
+
+/* ===== Owner mode (stage 2): edit About me, Resume, Contact and Links in place ===== */
+const EDITABLE=['about','resume','contact','links','projects','documents'];
+function rerenderApp(id){const w=open[id];if(!w)return;const a=APPS.find(x=>x.id===id),body=w.querySelector('.body');body.classList.remove('editing');body.scrollTop=0;
+  const html=a.render(body);if(typeof html==='string')body.innerHTML=html;wire(body)}
+function edBtn(body){const w=body.closest('.win');const id=w&&w.dataset.app;if(!EDITABLE.includes(id)||body.classList.contains('editing')||body.querySelector('.ed-btn'))return;
+  const b=document.createElement('button');b.className='ed-btn';b.textContent='Edit';b.onclick=()=>edOpen(id,body);body.prepend(b)}
+const ED_ICONS=['cal','mail','work','cam','chat','book','pen'],ED_COLORS=['c1','c2','c3','c4','c5','c6'];
+function edConfig(id){
+  const appOpts=[['','Opens a web address']].concat(APPS.filter(a=>!NEVER_HIDE.includes(a.id)||a.id==='notes').map(a=>[a.id,'Opens '+a.title+' on this site']));
+  if(id==='about')return{title:'Edit About me',scalars:[{k:'bio',label:'Short bio',type:'area',max:1500,val:P.bio},{k:'skills',label:'Skills (separate with commas)',type:'csv',max:40,val:P.skills}],lists:[]};
+  if(id==='resume')return{title:'Edit Resume',scalars:[{k:'skills',label:'Skills (separate with commas)',type:'csv',max:40,val:P.skills}],
+    lists:[{k:'experience',label:'Experience and education',noun:'entry',items:P.experience,blank:{title:'',time:'',text:''},fields:[{k:'title',label:'Title',max:120},{k:'time',label:'When',max:40},{k:'text',label:'What you did',type:'area',max:600}]}]};
+  if(id==='contact')return{title:'Edit Contact',scalars:[{k:'email',label:'Email',type:'text',max:120,val:P.email},{k:'booking',label:'Booking link',type:'text',max:300,val:P.booking}],
+    lists:[{k:'links',label:'Buttons on the Contact page',noun:'link',items:P.links,blank:{label:'',url:'https://'},fields:[{k:'label',label:'Label',max:40},{k:'url',label:'Web address',max:300}]}]};
+  if(id==='projects')return{title:'Edit Projects',scalars:[],lists:[{k:'projects',label:'Projects (the first one shows first)',noun:'project',items:PR(),blank:{title:'',cat:'Design',year:String(new Date().getFullYear()),color:'c2',desc:'',link:'https://'},
+    fields:[{k:'title',label:'Title',max:120},{k:'cat',label:'Category',max:40},{k:'year',label:'Year',max:20},{k:'color',label:'Colour',type:'select',opts:ED_COLORS.map(x=>[x,x])},{k:'desc',label:'Description',type:'area',max:800},{k:'link',label:'Link to the project (optional)',max:300},{k:'hidden',label:'Hide from visitors',type:'check'}]}]};
+  if(id==='documents')return{title:'Edit QR codes',scalars:[],lists:[{k:'qrs',label:'QR codes (made from the web address)',noun:'QR code',items:QL(),blank:{brand:'link',name:'',sub:'',url:'https://'},
+    fields:[{k:'brand',label:'Style',type:'select',opts:[['instagram','Instagram'],['youtube','YouTube'],['figma','Figma'],['behance','Behance'],['linkedin','LinkedIn'],['link','Other link']]},{k:'name',label:'Name on the card (optional)',max:30},{k:'sub',label:'Handle or short label',max:80},{k:'url',label:'Web address the QR opens',max:300},{k:'hidden',label:'Hide from visitors',type:'check'}]}]};
+  return{title:'Edit Links',scalars:[],lists:[{k:'linkpage',label:'Links page (items with the same group sit together)',noun:'link',items:P.linkpage,blank:{group:'Find me online',label:'',sub:'',url:'https://',icon:'work',color:'c1'},
+    fields:[{k:'group',label:'Group',max:40},{k:'label',label:'Label',max:60},{k:'sub',label:'Small text under it',max:100},{k:'app',label:'Goes to',type:'select',opts:appOpts},{k:'url',label:'Web address (when it opens a web address)',max:300},{k:'icon',label:'Icon',type:'select',opts:ED_ICONS.map(x=>[x,x])},{k:'color',label:'Colour',type:'select',opts:ED_COLORS.map(x=>[x,x])},{k:'primary',label:'Highlight as main button',type:'check'}]}]}}
+function edOpen(id,body){
+  const cfg=edConfig(id),D={sc:{},ls:{}};
+  cfg.scalars.forEach(f=>D.sc[f.k]=f.type==='csv'?f.val.join(', '):f.val);
+  cfg.lists.forEach(l=>D.ls[l.k]=JSON.parse(JSON.stringify(l.items)));
+  body.classList.add('editing');
+  const fld=(f,v,at)=>{const a=`data-f="${f.k}" ${at||''}`;
+    if(f.type==='area')return`<label class="ow-f">${f.label}<textarea ${a} rows="3" maxlength="${f.max}">${esc(v||'')}</textarea></label>`;
+    if(f.type==='select')return`<label class="ow-f">${f.label}<select ${a}>${f.opts.map(o=>`<option value="${esc(o[0])}" ${o[0]===(v||'')?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`;
+    if(f.type==='check')return`<label class="ow-app"><input type="checkbox" ${a} ${v?'checked':''}><span>${f.label}</span></label>`;
+    return`<label class="ow-f">${f.label}<input ${a} maxlength="${f.max}" value="${esc(v||'')}"></label>`};
+  const draw=()=>{
+    body.innerHTML=`<div class="ed"><h1>${cfg.title}</h1><p class="ow-top"><small>Saves to the live site for every visitor.</small><span class="ow-st"></span></p>
+    ${cfg.scalars.map(f=>fld(f,D.sc[f.k],'data-s="1"')).join('')}
+    ${cfg.lists.map(l=>`<h3>${l.label}</h3>${D.ls[l.k].map((it,i)=>`<div class="ed-card" data-l="${l.k}" data-i="${i}">${l.fields.map(f=>fld(f,it[f.k])).join('')}<div class="ed-ctl"><button type="button" data-m="up" ${i===0?'disabled':''}>↑ Up</button><button type="button" data-m="dn" ${i===D.ls[l.k].length-1?'disabled':''}>↓ Down</button><button type="button" data-m="del" class="ed-del">Remove</button></div></div>`).join('')}<button type="button" class="btn tonal ed-add" data-add="${l.k}">+ Add ${l.noun}</button>`).join('')}
+    <div class="ed-act"><button type="button" class="btn tonal ed-cancel">Cancel</button><button type="button" class="btn ed-save">Save</button></div></div>`;
+    body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{sync();const c=b.closest('.ed-card'),arr=D.ls[c.dataset.l],i=+c.dataset.i,m=b.dataset.m;
+      if(m==='del')arr.splice(i,1);else{const j=m==='up'?i-1:i+1;[arr[i],arr[j]]=[arr[j],arr[i]]}draw()});
+    body.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{sync();const l=cfg.lists.find(x=>x.k===b.dataset.add);D.ls[l.k].push(JSON.parse(JSON.stringify(l.blank)));draw();const cs=body.querySelectorAll(`.ed-card[data-l="${l.k}"]`);const last=cs[cs.length-1];if(last){last.scrollIntoView({block:'center'});const i=last.querySelector('input,textarea');if(i)i.focus()}});
+    body.querySelector('.ed-cancel').onclick=()=>rerenderApp(id);
+    body.querySelector('.ed-save').onclick=save;body.scrollTop=0};
+  const val=el=>el.type==='checkbox'?el.checked:el.value;
+  const sync=()=>{body.querySelectorAll('[data-s]').forEach(el=>D.sc[el.dataset.f]=val(el));
+    body.querySelectorAll('.ed-card').forEach(c=>{const it=D.ls[c.dataset.l][+c.dataset.i];c.querySelectorAll('[data-f]').forEach(el=>it[el.dataset.f]=val(el))})};
+  const save=()=>{sync();const s=SITE.s||(SITE.s={hiddenApps:[]}),err=t=>{body.querySelector('.ow-st').textContent=t};
+    for(const f of cfg.scalars){let v=D.sc[f.k];
+      if(f.type==='csv')v=String(v).split(',').map(x=>x.trim()).filter(Boolean).slice(0,30);else v=String(v).trim();
+      if(f.k==='email'&&v&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))return err('That email does not look right.');
+      if(f.k==='booking'&&v&&!/^https?:\/\//i.test(v))return err('Booking link must start with https://');
+      if(f.type==='csv')s[f.k]=v;else if(v)s[f.k]=v;else delete s[f.k]}
+    for(const l of cfg.lists){const out=D.ls[l.k].filter(it=>l.fields.some(f=>f.type!=='check'&&f.type!=='select'&&String(it[f.k]||'').trim()&&it[f.k]!==l.blank[f.k]));
+      for(const it of out){for(const k in it)if(typeof it[k]==='string')it[k]=it[k].trim();
+        for(const kk of ['url','link'])if(it[kk]==='https://')it[kk]='';
+        if(it.link&&it.link!=='#'&&!/^(https?:\/\/|mailto:|tel:)/i.test(it.link))return err('Project links must start with https://');
+        if(!it.hidden)delete it.hidden;
+        if(l.k==='qrs'){if(!/^https?:\/\//i.test(it.url||''))return err('QR codes need a web address starting with https://');if(!qrOf(it.url))return err('That address is too long for a QR code.')}
+        if(l.k!=='qrs'&&it.url!==undefined&&!(it.app)&&it.url&&!/^(https?:\/\/|mailto:|tel:)/i.test(it.url))return err('Web addresses must start with https://, mailto: or tel:');
+        if(l.k==='linkpage'){if(it.app)it.url='';else if(!it.url)return err('Add a web address for "'+(it.label||'a link')+'".');if(!it.primary)delete it.primary;if(!it.app)delete it.app;if(!it.sub)delete it.sub}}
+      s[l.k]=out}
+    applyText();siteSave();EDITABLE.forEach(rerenderApp);const w=open.settings;if(w)settings(w.querySelector('.body'))};
+  draw()}
 
 /* ============ guestbook (shared data) ============ */
 const GB={db:null,uid:null,entries:[],ready:false,readonly:false};
@@ -2755,7 +2957,7 @@ const mobile=()=>innerWidth<=760;
 
 function openApp(id,opt){
   hideLauncher();
-  const a=APPS.find(x=>x.id===id); if(!a)return;
+  const a=APPS.find(x=>x.id===id); if(!a||!appVisible(id))return;
   if(open[id]){const ow=open[id];if(opt&&opt.toggle&&!ow.classList.contains('min')&&!ow.classList.contains('minimizing')&&ow.classList.contains('top')){const to=lastOrigin&&Date.now()-lastOrigin.t<1500?lastOrigin:null;lastOrigin=null;minimizeWin(ow,id,false,to);return}if(ow.classList.contains('min')){ow.classList.remove('min');if(lastOrigin&&Date.now()-lastOrigin.t<1500){const r0=ow.getBoundingClientRect();ow.style.transformOrigin=`${lastOrigin.x-r0.left}px ${lastOrigin.y-r0.top}px`}ow.classList.add('restoring');lastOrigin=null;SFX.play('open')}else SFX.play('tap');focus(ow);shelf();return}
   const w=document.createElement('section');w.className='win';w.dataset.app=id;w.setAttribute('aria-label',a.title);
   const W=Math.min(a.w,innerWidth-40),H=Math.min(a.h,innerHeight-160);
@@ -2788,6 +2990,7 @@ function minimizeWin(w,id,quiet,to){if(w.classList.contains('min')||w.classList.
   w.addEventListener('animationend',done,{once:true});setTimeout(done,380)}
 function minimizeAll(){const ws=Object.entries(open).filter(([id,w])=>!w.classList.contains('min')&&!w.classList.contains('minimizing'));if(!ws.length)return;SFX.play('min');ws.forEach(([id,w])=>minimizeWin(w,id,true))}
 function wire(body){
+  if(LIVE.admin&&window.edBtn)edBtn(body);
   body.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openApp(b.dataset.open));
   const c=body.querySelector('#copyMail');
   if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(P.email);c.textContent="Copied"}catch(e){c.textContent=P.email}};
@@ -2823,7 +3026,7 @@ function isDark(){const t=document.documentElement.dataset.theme;return t?t==="d
 function showCtx(x,y){SFX.play('tap');
   const items=[["Open About me",()=>openApp('about')],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
     [isDark()?"Switch to light mode":"Switch to dark mode",()=>{document.documentElement.dataset.theme=isDark()?"light":"dark";save()}],
-    ["Sign the guestbook",()=>openApp('guestbook')],["Lock screen",lock],
+    ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),["Lock screen",lock],
     ...(desk.dataset.cat==="off"?[["Bring Mochi back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake Mochi gently",()=>MOCHI.wake()]]:[["Talk to Mochi",()=>MOCHI.talk()],["Let Mochi nap",()=>MOCHI.sleep()]]),
     ...(desk.dataset.status==="off"?[["Show status widget",()=>{desk.dataset.status="on";save()}]]:[]),
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
@@ -2966,7 +3169,7 @@ function magnify(s){
 }
 const L=document.getElementById('launcher'),LS=document.getElementById('lSearch');
 function drawLauncher(q=""){
-  document.getElementById('lGrid').innerHTML=APPS.filter(a=>a.title.toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="dicon" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('')||'<p class="sub">No apps match that. Try "projects".</p>';
+  document.getElementById('lGrid').innerHTML=APPS.filter(a=>appVisible(a.id)&&a.title.toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="dicon" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('')||'<p class="sub">No apps match that. Try "projects".</p>';
   L.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app,{toggle:true}));
 }
 function lOrigin(){const b=document.getElementById('lBtn');if(!b)return;const br=b.getBoundingClientRect(),lr=L.getBoundingClientRect(),k=lr.width?1:1;
@@ -3006,12 +3209,13 @@ document.getElementById('lImg').src=PHOTO;document.getElementById('lkImg').src=P
 document.getElementById('mSong').textContent=P.music.song;document.getElementById('mArtist').textContent=P.music.artist;
 document.getElementById('mLinks').innerHTML=`<a href="${esc(P.music.youtubeMusic)}" target="_blank" rel="noopener">YouTube Music</a><a href="${esc(P.music.spotify)}" target="_blank" rel="noopener">Spotify</a>`;
 gbInit();
+siteInit();
 setWall(desk.dataset.wall);
 document.getElementById('clockShape').setAttribute('d',shape('cookie'));
 /* ============ desktop icons: arrange by dragging ============ */
 function renderIcons(){let ord=[];try{ord=JSON.parse(localStorage.getItem('iconOrder')||'[]')}catch(e){}
-  const list=APPS.filter(a=>!a.drawer).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});
-  const g=document.getElementById('icons');g.innerHTML=list.map(a=>`<button class="dicon" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('');
+  const list=APPS.filter(a=>!a.drawer&&appVisible(a.id)).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});
+  const g=document.getElementById('icons');g.innerHTML=list.map(a=>`<button class="dicon${HIDDEN.has(a.id)?' hid':''}" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('');
   g.querySelectorAll('.dicon').forEach(b=>b.onclick=e=>{if(iconDrag.suppress){iconDrag.suppress=false;return}openApp(b.dataset.app,{toggle:true})})}
 const iconDrag={suppress:false};
 (()=>{const g=document.getElementById('icons');let st=null;
@@ -3279,11 +3483,11 @@ setInterval(()=>{
 /* ---------- conversation ---------- */
 const V=(()=>{try{return JSON.parse(localStorage.getItem('mochiVisitor')||'null')||{}}catch(e){return{}}})();
 V.answers=V.answers||[];V.stage=V.stage||0;V.name=V.name||'';
+if(!V.id){V.id=Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{localStorage.setItem('mochiVisitor',JSON.stringify(V))}catch(e){}}
 const saveV=()=>{try{localStorage.setItem('mochiVisitor',JSON.stringify(V))}catch(e){}};
 const bootAt=now();let lastTalk=0;
 async function record(q,a){V.answers.push({q,a,t:now()});saveV();
-  try{if(!window.claude||!claude.use)return;const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);if(!db||!user)return;const id=await user.id();if(!id)return;
-    await db.collection('visitors').doc(id).set({name:V.name||'',answers:V.answers.slice(-80),updated:now()})}catch(e){}}
+  try{await fetch('/api/mochi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:V.id,name:V.name||'',q:String(q).slice(0,40),a:String(a).slice(0,500)})})}catch(e){}}
 function nm(){return V.name?`, <b>${esc(V.name)}</b>`:''}
 function typeInto(el,html,cb){el.innerHTML='';const tmp=document.createElement('div');tmp.innerHTML=html;const txt=tmp.textContent;let i=0;
   const step=()=>{i+=2;if(i>=txt.length){el.innerHTML=html;cb&&cb();return}el.textContent=txt.slice(0,i);type.t=setTimeout(step,16)};clearTimeout(type.t);step()}
@@ -3304,7 +3508,7 @@ function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
 const moreChip={t:'Ask me about Rohan',fn:()=>askMenu()};
 const byeChip={t:'Bye, Mochi',fn:()=>closeChat()};
 function book(){window.open(P.booking,'_blank','noopener');record('action','opened booking link')}
-function askEmail(q){openChat(`Leave your email and I’ll make sure Rohan sees it${nm()}.`,{input:{type:'email',ph:'you@example.com',max:120,done:v=>{record(q||'email',v);V.email=v;saveV();trust(.5);openChat('Got it! I’ll put it right on his keyboard. Where he can’t miss it.',{chips:[moreChip,byeChip]})}},chips:[{t:'Never mind',fn:()=>closeChat()}]})}
+function askEmail(q){openChat(`Leave your email and I’ll make sure Rohan sees it${nm()}. Only he will read it.`,{input:{type:'email',ph:'you@example.com',max:120,done:v=>{record(q||'email',v);V.email=v;saveV();trust(.5);openChat('Got it! I’ll put it right on his keyboard. Where he can’t miss it.',{chips:[moreChip,byeChip]})}},chips:[{t:'Never mind',fn:()=>closeChat()}]})}
 /* scripted questions she asks over time */
 const STAGES=[
   ()=>openChat("psst… hi! I’m <b>Mochi</b>. What’s your name?",{input:{ph:'Your name',max:40,done:v=>{V.name=v.slice(0,40);V.stage=1;saveV();record('name',V.name);trust(.5);hearts(2);
