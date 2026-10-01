@@ -13,7 +13,7 @@ const clean = (list) =>
 export const handler = async (event) => {
   try {
     connectLambda(event);
-    const store = getStore({ name: "site-content", consistency: "strong" });
+        const store = getStore("site-content");
     if (event.httpMethod === "GET") {
       const notes = await store.get("notes", { type: "json" });
       return json({ notes: notes ?? null });
