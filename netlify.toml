@@ -2,6 +2,13 @@
   publish = "."
   functions = "netlify/functions"
 
+# Friendly address for the functions: /api/auth, /api/notes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
 # Keep server code and config out of the public site
 [[redirects]]
   from = "/netlify/*"
