@@ -22,6 +22,10 @@ export function safeUrl(u, { relative = true } = {}) {
   if (relative && /^(\/(?!\/)|#)/.test(s)) return s;
   return "";
 }
+// Uploads are served by /api/u?f=<id>.<ext>. Older content saved the same file as /u/<id>.<ext>; both mean the same picture,
+// so every place that shows one goes through this and old pictures keep working.
+export const upSrc = (u) => { const m = String(u || "").match(/^\/u\/([a-f0-9]{10}(?:-t)?\.(?:jpe?g|png|webp|gif|pdf))$/i); return m ? `/api/u?f=${m[1]}` : u; };
+export const upThumb = (u) => { const m = String(u || "").match(/[?/]f?=?([a-f0-9]{10})(?:-t)?\.(jpe?g|png|webp|gif)$/i); return m ? `/api/u?f=${m[1]}-t.${m[2]}` : ""; };
 // Pictures may come from this site's uploads, other web addresses, or the old inline data pictures.
 export function safeImg(u) {
   const s = String(u ?? "").trim();
@@ -185,9 +189,9 @@ function inlineOut(h) {
   });
 }
 function imgTag(src, alt, o = {}) {
-  const m = src.match(/^\/u\/([\w-]+?)(-t)?\.(jpe?g|webp|png)$/);
-  const w = o.rw && o.rh ? ` width="${o.rw}" height="${o.rh}"` : "";
-  const set = m ? ` srcset="/u/${m[1]}-t.jpg 600w, /u/${m[1]}.jpg 1800w" sizes="${o.sizes || "(max-width: 760px) 100vw, 760px"}"` : "";
+  src = upSrc(src);
+  const t = upThumb(src), w = o.rw && o.rh ? ` width="${o.rw}" height="${o.rh}"` : "";
+  const set = t ? ` srcset="${t} 600w, ${src.replace(/-t(\.\w+)$/, "$1")} 1800w" sizes="${o.sizes || "(max-width: 760px) 100vw, 760px"}"` : "";
   return `<img src="${esc(src)}"${set} alt="${esc(alt || "")}"${w} loading="${o.eager ? "eager" : "lazy"}" decoding="async">`;
 }
 export function renderBlocks(blocks, opts = {}) {

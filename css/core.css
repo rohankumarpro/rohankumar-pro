@@ -72,3 +72,6 @@ button .ic,a .ic{pointer-events:none}
 /* an uploaded wallpaper replaces the coloured shapes */
 .wall.pic{background-size:cover!important;background-position:center!important}
 .wall.pic>*,.wall.pic svg{display:none!important}
+
+/* a picture that could not load: invisible, so the tile behind it shows instead of a broken-image icon */
+img.img-broken{opacity:0}

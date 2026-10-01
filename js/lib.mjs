@@ -50,6 +50,15 @@ function scaled(im, max, q, png) {
   x.drawImage(im, 0, 0, w, hh);
   return new Promise((res, rej) => c.toBlob((b) => (b ? res({ blob: b, w, h: hh }) : rej(new Error("encode"))), png ? "image/png" : "image/jpeg", q));
 }
+// Confirms a stored picture can really be fetched (retrying briefly), so an upload that "worked" but cannot be served is reported.
+async function mustLoad(url) {
+  let status = 0;
+  for (let i = 0; i < 4; i++) {
+    try { const r = await fetch(url, { cache: "no-store" }); status = r.status; if (r.ok && /^image\//.test(r.headers.get("content-type") || "")) return; } catch { status = 0; }
+    await new Promise((res) => setTimeout(res, 400 * (i + 1)));
+  }
+  throw new Error(`The picture was saved but the server could not show it back (${status || "no connection"}). Try again in a moment.`);
+}
 const b64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(blob); });
 const uploadError = (r) => r.status === 401 ? "You are signed out. Sign in again as the owner." : r.status === 0 ? "No connection, or the picture is too big for the server. Try a smaller one." : r.status === 413 ? "That picture is too big to upload. Try a smaller one." : (r.data.error || "Upload failed") + (r.data.detail ? ": " + r.data.detail : "") + " (" + r.status + ")";
 export const Up = {
@@ -65,6 +74,7 @@ export const Up = {
     const thumb = await scaled(im, 640, 0.8, false);
     const r = await api("/api/upload", { method: "POST", body: { full: await b64(full.blob), thumb: await b64(thumb.blob), name: file.name, w: full.w, h: full.h } });
     if (!r.ok) throw new Error(uploadError(r));
+    await mustLoad(r.data.thumb); // never hand back a picture that cannot be shown: say why instead of leaving a broken icon
     return { url: r.data.url, thumb: r.data.thumb, w: full.w, h: full.h, name: file.name, id: r.data.item.id };
   },
   async file(file) {
@@ -74,7 +84,7 @@ export const Up = {
     if (!r.ok) throw new Error(uploadError(r));
     return { url: r.data.url, name: file.name, size: file.size };
   },
-  async list() { const r = await api("/api/upload"); return r.ok ? r.data.items.map((i) => ({ ...i, url: `/u/${i.id}.${i.ext}`, thumb: i.thumb ? `/u/${i.id}-t.${i.ext}` : `/u/${i.id}.${i.ext}` })) : []; },
+  async list() { const r = await api("/api/upload"); return r.ok ? r.data.items.map((i) => ({ ...i, url: `/api/u?f=${i.id}.${i.ext}`, thumb: `/api/u?f=${i.id}${i.thumb ? "-t" : ""}.${i.ext}` })) : []; },
   pick(accept = "image/*", multiple = false) {
     return new Promise((res) => {
       const i = h("input", { type: "file", accept, style: "display:none", ...(multiple ? { multiple: true } : {}) });

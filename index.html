@@ -3512,6 +3512,13 @@ function tick(){
   const c=document.createElementNS('http://www.w3.org/2000/svg','clipPath');c.id='clip-'+k;c.setAttribute('clipPathUnits','objectBoundingBox');
   const pth=document.createElementNS('http://www.w3.org/2000/svg','path');pth.setAttribute('d',shape(k));pth.setAttribute('transform','scale(.01)');c.appendChild(pth);g.appendChild(c)})})();
 load();
+/* Pictures that fail to load: older content points at /u/<file>, and a missing thumbnail falls back to the full picture.
+   Anything still failing gets a quiet placeholder (never the browser's broken-image icon). */
+document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!=='IMG')return;
+  const s=i.getAttribute('src')||'',old=s.match(/^\/u\/([a-f0-9]{10}(?:-t)?\.\w+)$/i),th=s.match(/^\/api\/u\?f=([a-f0-9]{10})-t(\.\w+)$/i);
+  if(old&&!i.dataset.fb){i.dataset.fb='1';i.removeAttribute('srcset');i.src='/api/u?f='+old[1];return}
+  if(th&&!i.dataset.fb2){i.dataset.fb2='1';i.removeAttribute('srcset');i.src='/api/u?f='+th[1]+th[2];return}
+  i.classList.add('img-broken')},true);
 try{if(sessionStorage.getItem('uiSwitch')){sessionStorage.removeItem('uiSwitch');unlock();openApp('settings')}}catch(e){}
 document.title=`${P.name} — Portfolio`;
 document.getElementById('who').textContent=P.name;

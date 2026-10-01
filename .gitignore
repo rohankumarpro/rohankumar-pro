@@ -1,2 +1,5 @@
 node_modules/
 _edtest.html
+
+# Local Netlify folder
+.netlify

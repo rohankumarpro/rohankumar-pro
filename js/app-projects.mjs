@@ -1,7 +1,7 @@
 // Projects: a portfolio like Behance or Dribbble. A grid of covers, a full page for each project, and a studio for the owner
 // with a cover, rich content blocks, tags, tools, credits, extra links, licence and search settings. Each project has its own address.
 import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, fmtNum } from "/js/lib.mjs";
-import { slugify } from "/shared/blocks.mjs";
+import { slugify, upSrc, upThumb } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
 import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
 const I = (n, size = 16) => _ic(n, { size });
@@ -42,7 +42,7 @@ const coverStyle = (c) => (c ? `object-position:${c.fx ?? 50}% ${c.fy ?? 50}%` :
 function card(p) {
   const likes = p.likes || 0, views = p.views || 0;
   return `<a class="pj-card${p.status !== "published" ? " dim" : ""}" href="/projects/${esc(p.slug)}" data-slug="${esc(p.slug)}" data-id="${esc(p.id)}">
-    <span class="pj-cv" style="--bgc:var(--${esc(p.color || "c2")})">${p.cover ? `<img src="${esc(p.cover.src.replace(/\.(jpe?g|png|webp)$/, (m) => m))}" ${p.cover.src.startsWith("/u/") ? `srcset="${esc(p.cover.src.replace(/\/u\/([\w]+)\.\w+$/, "/u/$1-t.jpg"))} 640w, ${esc(p.cover.src)} 1800w" sizes="(max-width:760px) 50vw, 240px"` : ""} alt="${esc(p.cover.alt || p.title)}" loading="lazy" style="${coverStyle(p.cover)}">` : `<span class="pj-ph">${esc((p.title || "?").slice(0, 1).toUpperCase())}</span>`}
+    <span class="pj-cv" style="--bgc:var(--${esc(p.color || "c2")})">${p.cover ? `<img src="${esc(upSrc(p.cover.src))}" ${upThumb(upSrc(p.cover.src)) ? `srcset="${esc(upThumb(upSrc(p.cover.src)))} 640w, ${esc(upSrc(p.cover.src))} 1800w" sizes="(max-width:760px) 50vw, 240px"` : ""} alt="${esc(p.cover.alt || p.title)}" loading="lazy" style="${coverStyle(p.cover)}">` : `<span class="pj-ph">${esc((p.title || "?").slice(0, 1).toUpperCase())}</span>`}
       ${p.featured ? `<em class="pj-b">${I("star", 12)} Featured</em>` : ""}${p.status !== "published" && isAdmin() ? `<em class="pj-b d">${p.status === "draft" ? "Draft" : "Unlisted"}</em>` : ""}</span>
     <span class="pj-m"><b>${esc(p.title)}</b><small>${esc([p.field, p.year].filter(Boolean).join(" · "))}</small></span>
     ${views || likes ? `<span class="pj-st"><span title="Appreciations">${I("heart", 13)} ${fmtNum(likes)}</span><span title="Views">${I("eye", 13)} ${fmtNum(views)}</span></span>` : ""}

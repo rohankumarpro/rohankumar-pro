@@ -12,7 +12,7 @@ self.addEventListener("activate", (e) => {
 const isStatic = (u) => /^\/(js|css|shared|img|u)\//.test(u.pathname) || /\.(png|jpe?g|webp|svg|woff2?|ico)$/.test(u.pathname);
 async function swr(req, cacheName) {
   const c = await caches.open(cacheName), hit = await c.match(req);
-  const net = fetch(req).then((r) => { if (r.ok && r.type === "basic") c.put(req, r.clone()); return r; }).catch(() => hit);
+  const net = fetch(req).then((r) => { if (r.ok && r.type === "basic") c.put(req, r.clone()); return r; }).catch(() => hit || Response.error());
   return hit || net;
 }
 self.addEventListener("fetch", (e) => {
@@ -20,7 +20,7 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const u = new URL(req.url);
   if (u.origin !== location.origin) return;
-  if (u.pathname.startsWith("/api/") || u.pathname.startsWith("/go/")) return; // always live
+  if (u.pathname.startsWith("/api/") || u.pathname.startsWith("/go/")) return; // always live (this includes /api/u uploads)
   if (req.mode === "navigate") {
     e.respondWith((async () => {
       const c = await caches.open(PAGES);

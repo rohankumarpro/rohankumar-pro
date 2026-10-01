@@ -1,6 +1,6 @@
 // /api/upload  Owner only. The pictures and small files used in articles, projects, links and notes.
 //   GET                 -> {items}                the media library
-//   POST {full, thumb?, name, w?, h?}   (base64)  -> {id, url, thumb}
+//   POST {full, thumb?, name, w?, h?}   (base64)  -> {id, url, thumb}   urls look like /api/u?f=<id>.<ext> (served by functions/u.mjs)
 //   DELETE ?id=<id>
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
@@ -34,7 +34,7 @@ export const handler = async (event) => {
       }
       const item = { id, ext: k.ext, kind: k.image ? "image" : "file", name: String(b.name || "").slice(0, 120), bytes: full.length, w: Math.min(20000, +b.w || 0), h: Math.min(20000, +b.h || 0), thumb: hasThumb, ts: Date.now() };
       await store.setJSON("uploads", [item, ...idx]);
-      return json({ ok: true, item, url: `/u/${id}.${k.ext}`, thumb: hasThumb ? `/u/${id}-t.${k.ext}` : `/u/${id}.${k.ext}` });
+      return json({ ok: true, item, url: `/api/u?f=${id}.${k.ext}`, thumb: `/api/u?f=${id}${hasThumb ? "-t" : ""}.${k.ext}` });
     }
     if (m === "DELETE") {
       const id = (event.queryStringParameters || {}).id;
