@@ -56,7 +56,7 @@ export async function resolve(event, store, rawPath) {
 <section><h2>Latest from the journal</h2><ul>${posts.map(postLi).join("")}</ul><p><a href="/journal">All articles</a></p></section>
 <section><h2>Selected projects</h2><ul>${projects.map(projLi).join("")}</ul><p><a href="/projects">All projects</a></p></section>
 <section><h2>Work with me</h2><p>${pr.booking ? `<a href="${esc(pr.booking)}">Book a call</a>` : ""}${pr.email ? ` · <a href="mailto:${esc(pr.email)}">${esc(pr.email)}</a>` : ""}</p></section>`,
-      md: undefined, mdText: `# ${pr.name} — ${pr.role}\n\n${pr.bio}\n`,
+      mdText: `# ${pr.name} — ${pr.role}\n\n${pr.bio}\n`,
     });
   }
 
@@ -126,10 +126,14 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
   }
 
   if (path === "/services") {
-    const sv = pr.settings.services || [];
-    return finish({ title: `Services — ${pr.name}`, desc: trim(sv.map((s) => s.title).join(", ") || `Design services by ${pr.name}.`), app: "services", noindex: !sv.length || hidden.has("services"),
-      body: `<h1>Services</h1>${sv.map((s) => `<section><h2>${esc(s.title)}</h2><p>${esc(s.text || "")}</p>${s.price ? `<p>${esc(s.price)}</p>` : ""}</section>`).join("")}`,
-      ld: [...sv.map((s) => ({ "@type": "Service", name: s.title, description: s.text || "", provider: { "@id": `${SITE}/#person` } })), crumbs([home, { name: "Services", path }])] });
+    const { SV_DEF } = (await import("./defaults.mjs")).defaults();
+    const saved = (pr.settings.services || []).length > 0;
+    const sv = saved ? pr.settings.services : SV_DEF.services, proc = (pr.settings.process || []).length ? pr.settings.process : SV_DEF.process, faq = (pr.settings.faq || []).length ? pr.settings.faq : SV_DEF.faq;
+    const pts = (v) => (Array.isArray(v.points) ? v.points : String(v.points || "").split(/\n|;/)).map((x) => x.trim()).filter(Boolean);
+    return finish({ title: `Services — ${pr.name}, ${pr.role}`, desc: trim(sv.map((s) => s.title).join(", ") + ". " + `Design services by ${pr.name}.`), app: "services", noindex: !saved || hidden.has("services"),
+      body: `<h1>Services</h1>${sv.map((s) => `<section><h2>${esc(s.title)}</h2><p>${esc(s.text || "")}</p>${pts(s).length ? `<ul>${pts(s).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${s.price ? `<p>${esc(s.price)}</p>` : ""}</section>`).join("")}<h2>How it works</h2><ol>${proc.map((x) => `<li><b>${esc(x.title)}</b>: ${esc(x.text || "")}</li>`).join("")}</ol><h2>Questions</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}`,
+      mdText: `# Services\n\n${sv.map((s) => `## ${s.title}\n\n${s.text || ""}\n\n${pts(s).map((x) => `- ${x}`).join("\n")}`).join("\n\n")}\n\n## FAQ\n\n${faq.map((f) => `**${f.q}** ${f.a}`).join("\n\n")}\n`,
+      ld: [...sv.map((s) => ({ "@type": "Service", name: s.title, description: s.text || "", provider: { "@id": `${SITE}/#person` }, ...(s.price ? { offers: { "@type": "Offer", description: s.price } } : {}) })), faq.length ? { "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) } : null, crumbs([home, { name: "Services", path }])].filter(Boolean) });
   }
   if (path === "/book") return finish({ title: `Book a call with ${pr.name}`, desc: `Pick a time for a free intro call with ${pr.name}.`, app: "book", noindex: !pr.booking,
     body: `<h1>Book a call</h1><p>${pr.booking ? `<a href="${esc(pr.booking)}">Choose a time</a>` : ""}</p>`, ld: [crumbs([home, { name: "Book a call", path }])] });

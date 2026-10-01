@@ -81,6 +81,7 @@ lazyApp("links", "/js/app-links.mjs", "linksApp");
 lazyApp("journal", "/js/app-journal.mjs", "journalApp");
 lazyApp("notes", "/js/app-notes.mjs", "notesApp");
 lazyApp("about", "/js/app-about.mjs", "aboutApp");
+lazyApp("resume", "/js/app-resume.mjs", "resumeApp");
 for (const id of ["projects", "links"]) { const i = EDITABLE.indexOf(id); if (i >= 0) EDITABLE.splice(i, 1); }
 
 /* ---------- first load: open the window the address asks for ---------- */
@@ -95,4 +96,18 @@ for (const id of ["projects", "links"]) { const i = EDITABLE.indexOf(id); if (i 
     if (document.readyState === "complete") setTimeout(go, 120); else window.addEventListener("load", () => setTimeout(go, 120));
   }
 })();
+/* ---------- installable app + offline ---------- */
+export const Install = { evt: null, installed: matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,
+  async prompt() { if (!Install.evt) return false; Install.evt.prompt(); const r = await Install.evt.userChoice.catch(() => ({})); Install.evt = null; return r.outcome === "accepted"; },
+  can() { return !!Install.evt && !Install.installed; },
+  ios() { return /iphone|ipad|ipod/i.test(navigator.userAgent) && !Install.installed; } };
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); Install.evt = e; document.dispatchEvent(new CustomEvent("install-ready")); });
+window.addEventListener("appinstalled", () => { Install.installed = true; Install.evt = null; toast("Installed. Find it on your home screen."); });
+window.Install = Install;
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && !/--/.test(location.hostname)) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
+window.addEventListener("offline", () => toast("You're offline. What you've already opened still works."));
+window.addEventListener("online", () => toast("Back online"));
 window.__extReady = true;
+setTimeout(() => import("/js/os-more.mjs").catch((e) => console.error("os-more", e)), 400);

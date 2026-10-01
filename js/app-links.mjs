@@ -5,6 +5,7 @@ import { embedInfo, safeUrl } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
 
 const H = { hub: null, saved: false, stats: null };
+
 const ICONS = {
   link: '<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
@@ -108,8 +109,8 @@ export function renderHub(box, hub, { owner, onEdit, preview, track } = {}) {
   root.addEventListener("click", (e) => {
     const t = e.target, id = t.closest("[data-id]")?.dataset.id;
     if (t.closest(".hb-edit")) return onEdit && onEdit();
-    const app = t.closest("[data-app]"); if (app) { if (id) beacon("click", { id }); if (preview) return; return openApp(app.dataset.app); }
-    const cp = t.closest("[data-copy]"); if (cp) { if (id) beacon("click", { id }); navigator.clipboard?.writeText(cp.dataset.copy).then(() => toast("Copied")).catch(() => prompt("Copy this", cp.dataset.copy)); return; }
+    const app = t.closest(".hb-it[data-app]"); if (app) { if (id) beacon("click", { id }); if (preview) return; return openApp(app.dataset.app); }
+    const cp = t.closest(".hb-it[data-copy]"); if (cp) { if (id) beacon("click", { id }); navigator.clipboard?.writeText(cp.dataset.copy).then(() => toast("Copied")).catch(() => prompt("Copy this", cp.dataset.copy)); return; }
     const hd = t.closest(".hb-h.hb-col"); if (hd) { const it = hub.items.find((x) => x.id === hd.dataset.id); if (it) { it.closed = !it.closed; renderHub(box, hub, { owner, onEdit, preview, track }); } return; }
     const pl = t.closest(".hb-play"); if (pl) { const w = pl.closest(".hb-emb"); if (id) beacon("click", { id }); w.innerHTML = `<iframe src="${esc(w.dataset.src)}${w.dataset.src.includes("?") ? "&" : "?"}autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen title="Video"></iframe>`; return; }
     const a = t.closest("a[data-id]"); if (a && id) { beacon("click", { id }); if (preview) e.preventDefault(); return; }

@@ -20,6 +20,7 @@ export function defaults() {
   const src = rawIndex();
   const P = extract(src, "P = {", "\nconst PROJECTS", "P");
   const TIMELINE = extract(src, "TIMELINE=[", "\nconst TLI", "TIMELINE") || [];
-  cache.d = { P: P || { name: "Rohan Kumar", role: "Brand Designer", bio: "", skills: [], experience: [], links: [], music: {}, linkpage: [] }, TIMELINE };
+  const SV_DEF = extract(src, "SV_DEF=", "\nconst EDITABLE", "SV_DEF") || { services: [], process: [], faq: [] };
+  cache.d = { SV_DEF, P: P || { name: "Rohan Kumar", role: "Brand Designer", bio: "", skills: [], experience: [], links: [], music: {}, linkpage: [] }, TIMELINE };
   return cache.d;
 }

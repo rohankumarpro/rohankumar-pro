@@ -175,3 +175,60 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .nt-sw{display:inline-flex;gap:5px;align-items:center;margin:0 4px}.nt-sw .nt-c{width:22px;height:22px;padding:0;border-radius:50%;border:2px solid transparent;cursor:pointer}.nt-sw .nt-c.on{border-color:var(--ink)}
 .jed-bar .ed-del{color:#E5484D}
 .nt-doc{margin-top:14px}
+/* top bar extras, search, notifications */
+.tb-right{display:flex;gap:8px;align-items:center}
+.topbtn.tb-ic{position:relative;width:38px;height:36px;padding:0;display:grid;place-items:center;border:0;color:var(--ink);cursor:pointer}
+.tb-dot{position:absolute;top:6px;right:8px;width:9px;height:9px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 2px var(--surface)}
+.spot-ov{position:fixed;inset:0;z-index:3400;background:rgba(15,21,18,.38);backdrop-filter:blur(6px);display:flex;justify-content:center;align-items:flex-start;padding:12vh 12px 12px;animation:lbIn .15s ease}
+.spot{width:min(640px,100%);max-height:min(560px,76vh);display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border-radius:26px;box-shadow:var(--shadow);overflow:hidden;animation:rtePop .16s ease-out;font-family:var(--font)}
+.spot-bar{display:flex;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}.spot-bar>span{color:var(--ink2);display:grid}
+.spot-in{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:18px;color:var(--ink);-webkit-appearance:none}.spot-in::-webkit-search-cancel-button{display:none}
+.spot-x{border:0;background:var(--surface2);color:var(--ink2);border-radius:8px;padding:4px 9px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.spot-list{overflow:auto;padding:6px 8px 8px;flex:1;scrollbar-width:thin}
+.spot-g{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);padding:10px 12px 4px}
+.spot-it,.notif-i{display:flex;gap:12px;align-items:center;width:100%;border:0;background:none;color:var(--ink);font:inherit;text-align:left;padding:9px 12px;border-radius:14px;cursor:pointer}
+.spot-it.on,.notif-i:hover{background:var(--surface2)}
+.spot-ic{flex:none;width:34px;height:34px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;color:var(--ink)}.spot-it.on .spot-ic{background:var(--surface)}
+.spot-t{display:flex;flex-direction:column;min-width:0}.spot-t b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spot-t small{font-size:12.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spot-none{padding:26px;text-align:center;color:var(--ink2)}
+.spot-foot{padding:9px 18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink2)}
+@media (max-width:760px){.spot-ov{padding:calc(env(safe-area-inset-top,0px) + 10px) 8px 8px}.spot{max-height:calc(100dvh - 24px);border-radius:22px}.spot-foot{display:none}}
+.notif{width:min(380px,calc(100% - 28px))}.notif-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 6px}.notif-clear{border:0;background:none;color:var(--primary);font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.notif-i{align-items:flex-start}.notif-i .spot-t small{white-space:normal}
+.snap-prev{position:fixed;z-index:880;border-radius:26px;background:color-mix(in srgb,var(--primary) 16%,transparent);border:2px solid color-mix(in srgb,var(--primary) 60%,transparent);pointer-events:none;transition:all .12s}
+.kbd dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:8px 0;font-size:14px}.kbd dt{font-family:var(--mono);font-size:12.5px;background:var(--surface2);border-radius:8px;padding:3px 8px;white-space:nowrap}.kbd dd{margin:0;color:var(--ink2);align-self:center}.own-card.kbd{width:min(440px,92vw)}
+/* widgets */
+.wtime{display:flex;gap:7px;align-items:center;font-size:12.5px!important;font-weight:600;margin-top:8px!important;color:var(--ink2)}.tdot{width:8px;height:8px;border-radius:50%;background:#B0B8B3}.tdot.on{background:#3DBE7A;box-shadow:0 0 0 3px rgba(61,190,122,.25)}
+.wcard.tw{border:0;text-align:left;font:inherit;cursor:pointer;color:var(--ink);animation:rtePop .3s ease}.wcard.tw .tq{margin:0;font-size:14px;line-height:1.45;font-weight:600}.wcard.tw small{display:block;margin-top:6px;color:var(--ink2);font-weight:600}
+/* services and booking */
+.sv .sv-lead{font-size:16px;margin:0 0 14px}.sv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.sv-card{background:var(--surface2);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:6px}.sv-card h2{font-size:18px;margin:0}.sv-card p{margin:0;font-size:14.5px}.sv-card ul{margin:6px 0 0;padding-left:18px;color:var(--ink2);font-size:14px}.sv-card li{margin:3px 0}
+.sv-ic{width:42px;height:42px;border-radius:14px;background:var(--c1);display:grid;place-items:center;font-size:20px;color:var(--glyph)}.sv-card:nth-child(2n) .sv-ic{background:var(--c2)}.sv-card:nth-child(3n) .sv-ic{background:var(--c3)}.sv-card:nth-child(4n) .sv-ic{background:var(--c4)}
+.sv-price{margin-top:auto;padding-top:8px;font-size:15px}
+.sv-h{font-size:20px;margin:26px 0 10px!important}
+.sv-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}.sv-steps li{display:flex;gap:14px;align-items:flex-start}.sv-steps span{flex:none;width:34px;height:34px;border-radius:50%;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;font-weight:800}.sv-steps p{margin:2px 0 0;font-size:14.5px}
+.sv-tt{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.sv-tt figure{margin:0;background:var(--surface2);border-radius:22px;padding:16px}.sv-tt blockquote{margin:0 0 8px;font-weight:600;line-height:1.45}.sv-tt small{display:block;color:var(--ink2)}
+.sv-faq details{border-bottom:1px solid var(--line);padding:12px 0}.sv-faq summary{cursor:pointer;font-weight:700}.sv-faq p{margin:8px 0 0;font-size:14.5px}
+.bk{display:flex;flex-direction:column;height:100%;width:100%;min-width:0;overflow:hidden}.bk-top{padding:6px 24px 8px}.bk-top p{margin:0}.bk-frame{flex:1;min-height:360px;margin:0 12px;width:auto;max-width:calc(100% - 24px);box-sizing:border-box;border-radius:20px;overflow:hidden;background:#fff}.bk-frame iframe{width:100%;height:100%;border:0;display:block}.bk-foot{display:flex;gap:8px;flex-wrap:wrap;padding:12px 24px 16px}
+.set-extra{margin-top:8px}
+@media print{#desk,#boot,.topbar,.spot-ov,#toast,.rte-ui{display:none!important}body{overflow:visible!important;height:auto!important;background:#fff!important}html{height:auto!important}#seo{position:static!important;width:auto!important;height:auto!important;clip:auto!important;clip-path:none!important;white-space:normal!important;overflow:visible!important;color:#000;font:12pt/1.55 Georgia,serif;max-width:none;padding:0}#seo img{max-width:100%}#seo a{color:#000;text-decoration:underline}#seo nav{display:none}}
+#print-one{display:none}
+@media print{body.print-one>*:not(#print-one){display:none!important}body.print-one #print-one{display:block!important;position:static;color:#000;font:12pt/1.55 Georgia,serif;padding:0}body.print-one #print-one .chip{border:1px solid #999;border-radius:99px;padding:2px 10px;margin:2px;display:inline-block}body.print-one #print-one .row{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #ccc;padding:8px 0}}
+/* phones: Mochi and her jar step aside while an app is open, so they never cover what you are reading */
+@media (max-width:760px){
+  #desk:has(.win:not(.min):not(.closing)) .cat:not(.chatting),#desk:has(.win:not(.min):not(.closing)) .jar{opacity:0;pointer-events:none;transition:opacity .25s}
+  .cat,.jar{transition:opacity .25s}
+}
+
+@media (max-width:760px){
+  .ownpill{font-size:0!important;padding:0 12px!important;gap:0}.ownpill i{margin:0}
+  .tb-right{gap:6px}
+}
+@media (max-width:520px){
+  .jed-bar{gap:6px;padding:8px 14px 10px}.jed-bar button{padding:8px 12px;font-size:13px}.jed-st{display:none}.jed-scroll{padding:0 14px}.hbe-tabs{padding:8px 14px}.hbe-main{padding:12px 14px 40px}
+  .jed-title{font-size:28px}
+  .jed-side{width:100%;top:53px}
+}
+
+.spot-ic.app{background:none;width:38px;height:38px}.spot-ic.app .ico{width:38px;height:38px}
+@media (max-width:760px){#stBtn svg{display:none}.topbar .pill{padding:6px 12px}}

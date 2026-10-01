@@ -207,7 +207,7 @@ export function createEditor(host, opts = {}) {
     imgs.forEach((im, i) => grid.append(h("div", { class: "rb-gi" }, h("img", { src: im.src, alt: im.alt || "", draggable: "false" }),
       h("div", { class: "rb-gt rte-ui" }, h("button", { type: "button", "data-act": "gl", "data-i": i, "aria-label": "Move earlier" }, "‹"), h("button", { type: "button", "data-act": "gr", "data-i": i, "aria-label": "Move later" }, "›"), h("button", { type: "button", "data-act": "gx", "data-i": i, "aria-label": "Remove" }, "✕")))));
     grid.append(h("button", { type: "button", class: "rb-gadd rte-ui", "data-act": "gadd" }, b.uploading ? "Uploading…" : "+ Add images"));
-    g.append(grid, h("div", { class: "rb-galc rte-ui" }, ["grid", "masonry", "carousel"].map((m) => h("button", { type: "button", class: "rb-mini" + ((b.mode || "grid") === m ? " on" : ""), "data-act": "gmode", "data-m": m }, m[0].toUpperCase() + m.slice(1))), [2, 3, 4].map((k) => h("button", { type: "button", class: "rb-mini" + ((b.cols || 3) === k ? " on" : ""), "data-act": "gcols", "data-n": k }, k + " across"))));
+    g.append(grid, h("div", { class: "rb-galc rte-ui" }, ["grid", "masonry", "carousel"].map((m) => h("button", { type: "button", class: "rb-mini" + ((b.mode || "grid") === m ? " on" : ""), "data-act": "gmode", "data-m": m }, m[0].toUpperCase() + m.slice(1))), [2, 3, 4].map((k) => h("button", { type: "button", class: "rb-mini" + ((b.per || 3) === k ? " on" : ""), "data-act": "gcols", "data-n": k }, k + " across"))));
     body.append(g);
   }
   function buildEmbed(el, body, b) {
@@ -391,7 +391,7 @@ export function createEditor(host, opts = {}) {
     renumber(); touch(true); el.scrollIntoView?.({ block: "nearest" });
   }
   function duplicate(el) { const b = ser(el); b.id = rid(); const c = mk(cloneIds(b)); el.after(c); renumber(); touch(true); return c; }
-  const cloneIds = (b) => { const o = JSON.parse(JSON.stringify(b)); const w = (x) => { x.id = rid(); (x.k || []).forEach(w); (x.cols || []).forEach((c) => c.forEach(w)); }; w(o); return o; };
+  const cloneIds = (b) => { const o = JSON.parse(JSON.stringify(b)); const w = (x) => { x.id = rid(); (x.k || []).forEach(w); if (x.t === "columns") (x.cols || []).forEach((c) => c.forEach(w)); }; w(o); return o; };
   function indent(el, dir) {
     if (!LIST_TYPES.includes(el.dataset.t)) return false;
     const d = el.__b.d || 0;
@@ -498,12 +498,16 @@ export function createEditor(host, opts = {}) {
     E.slash = null;
   }
   function placePop(p, rect) {
-    const vv = window.visualViewport, vw = innerWidth, vh = vv ? vv.height : innerHeight;
-    const pw = p.offsetWidth, ph2 = p.offsetHeight;
+    const vv = window.visualViewport, vw = innerWidth, vh = (vv ? vv.height : innerHeight) - (E.mbar && E.mbar.classList.contains("show") ? 54 : 0);
+    p.style.maxHeight = ""; const pw = p.offsetWidth, natural = p.offsetHeight;
+    const below = vh - rect.bottom - 12, above = rect.top - 12;
     const x = Math.min(Math.max(8, rect.left), Math.max(8, vw - pw - 8));
-    let y = rect.bottom + 6;
-    if (y + ph2 > vh - 8) y = Math.max(8, rect.top - ph2 - 6);
-    p.style.left = x + "px"; p.style.top = y + "px";
+    let y, mh = natural;
+    if (natural <= below) y = rect.bottom + 6;
+    else if (natural <= above) y = rect.top - natural - 6;
+    else if (below >= above) { mh = Math.max(120, below); y = rect.bottom + 6; }
+    else { mh = Math.max(120, above); y = Math.max(8, rect.top - mh - 6); }
+    p.style.maxHeight = mh + "px"; p.style.left = x + "px"; p.style.top = Math.max(8, y) + "px";
   }
   function popup(content, rect, cls = "") {
     closePop();
@@ -572,7 +576,7 @@ export function createEditor(host, opts = {}) {
     if (id === "divider") { const n = put({ t: "divider" }, false); withTail(n); const nx = n.nextElementSibling; if (nx) focusBlock(nx, "start"); touch(true); return; }
     if (id === "code") { const n = put({ t: "code", x: "", lang: "" }, false); withTail(n); $("textarea", n).focus(); return; }
     if (id === "image") { const n = put({ t: "image", src: "" }, false); withTail(n); selectBlock(n); if (isTouch()) setTimeout(() => act(n, "imgupload"), 50); return; }
-    if (id === "gallery") { const n = put({ t: "gallery", imgs: [], mode: "grid", cols: 3 }, false); withTail(n); setTimeout(() => act(n, "gadd"), 30); return; }
+    if (id === "gallery") { const n = put({ t: "gallery", imgs: [], mode: "grid", per: 3 }, false); withTail(n); setTimeout(() => act(n, "gadd"), 30); return; }
     if (id === "embed") { const n = put({ t: "embed", url: "" }, false); withTail(n); $(".rb-in", n)?.focus(); return; }
     if (id === "file") { const n = put({ t: "file", src: "" }, false); withTail(n); selectBlock(n); return; }
     if (id === "bookmark") { const n = put({ t: "bookmark", url: "" }, false); withTail(n); $(".rb-in", n)?.focus(); return; }
@@ -733,7 +737,7 @@ export function createEditor(host, opts = {}) {
         B.imgs = a; rebuild(el); touch(true); break;
       }
       case "gmode": B.mode = btn.dataset.m; rebuild(el); touch(true); break;
-      case "gcols": B.cols = +btn.dataset.n; rebuild(el); touch(true); break;
+      case "gcols": B.per = +btn.dataset.n; rebuild(el); touch(true); break;
       case "cols": {
         const n = +btn.dataset.n, b = ser(el); const cols = b.cols || [];
         while (cols.length < n) cols.push([{ t: "p", h: "" }]);

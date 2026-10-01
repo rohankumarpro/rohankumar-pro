@@ -49,10 +49,12 @@ export function cleanSettings(s) {
     return it;
   }).filter((q) => q.url);
   if (Array.isArray(s?.story)) o.story = cleanBlocks(s.story);
-  if (Array.isArray(s?.services)) o.services = s.services.slice(0, 12).map((v) => ({ title: str(v?.title, 80), text: str(v?.text, 600), price: str(v?.price, 60), icon: str(v?.icon, 4), points: (Array.isArray(v?.points) ? v.points : []).map((x) => str(x, 100)).filter(Boolean).slice(0, 8) })).filter((v) => v.title);
+  if (Array.isArray(s?.services)) o.services = s.services.slice(0, 12).map((v) => ({ title: str(v?.title, 80), text: str(v?.text, 600), price: str(v?.price, 60), icon: str(v?.icon, 4), points: (Array.isArray(v?.points) ? v.points : String(v?.points || "").split(/\n|;/)).map((x) => str(x, 100)).filter(Boolean).slice(0, 8) })).filter((v) => v.title);
   if (Array.isArray(s?.faq)) o.faq = s.faq.slice(0, 20).map((v) => ({ q: str(v?.q, 160), a: str(v?.a, 800) })).filter((v) => v.q && v.a);
   if (Array.isArray(s?.process)) o.process = s.process.slice(0, 8).map((v) => ({ title: str(v?.title, 60), text: str(v?.text, 300) })).filter((v) => v.title);
   if (Array.isArray(s?.testimonials)) o.testimonials = s.testimonials.slice(0, 20).map((v) => ({ name: str(v?.name, 60), role: str(v?.role, 80), text: str(v?.text, 500), avatar: safeImg(v?.avatar) || undefined })).filter((v) => v.name && v.text);
+  const rf = safeUrl(s?.resumeFile); if (rf && /^\/u\/[a-f0-9]{10}\.pdf$/.test(rf)) o.resumeFile = rf;
+  const tz = str(s?.tz, 40); if (/^[A-Za-z_]+\/[A-Za-z_\-+0-9\/]+$/.test(tz)) o.tz = tz;
   if (s?.gbAuto === true) o.gbAuto = true; // guestbook notes publish without waiting for approval
   o.hiddenApps = (Array.isArray(s?.hiddenApps) ? s.hiddenApps : [])
     .map((x) => str(x, 30)).filter((x) => /^[a-z0-9_-]+$/.test(x) && !KEEP.includes(x)).slice(0, 40);

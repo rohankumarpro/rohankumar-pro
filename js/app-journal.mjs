@@ -222,7 +222,7 @@ async function edit(body, post) {
       <label class="ow-f">Date shown<input type="date" data-f="dateIso" value="${isoOf({ date: S.date, published: S.extra.published })}"></label>
       <div class="ow-f">Tags <small>The first one is the main category</small><div class="chipin" data-chips></div></div>
       <label class="ow-f">Address <small>rohankumar.pro/journal/<b>${esc(S.slug || "…")}</b></small><input data-f="slug" maxlength="80" value="${esc(S.slug)}" ${isNew || st === "draft" ? "" : ""}></label>
-      ${st === "published" && !isNew ? '<p class="hint">Changing the address of a published article breaks old links to it.</p>' : ""}
+      ${st === "published" && orig ? '<p class="hint">Changing the address of a published article breaks old links to it.</p>' : ""}
       <h3>Search and sharing</h3>
       <label class="ow-f">Title for Google <small data-cnt="t">${sTitle.length}/60</small><input data-f="seoTitle" maxlength="70" placeholder="${esc(title.value || "Same as the article title")}" value="${esc(S.seoTitle)}"></label>
       <label class="ow-f">Description for Google <small data-cnt="d">${sDesc.length}/160</small><textarea data-f="seoDesc" rows="3" maxlength="200" placeholder="Same as the summary">${esc(S.seoDesc)}</textarea></label>
@@ -231,7 +231,7 @@ async function edit(body, post) {
       <h3>Original source</h3>
       <label class="ow-f">Where else is it published?<input data-f="source" maxlength="40" placeholder="LinkedIn" value="${esc(S.source)}"></label>
       <label class="ow-f">Link<input data-f="url" maxlength="300" placeholder="https://…" value="${esc(S.url)}" inputmode="url"></label>
-      <div class="ed-ctl">${isNew ? "" : '<button data-a="dup">Duplicate</button><button class="ed-del" data-a="del">Delete article</button>'}</div>`;
+      <div class="ed-ctl">${orig ? '<button data-a="dup">Duplicate</button><button class="ed-del" data-a="del">Delete article</button>' : ""}</div>`;
     chips($("[data-chips]", side), S.tags, { placeholder: "Add a tag", suggestions: [...new Set(J.posts.flatMap(allTags))], max: 8, onChange: () => touch() });
     const f = (n) => $(`[data-f=${n}]`, side);
     $$("[data-f]", side).forEach((el) => {

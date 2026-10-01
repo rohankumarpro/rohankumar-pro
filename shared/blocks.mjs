@@ -118,7 +118,7 @@ function cleanOne(b, depth) {
   }
   if (t === "gallery") {
     o.imgs = (Array.isArray(b.imgs) ? b.imgs : []).slice(0, 60).map((i) => ({ src: safeImg(i?.src), alt: str(i?.alt, 300), cap: str(i?.cap, 300) })).filter((i) => i.src);
-    o.cols = [2, 3, 4].includes(b.cols) ? b.cols : 3; o.mode = ["grid", "masonry", "carousel"].includes(b.mode) ? b.mode : "grid";
+    o.per = [2, 3, 4].includes(b.per) ? b.per : [2, 3, 4].includes(b.cols) ? b.cols : 3; o.mode = ["grid", "masonry", "carousel"].includes(b.mode) ? b.mode : "grid";
     if (!o.imgs.length) return null;
   }
   if (t === "carousel") { o.ref = str(b.ref, 60).replace(/[^\w-]/g, ""); if (!o.ref) return null; }
@@ -157,7 +157,7 @@ export function blocksText(blocks, sep = "\n") {
     if (b.t === "bookmark") out.push(`${b.title || ""} ${b.desc || ""}`.trim());
     if (b.t === "table") b.rows.forEach((r) => out.push(r.map(stripTags).join(" | ")));
     if (b.k) walk(b.k);
-    if (b.cols) b.cols.forEach(walk);
+    if (b.t === "columns") b.cols.forEach(walk);
   });
   walk(blocks);
   return out.filter(Boolean).join(sep);
@@ -166,11 +166,11 @@ export const wordCount = (blocks) => { const t = blocksText(blocks, " "); return
 export const readMinutes = (blocks) => Math.max(1, Math.round(wordCount(blocks) / 220));
 export function firstImage(blocks) {
   let found = "";
-  const walk = (list) => { for (const b of list || []) { if (found) return; if (b.t === "image") found = b.src; else if (b.t === "gallery") found = b.imgs[0]?.src || ""; else if (b.k) walk(b.k); else if (b.cols) b.cols.forEach(walk); } };
+  const walk = (list) => { for (const b of list || []) { if (found) return; if (b.t === "image") found = b.src; else if (b.t === "gallery") found = b.imgs[0]?.src || ""; else if (b.k) walk(b.k); else if (b.t === "columns") b.cols.forEach(walk); } };
   walk(blocks); return found;
 }
 export function headingsOf(blocks) {
-  const out = []; const walk = (list) => (list || []).forEach((b) => { if (b.t === "h1" || b.t === "h2" || b.t === "h3") out.push({ id: b.id, level: +b.t[1], text: stripTags(b.h) }); if (b.k) walk(b.k); if (b.cols) b.cols.forEach(walk); });
+  const out = []; const walk = (list) => (list || []).forEach((b) => { if (b.t === "h1" || b.t === "h2" || b.t === "h3") out.push({ id: b.id, level: +b.t[1], text: stripTags(b.h) }); if (b.k) walk(b.k); if (b.t === "columns") b.cols.forEach(walk); });
   walk(blocks); return out;
 }
 
@@ -232,7 +232,7 @@ export function renderBlocks(blocks, opts = {}) {
         const inner = b.link ? `<a href="${esc(b.link)}"${/^https?:/i.test(b.link) ? ' target="_blank" rel="noopener"' : ""}>${img}</a>` : img;
         return `<figure class="bk-fig bk-w-${b.w}">${inner}${b.cap && stripTags(b.cap) ? `<figcaption>${inlineOut(b.cap)}</figcaption>` : ""}</figure>`;
       }
-      case "gallery": return `<div class="bk-gal bk-${b.mode} bk-cols-${b.cols}" role="group" aria-label="Gallery">${b.imgs.map((i, n) => `<figure>${imgTag(i.src, i.alt || `Image ${n + 1} of ${b.imgs.length}`, { sizes: "(max-width: 760px) 100vw, 380px" })}${i.cap ? `<figcaption>${esc(i.cap)}</figcaption>` : ""}</figure>`).join("")}</div>`;
+      case "gallery": return `<div class="bk-gal bk-${b.mode} bk-cols-${b.per}" role="group" aria-label="Gallery">${b.imgs.map((i, n) => `<figure>${imgTag(i.src, i.alt || `Image ${n + 1} of ${b.imgs.length}`, { sizes: "(max-width: 760px) 100vw, 380px" })}${i.cap ? `<figcaption>${esc(i.cap)}</figcaption>` : ""}</figure>`).join("")}</div>`;
       case "carousel": {
         const c = (media.carousels || {})[b.ref]; const S = c ? (Array.isArray(c) ? c : c.slides) : null;
         if (!S?.length) return "";
