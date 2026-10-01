@@ -1,6 +1,7 @@
 // /api/notes  GET: anyone reads the notes.  PUT: only the signed-in owner saves them.
-import { connectLambda, getStore } from "@netlify/blobs";
+import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
+import { contentStore } from "../lib/store.mjs";
 
 const COLORS = ["c1", "c2", "c3", "c4", "c5", "c6"];
 const clean = (list) =>
@@ -13,7 +14,7 @@ const clean = (list) =>
 export const handler = async (event) => {
   try {
     connectLambda(event);
-        const store = getStore("site-content");
+        const store = contentStore(event);
     if (event.httpMethod === "GET") {
       const notes = await store.get("notes", { type: "json" });
       return json({ notes: notes ?? null });

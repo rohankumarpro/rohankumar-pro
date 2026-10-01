@@ -2217,13 +2217,14 @@ const TIMELINE=[
   {status:"next",title:"Moving this site to my own domain",detail:"So everyone can sign the guestbook and message me directly.",tag:"Website",date:"Soon"},
   {status:"done",title:"Designed this portfolio's look",detail:"Google-style desktop, custom icons, animated wallpapers.",tag:"Design",date:"Sep 2026"}
 ];
+const TLI=()=>P.timeline||TIMELINE;
 function timeline(body,filter){
   filter=filter||'all';
   const arts=JL().map((j,i)=>({status:'done',title:'Published “'+j.title+'”',tag:'Writing',date:j.date,art:i}));
-  const done=TIMELINE.filter(t=>t.status==='done').concat(arts);
+  const done=TLI().filter(t=>t.status==='done').concat(arts);
   const ord=d=>{const x=jDate(d||'');const m=Object.keys(MONTHS).indexOf(x.m);return (+x.y||0)*400+(m<0?0:m)*31+(+x.d||0)};
   done.sort((a,b)=>ord(b.date)-ord(a.date));
-  const now=TIMELINE.filter(t=>t.status==='now'),next=TIMELINE.filter(t=>t.status==='next');
+  const now=TLI().filter(t=>t.status==='now'),next=TLI().filter(t=>t.status==='next');
   const show=k=>filter==='all'||filter===k;
   const chips=[['all','All'],['now','Working on'],['next','Up next'],['done','Done']];
   let h=`<div class="tl"><h1>Timeline</h1><p>What I'm working on, what's next, and what's done.</p>
@@ -2242,6 +2243,7 @@ function timeline(body,filter){
     h+='</ol>'}
   body.innerHTML=h+'</div>';
   body.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>timeline(body,b.dataset.f));
+  if(LIVE.admin)edBtn(body);
   body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{openApp('journal');const jb=open.journal&&open.journal.querySelector('.body');if(jb)readPost(jb,+b.dataset.a)});
 }
 const pk=a=>a[Math.floor(Math.random()*a.length)];
@@ -2739,12 +2741,12 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(
 /* ===== Owner mode (stage 1): site settings the owner edits live; visitors see them read-only ===== */
 var HIDDEN=new Set();
 var SITE={s:null,saveT:null,status:''};
-const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
+const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),timeline:JSON.parse(JSON.stringify(TIMELINE)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
 const NEVER_HIDE=['settings','notes'];
 function appVisible(id){return !HIDDEN.has(id)||!!LIVE.admin}
 function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=s.now||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
-  const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=s.bio||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.qrs=A('qrs');
+  const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=s.bio||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.timeline=A('timeline');P.qrs=A('qrs');
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
   document.title=`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
 function applyHidden(){HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
@@ -2807,7 +2809,7 @@ async function mochiInbox(body){
     try{const r=await fetch('/api/mochi?vid='+encodeURIComponent(c.dataset.v),{method:'DELETE'});if(r.ok)c.remove()}catch(e){}})}
 
 /* ===== Owner mode (stage 2): edit About me, Resume, Contact and Links in place ===== */
-const EDITABLE=['about','resume','contact','links','projects','documents'];
+const EDITABLE=['about','resume','contact','links','projects','documents','timeline'];
 function rerenderApp(id){const w=open[id];if(!w)return;const a=APPS.find(x=>x.id===id),body=w.querySelector('.body');body.classList.remove('editing');body.scrollTop=0;
   const html=a.render(body);if(typeof html==='string')body.innerHTML=html;wire(body)}
 function edBtn(body){const w=body.closest('.win');const id=w&&w.dataset.app;if(!EDITABLE.includes(id)||body.classList.contains('editing')||body.querySelector('.ed-btn'))return;
@@ -2822,6 +2824,8 @@ function edConfig(id){
     lists:[{k:'links',label:'Buttons on the Contact page',noun:'link',items:P.links,blank:{label:'',url:'https://'},fields:[{k:'label',label:'Label',max:40},{k:'url',label:'Web address',max:300}]}]};
   if(id==='projects')return{title:'Edit Projects',scalars:[],lists:[{k:'projects',label:'Projects (the first one shows first)',noun:'project',items:PR(),blank:{title:'',cat:'Design',year:String(new Date().getFullYear()),color:'c2',desc:'',link:'https://'},
     fields:[{k:'title',label:'Title',max:120},{k:'cat',label:'Category',max:40},{k:'year',label:'Year',max:20},{k:'color',label:'Colour',type:'select',opts:ED_COLORS.map(x=>[x,x])},{k:'desc',label:'Description',type:'area',max:800},{k:'link',label:'Link to the project (optional)',max:300},{k:'hidden',label:'Hide from visitors',type:'check'}]}]};
+  if(id==='timeline')return{title:'Edit Timeline',scalars:[],lists:[{k:'timeline',label:'Timeline items (articles you publish in the Journal appear under Done by themselves)',noun:'item',items:TLI(),blank:{status:'now',title:'',detail:'',tag:'',date:''},
+    fields:[{k:'status',label:'Where it belongs',type:'select',opts:[['now','Working on now'],['next','Up next'],['done','Done']]},{k:'title',label:'Title',max:120},{k:'detail',label:'Details (optional)',type:'area',max:300},{k:'tag',label:'Tag (for example Branding)',max:40},{k:'date',label:'Date (for example Oct 2026)',max:40},{k:'progress',label:'Progress, 0 to 100 (only for Working on now, optional)',max:3}]}]};
   if(id==='documents')return{title:'Edit QR codes',scalars:[],lists:[{k:'qrs',label:'QR codes (made from the web address)',noun:'QR code',items:QL(),blank:{brand:'link',name:'',sub:'',url:'https://'},
     fields:[{k:'brand',label:'Style',type:'select',opts:[['instagram','Instagram'],['youtube','YouTube'],['figma','Figma'],['behance','Behance'],['linkedin','LinkedIn'],['link','Other link']]},{k:'name',label:'Name on the card (optional)',max:30},{k:'sub',label:'Handle or short label',max:80},{k:'url',label:'Web address the QR opens',max:300},{k:'hidden',label:'Hide from visitors',type:'check'}]}]};
   return{title:'Edit Links',scalars:[],lists:[{k:'linkpage',label:'Links page (items with the same group sit together)',noun:'link',items:P.linkpage,blank:{group:'Find me online',label:'',sub:'',url:'https://',icon:'work',color:'c1'},
@@ -2860,6 +2864,7 @@ function edOpen(id,body){
         for(const kk of ['url','link'])if(it[kk]==='https://')it[kk]='';
         if(it.link&&it.link!=='#'&&!/^(https?:\/\/|mailto:|tel:)/i.test(it.link))return err('Project links must start with https://');
         if(!it.hidden)delete it.hidden;
+        if(l.k==='timeline'){const p=String(it.progress??'').trim();if(p===''||it.status!=='now')delete it.progress;else{const n=Number(p);if(!Number.isFinite(n)||n<0||n>100)return err('Progress must be a number from 0 to 100.');it.progress=Math.round(n)}}
         if(l.k==='qrs'){if(!/^https?:\/\//i.test(it.url||''))return err('QR codes need a web address starting with https://');if(!qrOf(it.url))return err('That address is too long for a QR code.')}
         if(l.k!=='qrs'&&it.url!==undefined&&!(it.app)&&it.url&&!/^(https?:\/\/|mailto:|tel:)/i.test(it.url))return err('Web addresses must start with https://, mailto: or tel:');
         if(l.k==='linkpage'){if(it.app)it.url='';else if(!it.url)return err('Add a web address for "'+(it.label||'a link')+'".');if(!it.primary)delete it.primary;if(!it.app)delete it.app;if(!it.sub)delete it.sub}}

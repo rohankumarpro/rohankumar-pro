@@ -1,27 +1,72 @@
-// /api/site  GET: anyone reads the site settings.  PUT: only the signed-in owner saves them.
-import { connectLambda, getStore } from "@netlify/blobs";
+// /api/site  GET: anyone reads the public site settings.  PUT: only the signed-in owner saves them.
+import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
+import { contentStore } from "../lib/store.mjs";
 
-// Notes and Settings can never be hidden, so the owner can always get back in.
-const LOCKED = ["settings", "notes"];
+// Apps that can never be hidden, so the owner can't lock themselves out.
+const KEEP = ["settings", "notes"];
+const str = (v, n) => String(v ?? "").trim().slice(0, n);
+
+export function cleanSettings(s) {
+  const o = {};
+  for (const [k, n] of [["name", 60], ["role", 80], ["status", 80], ["now", 300], ["song", 80], ["artist", 80]]) {
+    const v = str(s?.[k], n);
+    if (v) o[k] = v;
+  }
+  const url = (v, ok) => { const u = str(v, 300); return ok.test(u) ? u : ""; };
+  const WEB = /^https?:\/\//i, ANY = /^(https?:\/\/|mailto:|tel:)/i;
+  const COLORS = ["c1", "c2", "c3", "c4", "c5", "c6"], ICONS = ["cal", "mail", "work", "cam", "chat", "book", "pen"];
+  const bio = str(s?.bio, 1500); if (bio) o.bio = bio;
+  const email = str(s?.email, 120); if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) o.email = email;
+  const booking = url(s?.booking, WEB); if (booking) o.booking = booking;
+  if (Array.isArray(s?.skills)) o.skills = s.skills.map((x) => str(x, 40)).filter(Boolean).slice(0, 30);
+  if (Array.isArray(s?.experience)) o.experience = s.experience.slice(0, 30).map((e) => ({ title: str(e?.title, 120), time: str(e?.time, 40), text: str(e?.text, 600) })).filter((e) => e.title || e.time || e.text);
+  if (Array.isArray(s?.links)) o.links = s.links.slice(0, 12).map((l) => ({ label: str(l?.label, 40), url: url(l?.url, ANY) })).filter((l) => l.label && l.url);
+  if (Array.isArray(s?.linkpage)) o.linkpage = s.linkpage.slice(0, 40).map((l) => {
+    const it = { group: str(l?.group, 40), label: str(l?.label, 60), color: COLORS.includes(l?.color) ? l.color : "c1", icon: ICONS.includes(l?.icon) ? l.icon : "work" };
+    const sub = str(l?.sub, 100); if (sub) it.sub = sub;
+    const app = str(l?.app, 30); if (/^[a-z0-9_-]+$/.test(app)) it.app = app; else it.url = url(l?.url, ANY);
+    if (l?.primary) it.primary = true;
+    return it;
+  }).filter((it) => it.label && (it.app || it.url));
+  if (Array.isArray(s?.projects)) o.projects = s.projects.slice(0, 60).map((p) => {
+    const it = { title: str(p?.title, 120), cat: str(p?.cat, 40), year: str(p?.year, 20), color: COLORS.includes(p?.color) ? p.color : "c2", desc: str(p?.desc, 800) };
+    const link = str(p?.link, 300); if (link === "#" || ANY.test(link)) it.link = link;
+    if (p?.hidden) it.hidden = true;
+    return it;
+  }).filter((p) => p.title);
+  if (Array.isArray(s?.timeline)) o.timeline = s.timeline.slice(0, 60).map((t) => {
+    const it = { status: ["now", "next", "done"].includes(t?.status) ? t.status : "now", title: str(t?.title, 120), tag: str(t?.tag, 40), date: str(t?.date, 40) };
+    const detail = str(t?.detail, 300); if (detail) it.detail = detail;
+    const p = Number(t?.progress); if (it.status === "now" && t?.progress !== "" && t?.progress != null && Number.isFinite(p)) it.progress = Math.max(0, Math.min(100, Math.round(p)));
+    return it;
+  }).filter((t) => t.title);
+  const BRANDS = ["instagram", "youtube", "figma", "behance", "linkedin", "link"];
+  if (Array.isArray(s?.qrs)) o.qrs = s.qrs.slice(0, 30).map((q) => {
+    const it = { brand: BRANDS.includes(q?.brand) ? q.brand : "link", name: str(q?.name, 30), sub: str(q?.sub, 80), url: url(q?.url, WEB) };
+    if (q?.hidden) it.hidden = true;
+    return it;
+  }).filter((q) => q.url);
+  o.hiddenApps = (Array.isArray(s?.hiddenApps) ? s.hiddenApps : [])
+    .map((x) => str(x, 30)).filter((x) => /^[a-z0-9_-]+$/.test(x) && !KEEP.includes(x)).slice(0, 40);
+  return o;
+}
 
 export const handler = async (event) => {
   try {
     connectLambda(event);
-    const store = getStore("site-content");
+    const store = contentStore(event);
     if (event.httpMethod === "GET") {
-      return json({ settings: (await store.get("site", { type: "json" })) ?? null });
+      const settings = await store.get("settings", { type: "json" });
+      return json({ settings: settings ?? null });
     }
     if (event.httpMethod === "PUT") {
       if (!isAdmin(event)) return json({ error: "Not signed in" }, 401);
       const b = body(event);
-      const s = b?.settings;
-      if (!s || typeof s !== "object" || Array.isArray(s)) return json({ error: "Bad JSON" }, 400);
-      if (JSON.stringify(s).length > 20000) return json({ error: "Too large" }, 413);
-      s.hiddenApps = (Array.isArray(s.hiddenApps) ? s.hiddenApps : [])
-        .map(String).filter((x) => !LOCKED.includes(x)).slice(0, 100);
-      await store.setJSON("site", s);
-      return json({ ok: true, settings: s });
+      if (!b) return json({ error: "Bad JSON" }, 400);
+      const settings = cleanSettings(b.settings);
+      await store.setJSON("settings", settings);
+      return json({ ok: true, settings });
     }
     return json({ error: "Method not allowed" }, 405);
   } catch (e) {
