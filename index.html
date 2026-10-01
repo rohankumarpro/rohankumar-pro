@@ -20,7 +20,7 @@
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="gdefs">
 </defs></svg>
-<div id="desk" class="is-locked" data-wall="grid" data-grain="soft" data-motion="on" data-status="on" data-cat="on" data-music="on">
+<div id="desk" class="is-locked" data-wall="aura" data-grain="soft" data-motion="on" data-status="on" data-cat="on" data-music="on">
   <div class="wall" id="wall" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
   <header class="topbar">
     <button class="topbtn" id="who" aria-label="Lock screen"></button>
@@ -904,31 +904,31 @@ function shape(kind){
   }
   return pts.join('')+'Z';
 }
-function glyphSvg(g,size=24){return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="var(--glyph)" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">${g}</svg>`}
+function glyphSvg(g,size=24){return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="var(--glyph)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`}
 function icon(a){
   if(a.photo)return `<span class="ico photo"><img src="${PHOTO}" alt=""></span>`;
   return `<span class="ico" data-i="${a.id}"><svg viewBox="0 0 24 24" aria-hidden="true">${a.glyph}</svg></span>`}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const APPS=[
-  {id:"about",ix:"01",title:"About me",photo:true,glyph:G.person,w:580,h:500,render:about},
-  {id:"projects",ix:"02",title:"Projects",glyph:G.folder,w:680,h:500,render:projects},
-  {id:"journal",ix:"03",title:"Journal",glyph:G.book,w:760,h:640,render:journal},
-  {id:"photos",ix:"04",title:"Photos",glyph:G.img,w:640,h:500,render:photos},
-  {id:"notes",ix:"05",title:"Notes",glyph:G.note,w:560,h:460,render:notes},
-  {id:"guestbook",ix:"06",title:"Guestbook",glyph:G.pen,w:600,h:560,render:guestbook},
-  {id:"documents",ix:"07",title:"Documents",glyph:G.docs,w:520,h:640,render:documents},
-  {id:"content",ix:"08",title:"Content",glyph:G.play,w:560,h:620,render:contentApp},
-  {id:"resume",ix:"09",title:"Resume",glyph:G.doc,w:560,h:520,render:resume},
-  {id:"contact",ix:"10",title:"Contact",glyph:G.mail,w:460,h:380,render:contact},
-  {id:"timeline",ix:"11",title:"Timeline",glyph:G.tl,w:560,h:640,render:timeline},
-  {id:"messages",ix:"12",title:"Messages",glyph:G.msg,w:420,h:620,render:messages},
-  {id:"links",ix:"13",title:"Links",glyph:G.link,w:460,h:680,render:links},
-  {id:"palette",ix:"14",drawer:true,title:"Palette",glyph:G.palette,w:700,h:600,render:palette},
-  {id:"sketch",ix:"15",drawer:true,title:"Sketch",glyph:G.sketch,w:760,h:580,render:sketch},
-  {id:"focus",ix:"16",drawer:true,title:"Focus",glyph:G.focus,w:380,h:540,render:focusApp},
-  {id:"calculator",ix:"17",drawer:true,title:"Calculator",glyph:G.calc,w:340,h:540,render:calculator},
-  {id:"settings",ix:"18",drawer:true,title:"Settings",glyph:G.gear,w:460,h:520,render:settings}
+  {id:"about",ix:"01",title:"About me",photo:true,glyph:G.person,w:640,h:580,render:about},
+  {id:"projects",ix:"02",title:"Projects",glyph:G.folder,w:760,h:580,render:projects},
+  {id:"journal",ix:"03",title:"Journal",glyph:G.book,w:820,h:700,render:journal},
+  {id:"photos",ix:"04",title:"Photos",glyph:G.img,w:700,h:580,render:photos},
+  {id:"notes",ix:"05",title:"Notes",glyph:G.note,w:640,h:540,render:notes},
+  {id:"guestbook",ix:"06",title:"Guestbook",glyph:G.pen,w:680,h:620,render:guestbook},
+  {id:"documents",ix:"07",title:"Documents",glyph:G.docs,w:600,h:700,render:documents},
+  {id:"content",ix:"08",title:"Content",glyph:G.play,w:640,h:680,render:contentApp},
+  {id:"resume",ix:"09",title:"Resume",glyph:G.doc,w:640,h:600,render:resume},
+  {id:"contact",ix:"10",title:"Contact",glyph:G.mail,w:540,h:440,render:contact},
+  {id:"timeline",ix:"11",title:"Timeline",glyph:G.tl,w:640,h:700,render:timeline},
+  {id:"messages",ix:"12",title:"Messages",glyph:G.msg,w:460,h:680,render:messages},
+  {id:"links",ix:"13",title:"Links",glyph:G.link,w:500,h:720,render:links},
+  {id:"palette",ix:"14",drawer:true,title:"Palette",glyph:G.palette,w:760,h:660,render:palette},
+  {id:"sketch",ix:"15",drawer:true,title:"Sketch",glyph:G.sketch,w:800,h:620,render:sketch},
+  {id:"focus",ix:"16",drawer:true,title:"Focus",glyph:G.focus,w:420,h:620,render:focusApp},
+  {id:"calculator",ix:"17",drawer:true,title:"Calculator",glyph:G.calc,w:380,h:600,render:calculator},
+  {id:"settings",ix:"18",drawer:true,title:"Settings",glyph:G.gear,w:520,h:600,render:settings}
 ];
 const RUN=[];
 
@@ -1354,7 +1354,7 @@ function settings(body){
 }
 
 /* ============ wallpapers ============ */
-function setWall(k){const id=Wall.list.some(w=>w.id===k)?k:"grid";desk.dataset.wall=id;Wall.set(id)}
+function setWall(k){const id=Wall.list.some(w=>w.id===k)?k:"aura";desk.dataset.wall=id;Wall.set(id)}
 
 function inl(t){return esc(t.replace(/\\\*/g,'\u0001')).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/\u0001/g,'*')}
 function md(src){
@@ -1841,7 +1841,7 @@ document.getElementById('lImg').src=PHOTO;document.getElementById('lkImg').src=P
 document.getElementById('mSong').textContent=P.music.song;document.getElementById('mArtist').textContent=P.music.artist;
 document.getElementById('mLinks').innerHTML=`<a href="${esc(P.music.youtubeMusic)}" target="_blank" rel="noopener">YouTube Music</a><a href="${esc(P.music.spotify)}" target="_blank" rel="noopener">Spotify</a>`;
 gbInit();
-Wall.text=P.name;{const w=Wall.list.some(x=>x.id===desk.dataset.wall)?desk.dataset.wall:'grid';desk.dataset.wall=w;Wall.mount(document.getElementById('wall'),w)}
+Wall.text=P.name;{const w=Wall.list.some(x=>x.id===desk.dataset.wall)?desk.dataset.wall:'aura';desk.dataset.wall=w;Wall.mount(document.getElementById('wall'),w)}
 /* ============ desktop icons: arrange by dragging ============ */
 function renderIcons(){let ord=[];try{ord=JSON.parse(localStorage.getItem('iconOrder')||'[]')}catch(e){}
   const list=APPS.filter(a=>!a.drawer).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});

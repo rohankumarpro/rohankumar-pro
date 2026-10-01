@@ -20,6 +20,7 @@ function readColors(){
   var s=getComputedStyle(root),g=function(n,d){return s.getPropertyValue(n).trim()||d};
   C.bg=g('--bg','#E7E7E7');C.surface=g('--surface','#fff');C.ink=g('--ink','#0A0A0A');C.ink2=g('--ink2','#666');
   var b=hex(C.bg);C.dark=(b[0]*.299+b[1]*.587+b[2]*.114)<110;
+  var n=function(k,d){var v=parseFloat(g(k,''));return isNaN(v)?d:v};C.m=n('--m',28);C.bar=n('--bar',52);C.gap=n('--gap',14);C.tile=n('--tile',112);
 }
 var MONO='"Geist Mono",ui-monospace,Menlo,monospace', SANS='"Geist","Helvetica Neue",Helvetica,Arial,sans-serif';
 var FIXED=new Date(2026,0,1,10,9,36); // the still-frame time: 10:09:36, the classic
@@ -27,11 +28,11 @@ var FIXED=new Date(2026,0,1,10,9,36); // the still-frame time: 10:09:36, the cla
 /* ---------- the pieces ---------- */
 var P={};
 
-/* GRID: a 104px module. The desktop tiles sit exactly on these lines.
+/* GRID: a module the size of a tile plus its gap. The desktop tiles sit exactly on these lines.
    Crosses swell near the pointer; one scan line crosses; one orbit turns. */
 P.grid={name:'Grid',fps:60,draw:function(x,w,h,t,S){
   x.fillStyle=C.bg;x.fillRect(0,0,w,h);
-  var small=w<=760, step=small?(w-33)/4:104, m=small?16:24, top=40+m;
+  var small=w<=760, m=small?16:C.m, gap=small?10:C.gap, tile=small?(w-2*m-3*gap)/4:C.tile, step=tile+gap, top=(small?48:C.bar)+m;
   var span=h-top, scanY=top+((t*26)%(span+160))-40, ptr=S.hasPtr;
   x.lineWidth=1;x.strokeStyle=rgba(C.ink,C.dark?.1:.12);x.beginPath();
   for(var gx=m+.5;gx<=w;gx+=step){x.moveTo(gx,top);x.lineTo(gx,h)}
@@ -127,8 +128,8 @@ P.dial={name:'Dial',fps:30,draw:function(x,w,h,t,S){
 /* AURA: soft grey light, drifting. */
 P.aura={name:'Aura',fps:30,draw:function(x,w,h,t,S){
   x.fillStyle=C.bg;x.fillRect(0,0,w,h);
-  var s=Math.max(w,h), lo=C.dark?C.surface:'#FFFFFF', hi=C.ink;
-  var B=[[.050,.037,0,1.2,.62,lo,C.dark?.16:1],[.041,.058,2,.4,.58,hi,C.dark?.0:.34],[.033,.047,4,2.6,.7,lo,C.dark?.24:.95],[.062,.029,1,3.4,.5,hi,C.dark?.16:.30],[.027,.051,3,5.1,.6,lo,C.dark?.20:.85]];
+  var s=Math.max(w,h), lo=C.dark?'#4A4A4A':'#FFFFFF', hi=C.ink;
+  var B=[[.050,.037,0,1.2,.62,lo,C.dark?.26:1],[.041,.058,2,.4,.58,hi,C.dark?.0:.20],[.033,.047,4,2.6,.7,lo,C.dark?.34:.95],[.062,.029,1,3.4,.5,hi,C.dark?.0:.16],[.027,.051,3,5.1,.6,lo,C.dark?.28:.85]];
   for(var i=0;i<B.length;i++){var b=B[i],cx=w*(.5+.42*Math.sin(t*b[0]+b[2])),cy=h*(.5+.38*Math.cos(t*b[1]+b[3])),g=x.createRadialGradient(cx,cy,0,cx,cy,b[4]*s);
     g.addColorStop(0,rgba(b[5],b[6]));g.addColorStop(1,rgba(b[5],0));x.fillStyle=g;x.fillRect(0,0,w,h)}
 }};
@@ -152,8 +153,8 @@ P.type={name:'Type',fps:30,draw:function(x,w,h,t,S){
 P.paper={name:'Paper',fps:0,draw:function(x,w,h){x.fillStyle=C.bg;x.fillRect(0,0,w,h)}};
 
 /* ---------- engine ---------- */
-var ORDER=['grid','halftone','signal','dial','aura','type','paper'];
-var cv=null, ctx=null, host=null, cur='grid', raf=0, last=0, W=0, H=0, dpr=1;
+var ORDER=['aura','grid','halftone','signal','dial','type','paper'];
+var cv=null, ctx=null, host=null, cur='aura', raf=0, last=0, W=0, H=0, dpr=1;
 var S={mx:0,my:0,hasPtr:false,still:false};
 var reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -191,7 +192,7 @@ var Wall={
   mount:function(el,id){
     host=el;cv=document.createElement('canvas');cv.setAttribute('aria-hidden','true');
     el.innerHTML='';el.appendChild(cv);ctx=cv.getContext('2d');
-    readColors();cur=P[id]?id:'grid';size();kick();
+    readColors();cur=P[id]?id:'aura';size();kick();
     if(window.ResizeObserver)new ResizeObserver(function(){size();kick()}).observe(el);else addEventListener('resize',function(){size();kick()});
     addEventListener('pointermove',function(e){S.mx=e.clientX;S.my=e.clientY;S.hasPtr=true},{passive:true});
     document.addEventListener('pointerleave',function(){S.hasPtr=false});
@@ -203,7 +204,7 @@ var Wall={
     if(reduce.addEventListener)reduce.addEventListener('change',kick);
     if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('500 40px Geist'),document.fonts.load('400 12px "Geist Mono"')]).then(function(){wide={};kick()}).catch(function(){})}
   },
-  set:function(id){if(!P[id])id='grid';cur=id;size();kick()},
+  set:function(id){if(!P[id])id='aura';cur=id;size();kick()},
   thumb:function(id,tw,th){
     tw=tw||240;th=th||150;readColors();
     var ck=id+'|'+C.bg+'|'+C.ink;if(thumbs[ck])return thumbs[ck];
