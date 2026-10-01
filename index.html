@@ -361,6 +361,20 @@ a{color:var(--primary)}
 .note:nth-child(odd){transform:rotate(-1.2deg)}.note:nth-child(even){transform:rotate(1deg)}
 .note b{display:block;margin-bottom:8px;font-size:16px}
 .note p{margin:0;color:var(--glyph)!important;line-height:1.55;font-size:14.5px;white-space:pre-line}
+.nt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.nt-tools{display:flex;align-items:center;gap:8px}.nt-status{font-size:13px;opacity:.7;min-width:4ch}
+.nt-tools button,.own-row button{border:0;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer;background:var(--surface2,#eee);color:inherit}
+.notes.editing .note{transform:none!important}
+.notes.editing [contenteditable]{outline:none;border-radius:8px;cursor:text}
+.notes.editing [contenteditable]:focus{box-shadow:0 0 0 2px var(--glyph)}
+.nt-row{display:flex;align-items:center;gap:6px;margin-top:12px}
+.nt-c{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}.nt-c.on{border-color:var(--glyph)}
+.nt-del{margin-left:auto;border:0;background:none;font:inherit;font-size:12px;color:var(--glyph);opacity:.75;cursor:pointer}
+.nt-hint{opacity:.6}
+.own-dlg{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(0,0,0,.35)}
+.own-card{background:var(--surface,#fff);color:inherit;border-radius:22px;padding:22px;width:min(320px,90vw);display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.own-card input{font:inherit;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
+.own-err{margin:0;font-size:13px;min-height:1em;opacity:.8}.own-row{display:flex;justify-content:flex-end;gap:8px}
 /* icon arranging */
 .icons .dicon{touch-action:none;will-change:transform}
 .icons .dicon.dragging{z-index:10;cursor:grabbing;transition:none!important}
@@ -2550,7 +2564,46 @@ function photos(body){
     pr.onclick=()=>view((i-1+PHOTOS.length)%PHOTOS.length);nx.onclick=()=>view((i+1)%PHOTOS.length);
   }
 }
-function notes(){return `<h1>Notes</h1><div class="notes">${NOTES.map(n=>`<div class="note" style="background:var(--${n.color})"><b style="color:var(--glyph)">${esc(n.title)}</b><p>${esc(n.text)}</p></div>`).join('')}</div>`}
+/* ===== Live Notes: anyone reads, only the owner edits (Netlify Functions + Blobs) ===== */
+const LIVE={admin:false,notes:null,loaded:false,saveT:null,status:''};
+async function liveAuth(){try{const r=await fetch('/api/auth',{cache:'no-store'});if(r.ok)LIVE.admin=!!(await r.json()).admin}catch(e){}}
+async function liveLoad(){try{const r=await fetch('/api/notes',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.notes))LIVE.notes=d.notes}}catch(e){}LIVE.loaded=true}
+function liveNotes(){return LIVE.notes||NOTES}
+function liveSave(){clearTimeout(LIVE.saveT);LIVE.status='Saving…';liveStatus();
+  LIVE.saveT=setTimeout(async()=>{try{const r=await fetch('/api/notes',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({notes:liveNotes()})});
+    if(r.status===401){LIVE.admin=false;LIVE.status='Signed out. Changes not saved.';refreshNotes();return}
+    LIVE.status=r.ok?'Saved':'Could not save'}catch(e){LIVE.status='Offline. Could not save'}liveStatus()},700)}
+function liveStatus(){document.querySelectorAll('.nt-status').forEach(el=>el.textContent=LIVE.status)}
+function refreshNotes(){const w=open.notes;if(w)notes(w.querySelector('.body'))}
+function notes(body){
+  if(!LIVE.loaded){body.innerHTML='<h1>Notes</h1><p class="nt-hint">Loading…</p>';Promise.all([liveLoad(),liveAuth()]).then(()=>notes(body));return}
+  const list=liveNotes(),ed=LIVE.admin;
+  body.innerHTML=`<div class="nt-head"><h1>Notes</h1>${ed?`<div class="nt-tools"><span class="nt-status">${esc(LIVE.status)}</span><button class="nt-add">+ New note</button><button class="nt-out">Sign out</button></div>`:''}</div>
+  <div class="notes${ed?' editing':''}">${list.map((n,i)=>`<div class="note" data-i="${i}" style="background:var(--${n.color})">
+    <b style="color:var(--glyph)" ${ed?'contenteditable="plaintext-only" spellcheck="true" data-f="title"':''}>${esc(n.title)}</b>
+    <p ${ed?'contenteditable="plaintext-only" spellcheck="true" data-f="text"':''}>${esc(n.text)}</p>
+    ${ed?`<div class="nt-row">${['c1','c2','c3','c4','c5','c6'].map(c=>`<button class="nt-c${c===n.color?' on':''}" data-c="${c}" style="background:var(--${c})" aria-label="Color ${c}"></button>`).join('')}<button class="nt-del" aria-label="Delete note">Delete</button></div>`:''}
+  </div>`).join('')}</div>`;
+  if(!ed)return;
+  const cur=()=>{if(!LIVE.notes)LIVE.notes=NOTES.map(n=>({...n}));return LIVE.notes};
+  body.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{const i=+el.closest('.note').dataset.i;cur()[i][el.dataset.f]=el.innerText.replace(/\n$/,'');liveSave()}));
+  body.querySelectorAll('.nt-c').forEach(b=>b.onclick=()=>{const i=+b.closest('.note').dataset.i;cur()[i].color=b.dataset.c;liveSave();notes(body)});
+  body.querySelectorAll('.nt-del').forEach(b=>b.onclick=()=>{const i=+b.closest('.note').dataset.i;if(!confirm('Delete this note?'))return;cur().splice(i,1);liveSave();notes(body)});
+  body.querySelector('.nt-add').onclick=()=>{cur().unshift({title:'New note',text:'Write something…',color:'c4'});liveSave();notes(body);const t=body.querySelector('.note [data-f="title"]');if(t){t.focus();document.execCommand&&document.execCommand('selectAll',false,null)}};
+  body.querySelector('.nt-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';notes(body)};
+}
+/* Owner sign-in: press Ctrl+Shift+E (Cmd+Shift+E on Mac). Visitors never see it. */
+function ownerLogin(){
+  if(document.querySelector('.own-dlg'))return;
+  const d=document.createElement('div');d.className='own-dlg';
+  d.innerHTML=`<form class="own-card"><b>Owner sign-in</b><input type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" required><p class="own-err" role="alert"></p><div class="own-row"><button type="button" class="own-x">Cancel</button><button type="submit">Sign in</button></div></form>`;
+  document.body.appendChild(d);const f=d.querySelector('form'),inp=d.querySelector('input'),err=d.querySelector('.own-err');
+  const close=()=>d.remove();d.querySelector('.own-x').onclick=close;d.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  f.onsubmit=async e=>{e.preventDefault();err.textContent='Checking…';
+    try{const r=await fetch('/api/auth',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:inp.value})});
+      if(r.ok){LIVE.admin=true;LIVE.status='Signed in. Edits save automatically.';close();openApp('notes');refreshNotes()}else err.textContent='Wrong password.'}catch(x){err.textContent='Could not reach the server.'}};
+  setTimeout(()=>inp.focus(),30)}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='E'||e.key==='e')){e.preventDefault();ownerLogin()}},true);
 
 /* ============ guestbook (shared data) ============ */
 const GB={db:null,uid:null,entries:[],ready:false,readonly:false};
