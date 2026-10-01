@@ -320,3 +320,4 @@ hr{border:0;border-top:0;height:calc(16 * var(--u))}
 .spot-it{border-radius:var(--r-5)}.spot-it.on,.notif-i:hover{background:var(--surface2)}
 .spot-ic{border-radius:var(--r-4);background:var(--surface2)}
 .spot-g{font:500 11px/16px var(--mono);letter-spacing:.06em;color:var(--ink2)}
+.gbf input,.gbf textarea{background:var(--surface)!important}
