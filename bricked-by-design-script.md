@@ -30,8 +30,10 @@ Spotify's Car Thing, a 90 dollar music player for your car, stopped working in D
 **[Online: AI Pin launch clip. Let this one breathe, it's the centerpiece.]**
 Then there's the Humane AI Pin, which I think is the worst one. It launched at 699 dollars, plus a monthly subscription. In February 2025, after HP bought most of the company, it was cut off from its servers. Only people who'd bought it in the previous 90 days got their money back. So if you were on day 91, you'd paid 699 dollars for a very expensive lapel decoration.
 
+Compare that with Revolv, where everyone got refunded. Same kind of shutdown, completely different outcome, and the only person who decided which one you got was the company.
+
 **[Online: Wemo ads, one after another: plug, switch, heater, coffee maker, baby monitor]**
-And the most recent one is from this year. On January 31, Belkin turned off the cloud for most of its Wemo smart home products. More than two dozen of them: smart plugs, light switches, space heaters, coffee makers, baby monitors. Wemo had been around since 2011, so some people had built a big part of their home on it. Yes, a baby monitor that needs a company's server to work.
+The newest one is from this year. On January 31, Belkin turned off the cloud for most of its Wemo products. That's more than two dozen of them, so the plugs and light switches, but also space heaters, coffee makers and baby monitors. Wemo had been around since 2011, so people had built a lot of their home around it. Yes, a baby monitor that needs a company's server to work.
 
 **[Screen: Apple Home app. Then Online: Matter logo on a product box]**
 Not every Wemo device died, though. A few models that work with Apple HomeKit carried on, but only if you'd set them up through HomeKit before the shutdown. And four newer models that use a standard called Matter weren't affected at all. Remember that word, I'll need it later.
@@ -45,16 +47,16 @@ What I kept asking while reading all this was why these things need a company's 
 ## Why they do it (2:50–4:30)
 
 **[Text: simple graphic. One payment for the device, then monthly server costs stacking up]**
-Part of it is just money. You pay once, when you buy the device. But the servers cost money every month, for every old device that's still online. After a few years those old devices aren't bringing in anything new, and the bill keeps coming.
+Money is the obvious one. You pay once, when you buy the device, but the servers cost money every month, for every old device that's still online. After a few years those devices aren't bringing in anything new and the bill keeps coming.
 
 **[Screen: scroll through subscription plan pages for smart cameras and doorbells]**
-Then there are subscriptions. A monthly fee is steady income, which is why cameras, doorbells and everything else now come with a plan. For some of these companies, the device is basically a very expensive sign-up form.
+Subscriptions are the other big one. A monthly fee is steady income, which is why cameras, doorbells and pretty much everything else now comes with a plan. For some of these companies, the device is basically a very expensive sign-up form.
 
 **[Screen: scroll a long terms page, highlight the "licensed, not sold" part]**
-And then there's the terms and conditions that nobody reads, me included. In a lot of them, the software inside your device isn't sold to you. It's licensed to you.
+But the one that actually makes all this legal is the terms and conditions that nobody reads, me included. In a lot of them, the software inside your device isn't sold to you. It's licensed to you.
 
 **[TH: hold the device]**
-So what you actually own is the plastic, the glass and the circuit board. The smart part is on loan, and the company decides when to take it back. You bought a lamp, and the light is on a rental.
+So what you actually own is the plastic, the glass and the circuit board. The smart part is on loan, and the company decides when to take it back. You bought a lamp, and the light is on a rental. At full price. That's the part I have a problem with.
 
 **[Online: AI Pin footage again, the projected display if possible]**
 Back to my question about working offline. After the shutdown, the AI Pin could still show its battery level. Calls, messages, all the AI features ran through Humane's servers, so they went with it. A 699 dollar gadget that could tell you its battery percentage, and nothing else.
@@ -85,7 +87,7 @@ Even phones have improved. My Pixel is supposed to get seven years of updates, a
 **[TH: straight to camera]**
 But repair rules are mostly about fixing hardware, and this isn't a hardware problem.
 
-Now, I get it. Nobody can run servers forever. That's actually why I think there should be a rule: if a company is going to switch off something it sold you, it should either refund you or let the device keep working without the cloud. That's not a lot to ask.
+Now, I get it. Nobody can run servers forever. That's actually why I think there should be a rule: if a company is going to switch off something it sold you, it should either refund you or let the device keep working without the cloud. And that's not far-fetched. Matter devices already work locally, and Home Assistant already lets people run it all themselves. If a company can't promise one of those two things, maybe it shouldn't be selling you a gadget that depends on it.
 
 ## Closing (6:00–7:00)
 
