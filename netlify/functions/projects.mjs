@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { contentStore } from "../lib/store.mjs";
+import { saveJSON } from "../lib/safe.mjs";
 import { cleanProject, metaOf, seedProjects, loadIndex, projKey, loadProject, uniqueSlug, publicList } from "../lib/projects.mjs";
 import { pingIndexNow } from "../lib/indexnow.mjs";
 
@@ -69,7 +70,7 @@ export const handler = async (event) => {
         const by = new Map(index.map((x) => [x.id, x])), out = [];
         for (const id of b.order) if (by.has(id)) { out.push(by.get(id)); by.delete(id); }
         out.push(...by.values());
-        await store.setJSON("projects-index", out);
+        await saveJSON(store, "projects-index", out);
         return json({ ok: true, projects: out.map(withStats) });
       }
       if (!b.project || typeof b.project !== "object") return json({ error: "Missing project" }, 400);
@@ -81,7 +82,7 @@ export const handler = async (event) => {
       await store.setJSON(projKey(p.id), p);
       const meta = metaOf(p), i = index.findIndex((x) => x.id === p.id);
       const next = i < 0 ? [meta, ...index] : index.map((x, j) => (j === i ? meta : x));
-      await store.setJSON("projects-index", next);
+      await saveJSON(store, "projects-index", next);
       if (p.status === "published") await pingIndexNow(event, [`/projects/${p.slug}`, "/projects", "/sitemap.xml"]);
       return json({ ok: true, project: withStats(p), projects: next.map(withStats) });
     }
@@ -92,7 +93,7 @@ export const handler = async (event) => {
       if (seeded) { for (const p of seedProjects(await store.get("settings", { type: "json" }))) await store.setJSON(projKey(p.id), p); }
       await store.delete(projKey(q.id));
       const next = index.filter((x) => x.id !== q.id);
-      await store.setJSON("projects-index", next);
+      await saveJSON(store, "projects-index", next);
       return json({ ok: true, projects: next.map(withStats) });
     }
     return json({ error: "Method not allowed" }, 405);

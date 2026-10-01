@@ -10,10 +10,11 @@ export const R = {
   take(id) { const p = R.pending; if (p && p.id === id && !p.used) { p.used = true; return p.slug; } return ""; },
   handlers: {},   // app id -> (body, slug, quiet) => shows that item, or the app's main view when slug is empty
   applying: false,
-  pathFor(id, slug) { return "/" + id + (slug ? "/" + slug : ""); },
+  alias: { wallet: "documents" }, // the Wallet window keeps its old internal name "documents" so saved settings still work
+  pathFor(id, slug) { const n = Object.keys(R.alias).find((k) => R.alias[k] === id) || id; return "/" + n + (slug ? "/" + slug : ""); },
   parse(path) {
     const seg = decodeURIComponent(path).replace(/^\/+|\/+$/g, "").split("/");
-    const id = seg[0]; const app = APPS.find((a) => a.id === id);
+    const id = R.alias[seg[0]] || seg[0]; const app = APPS.find((a) => a.id === id);
     return app ? { id, slug: seg.slice(1).join("/") } : { id: "", slug: "" };
   },
   top() {
@@ -56,7 +57,7 @@ window.openApp = function (id, opt) { const r = _open.call(this, id, opt); setTi
 const _focus = window.focus;
 window.focus = function (w) { const r = _focus.call(this, w); setTimeout(() => R.sync("replace"), 0); return r; };
 const _close = window.closeWin;
-window.closeWin = function (w, id, quiet) { const r = _close.call(this, w, id, quiet); setTimeout(() => R.sync("replace"), 60); return r; };
+window.closeWin = function (w, id, quiet) { try { const b = w.querySelector(".body"); b && b.__flush && b.__flush(); } catch {} const r = _close.call(this, w, id, quiet); setTimeout(() => R.sync("replace"), 60); return r; };
 window.addEventListener("popstate", () => R.apply(location.pathname));
 
 /* ---------- lazy apps ---------- */
@@ -85,16 +86,19 @@ lazyApp("resume", "/js/app-resume.mjs", "resumeApp");
 for (const id of ["projects", "links"]) { const i = EDITABLE.indexOf(id); if (i >= 0) EDITABLE.splice(i, 1); }
 
 /* ---------- first load: open the window the address asks for ---------- */
-(function boot() {
+export const moreReady = new Promise((res) => { window.__resolveMore = res; });
+(async function boot() {
   const rt = window.__ROUTE__ || {};
   const p = location.pathname;
-  const want = R.parse(p).id;
   if (rt.status === 404 && p !== "/") { setTimeout(() => toast("That page doesn't exist. Here is the desktop."), 900); history.replaceState({}, "", "/"); return; }
-  if (want) {
-    try { window.unlock(); } catch {}
-    const go = () => R.apply(p, { first: true });
-    if (document.readyState === "complete") setTimeout(go, 120); else window.addEventListener("load", () => setTimeout(go, 120));
-  }
+  if (p === "/") return;
+  // Apps added by the extras file (Docs, Services, Book a call) exist only once it has loaded, so wait for it before opening an address.
+  if (!R.parse(p).id) await Promise.race([moreReady, new Promise((r) => setTimeout(r, 5000))]);
+  const want = R.parse(p).id;
+  if (!want) return;
+  try { window.unlock(); } catch {}
+  const go = () => R.apply(p, { first: true });
+  if (document.readyState === "complete") setTimeout(go, 120); else window.addEventListener("load", () => setTimeout(go, 120));
 })();
 /* ---------- installable app + offline ---------- */
 export const Install = { evt: null, installed: matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,

@@ -1,3 +1,4 @@
+import { gbAll } from "./safe.mjs";
 // Loads what the public pages are made of: profile text, articles, projects, links, photos, notes, guestbook.
 import { defaults } from "./defaults.mjs";
 import { loadPosts, isLive, isoDate, blocksOf } from "./posts.mjs";
@@ -42,6 +43,15 @@ export async function loadHubPublic(store) {
   return publicHub(saved || defaultHub((await store.get("settings", { type: "json" })) ?? {}));
 }
 export const loadPhotos = async (store) => arr(await store.get("photos", { type: "json" }));
-export const loadNotes = async (store) => arr(await store.get("notes", { type: "json" }));
-export async function loadGuestbook(store) { return arr(await store.get("guestbook", { type: "json" })).filter((e) => e.status === "approved").sort((a, b) => b.ts - a.ts); }
+export const loadNotes = async (store) => arr(await store.get("notes", { type: "json" })).filter((n) => !n.private && !n.archived && !n.trashed);
+export async function loadGuestbook(store) { return arr(await gbAll(store)).filter((e) => e.status === "approved").sort((a, b) => b.ts - a.ts); }
 export { blocksOf, isoDate };
+
+// Docs published to the web
+import { loadIndex as loadDocIndex, publicMetas as docMetas, pageKey as docKey } from "./docs.mjs";
+export const docsPublic = async (store) => docMetas(await loadDocIndex(store)).sort((a, b) => b.updated - a.updated);
+export async function docBySlug(store, slug) {
+  const m = (await docsPublic(store)).find((x) => x.slug === slug); if (!m) return null;
+  const pg = (await store.get(docKey(m.id), { type: "json" })) ?? { blocks: [] };
+  return { ...m, blocks: pg.blocks || [] };
+}

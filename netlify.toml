@@ -107,6 +107,21 @@
   status = 200
   force = true
 [[redirects]]
+  from = "/docs/*"
+  to = "/.netlify/functions/page?p=/docs/:splat"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/docs"
+  to = "/.netlify/functions/page?p=/docs"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/notes/*"
+  to = "/.netlify/functions/page?p=/notes/:splat"
+  status = 200
+  force = true
+[[redirects]]
   from = "/projects/*"
   to = "/.netlify/functions/page?p=/projects/:splat"
   status = 200

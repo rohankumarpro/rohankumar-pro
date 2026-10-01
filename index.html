@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://rohankumar.pro/"><meta name="twitter:card" content="summary">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Rohan Kumar","jobTitle":"Brand Designer","url":"https://rohankumar.pro/","sameAs":["https://www.instagram.com/rohankumarpro/","https://www.youtube.com/@rohankumarpro","https://www.figma.com/@rohankumarpro","https://www.behance.net/rohankumarpro","https://www.linkedin.com/in/rohankumarpro/"]}</script>
 <!--/seo:head-->
-<meta name="theme-color" content="#E6ECE4" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0F1512" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#E9EEF8" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1117" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="/css/blocks.css"><link rel="stylesheet" href="/css/apps.css">
 <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png"><link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Rohan Kumar"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,17 +20,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  --bg:#E6ECE4; --w1:#C4E2D1; --w2:#F6D5C2; --w3:#D6D1F3; --w4:#F4E3A4;
-  --surface:#FBFCF8; --surface2:#EEF2EC; --line:#DCE3DC;
-  --ink:#17201B; --ink2:#4B5851;
-  --primary:#2E6B57; --on-primary:#fff;
-  --c1:#B5E5CD; --c2:#FFD5BE; --c3:#D6CFFF; --c4:#FFE08A; --c5:#C6E0FF; --c6:#F7C3D9;
-  --glyph:#1B2A23;
-  --shadow:0 18px 50px rgba(18,40,30,.20), 0 2px 6px rgba(18,40,30,.08);
-  --font:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bg:#E9EEF8; --w1:#C6DCFA; --w2:#FAD9D2; --w3:#DAD3FA; --w4:#CDEBD7;
+  --surface:#FAFBFF; --surface2:#E8EDF6; --line:#D3DAE8;
+  --ink:#1A1C20; --ink2:#454A55;
+  --primary:#0B57D0; --on-primary:#fff;
+  --c1:#C4EED0; --c2:#FFDBCC; --c3:#E3DAFF; --c4:#FFEFB0; --c5:#C7E3FF; --c6:#FFD9E6;
+  --glyph:#1B1C20;
+  --shadow:0 12px 40px rgba(20,35,80,.18), 0 2px 6px rgba(20,35,80,.10);
+  --font:"Google Sans Flex","Google Sans","Product Sans",Figtree,Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -38,19 +39,19 @@
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0F1512; --w1:#1A3B2E; --w2:#3B2A21; --w3:#27244A; --w4:#3D3620;
-    --surface:#1A211D; --surface2:#232C27; --line:#2E3832;
-    --ink:#E3ECE6; --ink2:#A5B4AB; --primary:#8FD5B8; --on-primary:#062519;
-    --c1:#3C7A61; --c2:#8C5B41; --c3:#5C54A3; --c4:#86702A; --c5:#3B6590; --c6:#8C4969;
-    --glyph:#F1F6F2; --shadow:0 18px 50px rgba(0,0,0,.5);
+    --bg:#0E1117; --w1:#183052; --w2:#46282D; --w3:#2A2759; --w4:#1B4332;
+    --surface:#1C1F26; --surface2:#292D36; --line:#3A3F4A;
+    --ink:#E4E6EE; --ink2:#C2C6D2; --primary:#A8C7FA; --on-primary:#062E6F;
+    --c1:#2E6A44; --c2:#8A5240; --c3:#5A4F9E; --c4:#7C671E; --c5:#2E5E98; --c6:#89445F;
+    --glyph:#F1F2F7; --shadow:0 18px 50px rgba(0,0,0,.55);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0F1512; --w1:#1A3B2E; --w2:#3B2A21; --w3:#27244A; --w4:#3D3620;
-  --surface:#1A211D; --surface2:#232C27; --line:#2E3832;
-  --ink:#E3ECE6; --ink2:#A5B4AB; --primary:#8FD5B8; --on-primary:#062519;
-  --c1:#3C7A61; --c2:#8C5B41; --c3:#5C54A3; --c4:#86702A; --c5:#3B6590; --c6:#8C4969;
-  --glyph:#F1F6F2; --shadow:0 18px 50px rgba(0,0,0,.5);
+  --bg:#0E1117; --w1:#183052; --w2:#46282D; --w3:#2A2759; --w4:#1B4332;
+  --surface:#1C1F26; --surface2:#292D36; --line:#3A3F4A;
+  --ink:#E4E6EE; --ink2:#C2C6D2; --primary:#A8C7FA; --on-primary:#062E6F;
+  --c1:#2E6A44; --c2:#8A5240; --c3:#5A4F9E; --c4:#7C671E; --c5:#2E5E98; --c6:#89445F;
+  --glyph:#F1F2F7; --shadow:0 18px 50px rgba(0,0,0,.55);
 }
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0}
@@ -540,6 +541,12 @@ button.tl-item:hover b{text-decoration:underline;text-underline-offset:3px}
 .gm-send svg{width:20px;height:20px}.gm-send:disabled{opacity:.35}.gm-send:not(:disabled):active{transform:scale(.92)}
 @keyframes gm-in{from{opacity:0;transform:translateY(6px) scale(.98)}}
 @keyframes gm-dot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+/* call popover (desktop) */
+.gm{position:relative}
+.gm-callpop{position:absolute;right:12px;top:64px;z-index:20;width:min(320px,calc(100% - 24px));background:var(--surface);color:var(--ink);border-radius:24px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:pop .22s cubic-bezier(.2,1.2,.4,1)}
+.gm-callpop b{font-size:17px}.gm-num{font-size:26px;font-weight:700;margin:6px 0 8px;letter-spacing:.3px}
+.gm-callpop ol{margin:0 0 12px;padding-left:20px;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.gm-callbtns{display:flex;gap:8px;flex-wrap:wrap}.gm-callpop small{display:block;margin-top:10px;color:var(--ink2);font-size:12px}
 /* messages icon hover: typing dots */
 .ico [class^="g-d"]{transform-box:fill-box}
 .dicon:hover .g-d1,.dicon:hover .g-d2,.dicon:hover .g-d3{animation:gm-dot 0.9s ease-in-out infinite}
@@ -765,6 +772,16 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 .cat.p-peek .cat-bubble.show{transform:none}
 .cat .heart{position:absolute;left:50%;top:22%;color:#E8574A;font-size:18px;pointer-events:none;animation:cat-heart 1.3s ease-out forwards}
 /* chat */
+/* phone chat sheet */
+.cat-chat.sheet,.cat-chat.sheet.left{position:fixed;left:10px;right:10px;width:auto;bottom:calc(var(--kb,0px) + 96px + env(safe-area-inset-bottom,0px));z-index:2400;max-height:min(44vh,330px);overflow:auto;padding:12px 12px 10px;border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,.22);overscroll-behavior:contain}
+.cat-chat.sheet .cc-msg{font-size:14px;margin-right:30px}
+.cat-chat.sheet .cc-ui{gap:6px;margin-top:8px}
+.cat-chat.sheet .cc-chip{padding:6px 11px;font-size:12.5px;text-align:left}
+.cat-chat.sheet .cc-form{position:sticky;bottom:0}
+.cat-chat.sheet .cc-form input{font-size:16px}
+.cat-chat.sheet .cc-x{width:30px;height:30px}
+html.dock-auto .cat-chat.sheet{bottom:calc(var(--kb,0px) + 40px + env(safe-area-inset-bottom,0px))}
+
 .cat-chat{position:absolute;right:30%;bottom:96%;width:min(280px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border-radius:22px 22px 6px 22px;box-shadow:var(--shadow);padding:16px 16px 14px;cursor:default;text-align:left;animation:pop .25s cubic-bezier(.2,1.2,.4,1)}
 .cat-chat.left{right:auto;left:30%;border-radius:22px 22px 22px 6px}
 .cat-chat[hidden]{display:none}
@@ -1121,6 +1138,7 @@ kbd{font:inherit;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6p
 .cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
 .cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
 </style>
+<link rel="stylesheet" href="/css/material.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="gdefs">
@@ -2025,7 +2043,7 @@ const APPS=[
   {id:"photos",title:"Photos",shape:"clover",color:"c6",glyph:G.img,w:640,h:500,render:photos},
   {id:"notes",title:"Notes",shape:"sun",color:"c4",glyph:G.note,w:560,h:460,render:notes},
   {id:"guestbook",title:"Guestbook",shape:"cookie",color:"c2",glyph:G.pen,w:600,h:560,render:guestbook},
-  {id:"documents",title:"Documents",shape:"squircle",color:"c2",glyph:G.docs,w:520,h:640,render:documents},
+  {id:"documents",title:"Wallet",shape:"squircle",color:"c2",glyph:G.docs,w:520,h:640,render:documents},
   {id:"content",title:"Content",shape:"clover",color:"c1",glyph:G.play,w:560,h:620,render:contentApp},
   {id:"resume",title:"Resume",shape:"flower",color:"c5",glyph:G.doc,w:560,h:520,render:resume},
   {id:"contact",title:"Contact",shape:"clover",color:"c2",glyph:G.mail,w:460,h:380,render:contact},
@@ -2145,10 +2163,10 @@ function documents(body){
     const qv=QV();
     const cards=qv.map((it,i)=>{const q=qrOf(it.url),br={...brandOf(it.brand)};if(it.name)br.name=it.name;
       return `<div class="dc-card${it.hidden?' hid':''}"><div class="dc-badge" style="background:${br.bg}"><span class="dc-bi">${br.ico}</span>${esc(br.name)}${it.hidden?' · hidden':''}</div><button class="dc-qr" data-k="${i}" aria-label="Enlarge ${esc(br.name)} QR code">${qrSvg(q)}<span class="dc-zoom">Tap to enlarge</span></button><div class="dc-meta"><b>${esc(it.sub||'')}</b><small>${esc(P.name)} on ${esc(br.name)}</small><a class="dc-open" href="${esc(it.url)}" target="_blank" rel="noopener">Open profile</a></div></div>`}).join('');
-    body.innerHTML=`<div class="dc"><h1>Documents</h1><p class="dc-sub">Tap a code to enlarge it, then scan it with your phone camera.</p><h3 class="lk-g">QR codes</h3><div class="dc-grid">${cards}</div><h3 class="lk-g">Private</h3><button class="dc-vault" id="dcV"><span class="dc-vi">${glyphSvg(G.lock,22)}</span><span class="lk-t"><b>Personal vault</b><small>Owner only. Opens with a passphrase</small></span></button></div>`;
+    body.innerHTML=`<div class="dc"><h1>Wallet</h1><p class="dc-sub">Tap a code to enlarge it, then scan it with your phone camera.</p><h3 class="lk-g">QR codes</h3><div class="dc-grid">${cards}</div><h3 class="lk-g">Private</h3><button class="dc-vault" id="dcV"><span class="dc-vi">${glyphSvg(G.lock,22)}</span><span class="lk-t"><b>Personal vault</b><small>Owner only. Opens with a passphrase</small></span></button></div>`;
     body.querySelector('#dcV').onclick=openVault;
     body.querySelectorAll('.dc-qr').forEach(b=>b.onclick=()=>qrBig(qv,+b.dataset.k));if(LIVE.admin)edBtn(body)};
-  const shell=(inner,top)=>{body.innerHTML=`<div class="dc dc-pw"><div class="dc-top"><button class="dc-back" id="dcB">‹ Documents</button>${top||''}</div>${inner}</div>`;body.querySelector('#dcB').onclick=home};
+  const shell=(inner,top)=>{body.innerHTML=`<div class="dc dc-pw"><div class="dc-top"><button class="dc-back" id="dcB">‹ Wallet</button>${top||''}</div>${inner}</div>`;body.querySelector('#dcB').onclick=home};
   async function openVault(){
     if(!LIVE.admin){ownerLogin();return}
     shell(`<p class="dc-sub">Opening the vault…</p>`);
@@ -2409,7 +2427,7 @@ const SK={strokes:[],tool:'pen',color:'#1f1c1a',size:4};
 try{const s=JSON.parse(localStorage.getItem('sketch')||'null');if(s&&Array.isArray(s.strokes))SK.strokes=s.strokes.slice(-400)}catch(e){}
 const saveSK=()=>{try{localStorage.setItem('sketch',JSON.stringify({strokes:SK.strokes.slice(-400)}))}catch(e){}};
 function sketch(body){
-  const COLS=['#1f1c1a','#2E6B57','#2F7BF5','#7C5CFF','#F0437A','#F46A12','#FFC21A','#FFFFFF'];
+  const COLS=['#1f1c1a','#0B57D0','#2F7BF5','#7C5CFF','#F0437A','#F46A12','#FFC21A','#FFFFFF'];
   body.innerHTML=`<div class="sk"><div class="sk-bar">
       <div class="seg sk-tools">${[['pen','Pen'],['marker','Marker'],['eraser','Eraser']].map(([k,l])=>`<button data-t="${k}" class="${SK.tool===k?'on':''}">${l}</button>`).join('')}</div>
       <div class="sk-cols">${COLS.map(c=>`<button class="sk-c ${SK.color===c?'on':''}" data-c="${c}" style="--c:${c}" aria-label="Colour ${c}"></button>`).join('')}</div>
@@ -2556,11 +2574,12 @@ const EMAIL_RE=/[^\s@]+@[^\s@]+\.[^\s@]{2,}/;
 async function sendMS(q,a){const v=visitor();if(!v.id)return;
   try{await fetch('/api/mochi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:v.id,name:v.name||'',q,a:String(a).slice(0,500)})})}catch(e){}}
 function msgTime(t){return new Date(t).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
+const PHONE_TEL='+918076211418',PHONE_SHOW='+91-8076211418';
 function messages(body){
   if(!MS.items.length){MS.items.push({from:'him',text:`Hi! I'm ${P.name.split(' ')[0]}. Drop me a message here, whether it's a project, a question, or just a hello, and I'll get back to you.`,t:Date.now(),auto:1});saveMS()}
   body.innerHTML=`<div class="gm">
     <header class="gm-bar"><img src="${PHOTO}" alt=""><div class="gm-who"><b>${esc(P.name)}</b><small>Usually replies within a day</small></div>
-      <a class="gm-ic" href="${esc(P.booking)}" target="_blank" rel="noopener" aria-label="Book a call" title="Book a call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></a></header>
+      <a class="gm-ic gm-call" href="tel:${PHONE_TEL}" aria-label="Call ${PHONE_SHOW}" title="Call ${PHONE_SHOW}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></a></header>
     <div class="gm-list" aria-live="polite"></div>
     <form class="gm-comp"><div class="gm-field"><input placeholder="Text message" aria-label="Message" maxlength="1000" autocomplete="off"></div>
       <button class="gm-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button></form>
@@ -2582,6 +2601,14 @@ function messages(body){
     if(firstMine){await autoReply("Thanks for the message! I'll read it and get back to you soon.");
       if(!MS.email){MS.askedEmail=1;saveMS();await autoReply("What's the best email to reach you?",400)}}
   };
+  const callBtn=body.querySelector('.gm-call');
+  callBtn.onclick=e=>{ if(matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad/i.test(navigator.userAgent))return; /* phones dial straight away */
+    e.preventDefault();const old=body.querySelector('.gm-callpop');if(old){old.remove();return}
+    const pop=document.createElement('div');pop.className='gm-callpop';
+    pop.innerHTML=`<b>Call ${esc(P.name.split(' ')[0])}</b><p class="gm-num">${PHONE_SHOW}</p><ol><li>Pick up your phone and open the dialer.</li><li>Dial the number above (it's an Indian number: +91).</li><li>No answer? Leave a message here and I'll call back.</li></ol><div class="gm-callbtns"><button class="btn" data-cp>Copy number</button><a class="btn tonal" href="tel:${PHONE_TEL}">Call from this device</a></div><small>Calls from a computer need a phone app such as Phone Link or Google Voice.</small>`;
+    body.querySelector('.gm').appendChild(pop);
+    pop.querySelector('[data-cp]').onclick=async ev=>{try{await navigator.clipboard.writeText(PHONE_SHOW);ev.target.textContent='Copied'}catch(x){ev.target.textContent=PHONE_SHOW}};
+    setTimeout(()=>document.addEventListener('pointerdown',function f(ev){if(!pop.contains(ev.target)&&!callBtn.contains(ev.target)){pop.remove();document.removeEventListener('pointerdown',f)}}),0)};
   draw();setTimeout(()=>inp.focus(),60);
 }
 function links(body){
@@ -2604,7 +2631,7 @@ function links(body){
   sh.onclick=async()=>{try{await navigator.clipboard.writeText(location.href);sh.textContent="Link copied"}catch(e){sh.textContent=location.href}setTimeout(()=>sh.textContent="Copy this page's link",2200)};
 }
 function contact(){return `<h1>Let's talk</h1><p>Have a project in mind or just want to say hi? My inbox is open.</p>
-<div class="links"><a class="btn" href="${esc(P.booking)}" target="_blank" rel="noopener">Book a call</a><a class="btn tonal" href="mailto:${esc(P.email)}">Email me</a><button class="btn tonal" id="copyMail">Copy email</button></div>
+<div class="links"><a class="btn" href="${esc(P.booking)}" target="_blank" rel="noopener">Book a call</a><a class="btn tonal" href="mailto:${esc(P.email)}">Email me</a><button class="btn tonal" id="copyMail">Copy email</button><a class="btn tonal" href="tel:+918076211418">Call +91-8076211418</a></div>
 <div class="links">${P.links.map(l=>`<a class="btn tonal" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>`}
 
 function settings(body){
@@ -3646,11 +3673,16 @@ function typeInto(el,html,cb){el.innerHTML='';const tmp=document.createElement('
   const step=()=>{i+=2;if(i>=txt.length){el.innerHTML=html;cb&&cb();return}el.textContent=txt.slice(0,i);type.t=setTimeout(step,16)};clearTimeout(type.t);step()}
 function type(){}
 function openChat(html,ui){if(!C.chat)SFX.play('softmeow');C.chat=true;C.busy=true;C.cb=null;if(!['sit','peek'].includes(C.pose))pose('sit');bub.classList.remove('show');
-  chatEl.hidden=false;chatEl.classList.toggle('left',C.x<300);chatUI.innerHTML='';paint();lastTalk=now();
+  chatEl.hidden=false;chatEl.classList.toggle('left',C.x<300);sheetChat();chatUI.innerHTML='';paint();lastTalk=now();
   clearTimeout(openChat.idle);const arm=()=>{clearTimeout(openChat.idle);openChat.idle=setTimeout(()=>{if(C.chat&&!chatEl.contains(document.activeElement))closeChat(true)},30000)};arm();chatEl.oninput=arm;chatEl.onpointerdown=e=>{e.stopPropagation();arm()};
   typeInto(chatMsg,html,()=>renderUI(ui))}
 function closeChat(silent){if(!C.chat)return;C.chat=false;C.busy=false;chatEl.hidden=true;lastTalk=now();paint();if(!silent)say(pick(['mrrp.','ok!','*flicks tail*']),1000)}
 chatEl.querySelector('.cc-x').onclick=()=>closeChat();
+/* On phones the chat is a bottom sheet pinned to the screen (the cat moves around and sits near the right edge, which cut it off). */
+function sheetChat(){const ph=matchMedia('(max-width:760px)').matches,desk=document.getElementById('desk');
+  if(ph&&chatEl.parentNode!==desk)desk.appendChild(chatEl);else if(!ph&&chatEl.parentNode!==cat)cat.appendChild(chatEl);
+  chatEl.classList.toggle('sheet',ph)}
+(()=>{const vv=window.visualViewport;if(!vv)return;const f=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);chatEl.style.setProperty('--kb',kb+'px')};vv.addEventListener('resize',f);vv.addEventListener('scroll',f)})();
 function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
   const addChips=()=>(ui.chips||[]).forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cc-chip'+(c.pri?' pri':'');b.textContent=c.t;b.onclick=c.fn;chatUI.appendChild(b)});
   if(ui.inputLast)addChips();
@@ -3713,7 +3745,7 @@ addEventListener('resize',()=>{C.x=clampX(C.x);C.tx=clampX(C.tx);if(C.y>2){C.y=0
 
 plantShelf();ftPill();
 shelf();tick();setInterval(tick,15000);
-if(!mobile()&&!(window.__ROUTE__&&window.__ROUTE__.app))setTimeout(()=>openApp('about'),350);
+
 </script>
 <script type="module" src="/js/os-ext.mjs"></script>
 </body>

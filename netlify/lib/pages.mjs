@@ -1,7 +1,7 @@
 // Every public address of the site (/about, /projects/<slug>, /journal/<slug> ...) described as data:
 // what the page is called, how it reads in search results, the text a crawler should see, and which window the desktop opens.
 import { esc, renderBlocks, blocksText, stripTags, slugify, firstImage, readMinutes, wordCount, blocksToMd } from "../../shared/blocks.mjs";
-import { SITE, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate } from "./site-data.mjs";
+import { SITE, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate, docsPublic, docBySlug } from "./site-data.mjs";
 import { hrefOf } from "./hub.mjs";
 import { CAROUSELS } from "./media.mjs";
 
@@ -17,7 +17,7 @@ export const APP_PAGES = {
   timeline: { path: "/timeline", title: "Timeline", index: true }, photos: { path: "/photos", title: "Photos", index: true }, notes: { path: "/notes", title: "Notes", index: true },
   guestbook: { path: "/guestbook", title: "Guestbook", index: true }, content: { path: "/content", title: "Content", index: true },
   services: { path: "/services", title: "Services", index: true }, book: { path: "/book", title: "Book a call", index: true },
-  messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/documents", title: "Documents", index: false }, settings: { path: "/settings", title: "Settings", index: false },
+  messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, docs: { path: "/docs", title: "Docs", index: true }, settings: { path: "/settings", title: "Settings", index: false },
   calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
   focus: { path: "/focus", title: "Focus timer", index: false }, search: { path: "/search", title: "Search", index: false },
 };
@@ -113,16 +113,43 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
       image: ph[0] ? `/api/photo?id=${ph[0].id}&s=f` : OG_DEFAULT, ld: [{ "@type": "ImageGallery", name: `Photos — ${pr.name}`, url: `${SITE}/photos` }, crumbs([home, { name: "Photos", path }])] });
   }
 
+  if (path === "/docs") {
+    const ds = await docsPublic(store);
+    return finish({ title: `Docs — ${pr.name}`, desc: `Guides, notes and write-ups by ${pr.name}.`, app: "docs", noindex: !ds.length || hidden.has("docs"),
+      body: `<h1>Docs</h1><ul>${ds.map((d) => `<li><a href="/docs/${esc(d.slug)}">${d.icon ? esc(d.icon) + " " : ""}${esc(d.title || "Untitled")}</a>${d.desc ? `<p>${esc(d.desc)}</p>` : ""}</li>`).join("")}</ul>`,
+      mdText: `# Docs\n\n${ds.map((d) => `- [${d.title || "Untitled"}](${SITE}/docs/${d.slug}.md)`).join("\n")}\n`, ld: [crumbs([home, { name: "Docs", path }])] });
+  }
+  if (path.startsWith("/docs/")) {
+    const d = await docBySlug(store, path.slice(6));
+    if (!d || hidden.has("docs")) return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "docs", noindex: true, notFound: true, body: `<h1>Page not found</h1><p><a href="/docs">Back to Docs</a></p>` });
+    const plain = trim(d.desc || blocksText(d.blocks), 160), img = d.cover?.src || firstImage(d.blocks) || OG_DEFAULT, iso = new Date(d.created || Date.now()).toISOString().slice(0, 10), mod = new Date(d.updated || Date.now()).toISOString();
+    return finish({ title: `${d.title || "Untitled"} — ${pr.name}`, desc: plain, app: "docs", slug: d.slug, type: "article", image: img, noindex: !!d.noindex, published: iso, modified: mod,
+      body: `<article><nav aria-label="Breadcrumb"><a href="/docs">Docs</a></nav><h1>${d.icon ? esc(d.icon) + " " : ""}${esc(d.title || "Untitled")}</h1>${renderBlocks(d.blocks, { hBase: 2 })}</article>`,
+      mdText: `# ${d.title || "Untitled"}\n\n${blocksToMd(d.blocks)}\n`,
+      ld: [{ "@type": "Article", "@id": `${SITE}/docs/${d.slug}#doc`, headline: (d.title || "Untitled").slice(0, 110), description: plain, url: `${SITE}/docs/${d.slug}`, image: [abs(img)], datePublished: iso, dateModified: mod.slice(0, 10), author: { "@id": `${SITE}/#person` }, publisher: { "@id": `${SITE}/#person` }, inLanguage: "en", wordCount: wordCount(d.blocks) }, crumbs([home, { name: "Docs", path: "/docs" }, { name: d.title || "Untitled", path }])] });
+  }
+
   if (path === "/guestbook") {
     const g = await loadGuestbook(store);
     return finish({ title: `Guestbook — ${pr.name}`, desc: `Notes left by visitors on ${pr.name}'s site.`, app: "guestbook", noindex: hidden.has("guestbook") || !g.length,
       body: `<h1>Guestbook</h1><ul>${g.slice(0, 50).map((e) => `<li><b>${esc(e.name)}</b>: ${esc(e.msg)}</li>`).join("")}</ul>`, ld: [crumbs([home, { name: "Guestbook", path }])] });
   }
 
-  if (path === "/notes") {
-    const n = await loadNotes(store);
-    return finish({ title: `Notes — ${pr.name}`, desc: `Short notes and thoughts from ${pr.name}.`, app: "notes", noindex: hidden.has("notes") || pr.placeholder,
-      body: `<h1>Notes</h1>${n.map((x) => `<article><h2>${esc(x.title)}</h2>${x.blocks?.length ? renderBlocks(x.blocks, { hBase: 3 }) : `<p>${esc(x.text)}</p>`}</article>`).join("")}`, ld: [crumbs([home, { name: "Notes", path }])] });
+  if (path === "/notes" || path.startsWith("/notes/")) {
+    const all = await loadNotes(store);
+    const bodyOf = (x) => (x.blocks?.length ? renderBlocks(x.blocks, { hBase: 3 }) : x.items?.length ? `<ul>${x.items.map((i) => `<li>${i.d ? "<s>" : ""}${esc(i.t)}${i.d ? "</s>" : ""}</li>`).join("")}</ul>` : `<p>${esc(x.text).replace(/\n/g, "<br>")}</p>`) + (x.img ? `<img src="${esc(x.img)}" alt="" loading="lazy">` : "");
+    const textOf = (x) => x.blocks?.length ? blocksText(x.blocks) : x.items?.length ? x.items.map((i) => i.t).join(". ") : x.text;
+    if (path === "/notes") {
+      return finish({ title: `Notes — ${pr.name}`, desc: `Short notes and thoughts from ${pr.name}.`, app: "notes", noindex: hidden.has("notes") || pr.placeholder || !all.length,
+        body: `<h1>Notes</h1>${all.map((x) => `<article><h2><a href="/notes/${esc(x.id)}">${esc(x.title || "Untitled")}</a></h2>${bodyOf(x)}</article>`).join("")}`,
+        mdText: `# Notes\n\n${all.map((x) => `## ${x.title || "Untitled"}\n\n${textOf(x)}`).join("\n\n")}\n`, ld: [crumbs([home, { name: "Notes", path }])] });
+    }
+    const x = all.find((n) => n.id === path.slice(7));
+    if (!x || hidden.has("notes")) return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "notes", noindex: true, notFound: true, body: `<h1>Page not found</h1><p><a href="/notes">Back to Notes</a></p>` });
+    const ttl = x.title || trim(textOf(x), 60) || "Note";
+    return finish({ title: `${ttl} — ${pr.name}`, desc: trim(textOf(x), 160), app: "notes", slug: x.id, noindex: pr.placeholder, type: "article", image: x.img || OG_DEFAULT,
+      body: `<article><nav aria-label="Breadcrumb"><a href="/notes">Notes</a></nav><h1>${esc(ttl)}</h1>${bodyOf(x)}</article>`, mdText: `# ${ttl}\n\n${textOf(x)}\n`,
+      ld: [{ "@type": "Article", headline: ttl.slice(0, 110), description: trim(textOf(x), 160), url: `${SITE}/notes/${x.id}`, author: { "@id": `${SITE}/#person` }, dateModified: new Date(x.ts || Date.now()).toISOString().slice(0, 10) }, crumbs([home, { name: "Notes", path: "/notes" }, { name: ttl, path }])] });
   }
 
   if (path === "/services") {

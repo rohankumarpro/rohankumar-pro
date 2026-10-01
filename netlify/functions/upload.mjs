@@ -8,6 +8,7 @@ import { contentStore } from "../lib/store.mjs";
 import { kindOf, upKey, newId } from "../lib/media-store.mjs";
 
 const MAX = 4_600_000; // base64 characters in one request (the platform limit is 6 MB)
+const ab = (b) => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength); // Blobs wants a plain ArrayBuffer, not a Node Buffer
 const B64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 export const handler = async (event) => {
@@ -25,11 +26,11 @@ export const handler = async (event) => {
       if (!k) return json({ error: "Only JPEG, PNG, WebP, GIF and PDF files are allowed" }, 400);
       if (idx.length >= 2000) return json({ error: "The media library is full" }, 400);
       const id = newId();
-      await store.set(upKey(id), full);
+      await store.set(upKey(id), ab(full));
       let hasThumb = false;
       if (k.image && typeof b.thumb === "string" && B64.test(b.thumb)) {
         const t = Buffer.from(b.thumb, "base64");
-        if (kindOf(t)?.image) { await store.set(upKey(id, true), t); hasThumb = true; }
+        if (kindOf(t)?.image) { await store.set(upKey(id, true), ab(t)); hasThumb = true; }
       }
       const item = { id, ext: k.ext, kind: k.image ? "image" : "file", name: String(b.name || "").slice(0, 120), bytes: full.length, w: Math.min(20000, +b.w || 0), h: Math.min(20000, +b.h || 0), thumb: hasThumb, ts: Date.now() };
       await store.setJSON("uploads", [item, ...idx]);

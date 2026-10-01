@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { contentStore } from "../lib/store.mjs";
+import { gbAll, gbAdd, gbUpdate } from "../lib/safe.mjs";
 
 const COLORS = ["c1", "c2", "c3", "c4", "c5", "c6"];
 const DAY = 86_400_000;
@@ -19,7 +20,7 @@ export const handler = async (event) => {
     connectLambda(event);
     const store = contentStore(event);
     const admin = isAdmin(event);
-    const all = (await store.get("guestbook", { type: "json" })) ?? [];
+    const all = await gbAll(store);
     const m = event.httpMethod;
 
     if (m === "GET") {
@@ -52,18 +53,16 @@ export const handler = async (event) => {
         id: Math.random().toString(16).slice(2, 14).padEnd(12, "0"), name, msg,
         color: COLORS.includes(b.color) ? b.color : "c4", ts: Date.now(), status, ip, vid,
       };
-      await store.setJSON("guestbook", all.concat([entry]));
+      await gbAdd(store, entry);
       return json({ ok: true, status, entry: pub(entry) });
     }
 
     if (m === "PUT" || m === "DELETE") {
       if (!admin) return json({ error: "Not signed in" }, 401);
       const id = m === "DELETE" ? (event.queryStringParameters || {}).id : body(event)?.id;
-      const i = all.findIndex((e) => e.id === id);
-      if (i < 0) return json({ error: "Not found" }, 404);
-      if (m === "DELETE") all.splice(i, 1);
-      else all[i].status = body(event).action === "unapprove" ? "pending" : "approved";
-      await store.setJSON("guestbook", all);
+      const act = m === "DELETE" ? "delete" : body(event).action === "unapprove" ? "pending" : "approved";
+      const ok = await gbUpdate(store, id, (e) => (act === "delete" ? null : { ...e, status: act }));
+      if (!ok) return json({ error: "Not found" }, 404);
       return json({ ok: true });
     }
     return json({ error: "Method not allowed" }, 405);

@@ -2,6 +2,7 @@
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { contentStore } from "../lib/store.mjs";
+import { saveJSON } from "../lib/safe.mjs";
 import { cleanBlocks, cleanInline, safeUrl, safeImg } from "../../shared/blocks.mjs";
 
 // Apps that can never be hidden, so the owner can't lock themselves out.
@@ -74,7 +75,7 @@ export const handler = async (event) => {
       const b = body(event);
       if (!b) return json({ error: "Bad JSON" }, 400);
       const settings = cleanSettings(b.settings);
-      await store.setJSON("settings", settings);
+      await saveJSON(store, "settings", settings);
       return json({ ok: true, settings });
     }
     return json({ error: "Method not allowed" }, 405);

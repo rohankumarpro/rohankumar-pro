@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { contentStore } from "../lib/store.mjs";
+import { saveJSON } from "../lib/safe.mjs";
 import { cleanHub, defaultHub, publicHub, vcardText } from "../lib/hub.mjs";
 
 const day = (t = Date.now()) => new Date(t).toISOString().slice(0, 10);
@@ -91,7 +92,7 @@ export const handler = async (event) => {
       if (!b?.hub) return json({ error: "Bad JSON" }, 400);
       const hub = cleanHub(b.hub);
       if (JSON.stringify(hub).length > 900000) return json({ error: "Too large" }, 413);
-      await store.setJSON("hub", hub);
+      await saveJSON(store, "hub", hub);
       return json({ ok: true, hub });
     }
     if (m === "DELETE" && q.a === "sub") {

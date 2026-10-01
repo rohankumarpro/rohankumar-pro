@@ -4,6 +4,7 @@ import { isAdmin, body, json } from "../lib/session.mjs";
 import { cleanPosts, loadPosts, isLive } from "../lib/posts.mjs";
 import { pingIndexNow } from "../lib/indexnow.mjs";
 import { contentStore } from "../lib/store.mjs";
+import { saveJSON } from "../lib/safe.mjs";
 
 export const handler = async (event) => {
   try {
@@ -22,7 +23,7 @@ export const handler = async (event) => {
       // an article keeps its modified date unless its content really changed
       const old = new Map((await loadPosts(store)).map((p) => [p.slug, p]));
       for (const p of posts) { const o = old.get(p.slug); if (o && o.body + o.title === p.body + p.title && o.modified) p.modified = o.modified; }
-      await store.setJSON("journal", posts);
+      await saveJSON(store, "journal", posts);
       const changed = posts.filter((p) => isLive(p) && before.get(p.slug) !== p.body + p.title).map((p) => `/journal/${p.slug}`);
       if (changed.length) await pingIndexNow(event, [...changed, "/journal", "/sitemap.xml", "/feed.xml"]);
       return json({ ok: true, posts });

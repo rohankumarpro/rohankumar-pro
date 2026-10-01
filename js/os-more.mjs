@@ -79,17 +79,65 @@ const Spot = {
   },
   hide() { if (Spot.el) { Spot.el.remove(); Spot.el = null; } },
 };
+/* ================= keyboard shortcuts (they all really work; the list below is what the ? sheet shows) ================= */
+const GO = { a: "about", p: "projects", j: "journal", n: "notes", d: "docs", l: "links", m: "messages", s: "settings", r: "resume", c: "contact", g: "guestbook", t: "timeline", h: "photos", w: "documents", v: "services", b: "book", x: "content" };
+const topWin = () => { const w = (window.Router || {}).top && Router.top(); return w || null; };
+const winId = (w) => w && w.dataset.app;
+function snapWin(w, side) {
+  if (!w || mobile()) return; w.classList.add("resizing-anim");
+  if (side === "max") w.classList.toggle("max");
+  else if (side === "restore") { w.classList.remove("max"); }
+  else { w.classList.remove("max"); const a = { top: 48, h: innerHeight - 140 }; w.style.top = a.top + "px"; w.style.height = a.h + "px"; w.style.width = innerWidth / 2 - 12 + "px"; w.style.left = (side === "l" ? 8 : innerWidth / 2 + 4) + "px"; }
+  setTimeout(() => w.classList.remove("resizing-anim"), 380);
+}
+function cycleWin(dir) {
+  const ws = $$(".win").filter((w) => !w.classList.contains("closing")); if (ws.length < 2) return;
+  const order = ws.sort((a, b) => (+a.style.zIndex || 0) - (+b.style.zIndex || 0)), cur = topWin(), i = order.indexOf(cur);
+  const nxt = dir > 0 ? order[0] : order[order.length - 2] || order[0]; // bring the back-most (or second) window forward
+  if (nxt.classList.contains("min")) openApp(winId(nxt)); else focus(nxt);
+}
+let chord = 0;
 document.addEventListener("keydown", (e) => {
-  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k" && !document.activeElement?.closest?.(".rte")) { e.preventDefault(); Spot.show(); return; }
-  if (!typing && !e.ctrlKey && !e.metaKey && !e.altKey && e.key === "/") { e.preventDefault(); Spot.show(); }
-  if (!typing && e.key === "?" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); shortcuts(); }
+  const ae = document.activeElement, typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae?.tagName) || ae?.isContentEditable;
+  const mod = e.ctrlKey || e.metaKey, k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (mod && k === "k" && !ae?.closest?.(".rte, .ed-host")) { e.preventDefault(); Spot.show(); return; }
+  if (document.getElementById("lock") && !document.getElementById("lock").classList.contains("off")) return; if ($(".own-dlg") && k !== "?") return;
+  // Alt shortcuts work even while typing
+  if (e.altKey && !mod) {
+    const w = topWin(); let used = true;
+    if (k === "w" || k === "x") { if (w) closeWin(w, winId(w)); }
+    else if (k === "m") { if (w) minimizeWin(w, winId(w)); }
+    else if (k === "Enter" || k === "ArrowUp") snapWin(w, "max");
+    else if (k === "ArrowDown") snapWin(w, "restore");
+    else if (k === "ArrowLeft") snapWin(w, "l");
+    else if (k === "ArrowRight") snapWin(w, "r");
+    else if (k === "]" || k === "`") cycleWin(1);
+    else if (k === "[") cycleWin(-1);
+    else if (k === "d") minimizeAll();
+    else if (k === "l" || k === " ") toggleLauncher();
+    else if (k === "n") Notif.toggle();
+    else if (k === "s") openApp("settings");
+    else if (/^[1-9]$/.test(k)) { const ids = [...$$(".shelf .app, .shelf [data-app]")].map((b) => b.dataset.app).filter(Boolean); if (ids[+k - 1]) openApp(ids[+k - 1]); else used = false; }
+    else used = false;
+    if (used) { e.preventDefault(); e.stopPropagation(); }
+    return;
+  }
+  if (typing || mod) return;
+  if (chord && Date.now() - chord < 1600) { chord = 0; const id = GO[k]; if (id) { e.preventDefault(); openApp(id); } return; }
+  if (k === "/" && !e.shiftKey) { e.preventDefault(); Spot.show(); }
+  else if (k === "?" || (k === "/" && e.shiftKey)) { e.preventDefault(); shortcuts(); }
+  else if (k === "g") { chord = Date.now(); toast("Go to… press a letter. ? lists them"); }
 }, true);
 
 function shortcuts() {
   if ($(".kbd-ov")) return;
-  const rows = [["Ctrl K  or  /", "Search everything"], ["?", "This list"], ["Esc", "Close the top box"], ["Double-click a title bar", "Maximise a window"], ["Drag a window to a screen edge", "Snap it to half the screen"], ["Writing:  /", "Insert a block (heading, image, video…)"], ["Writing:  Ctrl B / I / U", "Bold, italic, underline"], ["Writing:  Ctrl K", "Add a link"], ["Writing:  Ctrl Z / Ctrl Shift Z", "Undo and redo"], ["Writing:  Tab / Shift Tab", "Indent a list item"]];
-  const d = h("div", { class: "own-dlg kbd-ov" }, h("div", { class: "own-card kbd", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" }, h("b", {}, "Keyboard shortcuts"), h("dl", {}, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)])), h("div", { class: "own-row" }, h("button", { onclick: () => d.remove() }, "Close"))));
+  const grp = (t, rows) => [h("h4", {}, t), h("dl", {}, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]))];
+  const d = h("div", { class: "own-dlg kbd-ov" }, h("div", { class: "own-card kbd", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" }, h("b", {}, "Keyboard shortcuts"),
+    grp("Anywhere", [["Ctrl K  or  /", "Search everything"], ["?", "Show this list"], ["Esc", "Close the top box"], ["Ctrl Shift E", "Owner sign-in"]]),
+    grp("Go to an app: press G, then a letter", [["G A", "About"], ["G P", "Projects"], ["G J", "Journal"], ["G N", "Notes"], ["G D", "Docs"], ["G L", "Links"], ["G M", "Messages"], ["G R", "Resume"], ["G C", "Contact"], ["G G", "Guestbook"], ["G T", "Timeline"], ["G H", "Photos"], ["G W", "Wallet"], ["G V", "Services"], ["G B", "Book a call"], ["G X", "Content"], ["G S", "Settings"]]),
+    grp("Windows (hold Alt)", [["Alt W", "Close the window"], ["Alt M", "Minimise"], ["Alt Enter  or  Alt ↑", "Maximise or restore"], ["Alt ↓", "Restore size"], ["Alt ←  /  Alt →", "Snap to left or right half"], ["Alt ]  /  Alt [", "Switch window"], ["Alt D", "Show the desktop"], ["Alt L  or  Alt Space", "App launcher"], ["Alt N", "Notifications"], ["Alt S", "Settings"], ["Alt 1 … 9", "Open the nth app in the dock"]]),
+    grp("Writing (Journal, Projects, Docs, Notes)", [["/", "Insert a block (heading, image, video…)"], ["Ctrl B / I / U", "Bold, italic, underline"], ["Ctrl K", "Add a link"], ["Ctrl Z / Ctrl Shift Z", "Undo and redo"], ["Ctrl S", "Save now"], ["Tab / Shift Tab", "Indent or outdent a list item"], ["# , ## , - , 1. , [] , > , ```", "Markdown shortcuts at the start of a line"]]),
+    h("div", { class: "own-row" }, h("button", { onclick: () => d.remove() }, "Close"))));
   d.addEventListener("click", (e) => { if (e.target === d) d.remove(); }); d.addEventListener("keydown", (e) => { if (e.key === "Escape") d.remove(); }); document.body.append(d); d.querySelector("button").focus();
 }
 
@@ -101,36 +149,48 @@ const Notif = {
     const [j, p] = await Promise.all([api("/api/journal"), api("/api/projects")]);
     const posts = j.ok ? j.data.posts.filter((x) => !x.draft) : [], projects = p.ok ? p.data.projects.filter((x) => x.status === "published") : [];
     const first = !ls.get("rkVisited", 0);
-    for (const x of posts) { const t = Date.parse((x.published || "") + "T00:00:00Z") || 0; if (t > seen && !first) out.push({ ts: t, icon: "post", title: "New in the Journal", text: x.title, run: () => R.apply("/journal/" + x.slug) }); }
-    for (const x of projects) { const t = x.publishedAt || 0; if (t > seen && !first) out.push({ ts: t, icon: "proj", title: "New project", text: x.title, run: () => R.apply("/projects/" + x.slug) }); }
+    for (const x of posts) { const t = Date.parse((x.published || "") + "T00:00:00Z") || 0; if (t > seen && !first) out.push({ id: "post:" + x.slug, ts: t, icon: "post", title: "New in the Journal", text: x.title, run: () => R.apply("/journal/" + x.slug) }); }
+    for (const x of projects) { const t = x.publishedAt || 0; if (t > seen && !first) out.push({ id: "proj:" + x.slug, ts: t, icon: "proj", title: "New project", text: x.title, run: () => R.apply("/projects/" + x.slug) }); }
     if (isAdmin()) {
       const [m, g, s] = await Promise.all([api("/api/mochi"), api("/api/guestbook"), api("/api/hub?a=subs")]);
-      if (m.ok) { const ms = ls.get("mochiSeen", 0), n = m.data.visitors.filter((v) => (v.updated || 0) > ms).length; if (n) out.push({ ts: Date.now(), icon: "note", title: "Messages", text: `${n} new from visitors. Open Mochi's inbox in Settings.`, run: () => openApp("settings"), sticky: true }); }
-      if (g.ok) { const n = g.data.entries.filter((e) => e.status === "pending").length; if (n) out.push({ ts: Date.now(), icon: "note", title: "Guestbook", text: `${n} note${n > 1 ? "s" : ""} waiting for your approval.`, run: () => openApp("guestbook"), sticky: true }); }
-      if (s.ok) { const ss = ls.get("rkSubsSeen", 0), n = Math.max(0, s.data.subs.length - ss); if (n) out.push({ ts: Date.now(), icon: "link", title: "Subscribers", text: `${n} new email sign-up${n > 1 ? "s" : ""}.`, run: () => { openApp("links"); }, sticky: true, onOpen: () => ls.set("rkSubsSeen", s.data.subs.length) }); }
+      if (m.ok) { const ms = ls.get("mochiSeen", 0), n = m.data.visitors.filter((v) => (v.updated || 0) > ms).length; if (n) out.push({ id: "msgs:" + (m.data.visitors.map((v) => v.updated || 0).sort().pop() || 0), ts: Date.now(), icon: "note", title: "Messages", text: `${n} new from visitors. Open Mochi's inbox in Settings.`, run: () => openApp("settings"), sticky: true }); }
+      if (g.ok) { const n = g.data.entries.filter((e) => e.status === "pending").length; if (n) out.push({ id: "gb:" + n, ts: Date.now(), icon: "note", title: "Guestbook", text: `${n} note${n > 1 ? "s" : ""} waiting for your approval.`, run: () => openApp("guestbook"), sticky: true }); }
+      if (s.ok) { const ss = ls.get("rkSubsSeen", 0), n = Math.max(0, s.data.subs.length - ss); if (n) out.push({ id: "subs:" + s.data.subs.length, ts: Date.now(), icon: "link", title: "Subscribers", text: `${n} new email sign-up${n > 1 ? "s" : ""}.`, run: () => { openApp("links"); }, sticky: true, onOpen: () => ls.set("rkSubsSeen", s.data.subs.length) }); }
       const drafts = posts.length; // placeholder to keep structure simple
     }
-    if (Install.can()) out.push({ ts: Date.now(), icon: "bolt", title: "Install this site", text: "Add it to your home screen and open it like an app.", run: () => Install.prompt(), sticky: true });
-    else if (Install.ios()) out.push({ ts: Date.now(), icon: "bolt", title: "Add to Home Screen", text: "In Safari tap Share, then “Add to Home Screen” to open this like an app.", sticky: true });
+    if (Install.can()) out.push({ id: "install", ts: Date.now(), icon: "bolt", title: "Install this site", text: "Add it to your home screen and open it like an app.", run: () => Install.prompt(), sticky: true });
+    else if (Install.ios()) out.push({ id: "ios", ts: Date.now(), icon: "bolt", title: "Add to Home Screen", text: "In Safari tap Share, then “Add to Home Screen” to open this like an app.", sticky: true });
     Notif.items = out.sort((a, b) => b.ts - a.ts);
-    const unread = Notif.items.filter((n) => n.sticky || n.ts > seen).length;
-    const dot = $("#bellBtn .tb-dot"); if (dot) dot.hidden = !unread;
-    ls.set("rkVisited", 1);
+    ls.set("rkVisited", 1); Notif.updateDot();
   },
-  async toggle() { if (Notif.el) return Notif.hide(); await Notif.gather(); Notif.show(); },
+  async toggle() { if (Notif.el) return Notif.hide(); Notif.show(); Notif.refresh(); },
+  async refresh() { if (Notif.busy) return; Notif.busy = true; try { await Notif.gather(); } catch {} Notif.busy = false; if (Notif.el) Notif.paint(); },
+  list() { const dis = ls.get("rkDismiss", []); return Notif.items.filter((n) => !dis.includes(n.id)); },
+  paint() {
+    const p = Notif.el; if (!p) return; const items = Notif.list(), keep = p.scrollTop;
+    p.innerHTML = `<div class="notif-h"><b>Notifications</b>${items.length ? '<button class="notif-clear">Clear all</button>' : ""}</div>${items.length ? items.map((n, i) => `<div class="notif-row"><button class="notif-i" data-i="${i}"><span class="spot-ic">${svg(ICO[n.icon] || ICO.bolt, 18)}</span><span class="spot-t"><b>${esc(n.title)}</b><small>${esc(n.text)}</small></span></button><button class="notif-x" data-x="${i}" aria-label="Dismiss">✕</button></div>`).join("") : `<p class="hint notif-empty">${Notif.busy ? "Checking…" : "You are all caught up."}</p>`}`;
+    $$(".notif-i", p).forEach((b) => (b.onclick = () => { const n = items[+b.dataset.i]; Notif.hide(); n.onOpen && n.onOpen(); n.run && n.run(); }));
+    $$(".notif-x", p).forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const n = items[+b.dataset.x], row = b.closest(".notif-row"); const dis = ls.get("rkDismiss", []); dis.push(n.id); ls.set("rkDismiss", dis.slice(-200)); n.onOpen && n.onOpen(); row.classList.add("gone"); setTimeout(() => { Notif.updateDot(); Notif.paint(); }, 180); }));
+    const c = $(".notif-clear", p); if (c) c.onclick = () => { ls.set("rkSeen", Date.now()); const dis = ls.get("rkDismiss", []); items.forEach((n) => { dis.push(n.id); n.onOpen && n.onOpen(); }); ls.set("rkDismiss", dis.slice(-200)); Notif.updateDot(); Notif.paint(); };
+    p.scrollTop = keep;
+  },
+  updateDot() { const seen = ls.get("rkSeen", 0), dot = $("#bellBtn .tb-dot"); if (dot) dot.hidden = !Notif.list().some((n) => n.sticky || n.ts > seen); },
   show() {
     hideQS && hideQS();
     const p = h("div", { class: "qs notif", role: "dialog", "aria-label": "Notifications" });
-    p.innerHTML = `<div class="notif-h"><b>Notifications</b>${Notif.items.length ? '<button class="notif-clear">Mark as read</button>' : ""}</div>${Notif.items.length ? Notif.items.map((n, i) => `<button class="notif-i" data-i="${i}"><span class="spot-ic">${svg(ICO[n.icon] || ICO.bolt, 18)}</span><span class="spot-t"><b>${esc(n.title)}</b><small>${esc(n.text)}</small></span></button>`).join("") : '<p class="hint" style="padding:18px 6px;text-align:center">You are all caught up.</p>'}`;
     $("#desk").append(p); Notif.el = p; $("#bellBtn").setAttribute("aria-expanded", "true");
-    $$(".notif-i", p).forEach((b) => (b.onclick = () => { const n = Notif.items[+b.dataset.i]; Notif.hide(); n.onOpen && n.onOpen(); n.run && n.run(); }));
-    const c = $(".notif-clear", p); if (c) c.onclick = () => { ls.set("rkSeen", Date.now()); Notif.items.forEach((n) => n.onOpen && n.onOpen()); Notif.items = Notif.items.filter((n) => n.sticky); $("#bellBtn .tb-dot").hidden = true; Notif.hide(); };
+    Notif.paint();
     setTimeout(() => document.addEventListener("pointerdown", Notif.out, true), 0);
     const mine = Math.max(...Notif.items.filter((n) => !n.sticky).map((n) => n.ts), 0); if (mine) ls.set("rkSeen", Math.max(ls.get("rkSeen", 0), mine));
+    Notif.updateDot();
   },
   out(e) { if (Notif.el && !Notif.el.contains(e.target) && !e.target.closest("#bellBtn")) Notif.hide(); },
-  hide() { if (Notif.el) { Notif.el.remove(); Notif.el = null; $("#bellBtn")?.setAttribute("aria-expanded", "false"); document.removeEventListener("pointerdown", Notif.out, true); } },
+  hide() {
+    const p = Notif.el; if (!p) return; Notif.el = null; $("#bellBtn")?.setAttribute("aria-expanded", "false"); document.removeEventListener("pointerdown", Notif.out, true);
+    p.classList.add("closing"); setTimeout(() => p.remove(), 170);
+  },
 };
+setInterval(() => { if (!document.hidden) Notif.refresh(); }, 90000);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && Notif.el) { Notif.hide(); } });
 
 /* ================= window snapping (desktop) ================= */
@@ -177,6 +237,18 @@ window.applyText = function () { const r = _applyText.apply(this, arguments); tr
 window.settingsExtra = function (body) {
   const cur = ls.get("rkScale", 100);
   const sec = h("div", { class: "set-extra" }, h("h3", {}, "Text size"), h("div", { class: "seg" }, [90, 100, 112, 125].map((v) => h("button", { class: v === cur ? "on" : "", onclick: () => { ls.set("rkScale", v); applyScale(); $$(".seg button", sec).forEach((b) => b.classList.toggle("on", +b.dataset.v === v)); }, "data-v": v }, v === 100 ? "Normal" : v + "%"))), h("h3", {}, "This site as an app"), Install.installed ? h("p", { class: "hint" }, "You are using the installed app.") : Install.can() ? h("button", { class: "btn tonal", onclick: () => Install.prompt() }, "Install on this device") : h("p", { class: "hint" }, Install.ios() ? "In Safari tap Share, then “Add to Home Screen”." : "Use your browser's menu and choose “Install app” or “Add to Home Screen”."), h("p", {}, h("button", { class: "btn tonal", onclick: shortcuts }, "Keyboard shortcuts")));
+  if (isAdmin()) {
+    const msg = h("p", { class: "hint" }, "Everything you write in Owner mode is stored on the server, so updating the website never resets it. A backup is a copy you can keep.");
+    sec.append(h("h3", {}, "Backup"), msg, h("div", { class: "ow-row" },
+      h("a", { class: "btn tonal", href: "/api/backup", download: "" }, "Download backup"),
+      h("button", { class: "btn tonal", onclick: async () => {
+        const i = h("input", { type: "file", accept: "application/json,.json", style: "display:none" }); document.body.append(i);
+        i.onchange = async () => { const f = i.files[0]; i.remove(); if (!f) return; let data; try { data = JSON.parse(await f.text()); } catch { return toast("That file can't be read."); }
+          if (!confirm("Put this backup back? Items with the same name are replaced with the backup's version.")) return;
+          const r = await api("/api/backup", { method: "POST", body: data }); toast(r.ok ? `Restored ${r.data.restored} items. Reloading…` : r.data.error || "Restore failed"); if (r.ok) setTimeout(() => location.reload(), 1200); };
+        i.click();
+      } }, "Restore from file")));
+  }
   const own = $(".own-sec", body); own ? own.before(sec) : body.append(sec);
 };
 function applyScale() { const v = ls.get("rkScale", 100); document.body.style.zoom = v === 100 ? "" : v / 100; }
@@ -184,6 +256,8 @@ applyScale();
 
 /* ================= new apps: Services, Book a call ================= */
 const ART_ADD = {
+  docs: `<rect class="l1" x="24" y="20" width="50" height="60" rx="10" fill="#fff" stroke="${IK}" stroke-width="4.5"/><path class="up" d="M35 36h28M35 47h28M35 58h14" stroke="${IK}" stroke-width="4.5" stroke-linecap="round"/><rect class="rise" x="52" y="55" width="26" height="22" rx="6" fill="${IG}" stroke="${IK}" stroke-width="3.5"/><path d="M59 66h12" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
+  documents: `<rect class="l1" x="20" y="30" width="60" height="44" rx="11" fill="${IG}"/><path class="up" d="M24 34 62 21a4 4 0 0 1 5.4 3.8V32" fill="#fff" stroke="${IK}" stroke-width="3.5" stroke-linejoin="round"/><rect x="54" y="46" width="28" height="18" rx="9" fill="#fff"/><circle class="rise" cx="65" cy="55" r="3.6" fill="${IK}"/>`,
   services: `<rect class="l1" x="26" y="38" width="48" height="34" rx="8" fill="${IG}"/><path class="up" d="M41 38v-5a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v5" fill="none" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect x="26" y="52" width="48" height="4" fill="#2a8a45"/><circle class="rise" cx="50" cy="56" r="5" fill="#fff"/>`,
   book: `<rect class="l1" x="24" y="30" width="52" height="46" rx="8" fill="${IR}"/><rect x="24" y="44" width="52" height="32" rx="7" fill="#fff"/><path class="up" d="M36 24v12M64 24v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><g class="dots" fill="${IR}"><circle cx="38" cy="56" r="3.5"/><circle cx="50" cy="56" r="3.5"/><circle cx="62" cy="56" r="3.5"/><circle cx="38" cy="67" r="3.5"/><circle cx="50" cy="67" r="3.5"/></g>`,
 };
@@ -191,7 +265,9 @@ function newApps() {
   if (typeof ART !== "undefined") Object.assign(ART, ART_ADD);
   const SV = { id: "services", title: "Services", shape: "clover", color: "c1", glyph: G.work || G.folder, w: 640, h: 640, render: () => "" };
   const BK = { id: "book", title: "Book a call", shape: "cookie", color: "c2", glyph: G.mail, w: 560, h: 680, render: () => "" };
-  registerApp(SV); registerApp(BK);
+  const DX = { id: "docs", title: "Docs", shape: "squircle", color: "c3", glyph: G.docs || G.folder, w: 940, h: 640, render: () => "" };
+  registerApp(DX); registerApp(SV); registerApp(BK);
+  lazyApp("docs", "/js/app-docs.mjs", "docsApp");
   lazyApp("services", "/js/app-services.mjs", "servicesApp"); lazyApp("book", "/js/app-book.mjs", "bookApp");
   if (!EDITABLE.includes("services")) EDITABLE.push("services");
   renderIcons();
@@ -200,6 +276,7 @@ function newApps() {
 /* ================= go ================= */
 function init() {
   topbar(); newApps(); snapping(); widgets();
+  try { window.__resolveMore && window.__resolveMore(); } catch {}
   Notif.gather().catch(() => {});
   if (isAdmin()) setInterval(() => Notif.gather().catch(() => {}), 120000);
   document.addEventListener("owner-changed", () => Notif.gather().catch(() => {}));
