@@ -64,7 +64,7 @@ button:active:not(:disabled){opacity:.7}
 /* icons: thin line glyph, no tile, no colour */
 .ico.uitile{display:block;background:transparent;color:var(--ink)}
 .ico.uitile>svg{width:100%;height:100%;padding:0;overflow:visible}
-.ico.photo{border-radius:0;overflow:hidden;filter:grayscale(1) contrast(1.05)}
+.ico.photo{border-radius:0;overflow:hidden}
 .ico.photo svg{border-radius:0}
 .ico.photo path[fill]{fill:var(--surface2)}
 .ico.lay .icbg{fill:var(--surface2)}
@@ -107,7 +107,7 @@ button:active:not(:disabled){opacity:.7}
 .launcher .search::placeholder{color:var(--ink2)}
 .launcher .search:focus{box-shadow:none}
 .launcher .lhead{order:1;margin:0 0 calc(8 * var(--u));gap:calc(12 * var(--u));align-items:center}
-.launcher .lhead img{width:calc(24 * var(--u));height:calc(24 * var(--u));border-radius:0;filter:grayscale(1)}
+.launcher .lhead img{width:calc(24 * var(--u));height:calc(24 * var(--u));border-radius:0}
 .launcher h2{font-size:var(--label);font-weight:var(--fw-b);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
 .launcher .sub{display:none}
 .launcher .wb{width:calc(24 * var(--u));height:calc(24 * var(--u))}
@@ -129,7 +129,7 @@ button:active:not(:disabled){opacity:.7}
 .lock>*{position:relative}
 .lock .lt{order:3;font-size:clamp(calc(120 * var(--u)),calc(26 * 1vw),calc(360 * var(--u)));font-weight:var(--fw-m);letter-spacing:-.07em;line-height:.8;margin-left:-.04em}
 .lock .ld{position:absolute;top:var(--m);right:var(--m);order:0}
-.lock img{position:absolute;top:var(--m);left:var(--m);width:calc(40 * var(--u));height:calc(40 * var(--u));margin:0;border-radius:0;filter:grayscale(1);box-shadow:none}
+.lock img{position:absolute;top:var(--m);left:var(--m);width:calc(40 * var(--u));height:calc(40 * var(--u));margin:0;border-radius:0;box-shadow:none}
 .lock .ln{position:absolute;top:calc(var(--m) + 8 * var(--u));left:calc(var(--m) + 52 * var(--u));font-size:var(--fs-4);font-weight:var(--fw-b)}
 .lock button.lh{position:absolute;right:var(--m);bottom:var(--m);animation:none;background:transparent;color:var(--ink);font-size:var(--label);font-weight:var(--fw-b);letter-spacing:.1em;text-transform:uppercase;border:0;border-bottom:var(--rule);padding:0 0 calc(4 * var(--u));border-radius:0}
 .lock button.lh::after{content:" →"}
@@ -188,7 +188,6 @@ input[type=checkbox],input[type=radio],input[type=range]{accent-color:var(--ink)
 button[class],.btn,.chip{border-radius:var(--r-ctl)}
 .dot,.pill i,.wcard i,.tb-dot,.own-dot{border-radius:0}
 #ownPill i,.ownpill i{background:var(--ink)!important;box-shadow:none}
-.avatar,.avwrap,.hero img,.avatar *,.avwrap *,.lhead img,.msg-av,[class*="avatar"] img{filter:grayscale(1)}
 
 /* chips and tags: outlined labels */
 .chip,.tag,.pj-chip{background:transparent;border:1px solid var(--line);border-radius:0;font-size:var(--fs-2);font-weight:var(--fw-m);letter-spacing:.02em;color:var(--ink)}
@@ -234,11 +233,6 @@ hr{border:0;border-top:var(--hair)}
 .ck.op,.ck.fn{background:var(--surface2);border:1px solid var(--line);color:var(--ink)}
 .ck.eq,.ck[data-k="="]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
-/* ===================================================== 5. KEEPING THE SYSTEM BLACK AND WHITE =====================================================
-   Apps that carry brand or theme colour as content (link-in-bio pages, QR badges, content thumbnails) are rendered in greyscale
-   here. Colour tools (Palette, Sketch) and the owner's own pictures are left alone: that colour is the work, not the interface. */
-.hub,.qb-head,.ct-ti,.ct-eb,.dc-badge,.hb-soc span,.hbe-phone{filter:grayscale(1) contrast(1.05)}
-.hub{background:var(--bg)!important;color:var(--ink)!important}
 .tb-dot,.ownpill i{background:var(--ink)!important}
 .btn.primary,.hb-edit,.dx-b.primary{background:var(--ink);color:var(--bg);border-radius:0}
 .hub,.hub[data-shape]{--hb-r:2px}

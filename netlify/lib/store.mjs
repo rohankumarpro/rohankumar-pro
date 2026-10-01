@@ -9,4 +9,4 @@ export function isPreviewHost(event) {
   return h.includes("--") || h.startsWith("localhost") || h.startsWith("127.0.0.1");
 }
 
-export const contentStore = (event) => getStore({ name: isPreviewHost(event) ? "site-content-dev" : "site-content", consistency: "strong" }) // strong: a picture just uploaded must be readable straight away, from any server;
+export const contentStore = (event) => getStore(isPreviewHost(event) ? "site-content-dev" : "site-content");
