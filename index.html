@@ -607,7 +607,12 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 .ctx hr{border:0;border-top:1px solid var(--line);margin:4px 8px}
 /* lock screen */
 .lock{position:absolute;inset:0;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:color-mix(in srgb,var(--bg) 40%,transparent);backdrop-filter:blur(28px) saturate(1.3);transition:transform .5s cubic-bezier(.6,0,.2,1),opacity .5s;cursor:pointer;text-align:center}
-.lock.off{transform:translateY(-100%);opacity:0;pointer-events:none}
+.lock.off{transform:translateY(-100%)!important;opacity:0!important;pointer-events:none}
+.lock.swipe{touch-action:none;cursor:default}
+.lock.swipe .lh::before{content:"";display:block;width:22px;height:22px;margin:0 auto 6px;background:currentColor;opacity:.7;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 15 6-6 6 6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 15 6-6 6 6'/%3E%3C/svg%3E") center/contain no-repeat;animation:lkUp 1.6s ease-in-out infinite}
+@keyframes lkUp{0%,100%{transform:translateY(4px);opacity:.3}50%{transform:translateY(-4px);opacity:.9}}
+.lock.nudge{animation:lkNudge .5s ease}
+@keyframes lkNudge{0%,100%{transform:none}40%{transform:translateY(-26px)}}
 .lock .lt{font-size:clamp(88px,18vw,180px);font-weight:800;letter-spacing:-.05em;line-height:.9}
 .lock .ld{font-size:20px;font-weight:600;color:var(--ink2)}
 .lock img{width:72px;height:72px;border-radius:50%;object-fit:cover;margin-top:36px}
@@ -799,6 +804,15 @@ html.dock-auto .cat-chat.sheet{bottom:calc(var(--kb,0px) + 40px + env(safe-area-
 .cat-talk{position:absolute;top:14%;right:2%;width:30px;height:30px;border:0;border-radius:50%;background:var(--surface);color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.18);display:grid;place-items:center;opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .2s,transform .25s cubic-bezier(.3,1.5,.5,1)}
 .cat-talk svg{width:15px;height:15px}
 .cat.can-talk:hover .cat-talk,.cat.can-talk .cat-talk:focus-visible{opacity:1;transform:none;pointer-events:auto}
+
+/* corners and carrying */
+#desk[data-catpos="right"] .jar{right:calc(130px + 18px)}
+#desk[data-catpos="left"] .jar{right:auto;left:calc(130px + 18px)}
+@media (max-width:760px){#desk[data-catpos="right"] .jar{right:calc(96px + 12px)}#desk[data-catpos="left"] .jar{left:calc(96px + 12px)}}
+.cat.carried{transition:none;filter:drop-shadow(0 14px 16px rgba(0,0,0,.28));cursor:grabbing;z-index:2600}
+.cat.carried .bc,.cat.carried svg{transform:scale(1.06)}
+.jar.carried{transform:rotate(-8deg) scale(1.12);cursor:grabbing;z-index:2600;filter:drop-shadow(0 12px 14px rgba(0,0,0,.28));transition:none}
+.cat,.jar{-webkit-user-select:none;user-select:none}
 /* treat jar and treat */
 .jar{position:absolute;right:212px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:46px;height:56px;border:0;background:none;padding:0;z-index:800;cursor:grab;touch-action:none;transition:transform .3s cubic-bezier(.3,1.6,.5,1),opacity .3s}
 .jar:hover{transform:rotate(8deg) translateY(-2px)}
@@ -2638,11 +2652,12 @@ function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
   body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
-  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
+  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Mochi's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold Mochi or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
   body.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{desk.dataset.motion=b.dataset.mo;save();settings(body)});
   body.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{desk.dataset.status=b.dataset.sw;save();settings(body)});
   body.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{desk.dataset.cat=b.dataset.ct;save();settings(body)});
+  body.querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>{window.MOCHI&&MOCHI.setPos(b.dataset.cp);settings(body)});
   body.querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{SFX.set(b.dataset.sf==='on');SFX.play('toggle');settings(body)});
   body.querySelectorAll('[data-mu]').forEach(b=>b.onclick=()=>{desk.dataset.music=b.dataset.mu;save();settings(body)});
   body.querySelector('#mwReset').onclick=()=>{desk.dataset.music='on';save();window.resetMusicW&&resetMusicW();settings(body)};
@@ -3146,7 +3161,7 @@ function openApp(id,opt){
   w.style.top=Math.max(52,(innerHeight-H)/2-50+cascade*28)+'px';
   cascade=(cascade+1)%5;
   const B=(cls,label,path)=>`<button class="wb ${cls}" aria-label="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">${path}</svg></button>`;
-  w.innerHTML=`<div class="bar">${icon(a)}<span class="ttl">${a.title}</span>${B('mn','Minimize','<path d="M6 12h12"/>')}${B('mx','Maximize','<rect x="5" y="5" width="14" height="14" rx="3"/>')}${B('x','Close','<path d="M6 6l12 12M18 6 6 18"/>')}</div><div class="body"></div><div class="rz e"></div><div class="rz w"></div><div class="rz s"></div><div class="rz se"></div><div class="rz sw"></div>`;
+  w.innerHTML=`<div class="bar">${icon(a)}<span class="ttl">${a.title}</span>${B('fc','Focus mode (full screen, no distractions)','<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>')}${B('mn','Minimize','<path d="M6 12h12"/>')}${B('mx','Maximize','<rect x="5" y="5" width="14" height="14" rx="3"/>')}${B('x','Close','<path d="M6 6l12 12M18 6 6 18"/>')}</div><div class="body"></div><div class="rz e"></div><div class="rz w"></div><div class="rz s"></div><div class="rz se"></div><div class="rz sw"></div>`;
   wins.appendChild(w);open[id]=w;if(!RUN.includes(id))RUN.push(id);shelf.fresh=id;
   if(lastOrigin&&Date.now()-lastOrigin.t<1500){w.style.transformOrigin=`${lastOrigin.x-parseFloat(w.style.left)}px ${lastOrigin.y-parseFloat(w.style.top)}px`;w.classList.add('opening')}else w.classList.add('popin');
   w.addEventListener('animationend',e=>{if(e.target===w){w.classList.remove('opening','popin','restoring');w.style.transformOrigin=''}});lastOrigin=null;
@@ -3225,7 +3240,19 @@ desk.addEventListener('contextmenu',e=>{if(e.target.closest('.win,#launcher,#ctx
 desk.addEventListener('pointerdown',e=>{if(!ctx.hidden&&!e.target.closest('#ctx'))hideCtx()});
 function lock(){hideLauncher();hideCtx();lockEl.classList.remove('off');lockEl.setAttribute('aria-hidden','false');lockEl.tabIndex=0;lockEl.focus();keepAwake()}
 function unlock(){if(lockEl.classList.contains('off'))return;lockEl.classList.add('off');lockEl.setAttribute('aria-hidden','true');releaseAwake()}
-lockEl.addEventListener('click',unlock);
+/* Phones and tablets: swipe up to unlock (the screen follows your finger). A mouse or keyboard still unlocks with a click, Enter or Space. */
+const swipeLock=()=>matchMedia('(pointer:coarse)').matches&&matchMedia('(hover:none)').matches;
+(()=>{const go=document.getElementById('lkGo');
+  const setHint=()=>{if(go)go.textContent=swipeLock()?'Swipe up to unlock':'Tap to unlock';lockEl.classList.toggle('swipe',swipeLock())};setHint();addEventListener('resize',setHint);
+  let st=null;
+  lockEl.addEventListener('pointerdown',e=>{if(!swipeLock()||e.target.closest('#lkFs'))return;st={y:e.clientY,t:performance.now(),id:e.pointerId,dy:0};try{lockEl.setPointerCapture(e.pointerId)}catch(x){}lockEl.style.transition='none'});
+  lockEl.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;st.dy=Math.min(0,e.clientY-st.y);lockEl.style.transform=`translateY(${st.dy}px)`;lockEl.style.opacity=String(Math.max(.25,1+st.dy/(innerHeight*.9)))});
+  const end=e=>{if(!st||e.pointerId!==st.id)return;const dy=st.dy,v=-dy/Math.max(1,performance.now()-st.t);st=null;lockEl.style.transition='';
+    if(dy<-90||(dy<-30&&v>.5)){lockEl.style.transform='';lockEl.style.opacity='';unlock()}
+    else{lockEl.style.transform='';lockEl.style.opacity='';if(dy>-8)lockEl.classList.add('nudge'),setTimeout(()=>lockEl.classList.remove('nudge'),600)}};
+  lockEl.addEventListener('pointerup',end);lockEl.addEventListener('pointercancel',end);
+  lockEl.addEventListener('click',e=>{if(swipeLock()&&e.detail!==0)return;unlock()});
+})();
 document.addEventListener('keydown',e=>{if(!lockEl.classList.contains('off')){if(!['Tab','Enter',' ','Escape'].includes(e.key)&&!/^F\d+$/.test(e.key))e.preventDefault()}else if(e.key==="Escape")hideCtx()},true);
 /* lock screen: starts locked, opens only on tap/click, full screen + keep-awake for screensaver use */
 let screenWL=null;
@@ -3454,7 +3481,8 @@ const saveC=()=>{try{localStorage.setItem('catState',JSON.stringify({trust:C.tru
 const W=()=>cat.offsetWidth||130;
 const small=()=>innerWidth<=760;
 const TOUCH=matchMedia('(hover:none)').matches;
-const home=()=>innerWidth-W()-(small()?36:52);
+const catPos=()=>desk.dataset.catpos||'roam';
+const home=()=>catPos()==='left'?(small()?6:10):catPos()==='right'?innerWidth-W()-(small()?4:8):innerWidth-W()-(small()?36:52);
 const peekX=()=>innerWidth-W()*0.45;
 const clampX=v=>clamp(v,0,innerWidth-W()*0.4);
 const awake=()=>C.pose!=='sleep';
@@ -3497,6 +3525,7 @@ const GL=(()=>{try{return null;const cv=document.getElementById('catGL');
   return{draw(dt){if(desk.dataset.cat==='off'||document.hidden)return;size();const sc2=W()/130;R.root.scale.setScalar(sc2);
     R.update(dt,{x:C.x+W()/2,ground:baseB()+C.y,elev:C.y,pose:C.pose,mood:C.mood,dir:C.dir,lookX:C.lx||0,lookY:C.ly||0});ren.render(sc,cam)},
     z(v){cv.style.zIndex=v}}}catch(e){return null}})();
+try{const cp=localStorage.getItem('catPos');if(cp==='left'||cp==='right')desk.dataset.catpos=cp}catch(e){}
 C.x=home();paint();requestAnimationFrame(frame);
 
 /* ---------- eyes follow the cursor ---------- */
@@ -3515,6 +3544,7 @@ function wake(reason){if(C.pose!=='sleep')return;C.awakeSince=now();pose('sit');
   else{mood('blink',250);say(pick(['mrrp?','…hm?']),1300)}}
 function goSleep(){closeChat(true);mood('yawn',1400);say('*yawn*',1400);
   later(()=>{if(C.drag||C.busy)return;mood('',0);const settle=()=>{C.dir=-1;pose('sleep');C.sleepUntil=now()+rand(45000,90000)};
+    if(C.free){settle();return}
     if(C.y>2)jumpTo(dockR().right+10,0,()=>walkTo(home(),80,'walk',settle));else if(Math.abs(C.x-home())>6)walkTo(home(),80,'walk',settle);else settle()},1500)}
 function poke(){C.lastPoke=now();C.lastAct=now();if(C.busy||C.drag||C.jump)return;
   if(C.pose==='sleep'){C.busy=true;pose('sit');mood('startle',950);SFX.play('meow');say('!!',900);C.awakeSince=now();
@@ -3524,7 +3554,7 @@ function poke(){C.lastPoke=now();C.lastAct=now();if(C.busy||C.drag||C.jump)retur
   if(C.chat){pet();return}
   C.trust>=3?pet():flee();
 }
-cat.addEventListener('pointerdown',e=>{if(e.target.closest('.cat-chat,.cat-talk'))return;if(e.target.closest('.cat-bubble')&&cat.classList.contains('can-talk')){e.stopPropagation();return}e.stopPropagation();e.preventDefault();poke()});
+cat.addEventListener('pointerdown',e=>{if(e.target.closest('.cat-chat,.cat-talk'))return;if(e.target.closest('.cat-bubble')&&cat.classList.contains('can-talk')){e.stopPropagation();return}e.stopPropagation();e.preventDefault()});
 talkBtn.addEventListener('pointerdown',e=>e.stopPropagation());
 talkBtn.addEventListener('click',e=>{e.stopPropagation();askMenu()});
 bub.addEventListener('click',e=>{e.stopPropagation();if(cat.classList.contains('can-talk'))askMenu()});
@@ -3570,9 +3600,11 @@ desk.addEventListener('scroll',()=>{if(desk.scrollLeft||desk.scrollTop){desk.scr
 function activity(){
   if(desk.dataset.cat==='off'||C.drag||C.busy||C.chat||C.jump||!awake()||!['sit'].includes(C.pose))return;
   const n=now(),r=dockR(),canDock=!small()&&r.width>0,canSit=canDock&&r.width>W()+30;
+  if(C.free)return;
   if(C.y>2){C.busy=true;const down=r.right+8<innerWidth-W()?r.right+8:r.left-W()-8;say(pick(['hup!','*thud*']),900);jumpTo(down,0,()=>{C.busy=false},36);return}
   if(n-C.lastAct>30000&&n-C.awakeSince>60000){goSleep();return}
   const roll=Math.random();C.busy=true;const done=()=>{C.busy=false;if(!C.jump&&!MOVING.has(C.pose))pose('sit');paint()};
+  if(catPos()!=='roam'&&(roll<.28||roll>.54)){done();return} /* parked in a corner: she only grooms and stretches */
   if(roll<.28){walkTo(rand(innerWidth*.3,home()),rand(70,95),'walk',()=>{pose('sit');done()})}
   else if(roll<.44){pose('groom');if(Math.random()<.5)say('*lick lick*',1200);later(()=>{pose('sit');done()},rand(2600,4200))}
   else if(roll<.54){pose('stretch');mood('blink',0);later(()=>{mood('',0);done()},1700)}
@@ -3587,9 +3619,9 @@ function activity(){
 /* ---------- treats (and getting full) ---------- */
 function groundY(){return innerHeight-baseB()-12}
 function moveTreat(x,y){if(C.treat){C.treat.style.left=x+'px';C.treat.style.top=y+'px'}}
-function updJar(){jar.classList.toggle('full',full());jarTip.textContent=full()?'Mochi is full for now':'Drag a treat to Mochi'}
+function updJar(){jar.classList.toggle('full',full());jarTip.textContent=full()?'Mochi is full for now':'Drag a treat to Mochi. Hold to move me.'}
 updJar();setInterval(updJar,5000);
-jar.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(C.treat||desk.dataset.cat==='off')return;
+function jarDown(e){if(C.free){C.free=false;saveFree()}if(C.treat||desk.dataset.cat==='off')return;
   C.drag=true;C.handT=0;C.lastTreat=now();closeChat(true);jar.classList.add('open');
   const t=document.createElement('div');t.className='treat';t.innerHTML=FISH;document.body.appendChild(t);C.treat=t;C.px=e.clientX;C.py=e.clientY;moveTreat(e.clientX,e.clientY);
   if(full()){if(awake()){mood('away',1500);say(pick(['I’m stuffed…','no more, thank you','*turns away*']),1500)}return}
@@ -3598,7 +3630,7 @@ jar.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if
   else if(['peek','crouch','sneak'].includes(C.pose)){say(pick(['!!','treat?!','is that… for me?']),1200);pose('sit')}
   else if(C.y>2){say('!!',900);C.busy=true;jumpTo(dockR().right+8,0,()=>C.busy=false,34)}
   else{mood('',0);say(pick(['!!','treat?','mrrp!']),1000)}
-});
+}
 function chase(){
   if(!C.drag||full()||C.busy||C.jump||['sleep','eat'].includes(C.pose)||C.mood==='sniff')return;
   const w=W(),target=clampX(C.px-w/2),d=target-C.x;
@@ -3716,6 +3748,58 @@ function maybeTalk(){
   if(document.querySelector('.win.top .cc-form, .win.top input:focus'))return;
   const s=V.stage;V.stage++;saveV();STAGES[s]();
 }
+
+/* ---------- move Mochi and the treat jar: press and hold for half a second, then drag anywhere ---------- */
+const HOLD=450;
+const saveFree=()=>{try{if(C.free)localStorage.setItem('catFree',JSON.stringify({fx:C.fx,fy:C.fy}));else localStorage.removeItem('catFree')}catch(e){}};
+const saveJar=p=>{try{p?localStorage.setItem('jarPos',JSON.stringify(p)):localStorage.removeItem('jarPos')}catch(e){}};
+function placeJar(){let p=null;try{p=JSON.parse(localStorage.getItem('jarPos')||'null')}catch(e){}
+  if(!p){jar.style.left=jar.style.top=jar.style.right=jar.style.bottom='';jar.style.position='';return}
+  const w=jar.offsetWidth||46,h=jar.offsetHeight||56;jar.style.position='fixed';jar.style.right='auto';jar.style.bottom='auto';
+  jar.style.left=clamp(p.fx*innerWidth,0,innerWidth-w)+'px';jar.style.top=clamp(p.fy*innerHeight,50,innerHeight-h)+'px'}
+function holdToCarry(el,{onStart,onMove,onEnd,onTap,shouldIgnore}){
+  let st=null;
+  el.addEventListener('pointerdown',e=>{if(e.button!==0||(shouldIgnore&&shouldIgnore(e)))return;
+    st={id:e.pointerId,x:e.clientX,y:e.clientY,carry:false,moved:false,e0:e};
+    st.t=setTimeout(()=>{if(!st||st.moved)return;st.carry=true;try{el.setPointerCapture(st.id)}catch(x){}onStart(st.e0);if(navigator.vibrate)try{navigator.vibrate(12)}catch(x){}},HOLD)},true);
+  el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
+    if(!st.carry){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8){st.moved=true;clearTimeout(st.t)}return}
+    e.preventDefault();onMove(e)},true);
+  const up=e=>{if(!st||e.pointerId!==st.id)return;clearTimeout(st.t);const s2=st;st=null;if(s2.carry){onEnd(e);e.stopPropagation()}else if(!s2.moved)onTap&&onTap(e,s2)};
+  el.addEventListener('pointerup',up,true);el.addEventListener('pointercancel',up,true);
+  el.addEventListener('contextmenu',e=>{if(st&&st.carry)e.preventDefault()});
+  return ()=>st&&st.carry}
+/* Mochi */
+const carryingCat=holdToCarry(cat,{
+  shouldIgnore:e=>!!e.target.closest('.cat-chat,.cat-talk'),
+  onTap(){poke()},
+  onStart(){C.carry=true;C.busy=true;C.jump=null;C.cb=null;C.free=false;closeChat(true);mood('',0);pose('sit');cat.classList.add('carried');say('wheee!',900);try{SFX.play('softmeow')}catch(x){}},
+  onMove(e){C.x=clampX(e.clientX-W()/2);C.y=clamp(innerHeight-e.clientY-baseB()-W()*0.3,0,innerHeight-160);C.tx=C.x},
+  onEnd(){C.carry=false;cat.classList.remove('carried');C.busy=false;
+    if(C.y<26){C.y=0;C.free=false;C.lastAct=now();say('*lands*',900)}
+    else{C.free=true;C.fx=C.x/innerWidth;C.fy=C.y/innerHeight;C.lastAct=now();say(pick(['my spot now.','hm. nice view.','*sits*']),1300)}
+    saveFree();pose('sit');paint()}});
+cat.addEventListener('dblclick',e=>{if(C.free){C.free=false;saveFree();C.busy=true;say('back to roaming',1000);jumpTo(clampX(home()),0,()=>{C.busy=false;pose('sit')},40)}});
+cat.style.webkitTouchCallout='none';cat.style.userSelect='none';
+/* the treat jar */
+let jarSt=null;
+const jarCarrying=holdToCarry(jar,{
+  onStart(e){jarSt={dx:e.clientX-jar.getBoundingClientRect().left,dy:e.clientY-jar.getBoundingClientRect().top};jar.classList.add('carried');jar.style.position='fixed';jar.style.right='auto';jar.style.bottom='auto'},
+  onMove(e){const w=jar.offsetWidth,h=jar.offsetHeight;jar.style.left=clamp(e.clientX-jarSt.dx,0,innerWidth-w)+'px';jar.style.top=clamp(e.clientY-jarSt.dy,50,innerHeight-h)+'px'},
+  onEnd(){jar.classList.remove('carried');const r=jar.getBoundingClientRect();saveJar({fx:r.left/innerWidth,fy:r.top/innerHeight});say('treats go here now.',1100)}});
+/* a quick press-and-drag on the jar still pulls a treat out, exactly as before */
+jar.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(e.button!==0)return;
+  const x0=e.clientX,y0=e.clientY,id=e.pointerId;let started=false;
+  const mv=ev=>{if(ev.pointerId!==id||started||jarCarrying())return;if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>6){started=true;cleanup();jarDown(ev)}};
+  const up=ev=>{if(ev.pointerId===id)cleanup()};
+  const cleanup=()=>{removeEventListener('pointermove',mv,true);removeEventListener('pointerup',up,true);removeEventListener('pointercancel',up,true)};
+  addEventListener('pointermove',mv,true);addEventListener('pointerup',up,true);addEventListener('pointercancel',up,true)});
+jar.style.webkitTouchCallout='none';
+/* restore where they were left */
+try{const f=JSON.parse(localStorage.getItem('catFree')||'null');if(f&&typeof f.fx==='number'){C.free=true;C.fx=f.fx;C.fy=f.fy;C.x=clampX(f.fx*innerWidth);C.tx=C.x;C.y=clamp(f.fy*innerHeight,0,innerHeight-160);paint()}}catch(e){}
+placeJar();
+function setCatPos(v){desk.dataset.catpos=v;try{localStorage.setItem('catPos',v)}catch(e){}C.free=false;saveFree();C.busy=false;C.jump=null;C.cb=null;if(C.y>0){C.y=0}C.x=home();C.tx=C.x;saveJar(null);placeJar();C.dir=v==='left'?1:-1;pose(C.pose==='sleep'?'sleep':'sit');paint()}
+function resetPlaces(){setCatPos('roam')}
 /* visitors asking about Rohan */
 function answer(k){return MOCHI_TALK[k]}
 function reply(k,q){record('asked',q);const extra={available:[{t:'Book a call',pri:1,fn:()=>{book();closeChat(true)}}],contact:[{t:'Book a call',pri:1,fn:()=>{book();closeChat(true)}},{t:'Leave my email',fn:()=>askEmail('contact-email')}],price:[{t:'Book a call',pri:1,fn:()=>{book();closeChat(true)}}],
@@ -3739,8 +3823,8 @@ function askMenu(){if(!awake())wake();
     inputLast:true,input:{ph:'Or ask anything…',max:200,done:v=>reply(classify(v),v)}})}
 
 /* ---------- hooks ---------- */
-window.MOCHI={wake:()=>wake(),sleep:()=>{if(C.pose!=='sleep')goSleep()},asleep:()=>C.pose==='sleep',talk:askMenu};
-addEventListener('resize',()=>{C.x=clampX(C.x);C.tx=clampX(C.tx);if(C.y>2){C.y=0;pose('sit')}});
+window.MOCHI={setPos:v=>setCatPos(v),reset:()=>resetPlaces(),wake:()=>wake(),sleep:()=>{if(C.pose!=='sleep')goSleep()},asleep:()=>C.pose==='sleep',talk:askMenu};
+addEventListener('resize',()=>{if(C.free&&C.fx!=null){C.x=clampX(C.fx*innerWidth);C.y=clamp(C.fy*innerHeight,0,innerHeight-160);C.tx=C.x;placeJar();return}C.x=clampX(C.x);C.tx=clampX(C.tx);if(C.y>2){C.y=0;pose('sit')}if(catPos()!=='roam'&&!C.jump&&!MOVING.has(C.pose)){C.x=home();C.tx=C.x}placeJar()});
 })();
 
 plantShelf();ftPill();

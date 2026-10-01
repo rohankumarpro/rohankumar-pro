@@ -18,22 +18,37 @@ async function load(force) {
   N.fromSeed = !saved;
   const now = Date.now();
   N.list = (saved || (typeof NOTES !== "undefined" ? NOTES : []).map((n) => ({ ...n }))).map((n, i) => ({ ...n, id: n.id || uid(), color: COLORS.includes(n.color) ? n.color : "c0", ts: n.ts || now - i }));
+  // if a save did not reach the server last time (closed too quickly, offline, signed out), put those notes back and save them
+  if (isAdmin()) { try { const pend = JSON.parse(localStorage.getItem(PENDING) || "null"); if (pend && Array.isArray(pend.notes) && pend.notes.length) { N.list = pend.notes; N.fromSeed = false; setTimeout(persist, 300); } } catch {} }
   // the bin empties itself after a month
   if (isAdmin() && !N.fromSeed) { const keep = N.list.filter((n) => !n.trashed || now - n.trashed < BIN_DAYS * 864e5); if (keep.length !== N.list.length) { N.list = keep; persist(); } }
   window.LIVE && (LIVE.notes = N.list, LIVE.loaded = true);
 }
-let saveT = null;
-function queue() { clearTimeout(saveT); setSt("Unsaved…"); saveT = setTimeout(persist, 700); }
-async function persist() {
+let saveT = null, retryT = null, warned = false;
+const PENDING = "knPending";
+function queue() {
+  clearTimeout(saveT); setSt("Saving…");
+  try { localStorage.setItem(PENDING, JSON.stringify({ ts: Date.now(), notes: N.list })); } catch {}   // a copy on this device until the server confirms
+  saveT = setTimeout(persist, 500);
+}
+async function persist(keepalive) {
   clearTimeout(saveT);
   if (!isAdmin()) return;
   if (N.saving) { N.again = true; return; }
   N.saving = true; setSt("Saving…");
   try {
-    const r = await api("/api/notes", { method: "PUT", body: { notes: N.list } });
-    if (r.ok) { N.fromSeed = false; setSt("Saved"); window.LIVE && (LIVE.notes = N.list); } else setSt(r.status === 401 ? "Signed out. Not saved." : "Could not save (" + r.status + ")");
+    const r = await api("/api/notes", { method: "PUT", body: { notes: N.list }, keepalive });
+    if (r.ok) { N.fromSeed = false; warned = false; setSt("Saved"); try { localStorage.removeItem(PENDING); } catch {} window.LIVE && (LIVE.notes = N.list); }
+    else {
+      setSt(r.status === 401 ? "Signed out. Sign in again to save." : "Not saved yet. Retrying…");
+      if (!warned) { warned = true; toast(r.status === 401 ? "You are signed out, so your notes could not be saved. They are kept on this device." : "Could not save your notes (" + (r.status || "offline") + "). Trying again."); }
+      if (r.status !== 401) { clearTimeout(retryT); retryT = setTimeout(persist, 5000); }
+    }
   } finally { N.saving = false; if (N.again) { N.again = false; persist(); } }
 }
+export async function flushNotes() { clearTimeout(saveT); if (isAdmin() && (localStorage.getItem(PENDING) || N.saving)) await persist(true); }
+addEventListener("pagehide", () => { if (isAdmin() && N.list && localStorage.getItem(PENDING)) persist(true); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && isAdmin() && N.list && localStorage.getItem(PENDING)) persist(true); });
 const setSt = (t) => { N.status = t; $$(".kn-st").forEach((e) => (e.textContent = t)); };
 const textOf = (n) => (n.blocks && n.blocks.length ? blocksText(n.blocks, " ") : n.items ? n.items.map((i) => i.t).join(" ") : n.text || "");
 const labelsAll = () => [...new Set(N.list.filter((n) => !n.trashed).flatMap((n) => n.labels || []))].sort((a, b) => a.localeCompare(b));
@@ -49,6 +64,7 @@ function visibleList() {
 
 export async function notesApp(body, slug) {
   body.classList.add("kn-body");
+  body.__flush = async () => { try { body.__composerFinish && body.__composerFinish(); } catch {} const mh = $(".kn-modal-host", body); if (mh && mh.__close) await mh.__close("replace"); await flushNotes(); };
   R.handlers.notes = (b, key) => (key ? openNote(body, key, "replace") : closeModal(body, "replace"));
   body.innerHTML = '<div class="app-loading"><span class="rb-spin"></span></div>';
   await load(true);
@@ -134,6 +150,11 @@ function action(body, n, a, anchor) {
 /* ---------- quick capture (owner) ---------- */
 function composer(body) {
   const host = $(".kn-compose", body); let open = false, mode = "text";
+  // a note being typed is put in the list (and saved) as soon as it has anything in it, so nothing is lost if the window is closed
+  const commit = () => { const n = draw.n; if (!n) return; if (n.kind === "list") { /* empty rows are cleaned when the note closes */ }
+    const has = (n.title || "").trim() || (n.text || "").trim() || n.img || (n.items || []).some((i) => i.t.trim());
+    if (has && !draw.inList) { N.list.unshift(n); draw.inList = true; }
+    if (draw.inList) { n.ts = Date.now(); queue(); } };
   const draw = () => {
     if (!open) {
       host.innerHTML = `<div class="kn-compose-bar"><button class="kn-take" data-open>Take a note…</button><button class="kn-ib" data-open="list" aria-label="New checklist" title="New checklist">☑</button><button class="kn-ib" data-open="img" aria-label="New note with image" title="New note with image">🖼️</button></div>`;
@@ -147,28 +168,36 @@ function composer(body) {
     const card = $(".kn-compose-card", host);
     const ti = $(".kn-ti", host), ta = $(".kn-ta", host);
     const fit = (t) => { t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 320) + "px"; };
-    ti.oninput = () => (n.title = ti.value);
-    if (ta) { ta.oninput = () => { n.text = ta.value; fit(ta); }; fit(ta); }
-    if (n.kind === "list") itemsEditor($(".kn-items", host), n, () => {});
+    ti.oninput = () => { n.title = ti.value; commit(); };
+    if (ta) { ta.oninput = () => { n.text = ta.value; fit(ta); commit(); }; fit(ta); }
+    if (n.kind === "list") itemsEditor($(".kn-items", host), n, commit);
     (ta || ti).focus({ preventScroll: true });
     card.onclick = async (e) => {
       const a = e.target.closest("[data-a]")?.dataset.a; if (!a) return;
-      if (a === "color") colorPop(e.target, n, draw);
-      if (a === "pin") { n.pin = !n.pin; draw(); }
+      if (a === "color") colorPop(e.target, n, () => { commit(); draw(); });
+      if (a === "pin") { n.pin = !n.pin; commit(); draw(); }
       if (a === "img") pickImg();
-      if (a === "mode") { n.title = ti.value; if (n.kind === "list") { n.text = n.items.map((i) => i.t).filter(Boolean).join("\n"); delete n.items; delete n.kind; } else { n.items = (ta.value || "").split("\n").map((t) => t.trim()).filter(Boolean).map((t) => ({ id: uid(), t })); if (!n.items.length) n.items = [{ id: uid(), t: "" }]; n.kind = "list"; n.text = ""; } draw(); }
+      if (a === "mode") { n.title = ti.value; if (n.kind === "list") { n.text = n.items.map((i) => i.t).filter(Boolean).join("\n"); delete n.items; delete n.kind; } else { n.items = (ta.value || "").split("\n").map((t) => t.trim()).filter(Boolean).map((t) => ({ id: uid(), t })); if (!n.items.length) n.items = [{ id: uid(), t: "" }]; n.kind = "list"; n.text = ""; } commit(); draw(); }
       if (a === "done") finish();
     };
     card.onkeydown = (e) => { if (e.key === "Escape" || ((e.ctrlKey || e.metaKey) && e.key === "Enter")) { e.preventDefault(); finish(); } };
   };
   async function pickImg() {
-    try { const f = (await Up.pick("image/*"))[0]; if (!f) return; const n = draw.n || (draw.n = { id: uid(), title: "", text: "", color: "c0", created: Date.now(), ts: Date.now() }); setSt("Uploading…"); const r = await Up.image(f, { max: 1600 }); n.img = r.url; setSt(""); draw(); } catch (e) { toast(e.message || "Upload failed"); }
+    try { const f = (await Up.pick("image/*"))[0]; if (!f) return; const n = draw.n || (draw.n = { id: uid(), title: "", text: "", color: "c0", created: Date.now(), ts: Date.now() }); setSt("Uploading…"); const r = await Up.image(f, { max: 1600 }); n.img = r.url; commit(); draw(); } catch (e) { toast(e.message || "Upload failed"); }
   }
   function finish() {
-    const n = draw.n; open = false; draw.n = null;
-    if (n) { if (n.kind === "list") n.items = n.items.filter((i) => i.t.trim()); const empty = !n.title.trim() && !(n.text || "").trim() && !(n.items && n.items.length) && !n.img; if (!empty) { n.title = n.title.trim(); if (!n.pin) delete n.pin; N.list.unshift(n); queue(); N.filter = "notes"; drawNav(body); drawLists(body); } }
+    const n = draw.n, inList = draw.inList; open = false; draw.n = null; draw.inList = false;
+    if (n && inList) {
+      if (n.kind === "list") n.items = n.items.filter((i) => i.t.trim());
+      const empty = !(n.title || "").trim() && !(n.text || "").trim() && !(n.items && n.items.length) && !n.img;
+      if (empty) N.list = N.list.filter((x) => x.id !== n.id); else { n.title = (n.title || "").trim(); if (!n.pin) delete n.pin; }
+      queue(); N.filter = "notes"; drawNav(body); drawLists(body);
+    }
     draw();
   }
+  body.__composerFinish = () => { if (open) finish(); };
+  // clicking anywhere outside the open note card saves and closes it, like Keep
+  host.closest(".kn").addEventListener("click", (e) => { if (open && e.target.isConnected && !e.target.closest(".kn-compose, .kn-pop, .kn-modal-host")) finish(); });
   draw();
 }
 function itemsEditor(host, n, onChange) {

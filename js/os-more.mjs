@@ -3,6 +3,7 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile } from "/js/lib.mjs";
 import { R, Install, registerApp, lazyApp } from "/js/os-ext.mjs";
 import { slugify, stripTags } from "/shared/blocks.mjs";
+import { Focus, Overview, addTabsButton } from "/js/os-windows.mjs";
 
 const ls = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const svg = (p, s = 18) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -29,6 +30,8 @@ const Spot = {
       { k: "Action", t: "Close all windows", s: "Tidy the desktop", i: "bolt", run: () => closeAll() },
       { k: "Action", t: "Copy link to this page", s: location.pathname, i: "link", run: () => navigator.clipboard.writeText(location.href).then(() => toast("Link copied")) },
       { k: "Action", t: "Book a call", s: "Free intro call", i: "bolt", run: () => openApp("book") },
+      { k: "Action", t: "All open windows", s: "Alt A", i: "app", run: () => Overview.show() },
+      { k: "Action", t: "Focus mode for the current app", s: "Alt Z", i: "bolt", run: () => { const w = topWin(); w ? Focus.enter(w) : toast("Open an app first"); } },
       { k: "Action", t: "Show keyboard shortcuts", s: "Press ? anywhere", i: "bolt", run: () => shortcuts() },
     ];
     if (Install.can()) A.push({ k: "Action", t: "Install as an app", s: "Add to your device", i: "bolt", run: () => Install.prompt() });
@@ -115,6 +118,8 @@ document.addEventListener("keydown", (e) => {
     else if (k === "[") cycleWin(-1);
     else if (k === "d") minimizeAll();
     else if (k === "l" || k === " ") toggleLauncher();
+    else if (k === "a") Overview.toggle();
+    else if (k === "z") { const w = topWin(); if (w) Focus.toggle(w); }
     else if (k === "n") Notif.toggle();
     else if (k === "s") openApp("settings");
     else if (/^[1-9]$/.test(k)) { const ids = [...$$(".shelf .app, .shelf [data-app]")].map((b) => b.dataset.app).filter(Boolean); if (ids[+k - 1]) openApp(ids[+k - 1]); else used = false; }
@@ -135,7 +140,7 @@ function shortcuts() {
   const d = h("div", { class: "own-dlg kbd-ov" }, h("div", { class: "own-card kbd", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" }, h("b", {}, "Keyboard shortcuts"),
     grp("Anywhere", [["Ctrl K  or  /", "Search everything"], ["?", "Show this list"], ["Esc", "Close the top box"], ["Ctrl Shift E", "Owner sign-in"]]),
     grp("Go to an app: press G, then a letter", [["G A", "About"], ["G P", "Projects"], ["G J", "Journal"], ["G N", "Notes"], ["G D", "Docs"], ["G L", "Links"], ["G M", "Messages"], ["G R", "Resume"], ["G C", "Contact"], ["G G", "Guestbook"], ["G T", "Timeline"], ["G H", "Photos"], ["G W", "Wallet"], ["G V", "Services"], ["G B", "Book a call"], ["G X", "Content"], ["G S", "Settings"]]),
-    grp("Windows (hold Alt)", [["Alt W", "Close the window"], ["Alt M", "Minimise"], ["Alt Enter  or  Alt ↑", "Maximise or restore"], ["Alt ↓", "Restore size"], ["Alt ←  /  Alt →", "Snap to left or right half"], ["Alt ]  /  Alt [", "Switch window"], ["Alt D", "Show the desktop"], ["Alt L  or  Alt Space", "App launcher"], ["Alt N", "Notifications"], ["Alt S", "Settings"], ["Alt 1 … 9", "Open the nth app in the dock"]]),
+    grp("Windows (hold Alt)", [["Alt W", "Close the window"], ["Alt M", "Minimise"], ["Alt Enter  or  Alt ↑", "Maximise or restore"], ["Alt ↓", "Restore size"], ["Alt ←  /  Alt →", "Snap to left or right half"], ["Alt ]  /  Alt [", "Switch window"], ["Alt D", "Show the desktop"], ["Alt A", "All open windows (overview)"], ["Alt Z", "Focus mode: full screen, nothing else"], ["Alt L  or  Alt Space", "App launcher"], ["Alt N", "Notifications"], ["Alt S", "Settings"], ["Alt 1 … 9", "Open the nth app in the dock"]]),
     grp("Writing (Journal, Projects, Docs, Notes)", [["/", "Insert a block (heading, image, video…)"], ["Ctrl B / I / U", "Bold, italic, underline"], ["Ctrl K", "Add a link"], ["Ctrl Z / Ctrl Shift Z", "Undo and redo"], ["Ctrl S", "Save now"], ["Tab / Shift Tab", "Indent or outdent a list item"], ["# , ## , - , 1. , [] , > , ```", "Markdown shortcuts at the start of a line"]]),
     h("div", { class: "own-row" }, h("button", { onclick: () => d.remove() }, "Close"))));
   d.addEventListener("click", (e) => { if (e.target === d) d.remove(); }); d.addEventListener("keydown", (e) => { if (e.key === "Escape") d.remove(); }); document.body.append(d); d.querySelector("button").focus();
@@ -275,7 +280,7 @@ function newApps() {
 
 /* ================= go ================= */
 function init() {
-  topbar(); newApps(); snapping(); widgets();
+  topbar(); addTabsButton(); newApps(); snapping(); widgets();
   try { window.__resolveMore && window.__resolveMore(); } catch {}
   Notif.gather().catch(() => {});
   if (isAdmin()) setInterval(() => Notif.gather().catch(() => {}), 120000);

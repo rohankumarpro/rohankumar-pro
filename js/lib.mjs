@@ -20,9 +20,9 @@ export const isAdmin = () => !!(window.LIVE && window.LIVE.admin);
 export const mobile = () => matchMedia("(max-width:760px)").matches;
 
 /* ---------- talking to the server ---------- */
-export async function api(path, { method = "GET", body, headers } = {}) {
+export async function api(path, { method = "GET", body, headers, keepalive } = {}) {
   try {
-    const r = await fetch(path, { method, cache: "no-store", headers: body !== undefined ? { "content-type": "application/json", ...headers } : headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+    const r = await fetch(path, { method, cache: "no-store", ...(keepalive ? { keepalive: true } : {}), headers: body !== undefined ? { "content-type": "application/json", ...headers } : headers, body: body !== undefined ? JSON.stringify(body) : undefined });
     let data = {};
     try { data = await r.json(); } catch {}
     if (r.status === 401 && isAdmin()) { window.LIVE.admin = false; window.ownerChanged && window.ownerChanged(); }

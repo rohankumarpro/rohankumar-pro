@@ -414,3 +414,4 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .kn-edit:not(.c0) .kn-ta,.kn-edit:not(.c0) .kn-ti,.kn-compose-card:not(.c0) .kn-ta,.kn-compose-card:not(.c0) .kn-ti,.kn-edit:not(.c0) .kn-row textarea{color:var(--glyph)}
 .kbd dl{grid-template-columns:200px 1fr;align-items:start}.kbd dt{align-self:start;white-space:normal}
 @media (max-width:560px){.kbd dl{grid-template-columns:1fr}.kbd dd{margin:0 0 6px 4px}}
+.kn-card:has(.kn-act) .kn-in{padding-bottom:42px}
