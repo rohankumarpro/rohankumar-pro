@@ -4,8 +4,14 @@ import { readFileSync } from "node:fs";
 
 let cache = null;
 function indexHtml() {
-  for (const p of [new URL("../../index.html", import.meta.url), `${process.env.LAMBDA_TASK_ROOT || "."}/index.html`, "./index.html"]) {
-    try { return readFileSync(p, "utf8"); } catch {}
+  // Bundled functions have no usable import.meta.url, so build each candidate path inside the try.
+  const paths = [
+    () => `${process.env.LAMBDA_TASK_ROOT || "."}/index.html`,
+    () => "./index.html",
+    () => new URL("../../index.html", import.meta.url),
+  ];
+  for (const p of paths) {
+    try { return readFileSync(p(), "utf8"); } catch {}
   }
   return "";
 }
