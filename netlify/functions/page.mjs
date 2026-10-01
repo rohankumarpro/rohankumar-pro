@@ -5,6 +5,7 @@ import { connectLambda } from "@netlify/blobs";
 import { contentStore, isPreviewHost } from "../lib/store.mjs";
 import { resolve } from "../lib/pages.mjs";
 import { renderShell } from "../lib/seo.mjs";
+import { rawIndex } from "../lib/defaults.mjs";
 
 export const handler = async (event) => {
   try {
@@ -21,6 +22,12 @@ export const handler = async (event) => {
     return { statusCode: P.status, headers: { ...common, "content-type": "text/html; charset=utf-8" }, body: renderShell(P, { preview }) };
   } catch (e) {
     console.error("page", e);
-    return { statusCode: 500, headers: { "content-type": "text/plain" }, body: "Something went wrong. Please try again." };
+    // If the extra search-engine content can't be built, still hand over the plain desktop so the site always opens.
+    const preview = isPreviewHost(event), note = String(e?.stack || e).slice(0, 600);
+    const html = rawIndex();
+    if (html && !(event.queryStringParameters || {}).p?.endsWith(".md")) {
+      return { statusCode: 200, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-page-fallback": "1", ...(preview ? { "x-robots-tag": "noindex", "x-page-error": encodeURIComponent(note.split("\n")[0]).slice(0, 300) } : {}) }, body: html };
+    }
+    return { statusCode: 500, headers: { "content-type": "text/plain" }, body: preview ? "Page error: " + note : "Something went wrong. Please try again." };
   }
 };
