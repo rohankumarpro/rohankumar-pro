@@ -1,0 +1,77 @@
+/* ==========================================================================================================================
+   DESIGN TOKENS: the one place where the look of the whole system is decided.
+
+   Every stylesheet (index.html, blocks, apps, editor, core and the two UI skins) reads these tokens instead of hard-coding
+   numbers, so a UI is just a different set of values:
+
+     SHAPE      --r-1 … --r-9   corner radius steps        --r-pill  pills and capsules       --r-win / --r-ctl  windows, controls
+     TYPE       --fs-0 … --fs-13  type scale               --fw-m / -b / -x   medium, bold, heavy weights
+     SPACE      --u             one unit multiplier: every padding, margin and gap is  N * var(--u)  (1px = compact, 1.25px = airy)
+     MOTION     --d-1 / -2 / -3 durations                  --ease (standard)  --ease-spring (overshoot)
+     COLOUR     --bg --surface --surface2 --line --ink --ink2 --primary --on-primary --c1…c6 --danger --ok
+
+   Material UI is the default and keeps the values the site shipped with (set on :root here and in index.html).
+   Minimal UI (html[data-ui="minimal"]) is black and white, square, Swiss-typographic, roomy and quick.
+   ========================================================================================================================== */
+:root{
+  --u:1px;
+  --r-1:2px; --r-2:4px; --r-3:8px; --r-4:12px; --r-5:16px; --r-6:20px; --r-7:24px; --r-8:28px; --r-9:32px; --r-pill:99px;
+  --r-win:var(--r-8); --r-win-max:var(--r-7); --r-ctl:var(--r-pill);
+  --fs-0:10px; --fs-1:11px; --fs-2:12px; --fs-3:13px; --fs-4:14px; --fs-5:15px; --fs-6:16px; --fs-7:18px; --fs-8:20px; --fs-9:24px; --fs-10:28px; --fs-11:34px; --fs-12:44px; --fs-13:64px;
+  --fw-m:600; --fw-b:700; --fw-x:800;
+  --d-1:.12s; --d-2:.2s; --d-3:.32s;
+  --ease:cubic-bezier(.2,0,0,1); --ease-spring:cubic-bezier(.34,1.3,.5,1);
+  --danger:#D93025; --ok:#3DBE7A;
+}
+
+/* ---------------------------------------------- MINIMAL UI : shape, type, space, motion ---------------------------------------------- */
+:root[data-ui="minimal"]{
+  --u:1.25px;
+  --r-1:0; --r-2:0; --r-3:2px; --r-4:2px; --r-5:2px; --r-6:3px; --r-7:4px; --r-8:4px; --r-9:6px; --r-pill:2px;
+  --r-win:4px; --r-win-max:0px; --r-ctl:2px;
+  /* fewer, firmer sizes: Swiss typography is built on restraint and contrast, not on many near-identical steps */
+  --fs-0:10px; --fs-1:11px; --fs-2:12px; --fs-3:13px; --fs-4:14px; --fs-5:14px; --fs-6:15px; --fs-7:17px; --fs-8:21px; --fs-9:28px; --fs-10:36px; --fs-11:48px; --fs-12:64px; --fs-13:88px;
+  --fw-m:500; --fw-b:600; --fw-x:600;
+  --d-1:.08s; --d-2:.14s; --d-3:.22s;
+  --ease:cubic-bezier(.3,0,.1,1); --ease-spring:cubic-bezier(.3,0,.1,1);
+  --font:"Inter Tight","Inter","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --danger:#000; --ok:#000;
+}
+/* ---------------------------------------------- MINIMAL UI : colour (black, white and greys only) ---------------------------------------------- */
+:root[data-ui="minimal"],[data-sample="minimal"]{
+  --bg:#FFFFFF; --w1:#F3F3F3; --w2:#EAEAEA; --w3:#E0E0E0; --w4:#F8F8F8;
+  --surface:#FFFFFF; --surface2:#F5F5F5; --line:#E4E4E4;
+  --ink:#000000; --ink2:#5C5C5C; --primary:#000000; --on-primary:#FFFFFF;
+  --c1:#F5F5F5; --c2:#EFEFEF; --c3:#EAEAEA; --c4:#F8F8F8; --c5:#E4E4E4; --c6:#F0F0F0;
+  --glyph:#000000; --icbg:#F5F5F5; --ik:#000; --igy:#5C5C5C;
+  --shadow:0 0 0 1px rgba(0,0,0,.10),0 16px 40px rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-ui="minimal"]:not([data-theme="light"]),:root:not([data-theme="light"]) [data-sample="minimal"]{
+    --bg:#000000; --w1:#0E0E0E; --w2:#171717; --w3:#222222; --w4:#0A0A0A;
+    --surface:#000000; --surface2:#111111; --line:#262626;
+    --ink:#FFFFFF; --ink2:#A0A0A0; --primary:#FFFFFF; --on-primary:#000000;
+    --c1:#111111; --c2:#171717; --c3:#1D1D1D; --c4:#0D0D0D; --c5:#222222; --c6:#141414;
+    --glyph:#FFFFFF; --icbg:#111111; --ik:#fff; --igy:#A0A0A0;
+    --shadow:0 0 0 1px rgba(255,255,255,.14),0 16px 40px rgba(0,0,0,.6);
+  }
+}
+:root[data-ui="minimal"][data-theme="dark"],:root[data-theme="dark"] [data-sample="minimal"]{
+  --bg:#000000; --w1:#0E0E0E; --w2:#171717; --w3:#222222; --w4:#0A0A0A;
+  --surface:#000000; --surface2:#111111; --line:#262626;
+  --ink:#FFFFFF; --ink2:#A0A0A0; --primary:#FFFFFF; --on-primary:#000000;
+  --c1:#111111; --c2:#171717; --c3:#1D1D1D; --c4:#0D0D0D; --c5:#222222; --c6:#141414;
+  --glyph:#FFFFFF; --icbg:#111111; --ik:#fff; --igy:#A0A0A0;
+  --shadow:0 0 0 1px rgba(255,255,255,.14),0 16px 40px rgba(0,0,0,.6);
+}
+
+/* ---------------------------------------------- Settings picker previews (each UI drawn in its own tokens) ---------------------------------------------- */
+[data-sample="material"]{
+  --bg:#E9EEF8; --surface:#FAFBFF; --surface2:#E8EDF6; --line:#D3DAE8; --ink:#1A1C20; --ink2:#454A55; --primary:#0B57D0;
+  --shadow:0 12px 40px rgba(20,35,80,.18),0 2px 6px rgba(20,35,80,.10);
+  --font:"Google Sans Flex",Figtree,Roboto,system-ui,sans-serif; --r-win:28px; --r-ctl:99px; --r-pill:99px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-sample="material"]{--bg:#0E1117;--surface:#1C1F26;--surface2:#292D36;--line:#3A3F4A;--ink:#E4E6EE;--ink2:#C2C6D2;--primary:#A8C7FA;--shadow:0 18px 50px rgba(0,0,0,.55)}}
+:root[data-theme="dark"] [data-sample="material"]{--bg:#0E1117;--surface:#1C1F26;--surface2:#292D36;--line:#3A3F4A;--ink:#E4E6EE;--ink2:#C2C6D2;--primary:#A8C7FA;--shadow:0 18px 50px rgba(0,0,0,.55)}
+[data-sample="minimal"]{--font:"Inter Tight","Inter",Helvetica,Arial,sans-serif;--r-win:4px;--r-ctl:2px;--r-pill:2px}
