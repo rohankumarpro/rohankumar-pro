@@ -83,6 +83,17 @@ lazyApp("journal", "/js/app-journal.mjs", "journalApp");
 lazyApp("notes", "/js/app-notes.mjs", "notesApp");
 lazyApp("about", "/js/app-about.mjs", "aboutApp");
 lazyApp("resume", "/js/app-resume.mjs", "resumeApp");
+/* pages that get a free-form editor under their fixed content */
+export function enrichApp(id, key) {
+  const a = APPS.find((x) => x.id === id); if (!a) return; const prev = a.render;
+  a.render = (body) => {
+    const r = prev(body); const done = () => import("/js/rich-section.mjs").then((m) => m.richSection(body, key)).catch((e) => console.error("rich", e));
+    if (r && typeof r.then === "function") return r.then(done);
+    if (typeof r === "string") body.innerHTML = r; done();
+  };
+}
+window.enrichApp = enrichApp;
+for (const [id, key] of [["resume", "resume"], ["contact", "contact"], ["timeline", "timeline"]]) enrichApp(id, key);
 for (const id of ["projects", "links"]) { const i = EDITABLE.indexOf(id); if (i >= 0) EDITABLE.splice(i, 1); }
 
 /* ---------- first load: open the window the address asks for ---------- */
@@ -93,7 +104,7 @@ export const moreReady = new Promise((res) => { window.__resolveMore = res; });
   if (rt.status === 404 && p !== "/") { setTimeout(() => toast("That page doesn't exist. Here is the desktop."), 900); history.replaceState({}, "", "/"); return; }
   if (p === "/") return;
   // Apps added by the extras file (Docs, Services, Book a call) exist only once it has loaded, so wait for it before opening an address.
-  if (!R.parse(p).id) await Promise.race([moreReady, new Promise((r) => setTimeout(r, 5000))]);
+  await Promise.race([moreReady, new Promise((r) => setTimeout(r, 5000))]);
   const want = R.parse(p).id;
   if (!want) return;
   try { window.unlock(); } catch {}

@@ -2,6 +2,8 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, renderBlocks, stripTags } from "/js/lib.mjs";
 import { mdToBlocks, blocksText, readMinutes, slugify, firstImage, headingsOf } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
+import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
+const I = (n, size = 16) => _ic(n, { size });
 
 const J = { posts: null, saving: false, again: false, status: "" };
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -110,7 +112,7 @@ function read(body, p, quiet) {
   const rel = posts.filter((x) => x.slug !== p.slug && allTags(x).some((t) => allTags(p).includes(t))).slice(0, 3);
   const mins = readMinutes(blocks), heads = headingsOf(blocks).filter((x) => x.level <= 2), c = coverOf(p), iso = isoOf(p);
   body.scrollTop = 0; body.classList.remove("jr-editing");
-  body.innerHTML = `<div class="abar jr-bar"><div class="jr-row"><button class="back">‹ All posts</button><span class="sp"></span>${heads.length > 2 ? '<button class="j-toc">Contents</button>' : ""}${isAdmin() ? '<button class="j-edit">Edit</button>' : ""}<button class="j-share">Share</button></div><div class="rprog"><i></i></div></div>
+  body.innerHTML = `<div class="abar jr-bar"><div class="jr-row"><button class="back">${I("chevron-left")}All posts</button><span class="sp"></span>${heads.length > 2 ? '<button class="j-toc">Contents</button>' : ""}${isAdmin() ? '<button class="j-edit">Edit</button>' : ""}<button class="j-share">Share</button></div><div class="rprog"><i></i></div></div>
   <article class="article jr-art" itemscope itemtype="https://schema.org/BlogPosting">${c ? `<img class="ahero" src="${esc(c)}" alt="${esc(p.imgAlt || "Cover image for " + p.title)}">` : ""}
   <p class="meta">${iso ? `<time datetime="${iso}">${esc(p.date || iso)}</time>` : esc(p.date || "")} · ${mins} min read · ${esc(P.name)}${stateOf(p) !== "published" ? ` · <b>${stateOf(p)}</b>` : ""}</p>${p.updated ? `<span class="upd">${esc(p.updated)}</span>` : ""}
   <h1 itemprop="headline">${esc(p.title)}</h1>${p.excerpt ? `<p class="lead">${esc(p.excerpt)}</p>` : ""}<hr><div class="jr-content"></div>
@@ -118,7 +120,7 @@ function read(body, p, quiet) {
   ${allTags(p).length ? `<p class="jr-tags">${allTags(p).map((t) => `<a href="/journal/tag/${esc(tagSlug(t))}" data-tag="${esc(t)}">#${esc(t)}</a>`).join("")}</p>` : ""}
   <div class="callout"><p><b>Working on a brand?</b> Let's talk it through.</p><a class="btn" href="${esc(booking())}" target="_blank" rel="noopener">Book a call</a></div>
   ${rel.length ? `<section class="jr-rel"><h2>More to read</h2>${rel.map((x) => `<a href="/journal/${esc(x.slug)}" data-slug="${esc(x.slug)}"><b>${esc(x.title)}</b><span>${esc(x.excerpt)}</span></a>`).join("")}</section>` : ""}
-  <nav class="jr-pn">${newer ? `<a href="/journal/${esc(newer.slug)}" data-slug="${esc(newer.slug)}"><small>‹ Newer</small><b>${esc(newer.title)}</b></a>` : "<span></span>"}${older ? `<a href="/journal/${esc(older.slug)}" data-slug="${esc(older.slug)}"><small>Older ›</small><b>${esc(older.title)}</b></a>` : "<span></span>"}</nav></article>`;
+  <nav class="jr-pn">${newer ? `<a href="/journal/${esc(newer.slug)}" data-slug="${esc(newer.slug)}"><small>${I("chevron-left", 13)}Newer</small><b>${esc(newer.title)}</b></a>` : "<span></span>"}${older ? `<a href="/journal/${esc(older.slug)}" data-slug="${esc(older.slug)}"><small>Older${I("chevron-right", 13)}</small><b>${esc(older.title)}</b></a>` : "<span></span>"}</nav></article>`;
   showBlocks($(".jr-content", body), blocks, { hBase: 2 });
   const bar = $(".rprog i", body);
   body.onscroll = () => { if (!bar.isConnected) { body.onscroll = null; return; } const m = body.scrollHeight - body.clientHeight; bar.style.width = (m > 0 ? (body.scrollTop / m) * 100 : 0) + "%"; };
@@ -148,7 +150,7 @@ async function edit(body, post) {
   if (!mobile()) w.classList.add("max");
   body.onscroll = null; body.scrollTop = 0; body.classList.add("jr-editing");
   body.innerHTML = `<div class="jed">
-    <div class="jed-bar"><button class="back">‹ ${isNew ? "Cancel" : "Back"}</button><span class="jed-st">${esc(J.status || "")}</span><span class="sp"></span>
+    <div class="jed-bar"><button class="back">${I("chevron-left")}${isNew ? "Cancel" : "Back"}</button><span class="jed-st">${esc(J.status || "")}</span><span class="sp"></span>
       <span class="jed-live" hidden>Live</span><button data-a="preview">Preview</button><button data-a="settings">Settings</button><button class="btn" data-a="publish"></button></div>
     <div class="jed-scroll"><div class="jed-main"><div class="jed-cover"></div>
       <textarea class="jed-title" rows="1" placeholder="Article title" maxlength="200" aria-label="Title"></textarea>
@@ -180,7 +182,7 @@ async function edit(body, post) {
     p.slug = uniqueSlug(p.slug); S.slug = p.slug;
     const i = orig ? J.posts.findIndex((x) => x.slug === orig) : -1;
     if (i >= 0) J.posts[i] = p; else J.posts.unshift(p);
-    orig = p.slug; const bk = $(".jed-bar .back", body); if (bk) bk.textContent = "‹ Back"; const slugEl = q("[data-f=slug]"); if (slugEl && slugEl !== document.activeElement) slugEl.value = p.slug;
+    orig = p.slug; const bk = $(".jed-bar .back", body); if (bk) bk.innerHTML = I("chevron-left") + "Back"; const slugEl = q("[data-f=slug]"); if (slugEl && slugEl !== document.activeElement) slugEl.value = p.slug;
     await persist();
   }
   const updBtn = () => {
@@ -193,7 +195,7 @@ async function edit(body, post) {
     const c = q(".jed-cover");
     if (S.img) {
       c.innerHTML = `<img src="${esc(S.img)}" alt="${esc(S.imgAlt || "")}"><div class="jed-ct"><button data-c="replace">Replace</button><button data-c="alt">Alt text</button><button data-c="remove">Remove</button></div>`;
-    } else c.innerHTML = `<button class="jed-add" data-c="add"><span>＋</span> Add a cover image <small>Shown on the list, the article page, Google and social shares</small></button>`;
+    } else c.innerHTML = `<button class="jed-add" data-c="add"><span>${I("image", 20)}</span> Add a cover image <small>Shown on the list, the article page, Google and social shares</small></button>`;
     $$("[data-c]", c).forEach((b) => (b.onclick = async () => {
       const a = b.dataset.c;
       if (a === "remove") { S.img = ""; S.imgAlt = ""; drawCover(); touch(); return; }
@@ -216,7 +218,7 @@ async function edit(body, post) {
   function drawSide() {
     const st = S.draft ? "draft" : S.publishAt && Date.parse(S.publishAt) > Date.now() ? "scheduled" : "published";
     const sTitle = S.seoTitle || title.value || "Article title", sDesc = S.seoDesc || exc.value || "Your summary shows here.";
-    side.innerHTML = `<div class="jed-sh"><b>Article settings</b><button data-a="closeside" aria-label="Close settings">✕</button></div>
+    side.innerHTML = `<div class="jed-sh"><b>Article settings</b><button data-a="closeside" aria-label="Close settings">${I("x", 16)}</button></div>
       <label class="ow-f">Status<select data-f="state"><option value="draft"${st === "draft" ? " selected" : ""}>Draft (only you can see it)</option><option value="published"${st === "published" ? " selected" : ""}>Published</option><option value="scheduled"${st === "scheduled" ? " selected" : ""}>Scheduled</option></select></label>
       <label class="ow-f" data-sched ${st === "scheduled" ? "" : "hidden"}>Publish on<input type="datetime-local" data-f="publishAt" value="${S.publishAt ? toLocalInput(S.publishAt) : ""}"></label>
       <label class="ow-f">Date shown<input type="date" data-f="dateIso" value="${isoOf({ date: S.date, published: S.extra.published })}"></label>
@@ -226,7 +228,7 @@ async function edit(body, post) {
       <h3>Search and sharing</h3>
       <label class="ow-f">Title for Google <small data-cnt="t">${sTitle.length}/60</small><input data-f="seoTitle" maxlength="70" placeholder="${esc(title.value || "Same as the article title")}" value="${esc(S.seoTitle)}"></label>
       <label class="ow-f">Description for Google <small data-cnt="d">${sDesc.length}/160</small><textarea data-f="seoDesc" rows="3" maxlength="200" placeholder="Same as the summary">${esc(S.seoDesc)}</textarea></label>
-      <div class="serp"><small>rohankumar.pro › journal › ${esc(S.slug || "")}</small><b>${esc(sTitle.slice(0, 60))}</b><span>${esc(sDesc.slice(0, 160))}</span></div>
+      <div class="serp"><small>rohankumar.pro / journal / ${esc(S.slug || "")}</small><b>${esc(sTitle.slice(0, 60))}</b><span>${esc(sDesc.slice(0, 160))}</span></div>
       <label class="ow-app"><input type="checkbox" data-f="noindex" ${S.noindex ? "checked" : ""}><span>Hide this article from search engines</span></label>
       <h3>Original source</h3>
       <label class="ow-f">Where else is it published?<input data-f="source" maxlength="40" placeholder="LinkedIn" value="${esc(S.source)}"></label>

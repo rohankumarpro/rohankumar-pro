@@ -3,6 +3,8 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, ago } from "/js/lib.mjs";
 import { blocksText } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
+import { icon } from "/shared/icons.mjs";
+const I = (n, size = 18) => icon(n, { size });
 
 const N = { list: null, status: "", saving: false, again: false, q: "", filter: "notes", fromSeed: false };
 const COLORS = ["c0", "c1", "c2", "c3", "c4", "c5", "c6"];
@@ -78,8 +80,8 @@ function shell(body) {
   body.scrollTop = 0; body.classList.remove("jr-editing");
   const view = ls.get("knView", "grid");
   body.innerHTML = `<div class="kn" data-view="${view}">
-    <header class="kn-top"><label class="kn-search"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input type="search" placeholder="Search notes" aria-label="Search notes" value="${esc(N.q)}" autocomplete="off"></label>
-      <button class="kn-ib" data-view-toggle aria-label="${view === "grid" ? "Switch to list view" : "Switch to grid view"}" title="${view === "grid" ? "List view" : "Grid view"}">${view === "grid" ? "☰" : "▦"}</button>
+    <header class="kn-top"><label class="kn-search">${I("search", 18)}<input type="search" placeholder="Search notes" aria-label="Search notes" value="${esc(N.q)}" autocomplete="off"></label>
+      <button class="kn-ib" data-view-toggle aria-label="${view === "grid" ? "Switch to list view" : "Switch to grid view"}" title="${view === "grid" ? "List view" : "Grid view"}">${I(view === "grid" ? "rows" : "grid", 20)}</button>
       ${owner ? '<span class="kn-st"></span>' : ""}</header>
     <nav class="kn-nav" aria-label="Notes filters"></nav>
     <div class="kn-scroll">${owner ? '<div class="kn-compose"></div>' : ""}<div class="kn-lists"></div></div>
@@ -105,8 +107,8 @@ function card(n, owner) {
     : `<p class="kn-tx">${esc(textOf(n).slice(0, 360))}</p>`;
   return `<article class="kn-card ${n.color || "c0"}" data-id="${esc(n.id)}" tabindex="0" role="button" aria-label="Open note ${esc(n.title || "Untitled")}">${n.img ? `<img class="kn-img" src="${esc(n.img)}" alt="" loading="lazy">` : ""}
     <div class="kn-in">${n.title ? `<h3>${esc(n.title)}</h3>` : ""}${content}${(n.labels || []).length ? `<div class="kn-lb">${n.labels.map((l) => `<span>${esc(l)}</span>`).join("")}</div>` : ""}</div>
-    ${n.pin ? '<span class="kn-pin" title="Pinned">📌</span>' : ""}${n.private && owner ? '<span class="kn-priv" title="Only you can see this">🔒</span>' : ""}
-    ${owner && !n.trashed ? `<div class="kn-act"><button data-a="pin" aria-label="${n.pin ? "Unpin" : "Pin"}" title="${n.pin ? "Unpin" : "Pin"}">${n.pin ? "📍" : "📌"}</button><button data-a="color" aria-label="Colour" title="Colour">🎨</button><button data-a="archive" aria-label="${n.archived ? "Unarchive" : "Archive"}" title="${n.archived ? "Unarchive" : "Archive"}">🗄️</button><button data-a="trash" aria-label="Move to bin" title="Move to bin">🗑️</button></div>` : ""}
+    ${n.pin ? `<span class="kn-pin" title="Pinned">${I("pin", 15)}</span>` : ""}${n.private && owner ? `<span class="kn-priv" title="Only you can see this">${I("lock", 15)}</span>` : ""}
+    ${owner && !n.trashed ? `<div class="kn-act"><button data-a="pin" aria-label="${n.pin ? "Unpin" : "Pin"}" title="${n.pin ? "Unpin" : "Pin"}">${I("pin", 16)}</button><button data-a="color" aria-label="Colour" title="Colour">${I("palette", 16)}</button><button data-a="archive" aria-label="${n.archived ? "Unarchive" : "Archive"}" title="${n.archived ? "Unarchive" : "Archive"}">${I("archive", 16)}</button><button data-a="trash" aria-label="Move to bin" title="Move to bin">${I("trash", 16)}</button></div>` : ""}
     ${owner && n.trashed ? `<div class="kn-act on"><button data-a="restore">Restore</button><button data-a="purge" class="danger">Delete forever</button></div>` : ""}</article>`;
 }
 function drawLists(body) {
@@ -117,7 +119,7 @@ function drawLists(body) {
   if (N.filter === "bin" && owner) html += `<p class="kn-hint">Notes in the bin are deleted after ${BIN_DAYS} days. ${l.length ? '<button class="kn-link danger" data-empty>Empty bin</button>' : ""}</p>`;
   if (pinned.length) html += `<h4 class="kn-h">Pinned</h4>${grid(pinned)}${others.length ? '<h4 class="kn-h">Others</h4>' : ""}`;
   html += others.length ? grid(others) : "";
-  if (!l.length) html = `<div class="kn-empty"><div>${N.filter === "bin" ? "🗑️" : N.filter === "archive" ? "🗄️" : N.q ? "🔍" : "📝"}</div><p>${N.q ? "No notes match your search." : N.filter === "bin" ? "The bin is empty." : N.filter === "archive" ? "Archived notes show up here." : owner ? "Notes you add appear here." : "No notes yet."}</p></div>`;
+  if (!l.length) html = `<div class="kn-empty"><div>${I(N.filter === "bin" ? "trash" : N.filter === "archive" ? "archive" : N.q ? "search" : "pencil", 54)}</div><p>${N.q ? "No notes match your search." : N.filter === "bin" ? "The bin is empty." : N.filter === "archive" ? "Archived notes show up here." : owner ? "Notes you add appear here." : "No notes yet."}</p></div>`;
   host.innerHTML = html;
   $$(".kn-card", host).forEach((el) => {
     const id = el.dataset.id, n = N.list.find((x) => x.id === id);
@@ -157,14 +159,14 @@ function composer(body) {
     if (draw.inList) { n.ts = Date.now(); queue(); } };
   const draw = () => {
     if (!open) {
-      host.innerHTML = `<div class="kn-compose-bar"><button class="kn-take" data-open>Take a note…</button><button class="kn-ib" data-open="list" aria-label="New checklist" title="New checklist">☑</button><button class="kn-ib" data-open="img" aria-label="New note with image" title="New note with image">🖼️</button></div>`;
+      host.innerHTML = `<div class="kn-compose-bar"><button class="kn-take" data-open>Take a note…</button><button class="kn-ib" data-open="list" aria-label="New checklist" title="New checklist">${I("checkbox", 20)}</button><button class="kn-ib" data-open="img" aria-label="New note with image" title="New note with image">${I("image", 20)}</button></div>`;
       $$("[data-open]", host).forEach((b) => (b.onclick = () => { open = true; mode = b.dataset.open === "list" ? "list" : "text"; draw(); if (b.dataset.open === "img") pickImg(); }));
       return;
     }
     const n = draw.n || (draw.n = { id: uid(), title: "", text: "", color: "c0", kind: mode === "list" ? "list" : undefined, items: mode === "list" ? [{ id: uid(), t: "" }] : undefined, created: Date.now(), ts: Date.now() });
     host.innerHTML = `<div class="kn-compose-card ${n.color}">${n.img ? `<img class="kn-img" src="${esc(n.img)}" alt="">` : ""}<input class="kn-ti" placeholder="Title" maxlength="120" aria-label="Title" value="${esc(n.title)}">
       ${n.kind === "list" ? '<div class="kn-items"></div>' : `<textarea class="kn-ta" rows="3" placeholder="Take a note…" aria-label="Note text" maxlength="10000">${esc(n.text)}</textarea>`}
-      <div class="kn-bar"><button data-a="color" aria-label="Colour" title="Colour">🎨</button><button data-a="img" aria-label="Add image" title="Add image">🖼️</button><button data-a="mode" aria-label="${n.kind === "list" ? "Show as text" : "Show as checklist"}" title="${n.kind === "list" ? "Show as text" : "Show as checklist"}">${n.kind === "list" ? "¶" : "☑"}</button><button data-a="pin" class="${n.pin ? "on" : ""}" aria-label="Pin" title="Pin">📌</button><span class="sp"></span><button class="kn-done" data-a="done">Close</button></div></div>`;
+      <div class="kn-bar"><button data-a="color" aria-label="Colour" title="Colour">${I("palette")}</button><button data-a="img" aria-label="Add image" title="Add image">${I("image")}</button><button data-a="mode" aria-label="${n.kind === "list" ? "Show as text" : "Show as checklist"}" title="${n.kind === "list" ? "Show as text" : "Show as checklist"}">${I(n.kind === "list" ? "text" : "checkbox")}</button><button data-a="pin" class="${n.pin ? "on" : ""}" aria-label="Pin" title="Pin">${I("pin")}</button><span class="sp"></span><button class="kn-done" data-a="done">Close</button></div></div>`;
     const card = $(".kn-compose-card", host);
     const ti = $(".kn-ti", host), ta = $(".kn-ta", host);
     const fit = (t) => { t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 320) + "px"; };
@@ -204,8 +206,8 @@ function itemsEditor(host, n, onChange) {
   const fit = (t) => { t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; };
   const draw = (focusId) => {
     const open = n.items.filter((i) => !i.d), done = n.items.filter((i) => i.d);
-    const row = (i) => `<div class="kn-row${i.d ? " d" : ""}" data-id="${i.id}"><span class="kn-grip" aria-hidden="true">⋮⋮</span><button class="kn-cb${i.d ? " on" : ""}" data-t aria-label="${i.d ? "Mark not done" : "Mark done"}"></button><textarea rows="1" maxlength="300" aria-label="List item" placeholder="List item">${esc(i.t)}</textarea><button class="kn-rm" data-rm aria-label="Delete item">✕</button></div>`;
-    host.innerHTML = `${open.map(row).join("")}<button class="kn-addrow" data-add>＋ List item</button>${done.length ? `<details class="kn-doneblk"${n.__openDone ? " open" : ""}><summary>${done.length} completed</summary>${done.map(row).join("")}</details>` : ""}`;
+    const row = (i) => `<div class="kn-row${i.d ? " d" : ""}" data-id="${i.id}"><span class="kn-grip" aria-hidden="true">${I("grip", 14)}</span><button class="kn-cb${i.d ? " on" : ""}" data-t aria-label="${i.d ? "Mark not done" : "Mark done"}"></button><textarea rows="1" maxlength="300" aria-label="List item" placeholder="List item">${esc(i.t)}</textarea><button class="kn-rm" data-rm aria-label="Delete item">${I("x", 14)}</button></div>`;
+    host.innerHTML = `${open.map(row).join("")}<button class="kn-addrow" data-add>${I("plus", 16)}<span>List item</span></button>${done.length ? `<details class="kn-doneblk"${n.__openDone ? " open" : ""}><summary>${done.length} completed</summary>${done.map(row).join("")}</details>` : ""}`;
     $$("textarea", host).forEach(fit);
     if (focusId) { const t = $(`[data-id="${focusId}"] textarea`, host); t && t.focus(); }
     $$(".kn-row", host).forEach((r) => {
@@ -245,12 +247,12 @@ async function openNote(body, id, mode = "push") {
   body.classList.add("kn-open");
   const labelsFor = () => (n.labels || []);
   mh.innerHTML = `<div class="kn-scrim"><div class="kn-edit ${n.color || "c0"}" role="dialog" aria-modal="true" aria-label="${editable ? "Edit note" : "Note"}">
-    ${n.img ? `<div class="kn-eimg"><img src="${esc(n.img)}" alt="">${editable ? '<button data-a="rmimg" aria-label="Remove image">✕</button>' : ""}</div>` : ""}
+    ${n.img ? `<div class="kn-eimg"><img src="${esc(n.img)}" alt="">${editable ? `<button data-a="rmimg" aria-label="Remove image">${I("x", 16)}</button>` : ""}</div>` : ""}
     <div class="kn-ebody">${editable ? `<input class="kn-ti" placeholder="Title" maxlength="120" aria-label="Title" value="${esc(n.title || "")}">` : `<h2>${esc(n.title || "")}</h2>`}
       <div class="kn-content"></div><div class="kn-lbl"></div></div>
-    <div class="kn-bar">${editable ? `<button data-a="color" aria-label="Colour" title="Colour">🎨</button><button data-a="img" aria-label="Add image" title="Add image">🖼️</button><button data-a="label" aria-label="Labels" title="Labels">🏷️</button><button data-a="pin" class="${n.pin ? "on" : ""}" aria-label="Pin" title="Pin">📌</button><button data-a="private" class="${n.private ? "on" : ""}" aria-label="Private" title="${n.private ? "Only you can see this" : "Public note"}">${n.private ? "🔒" : "🔓"}</button>${n.blocks && n.blocks.length ? "" : `<button data-a="mode" title="${n.kind === "list" ? "Show as text" : "Show as checklist"}" aria-label="${n.kind === "list" ? "Show as text" : "Show as checklist"}">${n.kind === "list" ? "¶" : "☑"}</button>`}<button data-a="archive" aria-label="Archive" title="Archive">🗄️</button><button data-a="trash" aria-label="Move to bin" title="Move to bin">🗑️</button>` : `<button data-a="share" title="Share this note">Share</button>`}<span class="sp"></span><span class="kn-st"></span><span class="kn-when">${n.ts ? "Edited " + ago(n.ts) : ""}</span><button class="kn-done" data-a="close">Close</button></div></div></div>`;
+    <div class="kn-bar">${editable ? `<button data-a="color" aria-label="Colour" title="Colour">${I("palette")}</button><button data-a="img" aria-label="Add image" title="Add image">${I("image")}</button><button data-a="label" aria-label="Labels" title="Labels">${I("tag")}</button><button data-a="pin" class="${n.pin ? "on" : ""}" aria-label="Pin" title="Pin">${I("pin")}</button><button data-a="private" class="${n.private ? "on" : ""}" aria-label="Private" title="${n.private ? "Only you can see this" : "Public note"}">${I(n.private ? "lock" : "unlock")}</button>${n.blocks && n.blocks.length ? "" : `<button data-a="mode" title="${n.kind === "list" ? "Show as text" : "Show as checklist"}" aria-label="${n.kind === "list" ? "Show as text" : "Show as checklist"}">${I(n.kind === "list" ? "text" : "checkbox")}</button>`}<button data-a="archive" aria-label="Archive" title="Archive">${I("archive")}</button><button data-a="trash" aria-label="Move to bin" title="Move to bin">${I("trash")}</button>` : `<button data-a="share" title="Share this note">Share</button>`}<span class="sp"></span><span class="kn-st"></span><span class="kn-when">${n.ts ? "Edited " + ago(n.ts) : ""}</span><button class="kn-done" data-a="close">Close</button></div></div></div>`;
   const edit = $(".kn-edit", mh), content = $(".kn-content", mh), lbl = $(".kn-lbl", mh);
-  const drawLabels = () => { lbl.innerHTML = labelsFor().map((l) => `<span class="kn-chip">${esc(l)}${editable ? `<button data-rl="${esc(l)}" aria-label="Remove label ${esc(l)}">✕</button>` : ""}</span>`).join(""); $$("[data-rl]", lbl).forEach((b) => (b.onclick = () => { n.labels = labelsFor().filter((x) => x !== b.dataset.rl); if (!n.labels.length) delete n.labels; touchNote(n); drawLabels(); })); };
+  const drawLabels = () => { lbl.innerHTML = labelsFor().map((l) => `<span class="kn-chip">${esc(l)}${editable ? `<button data-rl="${esc(l)}" aria-label="Remove label ${esc(l)}">${I("x", 12)}</button>` : ""}</span>`).join(""); $$("[data-rl]", lbl).forEach((b) => (b.onclick = () => { n.labels = labelsFor().filter((x) => x !== b.dataset.rl); if (!n.labels.length) delete n.labels; touchNote(n); drawLabels(); })); };
   drawLabels();
   const fit = (t) => { t.style.height = "auto"; t.style.height = Math.max(120, t.scrollHeight) + "px"; };
   const drawContent = async () => {
@@ -278,12 +280,12 @@ async function openNote(body, id, mode = "push") {
     if (a === "share") return share(location.origin + "/notes/" + n.id, n.title || "Note");
     if (a === "color") { colorPop(e.target.closest("[data-a]"), n, swap); }
     if (a === "pin") { n.pin = !n.pin; if (!n.pin) delete n.pin; e.target.closest("[data-a]").classList.toggle("on", !!n.pin); touchNote(n); }
-    if (a === "private") { n.private = !n.private; if (!n.private) delete n.private; const b = e.target.closest("[data-a]"); b.classList.toggle("on", !!n.private); b.textContent = n.private ? "🔒" : "🔓"; b.title = n.private ? "Only you can see this" : "Public note"; touchNote(n); toast(n.private ? "Private: only you can see this note" : "Public: visitors can read this note"); }
+    if (a === "private") { n.private = !n.private; if (!n.private) delete n.private; const b = e.target.closest("[data-a]"); b.classList.toggle("on", !!n.private); b.innerHTML = I(n.private ? "lock" : "unlock"); b.title = n.private ? "Only you can see this" : "Public note"; touchNote(n); toast(n.private ? "Private: only you can see this note" : "Public: visitors can read this note"); }
     if (a === "archive") { n.archived = !n.archived; if (!n.archived) delete n.archived; else delete n.pin; touchNote(n); toast(n.archived ? "Note archived" : "Note unarchived"); return close(); }
     if (a === "trash") { n.trashed = Date.now(); delete n.pin; touchNote(n); toast("Moved to the bin"); return close(); }
     if (a === "rmimg") { delete n.img; touchNote(n); $(".kn-eimg", mh)?.remove(); }
-    if (a === "img") { try { const f = (await Up.pick("image/*"))[0]; if (!f) return; setSt("Uploading…"); const r = await Up.image(f, { max: 1600 }); n.img = r.url; touchNote(n); let box = $(".kn-eimg", mh); if (!box) { box = h("div", { class: "kn-eimg" }); edit.prepend(box); } box.innerHTML = `<img src="${esc(n.img)}" alt=""><button data-a="rmimg" aria-label="Remove image">✕</button>`; } catch (er) { toast(er.message || "Upload failed"); } }
-    if (a === "mode") { const ta = $(".kn-ta", content); if (n.kind === "list") { n.text = (n.items || []).map((i) => i.t).filter(Boolean).join("\n"); delete n.items; delete n.kind; } else { const src = ta ? ta.value : n.text || ""; n.items = src.split("\n").map((t) => t.trim()).filter(Boolean).map((t) => ({ id: uid(), t })); if (!n.items.length) n.items = [{ id: uid(), t: "" }]; n.kind = "list"; n.text = ""; } touchNote(n); const b = e.target.closest("[data-a]"); b.textContent = n.kind === "list" ? "¶" : "☑"; await drawContent(); }
+    if (a === "img") { try { const f = (await Up.pick("image/*"))[0]; if (!f) return; setSt("Uploading…"); const r = await Up.image(f, { max: 1600 }); n.img = r.url; touchNote(n); let box = $(".kn-eimg", mh); if (!box) { box = h("div", { class: "kn-eimg" }); edit.prepend(box); } box.innerHTML = `<img src="${esc(n.img)}" alt=""><button data-a="rmimg" aria-label="Remove image">${I("x", 16)}</button>`; } catch (er) { toast(er.message || "Upload failed"); } }
+    if (a === "mode") { const ta = $(".kn-ta", content); if (n.kind === "list") { n.text = (n.items || []).map((i) => i.t).filter(Boolean).join("\n"); delete n.items; delete n.kind; } else { const src = ta ? ta.value : n.text || ""; n.items = src.split("\n").map((t) => t.trim()).filter(Boolean).map((t) => ({ id: uid(), t })); if (!n.items.length) n.items = [{ id: uid(), t: "" }]; n.kind = "list"; n.text = ""; } touchNote(n); const b = e.target.closest("[data-a]"); b.innerHTML = I(n.kind === "list" ? "text" : "checkbox"); await drawContent(); }
     if (a === "label") {
       lbl.insertAdjacentHTML("beforeend", '<div class="kn-newlbl"><input list="kn-labels" maxlength="24" placeholder="Add a label, press Enter" aria-label="New label"><datalist id="kn-labels">' + labelsAll().map((l) => `<option value="${esc(l)}">`).join("") + "</datalist></div>");
       const inp = $(".kn-newlbl input", lbl); inp.focus();

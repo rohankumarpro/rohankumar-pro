@@ -1,6 +1,7 @@
 // A block editor in the style of Notion, for the Journal, Projects, Notes and About.
 //   const ed = createEditor(hostElement, { blocks, onChange, upload, library, placeholder, onError })
 // The page is the source of truth: blocks are read back from it when something changes.
+import { icon, iconName, iconNames, ICONS } from "/shared/icons.mjs";
 import { cleanInline, embedInfo, mdToBlocks, rid, stripTags, safeUrl, COLORS, CALLOUT_TONES, esc, isTexty } from "/shared/blocks.mjs";
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -14,6 +15,7 @@ function h(tag, attrs, ...kids) {
   for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(k));
   return e;
 }
+const I = (n, size = 16) => icon(n, { size });
 const isTouch = () => matchMedia("(pointer:coarse)").matches || innerWidth <= 760;
 const TEXT_TYPES = ["p", "h1", "h2", "h3", "quote", "callout", "ul", "ol", "todo", "toggle"];
 const LIST_TYPES = ["ul", "ol", "todo"];
@@ -22,33 +24,33 @@ const isZW = (c) => c === "\u200B" || c === "\uFEFF";
 
 /* what the "/" menu offers */
 const ITEMS = [
-  { id: "p", g: "Basic", label: "Text", desc: "Just start writing", ico: "¶", kw: "text paragraph plain" },
+  { id: "p", g: "Basic", label: "Text", desc: "Just start writing", ico: "text", kw: "text paragraph plain" },
   { id: "h1", g: "Basic", label: "Heading 1", desc: "Big section heading", ico: "H1", kw: "h1 heading title large" },
   { id: "h2", g: "Basic", label: "Heading 2", desc: "Medium section heading", ico: "H2", kw: "h2 heading subtitle" },
   { id: "h3", g: "Basic", label: "Heading 3", desc: "Small section heading", ico: "H3", kw: "h3 heading small" },
-  { id: "ul", g: "Basic", label: "Bulleted list", desc: "A simple list", ico: "•", kw: "bullet list ul unordered" },
-  { id: "ol", g: "Basic", label: "Numbered list", desc: "A list with numbers", ico: "1.", kw: "number list ol ordered" },
-  { id: "todo", g: "Basic", label: "To-do list", desc: "Track tasks with checkboxes", ico: "☑", kw: "todo task checkbox check" },
-  { id: "toggle", g: "Basic", label: "Toggle", desc: "Hide and show content inside", ico: "▸", kw: "toggle collapse accordion details" },
-  { id: "quote", g: "Basic", label: "Quote", desc: "Capture a quote", ico: "❝", kw: "quote blockquote pull" },
-  { id: "callout", g: "Basic", label: "Callout", desc: "Make writing stand out", ico: "💡", kw: "callout note tip highlight box" },
-  { id: "divider", g: "Basic", label: "Divider", desc: "Visually divide sections", ico: "—", kw: "divider line rule hr separator" },
-  { id: "code", g: "Basic", label: "Code", desc: "A block of code", ico: "</>", kw: "code snippet pre" },
-  { id: "image", g: "Media", label: "Image", desc: "Upload or link a picture", ico: "🖼", kw: "image picture photo upload cover" },
-  { id: "gallery", g: "Media", label: "Gallery", desc: "Grid, masonry or carousel", ico: "▦", kw: "gallery grid carousel slider images masonry" },
-  { id: "embed", g: "Media", label: "Video or embed", desc: "YouTube, Vimeo, Figma, Loom…", ico: "▶", kw: "video embed youtube vimeo figma loom spotify soundcloud codepen instagram behance" },
-  { id: "file", g: "Media", label: "File", desc: "A PDF people can download", ico: "📎", kw: "file pdf download attachment" },
-  { id: "bookmark", g: "Media", label: "Web bookmark", desc: "A card that links to a page", ico: "🔖", kw: "bookmark link card url" },
-  { id: "cols2", g: "Layout", label: "2 columns", desc: "Side by side", ico: "◫", kw: "columns two 2 layout side" },
-  { id: "cols3", g: "Layout", label: "3 columns", desc: "Three across", ico: "▥", kw: "columns three 3 layout" },
-  { id: "table", g: "Layout", label: "Table", desc: "Rows and columns", ico: "▦", kw: "table grid rows" },
-  { id: "toc", g: "Layout", label: "Table of contents", desc: "Links to your headings", ico: "☰", kw: "toc contents outline headings" },
-  { id: "button", g: "Layout", label: "Button", desc: "A call-to-action link", ico: "◉", kw: "button cta link action" },
+  { id: "ul", g: "Basic", label: "Bulleted list", desc: "A simple list", ico: "list", kw: "bullet list ul unordered" },
+  { id: "ol", g: "Basic", label: "Numbered list", desc: "A list with numbers", ico: "numbered", kw: "number list ol ordered" },
+  { id: "todo", g: "Basic", label: "To-do list", desc: "Track tasks with checkboxes", ico: "checkbox", kw: "todo task checkbox check" },
+  { id: "toggle", g: "Basic", label: "Toggle", desc: "Hide and show content inside", ico: "toggle", kw: "toggle collapse accordion details" },
+  { id: "quote", g: "Basic", label: "Quote", desc: "Capture a quote", ico: "quote", kw: "quote blockquote pull" },
+  { id: "callout", g: "Basic", label: "Callout", desc: "Make writing stand out", ico: "bulb", kw: "callout note tip highlight box" },
+  { id: "divider", g: "Basic", label: "Divider", desc: "Visually divide sections", ico: "divider", kw: "divider line rule hr separator" },
+  { id: "code", g: "Basic", label: "Code", desc: "A block of code", ico: "code", kw: "code snippet pre" },
+  { id: "image", g: "Media", label: "Image", desc: "Upload or link a picture", ico: "image", kw: "image picture photo upload cover" },
+  { id: "gallery", g: "Media", label: "Gallery", desc: "Grid, masonry or carousel", ico: "gallery", kw: "gallery grid carousel slider images masonry" },
+  { id: "embed", g: "Media", label: "Video or embed", desc: "YouTube, Vimeo, Figma, Loom…", ico: "play", kw: "video embed youtube vimeo figma loom spotify soundcloud codepen instagram behance" },
+  { id: "file", g: "Media", label: "File", desc: "A PDF people can download", ico: "paperclip", kw: "file pdf download attachment" },
+  { id: "bookmark", g: "Media", label: "Web bookmark", desc: "A card that links to a page", ico: "bookmark", kw: "bookmark link card url" },
+  { id: "cols2", g: "Layout", label: "2 columns", desc: "Side by side", ico: "columns", kw: "columns two 2 layout side" },
+  { id: "cols3", g: "Layout", label: "3 columns", desc: "Three across", ico: "columns3", kw: "columns three 3 layout" },
+  { id: "table", g: "Layout", label: "Table", desc: "Rows and columns", ico: "table", kw: "table grid rows" },
+  { id: "toc", g: "Layout", label: "Table of contents", desc: "Links to your headings", ico: "menu", kw: "toc contents outline headings" },
+  { id: "button", g: "Layout", label: "Button", desc: "A call-to-action link", ico: "button", kw: "button cta link action" },
 ];
 const TURN = ["p", "h1", "h2", "h3", "ul", "ol", "todo", "toggle", "quote", "callout"];
 const label = (t) => (ITEMS.find((i) => i.id === t) || {}).label || t;
 const LANGS = ["", "html", "css", "js", "ts", "json", "python", "bash", "sql", "php", "go", "rust", "java", "c", "cpp", "swift", "md"];
-const EMOJI = ["💡", "📌", "⚠️", "✅", "❗", "📞", "🎯", "✨", "🔥", "💬", "📝", "🚀", "❤️", "👀", "🧠", "🎨"];
+const CALLOUT_ICONS = ["bulb", "pin", "warning", "check", "alert", "phone", "target", "sparkles", "flame", "chat", "pencil", "rocket", "heart", "eye", "brain", "palette", "star", "info", "leaf", "trophy"];
 
 export function createEditor(host, opts = {}) {
   const E = { hist: [], hi: -1, uploading: 0, sel: null, dirty: false, timers: {} };
@@ -110,7 +112,7 @@ export function createEditor(host, opts = {}) {
       const row = h("div", { class: "rb-row" });
       if (t === "ul" || t === "ol") row.append(h("span", { class: "rb-mk rte-ui", contenteditable: "false" }, t === "ul" ? "•" : "1."));
       if (t === "todo") row.append(h("button", { type: "button", class: "rb-cb rte-ui" + (b.c ? " on" : ""), contenteditable: "false", tabindex: "-1", "aria-label": "Done", "aria-pressed": b.c ? "true" : "false" }));
-      if (t === "callout") row.append(h("button", { type: "button", class: "rb-ce rte-ui", contenteditable: "false", tabindex: "-1", title: "Change icon" }, b.e || "💡"));
+      if (t === "callout") row.append(h("button", { type: "button", class: "rb-ce rte-ui", contenteditable: "false", tabindex: "-1", title: "Change icon", html: I(iconName(b.e, "bulb"), 22) }));
       if (t === "toggle") row.append(h("button", { type: "button", class: "rb-tg rte-ui" + (b.open ? " open" : ""), contenteditable: "false", tabindex: "-1", "aria-label": "Open or close" }));
       row.append(ed);
       body.append(row);
@@ -152,7 +154,7 @@ export function createEditor(host, opts = {}) {
     }
     if (t === "file") {
       body.append(h("div", { class: "rb-filew", contenteditable: "false" }, b.src
-        ? [h("span", {}, "📎 "), h("b", {}, b.name || "File"), h("button", { type: "button", class: "rb-mini", "data-act": "filepick" }, "Replace")]
+        ? [h("span", { class: "rb-ficon", html: I("paperclip", 18) }), h("b", {}, b.name || "File"), h("button", { type: "button", class: "rb-mini", "data-act": "filepick" }, "Replace")]
         : [h("button", { type: "button", class: "rb-pick-btn", "data-act": "filepick" }, "Upload a PDF"), h("small", {}, "up to 3 MB")]));
       return;
     }
@@ -185,9 +187,9 @@ export function createEditor(host, opts = {}) {
     if (b.src) {
       const img = h("img", { src: b.thumb || b.src, alt: b.alt || "", draggable: "false" });
       const tools = h("div", { class: "rb-imgtools rte-ui" },
-        ["n", "w", "f"].map((w) => h("button", { type: "button", class: "rb-mini" + ((b.w || "n") === w ? " on" : ""), "data-act": "imgw", "data-w": w, title: { n: "Normal width", w: "Wide", f: "Full width" }[w] }, { n: "▭", w: "▬", f: "▣" }[w])),
+        ["n", "w", "f"].map((w) => h("button", { type: "button", class: "rb-mini" + ((b.w || "n") === w ? " on" : ""), "data-act": "imgw", "data-w": w, title: { n: "Normal width", w: "Wide", f: "Full width" }[w] }, { n: "N", w: "W", f: "F" }[w])),
         h("button", { type: "button", class: "rb-mini", "data-act": "alt" }, "Alt text"), h("button", { type: "button", class: "rb-mini", "data-act": "imglink" }, "Link"),
-        h("button", { type: "button", class: "rb-mini", "data-act": "imgreplace" }, "Replace"), h("button", { type: "button", class: "rb-mini rb-x", "data-act": "remove", "aria-label": "Remove" }, "✕"));
+        h("button", { type: "button", class: "rb-mini", "data-act": "imgreplace" }, "Replace"), h("button", { type: "button", class: "rb-mini rb-x", "data-act": "remove", "aria-label": "Remove", html: I("x", 14) }));
       fig.append(h("div", { class: "rb-imgwrap" }, img, tools));
       const cap = editable("rb-cap", b.cap, "Add a caption"); cap.setAttribute("contenteditable", "true"); fig.append(cap);
     } else if (b.uploading) {
@@ -205,8 +207,8 @@ export function createEditor(host, opts = {}) {
     const g = h("div", { class: "rb-galw", contenteditable: "false" });
     const grid = h("div", { class: "rb-gal" + (b.mode === "carousel" ? " car" : "") });
     imgs.forEach((im, i) => grid.append(h("div", { class: "rb-gi" }, h("img", { src: im.src, alt: im.alt || "", draggable: "false" }),
-      h("div", { class: "rb-gt rte-ui" }, h("button", { type: "button", "data-act": "gl", "data-i": i, "aria-label": "Move earlier" }, "‹"), h("button", { type: "button", "data-act": "gr", "data-i": i, "aria-label": "Move later" }, "›"), h("button", { type: "button", "data-act": "gx", "data-i": i, "aria-label": "Remove" }, "✕")))));
-    grid.append(h("button", { type: "button", class: "rb-gadd rte-ui", "data-act": "gadd" }, b.uploading ? "Uploading…" : "+ Add images"));
+      h("div", { class: "rb-gt rte-ui" }, h("button", { type: "button", "data-act": "gl", "data-i": i, "aria-label": "Move earlier", html: I("chevron-left", 16) }), h("button", { type: "button", "data-act": "gr", "data-i": i, "aria-label": "Move later", html: I("chevron-right", 16) }), h("button", { type: "button", "data-act": "gx", "data-i": i, "aria-label": "Remove", html: I("x", 14) })))));
+    grid.append(h("button", { type: "button", class: "rb-gadd rte-ui", "data-act": "gadd" }, b.uploading ? "Uploading…" : "Add images"));
     g.append(grid, h("div", { class: "rb-galc rte-ui" }, ["grid", "masonry", "carousel"].map((m) => h("button", { type: "button", class: "rb-mini" + ((b.mode || "grid") === m ? " on" : ""), "data-act": "gmode", "data-m": m }, m[0].toUpperCase() + m.slice(1))), [2, 3, 4].map((k) => h("button", { type: "button", class: "rb-mini" + ((b.per || 3) === k ? " on" : ""), "data-act": "gcols", "data-n": k }, k + " across"))));
     body.append(g);
   }
@@ -215,7 +217,7 @@ export function createEditor(host, opts = {}) {
     const w = h("div", { class: "rb-embw", contenteditable: "false" });
     if (info) {
       w.append(h("div", { class: "bk-frame rb-frame", style: info.fixedH ? `height:${info.fixedH}px` : `aspect-ratio:${info.ratio}` }, h("iframe", { src: info.src, loading: "lazy", title: info.kind, allowfullscreen: true, tabindex: "-1" }), h("div", { class: "rb-shield" })));
-      const cap = editable("rb-cap", b.cap, "Add a caption"); w.append(cap, h("div", { class: "rb-embr rte-ui" }, h("small", {}, info.kind + " · "), h("button", { type: "button", class: "rb-mini", "data-act": "embedchange" }, "Change link"), h("button", { type: "button", class: "rb-mini rb-x", "data-act": "remove" }, "✕")));
+      const cap = editable("rb-cap", b.cap, "Add a caption"); w.append(cap, h("div", { class: "rb-embr rte-ui" }, h("small", {}, info.kind + " · "), h("button", { type: "button", class: "rb-mini", "data-act": "embedchange" }, "Change link"), h("button", { type: "button", class: "rb-mini rb-x", "data-act": "remove", "aria-label": "Remove", html: I("x", 14) })));
     } else {
       w.append(h("div", { class: "rb-pick" }, h("div", { class: "rb-pickt" }, "Embed a video, design or player"),
         h("div", { class: "rb-pickb" }, h("input", { class: "rb-in", "data-k": "embedurl", placeholder: "Paste a YouTube, Vimeo, Figma, Loom, Spotify… link", value: b.url || "", inputmode: "url", "aria-label": "Link to embed" }), h("button", { type: "button", class: "rb-pick-btn", "data-act": "embedgo" }, "Embed")),
@@ -543,7 +545,7 @@ export function createEditor(host, opts = {}) {
     let g = "", out = [];
     S.items.forEach((it, i) => {
       if (it.g !== g) { g = it.g; out.push(h("div", { class: "rte-sg" }, g)); }
-      out.push(h("button", { type: "button", class: "rte-si" + (i === S.idx ? " on" : ""), role: "option", "data-i": i, onclick: () => slashPick(it) }, h("span", { class: "rte-sic" }, it.ico), h("span", { class: "rte-sit" }, h("b", {}, it.label), h("small", {}, it.desc))));
+      out.push(h("button", { type: "button", class: "rte-si" + (i === S.idx ? " on" : ""), role: "option", "data-i": i, onclick: () => slashPick(it) }, h("span", { class: "rte-sic", html: ICONS[it.ico] ? I(it.ico, 18) : it.ico }), h("span", { class: "rte-sit" }, h("b", {}, it.label), h("small", {}, it.desc))));
     });
     S.list.textContent = ""; S.list.append(...out);
     $(".rte-si.on", S.list)?.scrollIntoView({ block: "nearest" });
@@ -571,7 +573,7 @@ export function createEditor(host, opts = {}) {
     const withTail = (n) => { if (!n.nextElementSibling || !n.nextElementSibling.classList.contains("rb")) { const p = mk({ t: "p", h: "" }); n.after(p); } };
     if (["p", "h1", "h2", "h3", "ul", "ol", "todo", "toggle", "quote", "callout"].includes(id)) {
       if (el.dataset.t !== "p" && !empty) return void focusBlock(convert(el, id, id === "toggle" ? { open: true } : {}), "end");
-      const n = convert(el, id, id === "callout" ? { e: "💡", tone: "gray" } : id === "toggle" ? { open: true } : {}); focusBlock(n, "end"); return;
+      const n = convert(el, id, id === "callout" ? { e: "bulb", tone: "gray" } : id === "toggle" ? { open: true } : {}); focusBlock(n, "end"); return;
     }
     if (id === "divider") { const n = put({ t: "divider" }, false); withTail(n); const nx = n.nextElementSibling; if (nx) focusBlock(nx, "start"); touch(true); return; }
     if (id === "code") { const n = put({ t: "code", x: "", lang: "" }, false); withTail(n); $("textarea", n).focus(); return; }
@@ -603,15 +605,15 @@ export function createEditor(host, opts = {}) {
     popup(h("div", { class: "rte-colors" }, row("tc", "Text colour"), row("bg", "Background")), anchorRect);
   }
   function turnPop(anchorRect, el) {
-    popup(h("div", { class: "rte-menu" }, TURN.map((t) => h("button", { type: "button", class: "rte-mi" + (el.dataset.t === t ? " on" : ""), onclick: () => { closePop(); const n = convert(el, t, t === "callout" ? { e: "💡", tone: "gray" } : {}); focusBlock(n, "end"); } }, h("span", { class: "rte-sic" }, ITEMS.find((i) => i.id === t).ico), label(t)))), anchorRect);
+    popup(h("div", { class: "rte-menu" }, TURN.map((t) => h("button", { type: "button", class: "rte-mi" + (el.dataset.t === t ? " on" : ""), onclick: () => { closePop(); const n = convert(el, t, t === "callout" ? { e: "bulb", tone: "gray" } : {}); focusBlock(n, "end"); } }, h("span", { class: "rte-sic", html: I(ITEMS.find((i) => i.id === t).ico, 18) }), label(t)))), anchorRect);
   }
   function buildFbar() {
     const bar = h("div", { class: "rte-fbar rte-ui", role: "toolbar", "aria-label": "Formatting" });
-    bar.append(h("button", { type: "button", class: "rte-fb turn", "data-k": "turn", title: "Turn into" }, "Text ▾"));
+    bar.append(h("button", { type: "button", class: "rte-fb turn", "data-k": "turn", title: "Turn into" }, "Text"));
     markBtns.forEach(([k, t, ico, fn]) => bar.append(h("button", { type: "button", class: "rte-fb", "data-k": k, title: t, "aria-label": t, html: ico, onclick: fn })));
-    bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "link", title: "Link (Ctrl+K)", "aria-label": "Link", html: "🔗", onclick: (e) => linkAsk(e.currentTarget.getBoundingClientRect()) }));
+    bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "link", title: "Link (Ctrl+K)", "aria-label": "Link", html: I("link", 16), onclick: (e) => linkAsk(e.currentTarget.getBoundingClientRect()) }));
     bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "color", title: "Colour", "aria-label": "Colour", html: '<span class="rte-ca">A</span>', onclick: (e) => colorPop(e.currentTarget.getBoundingClientRect()) }));
-    bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "clear", title: "Clear formatting", "aria-label": "Clear formatting", html: "⌫", onclick: clearFormatting }));
+    bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "clear", title: "Clear formatting", "aria-label": "Clear formatting", html: I("eraser", 16), onclick: clearFormatting }));
     bar.addEventListener("pointerdown", (e) => { if (!e.target.closest("input")) e.preventDefault(); });
     $(".turn", bar).onclick = (e) => { const el = rbOf(sel().anchorNode); if (el) turnPop(e.currentTarget.getBoundingClientRect(), el); };
     document.body.append(bar); return bar;
@@ -620,12 +622,12 @@ export function createEditor(host, opts = {}) {
     const bar = h("div", { class: "rte-mbar rte-ui", role: "toolbar", "aria-label": "Formatting" });
     const B = (html, title, fn, k) => h("button", { type: "button", class: "rte-fb", title, "aria-label": title, "data-k": k || "", html, onclick: fn });
     bar.append(
-      B("＋", "Add block", () => { const ed = edAt(sel().anchorNode); const el = ed && rbOf(ed); if (!el) return; const n = isEmptyHtml(htmlOf(ed)) && el.dataset.t === "p" ? el : insertAfter(el, { t: "p", h: "" }); focusBlock(n, "start"); const e2 = edOf(n); document.execCommand("insertText", false, "/"); }),
+      B(I("plus", 18), "Add block", () => { const ed = edAt(sel().anchorNode); const el = ed && rbOf(ed); if (!el) return; const n = isEmptyHtml(htmlOf(ed)) && el.dataset.t === "p" ? el : insertAfter(el, { t: "p", h: "" }); focusBlock(n, "start"); const e2 = edOf(n); document.execCommand("insertText", false, "/"); }),
       B("<b>B</b>", "Bold", () => toggleMark("strong"), "b"), B("<i>I</i>", "Italic", () => toggleMark("em"), "i"), B("<u>U</u>", "Underline", () => toggleMark("u"), "u"), B("<s>S</s>", "Strikethrough", () => toggleMark("s"), "s"), B("&lt;/&gt;", "Code", () => toggleMark("code"), "c"),
-      B("🔗", "Link", (e) => linkAsk(e.currentTarget.getBoundingClientRect())), B('<span class="rte-ca">A</span>', "Colour", (e) => colorPop(e.currentTarget.getBoundingClientRect())),
+      B(I("link", 18), "Link", (e) => linkAsk(e.currentTarget.getBoundingClientRect())), B('<span class="rte-ca">A</span>', "Colour", (e) => colorPop(e.currentTarget.getBoundingClientRect())),
       B("Aa", "Turn into", (e) => { const el = rbOf(sel().anchorNode); if (el) turnPop(e.currentTarget.getBoundingClientRect(), el); }),
-      B("⇥", "Indent", () => { const el = rbOf(sel().anchorNode); if (el) indent(el, 1); }), B("⇤", "Outdent", () => { const el = rbOf(sel().anchorNode); if (el) indent(el, -1); }),
-      B("↶", "Undo", undo), B("↷", "Redo", redo), B("⌄", "Hide keyboard", () => { document.activeElement?.blur(); }));
+      B(I("indent", 18), "Indent", () => { const el = rbOf(sel().anchorNode); if (el) indent(el, 1); }), B(I("outdent", 18), "Outdent", () => { const el = rbOf(sel().anchorNode); if (el) indent(el, -1); }),
+      B(I("undo", 18), "Undo", undo), B(I("redo", 18), "Redo", redo), B(I("chevron-down", 18), "Hide keyboard", () => { document.activeElement?.blur(); }));
     bar.addEventListener("pointerdown", (e) => e.preventDefault());
     document.body.append(bar); return bar;
   }
@@ -638,7 +640,7 @@ export function createEditor(host, opts = {}) {
     if (inside && !r.collapsed && !isTouch() && r.toString().trim()) {
       const bar = E.fbar || (E.fbar = buildFbar());
       const rc = r.getBoundingClientRect(), el = rbOf(ed);
-      $(".turn", bar).textContent = (el ? label(el.dataset.t) : "Text") + " ▾";
+      $(".turn", bar).textContent = el ? label(el.dataset.t) : "Text";
       $(".turn", bar).style.display = el && ed === edOf(el) ? "" : "none";
       bar.classList.add("show");
       const bw = bar.offsetWidth, bh = bar.offsetHeight;
@@ -753,19 +755,19 @@ export function createEditor(host, opts = {}) {
   }
   function emojiPop(el, rc) {
     const tones = h("div", { class: "rte-tones" }, CALLOUT_TONES.map((t) => h("button", { type: "button", class: "rte-tone", "data-tone": t, "aria-label": t + " callout", onclick: () => { el.dataset.tone = t; el.__b.tone = t; touch(true); closePop(); } })));
-    const grid = h("div", { class: "rte-emoji" }, EMOJI.map((e) => h("button", { type: "button", onclick: () => { el.__b.e = e; $(".rb-ce", el).textContent = e; touch(true); closePop(); } }, e)));
+    const grid = h("div", { class: "rte-emoji" }, CALLOUT_ICONS.map((e) => h("button", { type: "button", "aria-label": e, html: I(e, 20), onclick: () => { el.__b.e = e; $(".rb-ce", el).innerHTML = I(e, 22); touch(true); closePop(); } })));
     popup(h("div", {}, grid, tones), rc);
   }
   function blockMenu(el, rc) {
     const t = el.dataset.t, items = [];
-    if (TEXT_TYPES.includes(t)) items.push(["Turn into…", "↻", () => turnPop(rc, el), true]);
-    items.push(["Duplicate", "⧉", () => { const c = duplicate(el); focusBlock(c, "end"); }]);
-    items.push(["Move up", "↑", () => moveBlock(el, -1)], ["Move down", "↓", () => moveBlock(el, 1)]);
-    if (TEXT_TYPES.includes(t) && !["ul", "ol", "todo"].includes(t)) items.push(["Align", "≡", () => { const order = ["l", "c", "r"], cur = el.__b.a || "l"; const nx = order[(order.indexOf(cur) + 1) % 3]; if (nx === "l") delete el.__b.a; else el.__b.a = nx; const ed = edOf(el); if (nx === "l") delete ed.dataset.a; else ed.dataset.a = nx; touch(true); }]);
-    if (t === "callout") items.push(["Colour & icon", "🎨", () => emojiPop(el, rc), true]);
-    if (t === "toggle") items.push([el.__b.open ? "Collapse" : "Expand", "▸", () => { $(".rb-tg", el)?.click(); }]);
-    items.push(["Delete", "🗑", () => removeBlock(el), false, true]);
-    const p = popup(h("div", { class: "rte-menu" }, items.map(([l, ico, fn, keep, danger]) => h("button", { type: "button", class: "rte-mi" + (danger ? " danger" : ""), onclick: () => { if (!keep) closePop(); fn(); } }, h("span", { class: "rte-sic" }, ico), l))), rc);
+    if (TEXT_TYPES.includes(t)) items.push(["Turn into…", "refresh", () => turnPop(rc, el), true]);
+    items.push(["Duplicate", "copy", () => { const c = duplicate(el); focusBlock(c, "end"); }]);
+    items.push(["Move up", "arrow-up", () => moveBlock(el, -1)], ["Move down", "arrow-down", () => moveBlock(el, 1)]);
+    if (TEXT_TYPES.includes(t) && !["ul", "ol", "todo"].includes(t)) items.push(["Align", "menu", () => { const order = ["l", "c", "r"], cur = el.__b.a || "l"; const nx = order[(order.indexOf(cur) + 1) % 3]; if (nx === "l") delete el.__b.a; else el.__b.a = nx; const ed = edOf(el); if (nx === "l") delete ed.dataset.a; else ed.dataset.a = nx; touch(true); }]);
+    if (t === "callout") items.push(["Colour & icon", "palette", () => emojiPop(el, rc), true]);
+    if (t === "toggle") items.push([el.__b.open ? "Collapse" : "Expand", "toggle", () => { $(".rb-tg", el)?.click(); }]);
+    items.push(["Delete", "trash", () => removeBlock(el), false, true]);
+    const p = popup(h("div", { class: "rte-menu" }, items.map(([l, ico, fn, keep, danger]) => h("button", { type: "button", class: "rte-mi" + (danger ? " danger" : ""), onclick: () => { if (!keep) closePop(); fn(); } }, h("span", { class: "rte-sic", html: I(ico, 18) }), l))), rc);
   }
   root.addEventListener("click", (e) => {
     const t = e.target, el = rbOf(t); if (!el) return;
@@ -801,7 +803,7 @@ export function createEditor(host, opts = {}) {
       let n;
       if (type === "todo-done") n = convert(el, "todo", { c: true });
       else if (type === "code") { const x = ""; n = convert(el, "code", { x, lang: "" }); $("textarea", n).focus(); return true; }
-      else if (type === "callout") n = convert(el, "callout", { e: "💡", tone: "gray" });
+      else if (type === "callout") n = convert(el, "callout", { e: "bulb", tone: "gray" });
       else if (type === "toggle") n = convert(el, "toggle", { open: true });
       else n = convert(el, type);
       focusBlock(n, "start"); return true;

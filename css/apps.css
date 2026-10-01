@@ -17,7 +17,7 @@
 /* journal list */
 .jr .nt-head{align-items:flex-end}.jr-sub{margin:0 0 14px!important;font-size:16px}
 .jr-find{margin:0 0 12px}.jr-search{width:100%;border:0;background:var(--surface2);color:var(--ink);font:inherit;font-size:15px;border-radius:99px;padding:11px 18px}
-.jr-search:focus{outline:2px solid var(--primary)}
+.jr-search:focus{outline:0;box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 70%,transparent)}
 .jr-feat{display:flex;flex-direction:column;border-radius:24px;overflow:hidden;background:var(--surface2);text-decoration:none;color:var(--ink);margin:6px 0 4px;transition:transform .2s}
 .jr-feat:hover{transform:translateY(-2px)}
 .jr-feat img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
@@ -415,3 +415,15 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .kbd dl{grid-template-columns:200px 1fr;align-items:start}.kbd dt{align-self:start;white-space:normal}
 @media (max-width:560px){.kbd dl{grid-template-columns:1fr}.kbd dd{margin:0 0 6px 4px}}
 .kn-card:has(.kn-act) .kn-in{padding-bottom:42px}
+
+/* picture fields in the owner forms, and pictures shown in pages */
+.ow-img>span{font-weight:600}.ow-imgrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ow-thumb{flex:none;width:64px;height:64px;border-radius:16px;background:var(--surface2);display:grid;place-items:center;color:var(--ink2);overflow:hidden}
+.ow-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ow-imgrow .btn{min-height:38px;padding:0 16px;font-size:14px}
+.rs-logo{flex:none;width:44px;height:44px;border-radius:12px;object-fit:cover;margin-right:12px;background:var(--surface2)}
+.row:has(.rs-logo){display:flex;align-items:flex-start}.row:has(.rs-logo)>div{flex:1}
+.tl-img{display:block;width:100%;max-height:200px;object-fit:cover;border-radius:16px;margin:8px 0}
+.sv-img{display:block;width:100%;height:150px;object-fit:cover;border-radius:18px;margin-bottom:12px}
+.sv-steps .sv-simg{width:100%;max-height:140px;object-fit:cover;border-radius:14px;margin-top:8px}
+.sv-av{width:36px;height:36px;border-radius:50%;object-fit:cover;margin-right:10px;vertical-align:middle}

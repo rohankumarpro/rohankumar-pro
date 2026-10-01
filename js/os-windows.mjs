@@ -1,6 +1,7 @@
 // Two ways to work without clutter: Focus mode (one app, truly full screen, nothing else on screen) and the
 // All windows overview (every open app as a live preview you can switch to or close).
 import { h, $, $$, esc, toast, mobile } from "/js/lib.mjs";
+import { icon } from "/shared/icons.mjs";
 
 const svg = (p, s = 18) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const ICON = {
@@ -92,13 +93,13 @@ export const Overview = {
   },
   draw() {
     const ov = Overview.el; if (!ov) return; const wins = Overview.wins();
-    ov.innerHTML = `<div class="ov-top"><b>Open apps</b><span class="ov-n">${wins.length}</span><span class="sp"></span>${wins.length ? '<button class="ov-all">Close all</button>' : ""}<button class="ov-x" aria-label="Close overview">✕</button></div>
-      <div class="ov-wrap"><div class="ov-grid">${wins.length ? "" : '<div class="ov-empty"><div>🪟</div><p>No apps are open.</p></div>'}</div></div><p class="ov-hint">${mobile() ? "Swipe a card up to close it" : "Click to switch · ✕ or Delete to close · Esc to leave"}</p>`;
+    ov.innerHTML = `<div class="ov-top"><b>Open apps</b><span class="ov-n">${wins.length}</span><span class="sp"></span>${wins.length ? '<button class="ov-all">Close all</button>' : ""}<button class="ov-x" aria-label="Close overview">${icon("x", { size: 18 })}</button></div>
+      <div class="ov-wrap"><div class="ov-grid">${wins.length ? "" : '<div class="ov-empty"><div>${icon("window", { size: 56 })}</div><p>No apps are open.</p></div>'}</div></div><p class="ov-hint">${mobile() ? "Swipe a card up to close it" : "Click to switch. Delete closes a window. Esc leaves."}</p>`;
     const grid = $(".ov-grid", ov);
     wins.forEach((w, i) => {
       const id = w.dataset.app, title = $(".ttl", w)?.textContent || id, ic = $(".bar .ico", w)?.outerHTML || "";
       const card = h("div", { class: "ov-card" + (w.classList.contains("min") ? " is-min" : ""), tabindex: "0", role: "button", "aria-label": `${title}. Press Enter to open, Delete to close.`, "data-app": id, style: `--i:${i}` });
-      card.innerHTML = `<div class="ov-h"><span class="ov-ic">${ic}</span><span class="ov-t">${esc(title)}</span><button class="ov-c" aria-label="Close ${esc(title)}">✕</button></div><div class="ov-p"></div>${w.classList.contains("min") ? '<span class="ov-badge">Minimised</span>' : ""}`;
+      card.innerHTML = `<div class="ov-h"><span class="ov-ic">${ic}</span><span class="ov-t">${esc(title)}</span><button class="ov-c" aria-label="Close ${esc(title)}">${icon("x", { size: 15 })}</button></div><div class="ov-p"></div>${w.classList.contains("min") ? '<span class="ov-badge">Minimised</span>' : ""}`;
       const box = $(".ov-p", card), { node, W, H } = Overview.preview(w);
       box.append(node);
       card.__win = w; card.__dims = [W, H]; grid.append(card);

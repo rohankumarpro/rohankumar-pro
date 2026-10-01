@@ -2,6 +2,7 @@
 // They use the desktop's own globals (esc, LIVE, toast, openApp ...) so everything feels like one system.
 import { renderBlocks, esc as escape, stripTags, safeUrl } from "/shared/blocks.mjs";
 
+import { icon } from "/shared/icons.mjs";
 export const esc = escape;
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -50,6 +51,7 @@ function scaled(im, max, q, png) {
   return new Promise((res, rej) => c.toBlob((b) => (b ? res({ blob: b, w, h: hh }) : rej(new Error("encode"))), png ? "image/png" : "image/jpeg", q));
 }
 const b64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(blob); });
+const uploadError = (r) => r.status === 401 ? "You are signed out. Sign in again as the owner." : r.status === 0 ? "No connection, or the picture is too big for the server. Try a smaller one." : r.status === 413 ? "That picture is too big to upload. Try a smaller one." : (r.data.error || "Upload failed") + (r.data.detail ? ": " + r.data.detail : "") + " (" + r.status + ")";
 export const Up = {
   // Shrinks a picture in the browser, then stores a full size and a small copy. Returns {url, thumb, w, h, name}.
   async image(file, { max = 2000 } = {}) {
@@ -62,14 +64,14 @@ export const Up = {
     if (full.blob.size > 3000000) throw new Error("That picture is too large even after shrinking it. Try a smaller one.");
     const thumb = await scaled(im, 640, 0.8, false);
     const r = await api("/api/upload", { method: "POST", body: { full: await b64(full.blob), thumb: await b64(thumb.blob), name: file.name, w: full.w, h: full.h } });
-    if (!r.ok) throw new Error(r.status === 401 ? "You are signed out. Sign in again." : r.data.error || "Upload failed (" + r.status + ")");
+    if (!r.ok) throw new Error(uploadError(r));
     return { url: r.data.url, thumb: r.data.thumb, w: full.w, h: full.h, name: file.name, id: r.data.item.id };
   },
   async file(file) {
     if (file.type !== "application/pdf") throw new Error("Only PDF files can be uploaded.");
     if (file.size > 3 * 1024 * 1024) throw new Error("That file is over 3 MB.");
     const r = await api("/api/upload", { method: "POST", body: { full: await b64(file), name: file.name } });
-    if (!r.ok) throw new Error(r.data.error || "Upload failed (" + r.status + ")");
+    if (!r.ok) throw new Error(uploadError(r));
     return { url: r.data.url, name: file.name, size: file.size };
   },
   async list() { const r = await api("/api/upload"); return r.ok ? r.data.items.map((i) => ({ ...i, url: `/u/${i.id}.${i.ext}`, thumb: i.thumb ? `/u/${i.id}-t.${i.ext}` : `/u/${i.id}.${i.ext}` })) : []; },
@@ -81,6 +83,8 @@ export const Up = {
     });
   },
 };
+
+window.Up = Up; // the desktop's own owner forms use it too
 
 /* ---------- the editor, loaded only when someone starts writing ---------- */
 let edP = null;
@@ -122,7 +126,7 @@ export function lightbox(items, start = 0) {
   const close = () => { ov.remove(); document.removeEventListener("keydown", key, true); };
   const go = (d) => { i = (i + d + items.length) % items.length; show(); };
   const key = (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); } if (e.key === "ArrowRight" && items.length > 1) go(1); if (e.key === "ArrowLeft" && items.length > 1) go(-1); };
-  ov.append(img, cap, h("button", { class: "lb-x", "aria-label": "Close", onclick: close }, "✕"), items.length > 1 ? [h("button", { class: "lb-p", "aria-label": "Previous", onclick: () => go(-1) }, "‹"), h("button", { class: "lb-n", "aria-label": "Next", onclick: () => go(1) }, "›")] : null);
+  ov.append(img, cap, h("button", { class: "lb-x", "aria-label": "Close", onclick: close, html: icon("x", { size: 22 }) }), items.length > 1 ? [h("button", { class: "lb-p", "aria-label": "Previous", onclick: () => go(-1), html: icon("chevron-left", { size: 26 }) }), h("button", { class: "lb-n", "aria-label": "Next", onclick: () => go(1), html: icon("chevron-right", { size: 26 }) })] : null);
   ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
   let sx = null; ov.addEventListener("pointerdown", (e) => { sx = e.clientX; }); ov.addEventListener("pointerup", (e) => { if (sx != null && items.length > 1) { const dx = e.clientX - sx; if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1); } sx = null; });
   document.body.append(ov); document.addEventListener("keydown", key, true); show();

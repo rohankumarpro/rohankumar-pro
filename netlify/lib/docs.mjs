@@ -2,6 +2,7 @@
 // Pages are private. The owner can "Publish to web" one page (and its address, /docs/<slug>, gets the same SEO as the Journal).
 import { cleanBlocks, slugify, safeImg, rid, blocksText, wordCount } from "../../shared/blocks.mjs";
 import { saveJSON } from "./safe.mjs";
+import { ICONS } from "../../shared/icons.mjs";
 
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
 export const GRADS = ["g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8"];
@@ -16,7 +17,7 @@ export const loadIndex = async (store) => (await store.get(idxKey, { type: "json
 export function cleanMeta(b, prev = {}, all = []) {
   const o = { ...prev };
   if ("title" in b) o.title = str(b.title, 160);
-  if ("icon" in b) o.icon = str(b.icon, 8);
+  if ("icon" in b) o.icon = ICONS[b.icon] ? b.icon : "";
   if ("desc" in b) o.desc = str(b.desc, 200);
   if ("fav" in b) o.fav = !!b.fav;
   if ("noindex" in b) o.noindex = !!b.noindex;

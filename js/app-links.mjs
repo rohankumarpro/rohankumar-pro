@@ -3,6 +3,8 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile, Up, share, confirmBox, fmtNum, ago } from "/js/lib.mjs";
 import { embedInfo, safeUrl } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
+import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
+const I = (n, size = 16) => _ic(n, { size });
 
 const H = { hub: null, saved: false, stats: null };
 
@@ -24,7 +26,7 @@ const ICONS = {
 };
 const ICON_KEYS = Object.keys(ICONS);
 const glyph = (k, s = 22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ICONS.link}</svg>`;
-const SOC = { instagram: ["Instagram", "linear-gradient(135deg,#F58529,#DD2A7B 55%,#8134AF)", "◎"], youtube: ["YouTube", "#FF0000", "▶"], linkedin: ["LinkedIn", "#0A66C2", "in"], behance: ["Behance", "#1769FF", "Bē"], dribbble: ["Dribbble", "#EA4C89", "Dr"], figma: ["Figma", "#1E1E1E", "F"], x: ["X", "#000", "𝕏"], github: ["GitHub", "#24292F", "Gh"], tiktok: ["TikTok", "#000", "Tk"], facebook: ["Facebook", "#1877F2", "f"], threads: ["Threads", "#000", "@"], pinterest: ["Pinterest", "#E60023", "P"], reddit: ["Reddit", "#FF4500", "R"], spotify: ["Spotify", "#1DB954", "♫"], medium: ["Medium", "#000", "M"], whatsapp: ["WhatsApp", "#25D366", "Wa"], telegram: ["Telegram", "#26A5E4", "Tg"], email: ["Email", "#5F6368", "✉"], website: ["Website", "#2E6B57", "↗"] };
+const SOC = { instagram: ["Instagram", "linear-gradient(135deg,#F58529,#DD2A7B 55%,#8134AF)", "camera"], youtube: ["YouTube", "#FF0000", "play"], linkedin: ["LinkedIn", "#0A66C2", "in"], behance: ["Behance", "#1769FF", "Bē"], dribbble: ["Dribbble", "#EA4C89", "Dr"], figma: ["Figma", "#1E1E1E", "F"], x: ["X", "#000", "𝕏"], github: ["GitHub", "#24292F", "Gh"], tiktok: ["TikTok", "#000", "Tk"], facebook: ["Facebook", "#1877F2", "f"], threads: ["Threads", "#000", "@"], pinterest: ["Pinterest", "#E60023", "P"], reddit: ["Reddit", "#FF4500", "R"], spotify: ["Spotify", "#1DB954", "music"], medium: ["Medium", "#000", "M"], whatsapp: ["WhatsApp", "#25D366", "Wa"], telegram: ["Telegram", "#26A5E4", "Tg"], email: ["Email", "#5F6368", "mail"], website: ["Website", "#0B57D0", "globe"] };
 const PRESETS = {
   mint: { name: "Mint", bg: "linear-gradient(160deg,#E6ECE4,#C4E2D1)", fg: "#17201B", mut: "#4B5851", card: "rgba(255,255,255,.72)", accent: "#2E6B57", on: "#fff", line: "rgba(0,0,0,.08)" },
   midnight: { name: "Midnight", bg: "linear-gradient(160deg,#0F1512,#1A3B2E)", fg: "#E3ECE6", mut: "#A5B4AB", card: "rgba(255,255,255,.08)", accent: "#8FD5B8", on: "#062519", line: "rgba(255,255,255,.14)" },
@@ -65,7 +67,7 @@ function themeVars(hub) {
   return { "--hb-bg": t.bgImg ? `center/cover url(${t.bgImg})` : bg, "--hb-fg": t.text || p.fg, "--hb-mut": t.text || p.mut, "--hb-card": p.card, "--hb-ac": t.accent || p.accent, "--hb-on": t.accent ? contrast(t.accent) : p.on, "--hb-line": p.line, "--hb-font": FONTS[t.font && t.font !== "sans" ? t.font : p.font || "sans"] };
 }
 function contrast(hex) { const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111111" : "#ffffff"; }
-function socialBtn(s) { const [name, bg, ch] = SOC[s.type] || SOC.website; const href = s.type === "email" ? `mailto:${s.url}` : s.url; return `<a class="hb-soc" href="${esc(href)}" target="_blank" rel="me noopener" aria-label="${esc(name)}" title="${esc(name)}" style="background:${bg}"><span>${ch}</span></a>`; }
+function socialBtn(s) { const [name, bg, ch] = SOC[s.type] || SOC.website; const href = s.type === "email" ? `mailto:${s.url}` : s.url; return `<a class="hb-soc" href="${esc(href)}" target="_blank" rel="me noopener" aria-label="${esc(name)}" title="${esc(name)}" style="background:${bg}"><span>${_ICONS[ch] ? I(ch, 20) : ch}</span></a>`; }
 function itemHtml(i, st, hub) {
   const th = hub.theme || {};
   const cls = ["hb-it", i.style === "featured" ? "hb-feat" : i.style === "outline" ? "hb-out" : "", i.anim && i.anim !== "none" ? "an-" + i.anim : ""].filter(Boolean).join(" ");
@@ -76,7 +78,7 @@ function itemHtml(i, st, hub) {
     case "text": return `<p class="hb-p">${i.html || esc(i.title)}</p>`;
     case "divider": return `<hr class="hb-hr">`;
     case "image": return `<figure class="hb-img">${i.link ? `<a href="${esc(i.link)}" target="_blank" rel="noopener" data-id="${esc(i.id)}"><img src="${esc(i.src)}" alt="${esc(i.alt || i.title || "")}" loading="lazy"></a>` : `<img src="${esc(i.src)}" alt="${esc(i.alt || i.title || "")}" loading="lazy">`}</figure>`;
-    case "embed": { const e = embedInfo(i.url); if (!e) return `<a class="${cls}" href="${esc(i.url)}" target="_blank" rel="noopener" data-id="${esc(i.id)}">${inner}</a>`; return `<div class="hb-emb" data-id="${esc(i.id)}" data-src="${esc(e.src)}" style="${e.fixedH ? `height:${e.fixedH}px` : `aspect-ratio:${e.ratio}`}">${e.thumb ? `<button class="hb-play" aria-label="Play ${esc(i.title || e.kind)}"><img src="${esc(e.thumb)}" alt="" loading="lazy"><span>▶</span></button>` : `<iframe src="${esc(e.src)}" loading="lazy" allowfullscreen title="${esc(e.kind)}"></iframe>`}</div>${i.title ? `<small class="hb-cap">${esc(i.title)}</small>` : ""}`; }
+    case "embed": { const e = embedInfo(i.url); if (!e) return `<a class="${cls}" href="${esc(i.url)}" target="_blank" rel="noopener" data-id="${esc(i.id)}">${inner}</a>`; return `<div class="hb-emb" data-id="${esc(i.id)}" data-src="${esc(e.src)}" style="${e.fixedH ? `height:${e.fixedH}px` : `aspect-ratio:${e.ratio}`}">${e.thumb ? `<button class="hb-play" aria-label="Play ${esc(i.title || e.kind)}"><img src="${esc(e.thumb)}" alt="" loading="lazy"><span>${I("play", 22)}</span></button>` : `<iframe src="${esc(e.src)}" loading="lazy" allowfullscreen title="${esc(e.kind)}"></iframe>`}</div>${i.title ? `<small class="hb-cap">${esc(i.title)}</small>` : ""}`; }
     case "app": return `<button class="${cls}" data-app="${esc(i.app)}" data-id="${esc(i.id)}">${inner}</button>`;
     case "copy": return `<button class="${cls}" data-copy="${esc(i.text)}" data-id="${esc(i.id)}">${inner}</button>`;
     case "vcard": return `<a class="${cls}" href="/api/hub?a=vcard" download data-id="${esc(i.id)}">${inner}</a>`;
@@ -98,7 +100,7 @@ export function renderHub(box, hub, { owner, onEdit, preview, track } = {}) {
     const dim = (i.hidden || (i.start && i.start > now) || (i.end && i.end <= now)) ? ` data-dim="${i.hidden ? "Hidden" : i.start > now ? "Scheduled" : "Expired"}"` : "";
     list += `<div class="hb-row${closed && i.type !== "header" ? " shut" : ""}"${dim} data-for="${esc(i.id)}">${itemHtml(i, null, hub)}</div>`;
   }
-  root.innerHTML = `<div class="hb-pat"></div><div class="hb-in">${owner && onEdit ? '<button class="hb-edit">✎ Edit page</button>' : ""}
+  root.innerHTML = `<div class="hb-pat"></div><div class="hb-in">${owner && onEdit ? `<button class="hb-edit">${I("pencil", 15)} Edit page</button>` : ""}
     <header class="hb-head"><img class="hb-av" src="${esc(pr.avatar)}" alt="${esc(pr.name)}" width="96" height="96"><h1>${esc(pr.name)}</h1>${pr.role ? `<p class="hb-role">${esc(pr.role)}</p>` : ""}${pr.status ? `<span class="hb-status"><i></i>${esc(pr.status)}</span>` : ""}${pr.bio ? `<p class="hb-bio">${esc(pr.bio)}</p>` : ""}</header>
     ${hub.socials.length ? `<div class="hb-socs">${hub.socials.map(socialBtn).join("")}</div>` : ""}
     <div class="hb-list">${list || '<p class="hb-empty">No links yet.</p>'}</div>
@@ -142,7 +144,7 @@ function builder(body) {
   const B = { hub: JSON.parse(JSON.stringify(H.hub)), tab: "links", open: null, status: H.saved ? "Saved" : "Not saved yet", saveT: null, preview: false };
   body.classList.add("jr-editing"); body.onscroll = null;
   const TABS = [["links", "Links"], ["design", "Design"], ["profile", "Profile"], ["stats", "Analytics"], ["subs", "Subscribers"]];
-  body.innerHTML = `<div class="jed hbe"><div class="jed-bar"><button class="back" data-a="done">‹ Done</button><span class="jed-st hbe-st">${esc(B.status)}</span><span class="sp"></span><button data-a="prev" class="hbe-pvb">Preview</button></div>
+  body.innerHTML = `<div class="jed hbe"><div class="jed-bar"><button class="back" data-a="done">${I("chevron-left")}Done</button><span class="jed-st hbe-st">${esc(B.status)}</span><span class="sp"></span><button data-a="prev" class="hbe-pvb">Preview</button></div>
     <div class="hbe-tabs" role="tablist">${TABS.map(([k, l]) => `<button role="tab" data-tab="${k}">${l}</button>`).join("")}</div>
     <div class="hbe-cols"><div class="hbe-main"></div><div class="hbe-pv"><div class="hbe-phone"><div class="hbe-screen"></div></div></div></div></div>`;
   const main = $(".hbe-main", body), screen = $(".hbe-screen", body), st = $(".hbe-st", body);
@@ -188,7 +190,7 @@ function builder(body) {
     };
     return `<div class="hbe-card${it.hidden ? " off" : ""}${open ? " open" : ""}" data-id="${it.id}" data-i="${i}"><div class="hbe-ch"><button class="hbe-grip" aria-label="Drag to reorder" title="Drag to reorder">⋮⋮</button><span class="hbe-ti">${glyph(tp[2], 18)}</span>
       <div class="hbe-sum" data-a="toggle"><b>${esc(it.title || it.url || it.text || tp[1])}</b><small>${esc(tp[1])}${it.type === "link" && it.url ? " · " + esc(it.url.replace(/^https?:\/\//, "").slice(0, 36)) : ""}${clicks ? ` · ${clicks} click${clicks === 1 ? "" : "s"}` : ""}${it.start && it.start > Date.now() ? " · scheduled" : ""}</small></div>
-      <button class="hbe-eye" data-a="hide" aria-label="${it.hidden ? "Show" : "Hide"}" title="${it.hidden ? "Hidden. Click to show" : "Visible. Click to hide"}">${it.hidden ? "🙈" : "👁"}</button><button class="hbe-x" data-a="del" aria-label="Delete" title="Delete">✕</button></div>
+      <button class="hbe-eye" data-a="hide" aria-label="${it.hidden ? "Show" : "Hide"}" title="${it.hidden ? "Hidden. Click to show" : "Visible. Click to hide"}">${I(it.hidden ? "eye-off" : "eye", 17)}</button><button class="hbe-x" data-a="del" aria-label="Delete" title="Delete">${I("x", 16)}</button></div>
       ${open ? `<div class="hbe-cb">${F.map(inp).join("")}${it.type === "header" ? `<label class="ow-app"><input type="checkbox" data-k="collapsible" ${it.collapsible ? "checked" : ""}><span>Let visitors collapse this section</span></label>` : ""}
         ${advanced(it) ? `<details class="hbe-adv"><summary>More options</summary>
           ${it.type !== "subscribe" && it.type !== "countdown" ? `<label class="ow-f">Small text<input data-k="sub" value="${esc(it.sub || "")}" maxlength="160"></label>` : ""}
@@ -277,7 +279,7 @@ function builder(body) {
       <div class="hbe-imgrow"><img class="av" src="${esc(p.avatar || "/img/avatar.jpg")}" alt=""><button class="rb-mini" data-pickav>${p.avatar ? "Replace picture" : "Upload a picture"}</button>${p.avatar ? '<button class="rb-mini" data-rmav>Use default</button>' : ""}</div>
       <label class="ow-f">Name<input data-p="name" value="${esc(p.name || "")}" maxlength="60" placeholder="${esc(siteName())}"></label><label class="ow-f">Role<input data-p="role" value="${esc(p.role || "")}" maxlength="80" placeholder="${esc((typeof P !== "undefined" && P.role) || "")}"></label>
       <label class="ow-f">Status line<input data-p="status" value="${esc(p.status || "")}" maxlength="80" placeholder="${esc((typeof P !== "undefined" && P.status) || "Open to new projects")}"></label><label class="ow-f">Bio<textarea data-p="bio" rows="3" maxlength="400">${esc(p.bio || "")}</textarea></label>
-      <h3>Social icons</h3><div class="pj-rows" data-socs>${soc.map((x, i) => `<div class="pj-row"><select data-s="type" data-i="${i}">${Object.entries(SOC).map(([k, [n]]) => `<option value="${k}"${x.type === k ? " selected" : ""}>${n}</option>`).join("")}</select><input data-s="url" data-i="${i}" value="${esc(x.url)}" placeholder="https://…" maxlength="300"><button class="rb-mini" data-su="${i}" aria-label="Move up">↑</button><button class="rb-mini rb-x" data-sx="${i}" aria-label="Remove">✕</button></div>`).join("")}</div><button class="rb-mini" data-addsoc>+ Add social icon</button>
+      <h3>Social icons</h3><div class="pj-rows" data-socs>${soc.map((x, i) => `<div class="pj-row"><select data-s="type" data-i="${i}">${Object.entries(SOC).map(([k, [n]]) => `<option value="${k}"${x.type === k ? " selected" : ""}>${n}</option>`).join("")}</select><input data-s="url" data-i="${i}" value="${esc(x.url)}" placeholder="https://…" maxlength="300"><button class="rb-mini" data-su="${i}" aria-label="Move up">${I("arrow-up", 14)}</button><button class="rb-mini rb-x" data-sx="${i}" aria-label="Remove">${I("x", 14)}</button></div>`).join("")}</div><button class="rb-mini" data-addsoc>+ Add social icon</button>
       <h3>On the page</h3><label class="ow-app"><input type="checkbox" data-set="share" ${s.share !== false ? "checked" : ""}><span>Share button</span></label><label class="ow-app"><input type="checkbox" data-set="qr" ${s.qr !== false ? "checked" : ""}><span>QR code button</span></label><label class="ow-app"><input type="checkbox" data-set="vcard" ${s.vcard !== false ? "checked" : ""}><span>“Save contact” button (needs the contact card below)</span></label>
       <h3>Contact card <small>(what “Save contact” downloads)</small></h3><div class="pj-two"><label class="ow-f">Full name<input data-v="name" value="${esc(v.name || "")}" maxlength="80"></label><label class="ow-f">Company<input data-v="org" value="${esc(v.org || "")}" maxlength="80"></label></div><div class="pj-two"><label class="ow-f">Job title<input data-v="title" value="${esc(v.title || "")}" maxlength="80"></label><label class="ow-f">Phone<input data-v="phone" value="${esc(v.phone || "")}" maxlength="30" type="tel"></label></div><div class="pj-two"><label class="ow-f">Email<input data-v="email" value="${esc(v.email || "")}" maxlength="120" type="email"></label><label class="ow-f">Website<input data-v="url" value="${esc(v.url || "")}" maxlength="300" inputmode="url"></label></div>`;
     $$("[data-p]", main).forEach((el) => (el.oninput = () => { const k = el.dataset.p; if (el.value.trim()) p[k] = el.value; else delete p[k]; touch(); }));
@@ -311,7 +313,7 @@ function builder(body) {
   async function drawSubs() {
     main.innerHTML = '<div class="app-loading"><span class="rb-spin"></span></div>';
     const r = await api("/api/hub?a=subs"); const subs = r.ok ? r.data.subs : [];
-    main.innerHTML = `<h3>Subscribers <small>${subs.length}</small></h3><p class="hint">People who typed their email into an “Email sign-up” block. Add one from the Links tab.</p>${subs.length ? `<div class="hbe-subs">${subs.slice().reverse().map((s) => `<div><span>${esc(s.email)}<small>${ago(s.ts)}</small></span><button class="rb-mini rb-x" data-rm="${esc(s.email)}" aria-label="Remove">✕</button></div>`).join("")}</div><p><button class="rb-mini" data-csv>Download CSV</button></p>` : '<p class="hint">No subscribers yet.</p>'}`;
+    main.innerHTML = `<h3>Subscribers <small>${subs.length}</small></h3><p class="hint">People who typed their email into an “Email sign-up” block. Add one from the Links tab.</p>${subs.length ? `<div class="hbe-subs">${subs.slice().reverse().map((s) => `<div><span>${esc(s.email)}<small>${ago(s.ts)}</small></span><button class="rb-mini rb-x" data-rm="${esc(s.email)}" aria-label="Remove">${I("x", 14)}</button></div>`).join("")}</div><p><button class="rb-mini" data-csv>Download CSV</button></p>` : '<p class="hint">No subscribers yet.</p>'}`;
     $$("[data-rm]", main).forEach((b) => (b.onclick = async () => { await api("/api/hub?a=sub&email=" + encodeURIComponent(b.dataset.rm), { method: "DELETE" }); drawSubs(); }));
     $("[data-csv]", main)?.addEventListener("click", () => { const csv = "email,name,date\n" + subs.map((s) => `${s.email},${(s.name || "").replace(/,/g, " ")},${new Date(s.ts).toISOString()}`).join("\n"); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "subscribers.csv"; a.click(); });
   }

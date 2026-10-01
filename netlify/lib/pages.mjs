@@ -33,6 +33,8 @@ const crumbs = (list) => ({ "@type": "BreadcrumbList", itemListElement: list.map
 const itemList = (items) => ({ "@type": "ItemList", itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, url: abs(it.path), name: it.name })) });
 const nav = (hidden) => `<nav aria-label="Main"><ul>${["about", "projects", "journal", "links", "resume", "contact"].filter((id) => !hidden.has(id)).map((id) => `<li><a href="${APP_PAGES[id].path}">${APP_PAGES[id].title}</a></li>`).join("")}</ul></nav>`;
 const postLi = (p) => `<li><a href="/journal/${esc(p.slug)}">${esc(p.title)}</a> <small>${esc(dateLabel(p))}${p.tag ? ` · ${esc(p.tag)}` : ""}</small><p>${esc(trim(p.excerpt, 200))}</p></li>`;
+const extraOf = (pr, k) => (pr.settings.extra && pr.settings.extra[k]) || [];
+const extraHtml = (pr, k) => { const b = extraOf(pr, k); return b.length ? `<section>${renderBlocks(b, { hBase: 2 })}</section>` : ""; };
 const projLi = (p) => `<li><a href="/projects/${esc(p.slug)}">${esc(p.title)}</a>${p.field ? ` <small>${esc(p.field)}${p.year ? ` · ${esc(p.year)}` : ""}</small>` : ""}<p>${esc(trim(p.summary, 200))}</p></li>`;
 
 export async function resolve(event, store, rawPath) {
@@ -80,6 +82,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
       body = `<h1>Contact ${esc(pr.name)}</h1><p>${pr.booking ? `<a href="${esc(pr.booking)}">Book a call</a>` : ""}${pr.email ? ` · <a href="mailto:${esc(pr.email)}">${esc(pr.email)}</a>` : ""}</p><ul>${links}</ul>`;
       mdText = `# Contact ${pr.name}\n\n${pr.booking ? `Book a call: ${pr.booking}\n` : ""}${pr.email ? `Email: ${pr.email}\n` : ""}`;
     }
+    if (id !== "about") { body += extraHtml(pr, id); const xb = extraOf(pr, id); if (xb.length) mdText += "\n\n" + blocksToMd(xb); }
     return finish({ title, desc: trim(desc), app: id, noindex: pr.placeholder || hidden.has(id), type: id === "about" ? "profile" : "website", body, mdText,
       ld: [{ "@type": id === "about" ? "ProfilePage" : "WebPage", "@id": `${SITE}${path}#page`, url: `${SITE}${path}`, name: title, description: trim(desc), mainEntity: person(pr, hub), isPartOf: { "@id": `${SITE}/#website` } }, crumbs([home, { name: ap.title, path }])] });
   }
@@ -102,7 +105,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const t = pr.timeline;
     const sec = (k, h) => { const l = t.filter((x) => x.status === k); return l.length ? `<h2>${h}</h2><ul>${l.map((x) => `<li><b>${esc(x.title)}</b>${x.date ? ` <small>${esc(x.date)}</small>` : ""}${x.detail ? `<p>${esc(x.detail)}</p>` : ""}</li>`).join("")}</ul>` : ""; };
     return finish({ title: `Timeline — ${pr.name}`, desc: `What ${pr.name} is working on now, what is next, and what is done.`, app: "timeline", noindex: pr.placeholder || hidden.has("timeline"),
-      body: `<h1>Timeline</h1>${sec("now", "Working on now")}${sec("next", "Up next")}${sec("done", "Done")}`, mdText: `# Timeline\n\n${t.map((x) => `- [${x.status}] ${x.title}`).join("\n")}\n`,
+      body: `<h1>Timeline</h1>${sec("now", "Working on now")}${sec("next", "Up next")}${sec("done", "Done")}${extraHtml(pr, "timeline")}`, mdText: `# Timeline\n\n${t.map((x) => `- [${x.status}] ${x.title}`).join("\n")}\n`,
       ld: [crumbs([home, { name: "Timeline", path }])] });
   }
 
@@ -116,7 +119,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
   if (path === "/docs") {
     const ds = await docsPublic(store);
     return finish({ title: `Docs — ${pr.name}`, desc: `Guides, notes and write-ups by ${pr.name}.`, app: "docs", noindex: !ds.length || hidden.has("docs"),
-      body: `<h1>Docs</h1><ul>${ds.map((d) => `<li><a href="/docs/${esc(d.slug)}">${d.icon ? esc(d.icon) + " " : ""}${esc(d.title || "Untitled")}</a>${d.desc ? `<p>${esc(d.desc)}</p>` : ""}</li>`).join("")}</ul>`,
+      body: `<h1>Docs</h1><ul>${ds.map((d) => `<li><a href="/docs/${esc(d.slug)}">${esc(d.title || "Untitled")}</a>${d.desc ? `<p>${esc(d.desc)}</p>` : ""}</li>`).join("")}</ul>`,
       mdText: `# Docs\n\n${ds.map((d) => `- [${d.title || "Untitled"}](${SITE}/docs/${d.slug}.md)`).join("\n")}\n`, ld: [crumbs([home, { name: "Docs", path }])] });
   }
   if (path.startsWith("/docs/")) {
@@ -124,7 +127,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     if (!d || hidden.has("docs")) return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "docs", noindex: true, notFound: true, body: `<h1>Page not found</h1><p><a href="/docs">Back to Docs</a></p>` });
     const plain = trim(d.desc || blocksText(d.blocks), 160), img = d.cover?.src || firstImage(d.blocks) || OG_DEFAULT, iso = new Date(d.created || Date.now()).toISOString().slice(0, 10), mod = new Date(d.updated || Date.now()).toISOString();
     return finish({ title: `${d.title || "Untitled"} — ${pr.name}`, desc: plain, app: "docs", slug: d.slug, type: "article", image: img, noindex: !!d.noindex, published: iso, modified: mod,
-      body: `<article><nav aria-label="Breadcrumb"><a href="/docs">Docs</a></nav><h1>${d.icon ? esc(d.icon) + " " : ""}${esc(d.title || "Untitled")}</h1>${renderBlocks(d.blocks, { hBase: 2 })}</article>`,
+      body: `<article><nav aria-label="Breadcrumb"><a href="/docs">Docs</a></nav><h1>${esc(d.title || "Untitled")}</h1>${renderBlocks(d.blocks, { hBase: 2 })}</article>`,
       mdText: `# ${d.title || "Untitled"}\n\n${blocksToMd(d.blocks)}\n`,
       ld: [{ "@type": "Article", "@id": `${SITE}/docs/${d.slug}#doc`, headline: (d.title || "Untitled").slice(0, 110), description: plain, url: `${SITE}/docs/${d.slug}`, image: [abs(img)], datePublished: iso, dateModified: mod.slice(0, 10), author: { "@id": `${SITE}/#person` }, publisher: { "@id": `${SITE}/#person` }, inLanguage: "en", wordCount: wordCount(d.blocks) }, crumbs([home, { name: "Docs", path: "/docs" }, { name: d.title || "Untitled", path }])] });
   }
@@ -158,7 +161,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const sv = saved ? pr.settings.services : SV_DEF.services, proc = (pr.settings.process || []).length ? pr.settings.process : SV_DEF.process, faq = (pr.settings.faq || []).length ? pr.settings.faq : SV_DEF.faq;
     const pts = (v) => (Array.isArray(v.points) ? v.points : String(v.points || "").split(/\n|;/)).map((x) => x.trim()).filter(Boolean);
     return finish({ title: `Services — ${pr.name}, ${pr.role}`, desc: trim(sv.map((s) => s.title).join(", ") + ". " + `Design services by ${pr.name}.`), app: "services", noindex: !saved || hidden.has("services"),
-      body: `<h1>Services</h1>${sv.map((s) => `<section><h2>${esc(s.title)}</h2><p>${esc(s.text || "")}</p>${pts(s).length ? `<ul>${pts(s).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${s.price ? `<p>${esc(s.price)}</p>` : ""}</section>`).join("")}<h2>How it works</h2><ol>${proc.map((x) => `<li><b>${esc(x.title)}</b>: ${esc(x.text || "")}</li>`).join("")}</ol><h2>Questions</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}`,
+      body: `<h1>Services</h1>${sv.map((s) => `<section><h2>${esc(s.title)}</h2><p>${esc(s.text || "")}</p>${pts(s).length ? `<ul>${pts(s).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${s.price ? `<p>${esc(s.price)}</p>` : ""}</section>`).join("")}<h2>How it works</h2><ol>${proc.map((x) => `<li><b>${esc(x.title)}</b>: ${esc(x.text || "")}</li>`).join("")}</ol><h2>Questions</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}${extraHtml(pr, "services")}`,
       mdText: `# Services\n\n${sv.map((s) => `## ${s.title}\n\n${s.text || ""}\n\n${pts(s).map((x) => `- ${x}`).join("\n")}`).join("\n\n")}\n\n## FAQ\n\n${faq.map((f) => `**${f.q}** ${f.a}`).join("\n\n")}\n`,
       ld: [...sv.map((s) => ({ "@type": "Service", name: s.title, description: s.text || "", provider: { "@id": `${SITE}/#person` }, ...(s.price ? { offers: { "@type": "Offer", description: s.price } } : {}) })), faq.length ? { "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) } : null, crumbs([home, { name: "Services", path }])].filter(Boolean) });
   }

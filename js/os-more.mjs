@@ -1,13 +1,15 @@
 // What a real desktop has that this one was missing: search, notifications, window snapping, installable app,
 // text size, a services page, a booking window, testimonials and the owner's local time.
-import { h, $, $$, esc, api, isAdmin, toast, mobile } from "/js/lib.mjs";
+import { h, $, $$, esc, api, isAdmin, toast, mobile, Up } from "/js/lib.mjs";
 import { R, Install, registerApp, lazyApp } from "/js/os-ext.mjs";
 import { slugify, stripTags } from "/shared/blocks.mjs";
 import { Focus, Overview, addTabsButton } from "/js/os-windows.mjs";
+import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
+const I = (n, size = 16) => _ic(n, { size });
 
 const ls = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const svg = (p, s = 18) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
-const ICO = { search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>', bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>', app: '<rect x="4" y="4" width="16" height="16" rx="4"/>', post: '<path d="M5 3h10l4 4v14H5z"/><path d="M9 12h6M9 16h6"/>', proj: '<path d="M3 18V6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>', link: '<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', bolt: '<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>', note: '<path d="M5 3h14v12l-6 6H5z"/><path d="M13 21v-6h6"/>' };
+const ICO = { image: '<rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5"/>', upload: '<path d="M12 16V5M7 9l5-5 5 5M5 20h14"/>', trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>', bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>', app: '<rect x="4" y="4" width="16" height="16" rx="4"/>', post: '<path d="M5 3h10l4 4v14H5z"/><path d="M9 12h6M9 16h6"/>', proj: '<path d="M3 18V6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>', link: '<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', bolt: '<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>', note: '<path d="M5 3h14v12l-6 6H5z"/><path d="M13 21v-6h6"/>' };
 
 /* ================= top bar: search and notifications ================= */
 function topbar() {
@@ -59,7 +61,7 @@ const Spot = {
     const ov = h("div", { class: "spot-ov", role: "dialog", "aria-modal": "true", "aria-label": "Search" }), card = h("div", { class: "spot" });
     const inp = h("input", { class: "spot-in", type: "search", placeholder: "Search articles, projects, apps, links…", "aria-label": "Search", autocomplete: "off", spellcheck: "false", enterkeyhint: "go" });
     const list = h("div", { class: "spot-list", role: "listbox" });
-    card.append(h("div", { class: "spot-bar" }, h("span", { html: svg(ICO.search, 20) }), inp, h("button", { class: "spot-x", "aria-label": "Close search", onclick: () => Spot.hide() }, "Esc")), list, h("div", { class: "spot-foot" }, "↑ ↓ to move · Enter to open · Esc to close"));
+    card.append(h("div", { class: "spot-bar" }, h("span", { html: svg(ICO.search, 20) }), inp, h("button", { class: "spot-x", "aria-label": "Close search", onclick: () => Spot.hide() }, "Esc")), list, h("div", { class: "spot-foot" }, "Arrow keys to move. Enter opens. Esc closes."));
     ov.append(card); document.body.append(ov); Spot.el = ov;
     const draw = () => {
       Spot.items = Spot.search(inp.value.trim()); Spot.idx = Math.min(Spot.idx, Math.max(0, Spot.items.length - 1));
@@ -140,7 +142,7 @@ function shortcuts() {
   const d = h("div", { class: "own-dlg kbd-ov" }, h("div", { class: "own-card kbd", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" }, h("b", {}, "Keyboard shortcuts"),
     grp("Anywhere", [["Ctrl K  or  /", "Search everything"], ["?", "Show this list"], ["Esc", "Close the top box"], ["Ctrl Shift E", "Owner sign-in"]]),
     grp("Go to an app: press G, then a letter", [["G A", "About"], ["G P", "Projects"], ["G J", "Journal"], ["G N", "Notes"], ["G D", "Docs"], ["G L", "Links"], ["G M", "Messages"], ["G R", "Resume"], ["G C", "Contact"], ["G G", "Guestbook"], ["G T", "Timeline"], ["G H", "Photos"], ["G W", "Wallet"], ["G V", "Services"], ["G B", "Book a call"], ["G X", "Content"], ["G S", "Settings"]]),
-    grp("Windows (hold Alt)", [["Alt W", "Close the window"], ["Alt M", "Minimise"], ["Alt Enter  or  Alt ↑", "Maximise or restore"], ["Alt ↓", "Restore size"], ["Alt ←  /  Alt →", "Snap to left or right half"], ["Alt ]  /  Alt [", "Switch window"], ["Alt D", "Show the desktop"], ["Alt A", "All open windows (overview)"], ["Alt Z", "Focus mode: full screen, nothing else"], ["Alt L  or  Alt Space", "App launcher"], ["Alt N", "Notifications"], ["Alt S", "Settings"], ["Alt 1 … 9", "Open the nth app in the dock"]]),
+    grp("Windows (hold Alt)", [["Alt W", "Close the window"], ["Alt M", "Minimise"], ["Alt Enter  or  Alt Up", "Maximise or restore"], ["Alt Down", "Restore size"], ["Alt Left  /  Alt Right", "Snap to left or right half"], ["Alt ]  /  Alt [", "Switch window"], ["Alt D", "Show the desktop"], ["Alt A", "All open windows (overview)"], ["Alt Z", "Focus mode: full screen, nothing else"], ["Alt L  or  Alt Space", "App launcher"], ["Alt N", "Notifications"], ["Alt S", "Settings"], ["Alt 1 … 9", "Open the nth app in the dock"]]),
     grp("Writing (Journal, Projects, Docs, Notes)", [["/", "Insert a block (heading, image, video…)"], ["Ctrl B / I / U", "Bold, italic, underline"], ["Ctrl K", "Add a link"], ["Ctrl Z / Ctrl Shift Z", "Undo and redo"], ["Ctrl S", "Save now"], ["Tab / Shift Tab", "Indent or outdent a list item"], ["# , ## , - , 1. , [] , > , ```", "Markdown shortcuts at the start of a line"]]),
     h("div", { class: "own-row" }, h("button", { onclick: () => d.remove() }, "Close"))));
   d.addEventListener("click", (e) => { if (e.target === d) d.remove(); }); d.addEventListener("keydown", (e) => { if (e.key === "Escape") d.remove(); }); document.body.append(d); d.querySelector("button").focus();
@@ -173,7 +175,7 @@ const Notif = {
   list() { const dis = ls.get("rkDismiss", []); return Notif.items.filter((n) => !dis.includes(n.id)); },
   paint() {
     const p = Notif.el; if (!p) return; const items = Notif.list(), keep = p.scrollTop;
-    p.innerHTML = `<div class="notif-h"><b>Notifications</b>${items.length ? '<button class="notif-clear">Clear all</button>' : ""}</div>${items.length ? items.map((n, i) => `<div class="notif-row"><button class="notif-i" data-i="${i}"><span class="spot-ic">${svg(ICO[n.icon] || ICO.bolt, 18)}</span><span class="spot-t"><b>${esc(n.title)}</b><small>${esc(n.text)}</small></span></button><button class="notif-x" data-x="${i}" aria-label="Dismiss">✕</button></div>`).join("") : `<p class="hint notif-empty">${Notif.busy ? "Checking…" : "You are all caught up."}</p>`}`;
+    p.innerHTML = `<div class="notif-h"><b>Notifications</b>${items.length ? '<button class="notif-clear">Clear all</button>' : ""}</div>${items.length ? items.map((n, i) => `<div class="notif-row"><button class="notif-i" data-i="${i}"><span class="spot-ic">${svg(ICO[n.icon] || ICO.bolt, 18)}</span><span class="spot-t"><b>${esc(n.title)}</b><small>${esc(n.text)}</small></span></button><button class="notif-x" data-x="${i}" aria-label="Dismiss">${svg(ICO.x, 14)}</button></div>`).join("") : `<p class="hint notif-empty">${Notif.busy ? "Checking…" : "You are all caught up."}</p>`}`;
     $$(".notif-i", p).forEach((b) => (b.onclick = () => { const n = items[+b.dataset.i]; Notif.hide(); n.onOpen && n.onOpen(); n.run && n.run(); }));
     $$(".notif-x", p).forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const n = items[+b.dataset.x], row = b.closest(".notif-row"); const dis = ls.get("rkDismiss", []); dis.push(n.id); ls.set("rkDismiss", dis.slice(-200)); n.onOpen && n.onOpen(); row.classList.add("gone"); setTimeout(() => { Notif.updateDot(); Notif.paint(); }, 180); }));
     const c = $(".notif-clear", p); if (c) c.onclick = () => { ls.set("rkSeen", Date.now()); const dis = ls.get("rkDismiss", []); items.forEach((n) => { dis.push(n.id); n.onOpen && n.onOpen(); }); ls.set("rkDismiss", dis.slice(-200)); Notif.updateDot(); Notif.paint(); };
@@ -243,6 +245,20 @@ window.settingsExtra = function (body) {
   const cur = ls.get("rkScale", 100);
   const sec = h("div", { class: "set-extra" }, h("h3", {}, "Text size"), h("div", { class: "seg" }, [90, 100, 112, 125].map((v) => h("button", { class: v === cur ? "on" : "", onclick: () => { ls.set("rkScale", v); applyScale(); $$(".seg button", sec).forEach((b) => b.classList.toggle("on", +b.dataset.v === v)); }, "data-v": v }, v === 100 ? "Normal" : v + "%"))), h("h3", {}, "This site as an app"), Install.installed ? h("p", { class: "hint" }, "You are using the installed app.") : Install.can() ? h("button", { class: "btn tonal", onclick: () => Install.prompt() }, "Install on this device") : h("p", { class: "hint" }, Install.ios() ? "In Safari tap Share, then “Add to Home Screen”." : "Use your browser's menu and choose “Install app” or “Add to Home Screen”."), h("p", {}, h("button", { class: "btn tonal", onclick: shortcuts }, "Keyboard shortcuts")));
   if (isAdmin()) {
+    const S = (SITE.s = SITE.s || { hiddenApps: [] });
+    const picRow = (title, key, hint) => {
+      const row = h("div", { class: "ow-imgrow" });
+      const draw = () => {
+        row.innerHTML = `<span class="ow-thumb">${S[key] ? `<img src="${esc(S[key])}" alt="">` : svg(ICO.image, 22)}</span>`;
+        const up = h("button", { class: "btn tonal", html: svg(ICO.upload, 16) + `<span>${S[key] ? "Replace" : "Upload picture"}</span>`, onclick: async () => {
+          try { const f = (await Up.pick("image/*"))[0]; if (!f) return; up.disabled = true; up.lastChild.textContent = "Uploading…"; const r = await Up.image(f, { max: 2200 }); S[key] = r.url; siteSave(); applyText(); draw(); toast("Saved"); } catch (e) { up.disabled = false; toast(e.message || "Upload failed"); draw(); }
+        } });
+        row.append(up);
+        if (S[key]) row.append(h("button", { class: "btn tonal", html: svg(ICO.trash, 16) + "<span>Remove</span>", onclick: () => { delete S[key]; siteSave(); applyText(); draw(); } }));
+      };
+      draw(); return [h("h3", {}, title), h("p", { class: "hint" }, hint), row];
+    };
+    sec.append(...picRow("Wallpaper picture", "wallpaper", "Shown behind everything for every visitor. Remove it to go back to the coloured shapes."), ...picRow("Your photo", "photo", "Used on About, the lock screen and Messages."));
     const msg = h("p", { class: "hint" }, "Everything you write in Owner mode is stored on the server, so updating the website never resets it. A backup is a copy you can keep.");
     sec.append(h("h3", {}, "Backup"), msg, h("div", { class: "ow-row" },
       h("a", { class: "btn tonal", href: "/api/backup", download: "" }, "Download backup"),
@@ -273,7 +289,7 @@ function newApps() {
   const DX = { id: "docs", title: "Docs", shape: "squircle", color: "c3", glyph: G.docs || G.folder, w: 940, h: 640, render: () => "" };
   registerApp(DX); registerApp(SV); registerApp(BK);
   lazyApp("docs", "/js/app-docs.mjs", "docsApp");
-  lazyApp("services", "/js/app-services.mjs", "servicesApp"); lazyApp("book", "/js/app-book.mjs", "bookApp");
+  lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services"); lazyApp("book", "/js/app-book.mjs", "bookApp");
   if (!EDITABLE.includes("services")) EDITABLE.push("services");
   renderIcons();
 }

@@ -3,25 +3,28 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, wireBlocks, makeEditor, Up, share, confirmBox, ago } from "/js/lib.mjs";
 import { blocksToMd, blocksText, slugify } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
+import { icon, ICONS } from "/shared/icons.mjs";
+const I = (n, size = 16) => icon(n, { size });
+const pageIco = (p, size = 17) => I(p && p.icon && ICONS[p.icon] ? p.icon : "file-text", size);
 
 const D = { pages: null, open: null, ed: null, saveT: null, blocks: [], status: "", loaded: false };
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-const EMOJI = "📄 📝 📓 📔 📒 📚 📖 🗂️ 📌 📎 ✅ ☑️ 🎯 🚀 💡 ⭐ ❤️ 🔥 ✨ 🌱 🌍 🏠 💼 🧠 🎨 🖌️ 🎬 🎧 📷 💻 ⚙️ 🔧 📊 📈 🗓️ ⏰ 💬 📣 🔒 🧪 🧭 🍀 ☕ 🍕 ✈️ 🏆 🎁 🎓 🪴 🐱".split(" ");
+const PAGE_ICONS = ["file-text", "file", "folder", "bookmark", "checkbox", "target", "rocket", "bulb", "star", "heart", "flame", "sparkles", "leaf", "globe", "home", "wallet", "brain", "palette", "video", "music", "camera", "laptop", "settings", "wrench", "chart", "trend", "calendar", "clock", "chat", "mail", "phone", "lock", "flask", "compass", "coffee", "plane", "trophy", "gift", "graduation", "cat", "shield", "map", "user", "pencil", "tag", "image", "table", "code"];
 const GRADS = { g1: "linear-gradient(135deg,#a8e6cf,#dcedc1)", g2: "linear-gradient(135deg,#ffd3b6,#ffaaa5)", g3: "linear-gradient(135deg,#c3cfe2,#c3b1e1)", g4: "linear-gradient(135deg,#fddb92,#d1fdff)", g5: "linear-gradient(135deg,#84fab0,#8fd3f4)", g6: "linear-gradient(135deg,#fbc2eb,#a6c1ee)", g7: "linear-gradient(135deg,#cfd9df,#e2ebf0)", g8: "linear-gradient(135deg,#2e6b57,#1b3a30)" };
 const P = (t) => ({ t: "p", h: esc(t) });
 const H = (n, t) => ({ t: "h" + n, h: esc(t) });
 const LI = (t) => ({ t: "ul", h: esc(t) });
 const TD = (t, c) => ({ t: "todo", h: esc(t), ...(c ? { c: true } : {}) });
 const TEMPLATES = [
-  { name: "Blank page", icon: "📄", title: "", blocks: [] },
-  { name: "Meeting notes", icon: "🗓️", title: "Meeting notes", blocks: [H(2, "Details"), P("Date · People · Goal"), H(2, "Agenda"), LI("Topic one"), LI("Topic two"), H(2, "Notes"), P(""), H(2, "Action items"), TD("First action"), TD("Second action")] },
-  { name: "Project brief", icon: "🎯", title: "Project brief", blocks: [{ t: "callout", h: esc("One sentence on what this project is and why it matters."), e: "🎯", tone: "blue" }, H(2, "Goals"), LI("Goal"), H(2, "Scope"), P(""), H(2, "Timeline"), LI("Week 1"), LI("Week 2"), H(2, "Deliverables"), TD("Deliverable")] },
-  { name: "To-do list", icon: "✅", title: "To-do", blocks: [TD("First thing"), TD("Second thing"), TD("Third thing")] },
-  { name: "Daily log", icon: "📓", title: "Today", blocks: [H(2, "Focus"), P(""), H(2, "Wins"), LI(""), H(2, "Tomorrow"), TD("")] },
-  { name: "Wiki page", icon: "📚", title: "Wiki page", blocks: [{ t: "toc" }, H(2, "Overview"), P(""), H(2, "Details"), P(""), H(2, "Related"), P("")] },
+  { name: "Blank page", icon: "file-text", title: "", blocks: [] },
+  { name: "Meeting notes", icon: "calendar", title: "Meeting notes", blocks: [H(2, "Details"), P("Date · People · Goal"), H(2, "Agenda"), LI("Topic one"), LI("Topic two"), H(2, "Notes"), P(""), H(2, "Action items"), TD("First action"), TD("Second action")] },
+  { name: "Project brief", icon: "target", title: "Project brief", blocks: [{ t: "callout", h: esc("One sentence on what this project is and why it matters."), e: "target", tone: "blue" }, H(2, "Goals"), LI("Goal"), H(2, "Scope"), P(""), H(2, "Timeline"), LI("Week 1"), LI("Week 2"), H(2, "Deliverables"), TD("Deliverable")] },
+  { name: "To-do list", icon: "checkbox", title: "To-do", blocks: [TD("First thing"), TD("Second thing"), TD("Third thing")] },
+  { name: "Daily log", icon: "file-text", title: "Today", blocks: [H(2, "Focus"), P(""), H(2, "Wins"), LI(""), H(2, "Tomorrow"), TD("")] },
+  { name: "Wiki page", icon: "folder", title: "Wiki page", blocks: [{ t: "toc" }, H(2, "Overview"), P(""), H(2, "Details"), P(""), H(2, "Related"), P("")] },
 ];
 
 /* ---------- data helpers ---------- */
@@ -44,7 +47,7 @@ async function load(force) {
 /* ---------- small UI helpers ---------- */
 function popup(anchor, items, { align = "right" } = {}) {
   $$(".dx-pop").forEach((x) => x.remove());
-  const m = h("div", { class: "dx-pop", role: "menu" }, items.map((it) => it === "-" ? h("hr") : h("button", { role: "menuitem", class: it.danger ? "danger" : "", onclick: () => { m.remove(); it.run(); } }, h("span", { class: "ic" }, it.i || ""), it.t, it.hint ? h("small", {}, it.hint) : "")));
+  const m = h("div", { class: "dx-pop", role: "menu" }, items.map((it) => it === "-" ? h("hr") : h("button", { role: "menuitem", class: it.danger ? "danger" : "", onclick: () => { m.remove(); it.run(); } }, h("span", { class: "ic", html: it.i ? I(it.i, 17) : "" }), it.t, it.hint ? h("small", {}, it.hint) : "")));
   const host = anchor.closest(".dx") || document.body; host.append(m);
   const a = anchor.getBoundingClientRect(), r = host.getBoundingClientRect();
   m.style.top = Math.min(a.bottom - r.top + 4, r.height - m.offsetHeight - 8) + "px";
@@ -53,7 +56,7 @@ function popup(anchor, items, { align = "right" } = {}) {
   return m;
 }
 function dialog(root, title, content, { wide } = {}) {
-  const d = h("div", { class: "dx-dlg" }, h("div", { class: "dx-card" + (wide ? " wide" : ""), role: "dialog", "aria-modal": "true", "aria-label": title }, h("div", { class: "dx-card-h" }, h("b", {}, title), h("button", { class: "dx-x", "aria-label": "Close", onclick: () => d.remove() }, "✕")), content));
+  const d = h("div", { class: "dx-dlg" }, h("div", { class: "dx-card" + (wide ? " wide" : ""), role: "dialog", "aria-modal": "true", "aria-label": title }, h("div", { class: "dx-card-h" }, h("b", {}, title), h("button", { class: "dx-x", "aria-label": "Close", html: I("x", 16), onclick: () => d.remove() })), content));
   d.addEventListener("pointerdown", (e) => { if (e.target === d) d.remove(); });
   d.addEventListener("keydown", (e) => { if (e.key === "Escape") d.remove(); });
   root.append(d); return d;
@@ -78,21 +81,21 @@ export async function docsApp(body, slug) {
     const row = (p, depth) => {
       const ch = kids(p.id), isOpen = !!open[p.id];
       return `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:${depth}" ${owner ? 'draggable="true"' : ""} role="treeitem" aria-level="${depth + 1}" ${ch.length ? `aria-expanded="${isOpen}"` : ""}>
-        <button class="dx-tw${ch.length ? "" : " nokid"}" data-tw="${p.id}" aria-label="${isOpen ? "Collapse" : "Expand"}"><svg viewBox="0 0 24 24" width="14" height="14"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="dx-nm" data-go="${p.id}"><span class="dx-em">${esc(p.icon || "📄")}</span><span class="dx-t">${esc(label(p))}</span>${p.pub ? '<i class="dx-pubdot" title="Published"></i>' : ""}</button>
-        ${owner ? `<button class="dx-add" data-add="${p.id}" aria-label="Add a page inside" title="Add a page inside">＋</button>` : ""}</div>${ch.length && isOpen ? `<div class="dx-kids" role="group">${ch.map((c) => row(c, depth + 1)).join("")}</div>` : ""}</div>`;
+        <button class="dx-tw${ch.length ? "" : " nokid"}" data-tw="${p.id}" aria-label="${isOpen ? "Collapse" : "Expand"}">${I("chevron-right", 14)}</button>
+        <button class="dx-nm" data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><span class="dx-t">${esc(label(p))}</span>${p.pub ? '<i class="dx-pubdot" title="Published"></i>' : ""}</button>
+        ${owner ? `<button class="dx-add" data-add="${p.id}" aria-label="Add a page inside" title="Add a page inside">${I("plus", 15)}</button>` : ""}</div>${ch.length && isOpen ? `<div class="dx-kids" role="group">${ch.map((c) => row(c, depth + 1)).join("")}</div>` : ""}</div>`;
     };
     let tree;
     if (q.text) {
       const m = pages.filter((p) => label(p).toLowerCase().includes(q.text.toLowerCase()));
-      tree = m.length ? m.map((p) => `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:0"><span class="dx-tw nokid"></span><button class="dx-nm" data-go="${p.id}"><span class="dx-em">${esc(p.icon || "📄")}</span><span class="dx-t">${esc(label(p))}</span></button></div></div>`).join("") : '<p class="dx-none">No pages match.</p>';
+      tree = m.length ? m.map((p) => `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:0"><span class="dx-tw nokid"></span><button class="dx-nm" data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><span class="dx-t">${esc(label(p))}</span></button></div></div>`).join("") : '<p class="dx-none">No pages match.</p>';
     } else tree = kids(null).map((p) => row(p, 0)).join("") || `<p class="dx-none">${owner ? "No pages yet. Make your first one." : "Nothing is published yet."}</p>`;
-    side.innerHTML = `<div class="dx-sh"><b>Docs</b>${owner ? '<button class="dx-new" data-new aria-label="New page" title="New page">＋ New</button>' : ""}</div>
-      <label class="dx-search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input type="search" placeholder="Search pages" value="${esc(q.text)}" aria-label="Search pages" autocomplete="off"></label>
-      <div class="dx-scroll"><button class="dx-home${D.open ? "" : " on"}" data-home>🏠 <span>Home</span></button>
-      ${!q.text && favs.length ? `<h4>Favorites</h4>${favs.map((p) => `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:0"><span class="dx-tw nokid"></span><button class="dx-nm" data-go="${p.id}"><span class="dx-em">${esc(p.icon || "📄")}</span><span class="dx-t">${esc(label(p))}</span></button></div></div>`).join("")}` : ""}
+    side.innerHTML = `<div class="dx-sh"><b>Docs</b>${owner ? `<button class="dx-new" data-new aria-label="New page" title="New page">${I("plus", 15)}<span>New</span></button>` : ""}</div>
+      <label class="dx-search">${I("search", 16)}<input type="search" placeholder="Search pages" value="${esc(q.text)}" aria-label="Search pages" autocomplete="off"></label>
+      <div class="dx-scroll"><button class="dx-home${D.open ? "" : " on"}" data-home>${I("home", 17)}<span>Home</span></button>
+      ${!q.text && favs.length ? `<h4>Favorites</h4>${favs.map((p) => `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:0"><span class="dx-tw nokid"></span><button class="dx-nm" data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><span class="dx-t">${esc(label(p))}</span></button></div></div>`).join("")}` : ""}
       <h4>${q.text ? "Results" : owner ? "Pages" : "Published"}</h4><div role="tree">${tree}</div>
-      ${owner ? `<button class="dx-home dx-trash" data-trash>🗑️ <span>Bin${trashed.length ? ` (${trashed.length})` : ""}</span></button>` : ""}</div>`;
+      ${owner ? `<button class="dx-home dx-trash" data-trash>${I("trash", 17)}<span>Bin${trashed.length ? ` (${trashed.length})` : ""}</span></button>` : ""}</div>`;
     const search = $(".dx-search input", side);
     search.oninput = () => { q.text = search.value; const pos = search.selectionStart; drawSide(); const s2 = $(".dx-search input", side); s2.focus(); s2.setSelectionRange(pos, pos); };
     $$("[data-go]", side).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
@@ -136,7 +139,7 @@ export async function docsApp(body, slug) {
   /* ----- pages ----- */
   async function newPage({ parent = null, template } = {}) {
     const t = template || TEMPLATES[0];
-    const r = await api("/api/docs", { method: "POST", body: { title: t.title, icon: t.icon === "📄" ? "" : t.icon, parent, blocks: t.blocks } });
+    const r = await api("/api/docs", { method: "POST", body: { title: t.title, icon: t.icon === "file-text" ? "" : t.icon, parent, blocks: t.blocks } });
     if (!r.ok) return toast(r.data.error || "Could not create the page");
     D.pages.push(r.data.page); drawSide(); await openId(r.data.page.id, { fresh: true });
   }
@@ -144,8 +147,8 @@ export async function docsApp(body, slug) {
     flush(); D.open = null; root.dataset.view = "list"; drawSide();
     const recent = live().slice().sort((a, b) => b.updated - a.updated).slice(0, 6);
     main.innerHTML = `<div class="dx-home-view">${mobile() ? "" : ""}<h1>${owner ? "Your workspace" : "Docs"}</h1><p class="dx-lead">${owner ? "Notes, plans and write-ups. Pages are private until you publish them." : "Guides and write-ups published by Rohan."}</p>
-      ${owner ? `<h3>Start with a template</h3><div class="dx-tpl">${TEMPLATES.map((t, i) => `<button data-tpl="${i}"><span>${esc(t.icon)}</span><b>${esc(t.name)}</b></button>`).join("")}</div>` : ""}
-      ${recent.length ? `<h3>${owner ? "Recently edited" : "Pages"}</h3><div class="dx-recent">${recent.map((p) => `<button data-go="${p.id}"><span class="dx-em">${esc(p.icon || "📄")}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}${p.pub ? " · Published" : ""}</small></button>`).join("")}</div>` : (owner ? "" : '<div class="dx-empty"><h2>Nothing here yet</h2><p>Pages published by Rohan will show up here.</p></div>')}</div>`;
+      ${owner ? `<h3>Start with a template</h3><div class="dx-tpl">${TEMPLATES.map((t, i) => `<button data-tpl="${i}"><span>${I(t.icon, 26)}</span><b>${esc(t.name)}</b></button>`).join("")}</div>` : ""}
+      ${recent.length ? `<h3>${owner ? "Recently edited" : "Pages"}</h3><div class="dx-recent">${recent.map((p) => `<button data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}${p.pub ? " · Published" : ""}</small></button>`).join("")}</div>` : (owner ? "" : '<div class="dx-empty"><h2>Nothing here yet</h2><p>Pages published by Rohan will show up here.</p></div>')}</div>`;
     $$("[data-tpl]", main).forEach((b) => (b.onclick = () => newPage({ template: TEMPLATES[+b.dataset.tpl] })));
     $$("[data-go]", main).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
     R.item(body, "", "Docs — Rohan Kumar", mode);
@@ -160,8 +163,8 @@ export async function docsApp(body, slug) {
     D.open = { ...meta }; D.blocks = r.data.blocks; D.status = "";
     root.dataset.view = "page"; drawSide();
     const editable = owner && !meta.trashed;
-    main.innerHTML = `<div class="dx-top"><button class="dx-back" data-back aria-label="Back to pages">‹</button><nav class="dx-crumbs" aria-label="Breadcrumb"></nav><span class="dx-st"></span>
-        ${editable ? `<button class="dx-b" data-share>Share</button><button class="dx-b icon" data-menu aria-label="More" title="More">⋯</button>` : `<button class="dx-b" data-copy>Copy link</button>`}</div>
+    main.innerHTML = `<div class="dx-top"><button class="dx-back" data-back aria-label="Back to pages">${I("chevron-left", 20)}</button><nav class="dx-crumbs" aria-label="Breadcrumb"></nav><span class="dx-st"></span>
+        ${editable ? `<button class="dx-b" data-share>Share</button><button class="dx-b icon" data-menu aria-label="More" title="More">${I("more", 18)}</button>` : `<button class="dx-b" data-copy>Copy link</button>`}</div>
       <div class="dx-scrollmain"><div class="dx-page${ls.get("dxWide", false) ? " wide" : ""}"><div class="dx-cover" data-cover></div>
         <div class="dx-head"><button class="dx-icon" data-icon aria-label="Page icon"></button><textarea class="dx-title" rows="1" placeholder="Untitled" maxlength="160" aria-label="Page title" ${editable ? "" : "readonly"}></textarea></div>
         <div class="dx-body"></div><div class="dx-subs"></div><footer class="dx-foot"></footer></div></div>`;
@@ -183,21 +186,20 @@ export async function docsApp(body, slug) {
 
   function drawCrumbs() {
     const c = $(".dx-crumbs", main); if (!c || !D.open) return;
-    c.innerHTML = crumbs(D.open).map((p, i, a) => `${i ? '<span class="sep">/</span>' : ""}<button data-go="${p.id}"${i === a.length - 1 ? ' aria-current="page"' : ""}>${esc(p.icon || "📄")} ${esc(label(p))}</button>`).join("");
+    c.innerHTML = crumbs(D.open).map((p, i, a) => `${i ? `<span class="sep">${I("chevron-right", 13)}</span>` : ""}<button data-go="${p.id}"${i === a.length - 1 ? ' aria-current="page"' : ""}><span class="dx-cic">${pageIco(p, 15)}</span>${esc(label(p))}</button>`).join("");
     $$("[data-go]", c).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
   }
   function drawIcon() {
     const b = $("[data-icon]", main); if (!b) return; const ic = D.open.icon;
-    b.textContent = ic || (owner ? "☺" : "📄"); b.classList.toggle("empty", !ic); if (!ic && !owner) b.hidden = true;
+    b.innerHTML = ic && ICONS[ic] ? I(ic, 52) : (owner ? I("smile", 30) : ""); b.classList.toggle("empty", !ic); if (!ic && !owner) b.hidden = true;
     b.onclick = () => { if (!owner) return; iconPicker(b); };
   }
   function iconPicker(anchor) {
     const m = popup(anchor, [], { align: "left" }); m.classList.add("dx-emoji");
-    m.innerHTML = `<div class="dx-eg">${EMOJI.map((e) => `<button data-e="${e}">${e}</button>`).join("")}</div><div class="dx-er"><input maxlength="4" placeholder="Type any emoji" aria-label="Custom emoji"><button data-rm>Remove</button></div>`;
+    m.innerHTML = `<div class="dx-eg">${PAGE_ICONS.map((e) => `<button data-e="${e}" aria-label="${e.replace(/-/g, " ")}" title="${e.replace(/-/g, " ")}">${I(e, 20)}</button>`).join("")}</div><div class="dx-er"><button data-rm>Remove icon</button></div>`;
     const set = (v) => { D.open.icon = v; const mm = byId(D.open.id); if (mm) mm.icon = v; m.remove(); drawIcon(); drawCrumbs(); drawSide(); touch(true); };
     $$("[data-e]", m).forEach((b) => (b.onclick = () => set(b.dataset.e)));
     $("[data-rm]", m).onclick = () => set("");
-    const inp = $("input", m); inp.onkeydown = (e) => { if (e.key === "Enter" && inp.value.trim()) set(inp.value.trim()); }; setTimeout(() => inp.focus(), 30);
   }
   function drawCover() {
     const el = $("[data-cover]", main); if (!el || !D.open) return; const c = D.open.cover;
@@ -205,18 +207,18 @@ export async function docsApp(body, slug) {
     el.style.background = c && c.grad ? GRADS[c.grad] : "";
     el.innerHTML = c && c.src ? `<img src="${esc(c.src)}" alt="" style="object-position:50% ${c.fy ?? 50}%">` : "";
     if (!owner) return;
-    el.insertAdjacentHTML("beforeend", c ? `<div class="dx-cb"><button data-c="change">Change cover</button><button data-c="remove">Remove</button></div>` : `<button class="dx-addcover" data-c="add">＋ Add cover</button>`);
+    el.insertAdjacentHTML("beforeend", c ? `<div class="dx-cb"><button data-c="change">Change cover</button><button data-c="remove">Remove</button></div>` : `<button class="dx-addcover" data-c="add">${I("image", 15)}<span>Add cover</span></button>`);
     $$("[data-c]", el).forEach((b) => (b.onclick = () => {
       if (b.dataset.c === "remove") { D.open.cover = null; drawCover(); touch(true); return; }
       const m = popup(b, [], { align: "left" }); m.classList.add("dx-coverpick");
-      m.innerHTML = `<div class="dx-gr">${Object.keys(GRADS).map((g) => `<button data-g="${g}" style="background:${GRADS[g]}" aria-label="Colour ${g}"></button>`).join("")}</div><button class="dx-up" data-up>Upload a picture</button>`;
+      m.innerHTML = `<div class="dx-gr">${Object.keys(GRADS).map((g) => `<button data-g="${g}" style="background:${GRADS[g]}" aria-label="Colour ${g}"></button>`).join("")}</div><button class="dx-up" data-up>${I("upload", 16)}<span>Upload a picture</span></button>`;
       $$("[data-g]", m).forEach((x) => (x.onclick = () => { D.open.cover = { grad: x.dataset.g }; m.remove(); drawCover(); touch(true); }));
       $("[data-up]", m).onclick = async () => { m.remove(); try { const f = (await Up.pick("image/*"))[0]; if (!f) return; setStatus("Uploading…"); const r = await Up.image(f); D.open.cover = { src: r.url, fy: 50 }; drawCover(); touch(true); } catch (e) { toast(e.message || "Upload failed"); } };
     }));
   }
   function drawSubs() {
     const el = $(".dx-subs", main); if (!el || !D.open) return; const ch = kids(D.open.id);
-    el.innerHTML = ch.length ? `<h3>Pages inside</h3><div class="dx-recent">${ch.map((p) => `<button data-go="${p.id}"><span class="dx-em">${esc(p.icon || "📄")}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}</small></button>`).join("")}</div>` : "";
+    el.innerHTML = ch.length ? `<h3>Pages inside</h3><div class="dx-recent">${ch.map((p) => `<button data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}</small></button>`).join("")}</div>` : "";
     $$("[data-go]", el).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
   }
   function drawFoot() {
@@ -249,17 +251,17 @@ export async function docsApp(body, slug) {
     $("[data-menu]", main).onclick = (e) => {
       const p = D.open;
       popup(e.currentTarget, [
-        { t: p.fav ? "Remove from favorites" : "Add to favorites", i: p.fav ? "★" : "☆", run: async () => { p.fav = !p.fav; const m = byId(p.id); if (m) m.fav = p.fav; await api("/api/docs?id=" + p.id, { method: "PUT", body: { fav: p.fav } }); drawSide(); } },
-        { t: "Add a page inside", i: "＋", run: () => { open[p.id] = true; ls.set("dxOpen", open); newPage({ parent: p.id }); } },
-        { t: "Duplicate", i: "⧉", run: async () => { await flush(); const r0 = await api("/api/docs?id=" + p.id); const r = await api("/api/docs", { method: "POST", body: { title: label(p) + " (copy)", icon: p.icon, parent: p.parent, cover: p.cover, blocks: r0.data.blocks } }); if (r.ok) { D.pages.push(r.data.page); openId(r.data.page.id); } } },
-        { t: "Move to…", i: "↪", run: moveDialog },
+        { t: p.fav ? "Remove from favorites" : "Add to favorites", i: "star", run: async () => { p.fav = !p.fav; const m = byId(p.id); if (m) m.fav = p.fav; await api("/api/docs?id=" + p.id, { method: "PUT", body: { fav: p.fav } }); drawSide(); } },
+        { t: "Add a page inside", i: "plus", run: () => { open[p.id] = true; ls.set("dxOpen", open); newPage({ parent: p.id }); } },
+        { t: "Duplicate", i: "copy", run: async () => { await flush(); const r0 = await api("/api/docs?id=" + p.id); const r = await api("/api/docs", { method: "POST", body: { title: label(p) + " (copy)", icon: p.icon, parent: p.parent, cover: p.cover, blocks: r0.data.blocks } }); if (r.ok) { D.pages.push(r.data.page); openId(r.data.page.id); } } },
+        { t: "Move to…", i: "move", run: moveDialog },
         "-",
-        { t: ls.get("dxWide", false) ? "Normal width" : "Full width", i: "↔", run: () => { const w = !ls.get("dxWide", false); ls.set("dxWide", w); $(".dx-page", main).classList.toggle("wide", w); } },
-        { t: "Export as Markdown", i: "⇩", run: () => { const md = `# ${label(p)}\n\n${blocksToMd(D.ed ? D.ed.getBlocks() : D.blocks)}\n`, a = h("a", { href: URL.createObjectURL(new Blob([md], { type: "text/markdown" })), download: (slugify(label(p)) || "page") + ".md" }); a.click(); } },
-        { t: "Page history", i: "⟲", run: historyDialog },
-        { t: "Print / Save as PDF", i: "⎙", run: () => window.print() },
+        { t: ls.get("dxWide", false) ? "Normal width" : "Full width", i: "width", run: () => { const w = !ls.get("dxWide", false); ls.set("dxWide", w); $(".dx-page", main).classList.toggle("wide", w); } },
+        { t: "Export as Markdown", i: "download", run: () => { const md = `# ${label(p)}\n\n${blocksToMd(D.ed ? D.ed.getBlocks() : D.blocks)}\n`, a = h("a", { href: URL.createObjectURL(new Blob([md], { type: "text/markdown" })), download: (slugify(label(p)) || "page") + ".md" }); a.click(); } },
+        { t: "Page history", i: "history", run: historyDialog },
+        { t: "Print / Save as PDF", i: "print", run: () => window.print() },
         "-",
-        { t: "Move to bin", i: "🗑", danger: true, run: async () => { await flush(); const r = await api("/api/docs?id=" + p.id, { method: "PUT", body: { trashed: true } }); if (r.ok) { await load(true); toast("Moved to the bin"); home(); } } },
+        { t: "Move to bin", i: "trash", danger: true, run: async () => { await flush(); const r = await api("/api/docs?id=" + p.id, { method: "PUT", body: { trashed: true } }); if (r.ok) { await load(true); toast("Moved to the bin"); home(); } } },
       ]);
     };
   }
@@ -287,7 +289,7 @@ export async function docsApp(body, slug) {
     const p = D.open, list = [];
     const walk = (parent, depth) => kids(parent).forEach((x) => { if (x.id === p.id || within(x.id, p.id)) return; list.push([x, depth]); walk(x.id, depth + 1); });
     walk(null, 0);
-    const c = h("div", { class: "dx-move" }, h("button", { class: p.parent ? "" : "on", "data-p": "" }, "Top level"), ...list.map(([x, d]) => h("button", { "data-p": x.id, class: p.parent === x.id ? "on" : "", style: `padding-left:${12 + d * 18}px` }, (x.icon || "📄") + " " + label(x))));
+    const c = h("div", { class: "dx-move" }, h("button", { class: p.parent ? "" : "on", "data-p": "" }, "Top level"), ...list.map(([x, d]) => h("button", { "data-p": x.id, class: p.parent === x.id ? "on" : "", style: `padding-left:${12 + d * 18}px`, html: pageIco(x, 16) + "<span>" + esc(label(x)) + "</span>" })));
     const dlg = dialog(root, "Move to…", c);
     $$("button", c).forEach((b) => (b.onclick = async () => { dlg.remove(); const parent = b.dataset.p || null; const r = await api("/api/docs?id=" + p.id, { method: "PUT", body: { parent } }); if (r.ok) { Object.assign(p, r.data.page); const m = byId(p.id); if (m) Object.assign(m, r.data.page); if (parent) { open[parent] = true; ls.set("dxOpen", open); } drawSide(); drawCrumbs(); } }));
   }
@@ -302,8 +304,8 @@ export async function docsApp(body, slug) {
   async function showTrash() {
     await flush(); D.open = null; root.dataset.view = "page"; drawSide();
     const t = (D.pages || []).filter((p) => p.trashed && !(p.parent && byId(p.parent)?.trashed));
-    main.innerHTML = `<div class="dx-top"><button class="dx-back" data-back aria-label="Back">‹</button><b class="dx-bt">Bin</b><span class="dx-st"></span>${t.length ? '<button class="dx-b danger" data-empty>Empty bin</button>' : ""}</div>
-      <div class="dx-scrollmain"><div class="dx-page"><p class="hint">Pages you delete wait here. Restore them or delete them for good.</p>${t.length ? t.map((p) => `<div class="dx-hr"><span><b>${esc(p.icon || "📄")} ${esc(label(p))}</b><small>Deleted ${ago(p.trashed)}</small></span><span><button data-rs="${p.id}">Restore</button><button class="danger" data-del="${p.id}">Delete forever</button></span></div>`).join("") : '<div class="dx-empty"><h2>The bin is empty</h2></div>'}</div></div>`;
+    main.innerHTML = `<div class="dx-top"><button class="dx-back" data-back aria-label="Back">${I("chevron-left", 20)}</button><b class="dx-bt">Bin</b><span class="dx-st"></span>${t.length ? '<button class="dx-b danger" data-empty>Empty bin</button>' : ""}</div>
+      <div class="dx-scrollmain"><div class="dx-page"><p class="hint">Pages you delete wait here. Restore them or delete them for good.</p>${t.length ? t.map((p) => `<div class="dx-hr"><span><b>${esc(label(p))}</b><small>Deleted ${ago(p.trashed)}</small></span><span><button data-rs="${p.id}">Restore</button><button class="danger" data-del="${p.id}">Delete forever</button></span></div>`).join("") : '<div class="dx-empty"><h2>The bin is empty</h2></div>'}</div></div>`;
     $("[data-back]", main).onclick = () => home();
     $$("[data-rs]", main).forEach((b) => (b.onclick = async () => { await api("/api/docs?id=" + b.dataset.rs, { method: "PUT", body: { trashed: false } }); await load(true); showTrash(); }));
     $$("[data-del]", main).forEach((b) => (b.onclick = async () => { if (!(await confirmBox("Delete this page and everything inside it for good?"))) return; await api("/api/docs?id=" + b.dataset.del, { method: "DELETE" }); await load(true); showTrash(); }));

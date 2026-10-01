@@ -3,6 +3,8 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, fmtNum } from "/js/lib.mjs";
 import { slugify } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
+import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
+const I = (n, size = 16) => _ic(n, { size });
 
 const PR = { list: null, seeded: false, cache: {}, status: "", saving: false, again: false };
 const FIELDS = ["Branding", "Logo Design", "Graphic Design", "Illustration", "UI / UX", "Web Design", "Packaging", "Typography", "Motion Graphics", "Photography", "Art Direction", "Social Media", "Print Design", "Product Design", "Icon Design"];
@@ -41,9 +43,9 @@ function card(p) {
   const likes = p.likes || 0, views = p.views || 0;
   return `<a class="pj-card${p.status !== "published" ? " dim" : ""}" href="/projects/${esc(p.slug)}" data-slug="${esc(p.slug)}" data-id="${esc(p.id)}">
     <span class="pj-cv" style="--bgc:var(--${esc(p.color || "c2")})">${p.cover ? `<img src="${esc(p.cover.src.replace(/\.(jpe?g|png|webp)$/, (m) => m))}" ${p.cover.src.startsWith("/u/") ? `srcset="${esc(p.cover.src.replace(/\/u\/([\w]+)\.\w+$/, "/u/$1-t.jpg"))} 640w, ${esc(p.cover.src)} 1800w" sizes="(max-width:760px) 50vw, 240px"` : ""} alt="${esc(p.cover.alt || p.title)}" loading="lazy" style="${coverStyle(p.cover)}">` : `<span class="pj-ph">${esc((p.title || "?").slice(0, 1).toUpperCase())}</span>`}
-      ${p.featured ? '<em class="pj-b">★ Featured</em>' : ""}${p.status !== "published" && isAdmin() ? `<em class="pj-b d">${p.status === "draft" ? "Draft" : "Unlisted"}</em>` : ""}</span>
+      ${p.featured ? `<em class="pj-b">${I("star", 12)} Featured</em>` : ""}${p.status !== "published" && isAdmin() ? `<em class="pj-b d">${p.status === "draft" ? "Draft" : "Unlisted"}</em>` : ""}</span>
     <span class="pj-m"><b>${esc(p.title)}</b><small>${esc([p.field, p.year].filter(Boolean).join(" · "))}</small></span>
-    ${views || likes ? `<span class="pj-st"><span title="Appreciations">♥ ${fmtNum(likes)}</span><span title="Views">👁 ${fmtNum(views)}</span></span>` : ""}
+    ${views || likes ? `<span class="pj-st"><span title="Appreciations">${I("heart", 13)} ${fmtNum(likes)}</span><span title="Views">${I("eye", 13)} ${fmtNum(views)}</span></span>` : ""}
     ${isAdmin() ? `<button class="pj-more" data-id="${esc(p.id)}" aria-label="Project options" title="Options">⋯</button>` : ""}</a>`;
 }
 function grid(body, quiet) {
@@ -116,20 +118,20 @@ async function detail(body, slug, quiet) {
   const p = r.data.project, prev = r.data.prev, next = r.data.next; PR.cache[p.id] = p;
   const L = liked(), pub = PR.list.filter((x) => x.status === "published");
   const more = pub.filter((x) => x.id !== p.id && (x.field === p.field || (x.tags || []).some((t) => (p.tags || []).includes(t)))).slice(0, 3);
-  body.innerHTML = `<div class="abar jr-bar"><div class="jr-row"><button class="back">‹ All projects</button><span class="sp"></span><button class="pj-like${L.has(p.id) ? " on" : ""}" aria-pressed="${L.has(p.id)}">♥ <span>${fmtNum(p.likes || 0)}</span></button><button class="j-share">Share</button>${isAdmin() ? '<button class="j-edit">Edit</button>' : ""}</div><div class="rprog"><i></i></div></div>
+  body.innerHTML = `<div class="abar jr-bar"><div class="jr-row"><button class="back">${I("chevron-left")}All projects</button><span class="sp"></span><button class="pj-like${L.has(p.id) ? " on" : ""}" aria-pressed="${L.has(p.id)}">${I("heart", 16)} <span>${fmtNum(p.likes || 0)}</span></button><button class="j-share">Share</button>${isAdmin() ? '<button class="j-edit">Edit</button>' : ""}</div><div class="rprog"><i></i></div></div>
   <article class="article pj-art" itemscope itemtype="https://schema.org/CreativeWork">
     ${p.cover ? `<img class="ahero pj-hero" src="${esc(p.cover.src)}" alt="${esc(p.cover.alt || p.title)}" style="${coverStyle(p.cover)}">` : ""}
     <h1 itemprop="name">${esc(p.title)}</h1>${p.status !== "published" ? `<span class="upd">${p.status === "draft" ? "Draft: only you can see this" : "Unlisted: only people with the link can see this"}</span>` : ""}
     ${p.summary ? `<p class="lead">${esc(p.summary)}</p>` : ""}
     <dl class="pj-facts">${[["Field", p.field], ["Year", p.year], ["Client", p.client], ["Role", p.role]].filter((x) => x[1]).map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}${p.tools?.length ? `<div class="wide"><dt>Tools</dt><dd>${p.tools.map((t) => `<span class="chip">${esc(t)}</span>`).join(" ")}</dd></div>` : ""}</dl>
-    ${p.link || (p.links || []).length ? `<div class="afoot">${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">View the project ↗</a>` : ""}${(p.links || []).map((l) => `<a class="btn tonal" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div>` : ""}
+    ${p.link || (p.links || []).length ? `<div class="afoot">${p.link ? `<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">View the project ${I("external", 14)}</a>` : ""}${(p.links || []).map((l) => `<a class="btn tonal" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ${I("external", 14)}</a>`).join("")}</div>` : ""}
     <div class="pj-content"></div>
     ${p.credits?.length ? `<section class="pj-credits"><h2>Credits</h2><ul>${p.credits.map((c) => `<li>${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.name)}</a>` : esc(c.name)}${c.role ? ` <span>${esc(c.role)}</span>` : ""}</li>`).join("")}</ul></section>` : ""}
     ${p.tags?.length ? `<p class="jr-tags">${p.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</p>` : ""}
     <p class="pj-lic"><small>${esc(LICENSES[p.license] || LICENSES["all-rights"])} · ${fmtNum(p.views || 0)} views</small></p>
     <div class="callout"><p><b>Like what you see?</b> Let's make something together.</p><a class="btn" href="${esc((typeof P !== "undefined" && P.booking) || "#")}" target="_blank" rel="noopener">Book a call</a></div>
     ${more.length ? `<section class="jr-rel"><h2>More projects</h2><div class="pj-grid mini">${more.map((m) => card({ ...m })).join("")}</div></section>` : ""}
-    <nav class="jr-pn">${prev ? `<a href="/projects/${esc(prev.slug)}" data-slug="${esc(prev.slug)}"><small>‹ Previous</small><b>${esc(prev.title)}</b></a>` : "<span></span>"}${next ? `<a href="/projects/${esc(next.slug)}" data-slug="${esc(next.slug)}"><small>Next ›</small><b>${esc(next.title)}</b></a>` : "<span></span>"}</nav></article>`;
+    <nav class="jr-pn">${prev ? `<a href="/projects/${esc(prev.slug)}" data-slug="${esc(prev.slug)}"><small>${I("chevron-left", 13)}Previous</small><b>${esc(prev.title)}</b></a>` : "<span></span>"}${next ? `<a href="/projects/${esc(next.slug)}" data-slug="${esc(next.slug)}"><small>Next${I("chevron-right", 13)}</small><b>${esc(next.title)}</b></a>` : "<span></span>"}</nav></article>`;
   showBlocks($(".pj-content", body), p.blocks, { hBase: 2 });
   const bar = $(".rprog i", body);
   body.onscroll = () => { if (!bar.isConnected) { body.onscroll = null; return; } const m = body.scrollHeight - body.clientHeight; bar.style.width = (m > 0 ? (body.scrollTop / m) * 100 : 0) + "%"; };
@@ -156,7 +158,7 @@ async function studio(body, meta) {
   let slugTouched = !isNew, saveT = null, ed = null, preview = false, created = !isNew;
   if (!mobile()) w.classList.add("max");
   body.onscroll = null; body.scrollTop = 0; body.classList.add("jr-editing", "pj-editing");
-  body.innerHTML = `<div class="jed pjed"><div class="jed-bar"><button class="back">‹ ${isNew ? "Cancel" : "Back"}</button><span class="jed-st pjed-st">${esc(PR.status)}</span><span class="sp"></span><span class="jed-live" hidden>Live</span><button data-a="preview">Preview</button><button data-a="settings">Settings</button><button class="btn" data-a="publish"></button></div>
+  body.innerHTML = `<div class="jed pjed"><div class="jed-bar"><button class="back">${I("chevron-left")}${isNew ? "Cancel" : "Back"}</button><span class="jed-st pjed-st">${esc(PR.status)}</span><span class="sp"></span><span class="jed-live" hidden>Live</span><button data-a="preview">Preview</button><button data-a="settings">Settings</button><button class="btn" data-a="publish"></button></div>
     <div class="jed-scroll"><div class="jed-main"><div class="pj-cover jed-cover"></div>
       <textarea class="jed-title" rows="1" maxlength="160" placeholder="Project title" aria-label="Project title"></textarea>
       <textarea class="jed-excerpt" rows="2" maxlength="400" placeholder="One or two sentences: the problem, your role, the result" aria-label="Summary"></textarea>
@@ -180,7 +182,7 @@ async function studio(body, meta) {
     PR.saving = true; setStatus("Saving…");
     try {
       const r = await api("/api/projects", { method: "PUT", body: { project: p } });
-      if (r.ok) { created = true; PR.list = r.data.projects; PR.cache[S.id] = r.data.project; PR.seeded = false; S.slug = r.data.project.slug; const bk = $(".jed-bar .back", body); if (bk) bk.textContent = "‹ Back"; const se = q("[data-f=slug]"); if (se && se !== document.activeElement) se.value = S.slug; setStatus("Saved"); }
+      if (r.ok) { created = true; PR.list = r.data.projects; PR.cache[S.id] = r.data.project; PR.seeded = false; S.slug = r.data.project.slug; const bk = $(".jed-bar .back", body); if (bk) bk.innerHTML = I("chevron-left") + "Back"; const se = q("[data-f=slug]"); if (se && se !== document.activeElement) se.value = S.slug; setStatus("Saved"); }
       else setStatus(r.status === 401 ? "Signed out. Not saved." : r.status === 0 ? "Offline. Not saved." : r.data.error || "Could not save (" + r.status + ")");
     } finally { PR.saving = false; if (PR.again) { PR.again = false; save(); } }
   }
@@ -194,7 +196,7 @@ async function studio(body, meta) {
     const c = q(".pj-cover");
     if (S.cover && S.cover.src) {
       c.innerHTML = `<img src="${esc(S.cover.src)}" alt="" style="${coverStyle(S.cover)}"><i class="pj-focus" style="left:${S.cover.fx ?? 50}%;top:${S.cover.fy ?? 50}%"></i><div class="jed-ct"><button data-c="replace">Replace</button><button data-c="alt">Alt text</button><button data-c="remove">Remove</button></div><small class="pj-hint">Click the picture to choose which part stays in view when it is cropped</small>`;
-    } else c.innerHTML = `<button class="jed-add" data-c="add"><span>＋</span> Add a cover image <small>Shows on the projects grid, the project page, Google and social shares. 4:3 works best.</small></button>`;
+    } else c.innerHTML = `<button class="jed-add" data-c="add"><span>${I("image", 20)}</span> Add a cover image <small>Shows on the projects grid, the project page, Google and social shares. 4:3 works best.</small></button>`;
     $$("[data-c]", c).forEach((b) => (b.onclick = async (e) => {
       e.stopPropagation(); const a = b.dataset.c;
       if (a === "remove") { S.cover = null; drawCover(); touch(); return; }
@@ -215,7 +217,7 @@ async function studio(body, meta) {
   const side = q(".jed-side");
   function drawSide() {
     const sT = S.seo.title || title.value || "Project title", sD = S.seo.desc || exc.value || "Your summary shows here.";
-    side.innerHTML = `<div class="jed-sh"><b>Project settings</b><button data-a="closeside" aria-label="Close settings">✕</button></div>
+    side.innerHTML = `<div class="jed-sh"><b>Project settings</b><button data-a="closeside" aria-label="Close settings">${I("x", 16)}</button></div>
       <label class="ow-f">Visibility<select data-f="status"><option value="draft"${S.status === "draft" ? " selected" : ""}>Draft (only you)</option><option value="published"${S.status === "published" ? " selected" : ""}>Published</option><option value="unlisted"${S.status === "unlisted" ? " selected" : ""}>Unlisted (anyone with the link)</option></select></label>
       <label class="ow-app"><input type="checkbox" data-f="featured" ${S.featured ? "checked" : ""}><span>Feature this project (shown first)</span></label>
       <h3>About the project</h3>
@@ -234,13 +236,13 @@ async function studio(body, meta) {
       <label class="ow-f">Address <small>rohankumar.pro/projects/<b>${esc(S.slug || "…")}</b></small><input data-f="slug" maxlength="80" value="${esc(S.slug)}"></label>
       <label class="ow-f">Title for Google <small data-cnt="t">${sT.length}/60</small><input data-f="seo.title" maxlength="70" value="${esc(S.seo.title)}" placeholder="${esc(title.value || "Same as the title")}"></label>
       <label class="ow-f">Description for Google <small data-cnt="d">${sD.length}/160</small><textarea data-f="seo.desc" rows="3" maxlength="200" placeholder="Same as the summary">${esc(S.seo.desc)}</textarea></label>
-      <div class="serp"><small>rohankumar.pro › projects › ${esc(S.slug || "")}</small><b>${esc(sT.slice(0, 60))}</b><span>${esc(sD.slice(0, 160))}</span></div>
+      <div class="serp"><small>rohankumar.pro / projects / ${esc(S.slug || "")}</small><b>${esc(sT.slice(0, 60))}</b><span>${esc(sD.slice(0, 160))}</span></div>
       <div class="ed-ctl"><button data-a="dup">Duplicate</button><button class="ed-del" data-a="del">Delete project</button></div>`;
     chips($("[data-chips=tags]", side), S.tags, { placeholder: "Add a tag", max: 12, suggestions: [...new Set(PR.list.flatMap((p) => p.tags || []))], onChange: () => touch() });
     chips($("[data-chips=tools]", side), S.tools, { placeholder: "Add a tool", max: 20, suggestions: TOOLS, onChange: () => touch() });
     const rows = (key, blank, fields) => {
       const box = $(`[data-rows=${key}]`, side); box.textContent = "";
-      S[key].forEach((it, i) => box.append(h("div", { class: "pj-row" }, fields.map(([k, ph]) => h("input", { value: it[k] || "", placeholder: ph, "aria-label": ph, maxlength: "300", oninput: (e) => { it[k] = e.target.value; touch(); } })), h("button", { class: "rb-mini rb-x", "aria-label": "Remove", onclick: () => { S[key].splice(i, 1); rows(key, blank, fields); touch(); } }, "✕"))));
+      S[key].forEach((it, i) => box.append(h("div", { class: "pj-row" }, fields.map(([k, ph]) => h("input", { value: it[k] || "", placeholder: ph, "aria-label": ph, maxlength: "300", oninput: (e) => { it[k] = e.target.value; touch(); } })), h("button", { class: "rb-mini rb-x", "aria-label": "Remove", onclick: () => { S[key].splice(i, 1); rows(key, blank, fields); touch(); }, html: I("x", 14), "aria-label": "Remove" }))));
     };
     rows("links", { label: "", url: "" }, [["label", "Label"], ["url", "https://…"]]); rows("credits", { name: "", role: "", url: "" }, [["name", "Name"], ["role", "Role"], ["url", "Link (optional)"]]);
     $$("[data-f]", side).forEach((el) => {
@@ -251,7 +253,7 @@ async function studio(body, meta) {
         if (k === "status") { updBtn(); touch(true); drawSide(); return; }
         const t = S.seo.title || title.value || "", d = S.seo.desc || exc.value || "";
         $("[data-cnt=t]", side).textContent = t.length + "/60"; $("[data-cnt=d]", side).textContent = d.length + "/160";
-        const sp = $(".serp", side); sp.querySelector("b").textContent = t.slice(0, 60); sp.querySelector("span").textContent = d.slice(0, 160); sp.querySelector("small").textContent = "rohankumar.pro › projects › " + (S.slug || "");
+        const sp = $(".serp", side); sp.querySelector("b").textContent = t.slice(0, 60); sp.querySelector("span").textContent = d.slice(0, 160); sp.querySelector("small").textContent = "rohankumar.pro / projects / " + (S.slug || "");
         touch();
       });
     });

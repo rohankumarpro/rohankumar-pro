@@ -2,6 +2,7 @@
 // It cleans untrusted content, turns blocks into HTML (the same HTML for visitors, search engines and the editor preview),
 // extracts plain text, and converts the older markdown articles into blocks. No DOM is needed, so it runs anywhere.
 
+import { icon, iconName } from "./icons.mjs";
 export const COLORS = ["gray", "brown", "orange", "yellow", "green", "blue", "purple", "pink", "red"];
 export const CALLOUT_TONES = ["gray", "yellow", "green", "blue", "purple", "pink", "red", "orange"];
 export const TYPES = ["p", "h1", "h2", "h3", "quote", "callout", "ul", "ol", "todo", "toggle", "code", "divider", "image", "gallery", "embed", "button", "table", "columns", "bookmark", "file", "toc", "carousel"];
@@ -106,7 +107,7 @@ function cleanOne(b, depth) {
   }
   if ((t === "ul" || t === "ol" || t === "todo") && Number.isInteger(b.d)) o.d = Math.max(0, Math.min(3, b.d));
   if (t === "todo" && b.c) o.c = true;
-  if (t === "callout") { o.e = str(b.e || "💡", 8); o.tone = CALLOUT_TONES.includes(b.tone) ? b.tone : "gray"; }
+  if (t === "callout") { o.e = iconName(b.e, "bulb"); o.tone = CALLOUT_TONES.includes(b.tone) ? b.tone : "gray"; }
   if (t === "toggle") { o.k = depth < 3 ? cleanBlocks(b.k, depth + 1) : []; if (b.open) o.open = true; }
   if (t === "code") { o.x = str(b.x, 30000); o.lang = str(b.lang, 20).replace(/[^\w+#.-]/g, ""); }
   if (t === "image") {
@@ -223,7 +224,7 @@ export function renderBlocks(blocks, opts = {}) {
       case "p": return b.h && stripTags(b.h) ? `<p${al(b)}>${inlineOut(b.h)}</p>` : "";
       case "h1": case "h2": case "h3": return `<${heading(b)} id="${esc(slugify(stripTags(b.h)) || b.id)}"${al(b)}>${inlineOut(b.h)}</${heading(b)}>`;
       case "quote": return `<blockquote${al(b)}>${inlineOut(b.h)}</blockquote>`;
-      case "callout": return `<aside class="bk-callout" data-tone="${b.tone}"><span class="bk-ce" aria-hidden="true">${esc(b.e)}</span><div>${inlineOut(b.h)}</div></aside>`;
+      case "callout": return `<aside class="bk-callout" data-tone="${b.tone}"><span class="bk-ce" aria-hidden="true">${icon(b.e, { size: 22 })}</span><div>${inlineOut(b.h)}</div></aside>`;
       case "toggle": return `<details class="bk-toggle"${b.open ? " open" : ""}><summary>${inlineOut(b.h)}</summary><div>${many(b.k)}</div></details>`;
       case "code": return `<pre class="bk-code"${b.lang ? ` data-lang="${esc(b.lang)}"` : ""}><code>${esc(b.x)}</code></pre>`;
       case "divider": return "<hr>";
@@ -246,7 +247,7 @@ export function renderBlocks(blocks, opts = {}) {
       }
       case "button": return `<p class="bk-btn"><a class="btn ${b.style === "outline" ? "tonal" : ""}" href="${esc(b.url)}"${/^https?:/i.test(b.url) ? ' target="_blank" rel="noopener"' : ""}>${esc(b.label)}</a></p>`;
       case "bookmark": return `<a class="bk-bm" href="${esc(b.url)}" target="_blank" rel="noopener"><b>${esc(b.title || host(b.url))}</b>${b.desc ? `<span>${esc(b.desc)}</span>` : ""}<small>${esc(host(b.url))}</small></a>`;
-      case "file": return `<a class="bk-file" href="${esc(b.src)}" download><span aria-hidden="true">📎</span><b>${esc(b.name)}</b>${b.size ? `<small>${b.size < 1048576 ? Math.round(b.size / 1024) + " KB" : (b.size / 1048576).toFixed(1) + " MB"}</small>` : ""}</a>`;
+      case "file": return `<a class="bk-file" href="${esc(b.src)}" download><span aria-hidden="true">${icon("paperclip", { size: 20 })}</span><b>${esc(b.name)}</b>${b.size ? `<small>${b.size < 1048576 ? Math.round(b.size / 1024) + " KB" : (b.size / 1048576).toFixed(1) + " MB"}</small>` : ""}</a>`;
       case "table": {
         const [head, ...rest] = b.hr ? b.rows : [null, ...b.rows];
         const cell = (tag) => (c) => `<${tag}>${inlineOut(c)}</${tag}>`;
@@ -292,7 +293,7 @@ export function mdToBlocks(md, { booking = "https://cal.com/rohankumarpro" } = {
     else if (t.startsWith("# ")) out.push({ id: rid(), t: "h1", h: mdInline(t.slice(2)) });
     else if (t.startsWith("> ")) out.push({ id: rid(), t: "quote", h: mdInline(L.map((x) => x.replace(/^>\s?/, "")).join(" ")) });
     else if ((m = t.match(/^\[\[carousel:(\w+)\]\]$/))) out.push({ id: rid(), t: "carousel", ref: m[1] });
-    else if (t.startsWith("!! ")) { out.push({ id: rid(), t: "callout", e: "📞", tone: "green", h: mdInline(t.slice(3)) }, { id: rid(), t: "button", label: "Book a call", url: booking, style: "solid" }); }
+    else if (t.startsWith("!! ")) { out.push({ id: rid(), t: "callout", e: "phone", tone: "green", h: mdInline(t.slice(3)) }, { id: rid(), t: "button", label: "Book a call", url: booking, style: "solid" }); }
     else if (/^(---|\*\*\*)$/.test(t)) out.push({ id: rid(), t: "divider" });
     else out.push({ id: rid(), t: "p", h: mdInline(t) });
   }
@@ -305,7 +306,7 @@ export function blocksToMd(blocks) {
   const walk = (list) => (list || []).forEach((b) => {
     let s = "";
     if (b.t === "p") s = inl(b.h); else if (b.t === "h1") s = "# " + inl(b.h); else if (b.t === "h2") s = "## " + inl(b.h); else if (b.t === "h3") s = "### " + inl(b.h);
-    else if (b.t === "quote") s = "> " + inl(b.h); else if (b.t === "callout") s = `> ${b.e} ${inl(b.h)}`;
+    else if (b.t === "quote") s = "> " + inl(b.h); else if (b.t === "callout") s = `> ${inl(b.h)}`;
     else if (b.t === "ul") s = "- " + inl(b.h); else if (b.t === "todo") s = `- [${b.c ? "x" : " "}] ` + inl(b.h); else if (b.t === "ol") s = "1. " + inl(b.h);
     else if (b.t === "toggle") { s = inl(b.h); out.push(s); walk(b.k); prev = "toggle"; return; }
     else if (b.t === "code") s = "```\n" + b.x + "\n```"; else if (b.t === "divider") s = "---";
