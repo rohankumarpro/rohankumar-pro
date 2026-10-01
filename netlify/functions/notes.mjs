@@ -1,15 +1,23 @@
 // /api/notes  GET: anyone reads the notes.  PUT: only the signed-in owner saves them.
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
+import { cleanBlocks, blocksText, rid } from "../../shared/blocks.mjs";
 import { contentStore } from "../lib/store.mjs";
 
 const COLORS = ["c1", "c2", "c3", "c4", "c5", "c6"];
 const clean = (list) =>
-  (Array.isArray(list) ? list : []).slice(0, 60).map((n) => ({
-    title: String(n?.title ?? "").slice(0, 120),
-    text: String(n?.text ?? "").slice(0, 4000),
-    color: COLORS.includes(n?.color) ? n.color : "c4",
-  }));
+  (Array.isArray(list) ? list : []).slice(0, 80).map((n) => {
+    const blocks = Array.isArray(n?.blocks) ? cleanBlocks(n.blocks) : [];
+    const o = {
+      id: /^[\w-]{3,16}$/.test(n?.id || "") ? n.id : rid(),
+      title: String(n?.title ?? "").slice(0, 120),
+      text: blocks.length ? blocksText(blocks).slice(0, 4000) : String(n?.text ?? "").slice(0, 4000),
+      color: COLORS.includes(n?.color) ? n.color : "c4",
+    };
+    if (blocks.length) o.blocks = blocks;
+    if (n?.pin) o.pin = true;
+    return o;
+  });
 
 export const handler = async (event) => {
   try {
