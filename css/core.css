@@ -1,0 +1,74 @@
+/* Shared by every UI (Material, Notion, Apple): behaviour and layout that must not change with the look.
+   Focus mode, the All-windows overview, icon layout helpers and picture wallpapers. Each css/ui-*.css only restyles on top of this. */
+/* ===== Focus mode: one app, truly full screen ===== */
+html.focus-mode .topbar,html.focus-mode .shelf,html.focus-mode .icons,html.focus-mode .widgets,html.focus-mode .cat,html.focus-mode .jar,html.focus-mode .dock-handle,html.focus-mode .launcher,html.focus-mode .qs,html.focus-mode .snap-prev,html.focus-mode .cat-chat{display:none!important}
+html.focus-mode .win:not(.focus){visibility:hidden;pointer-events:none}
+html.focus-mode .win.focus{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0!important;border:0!important;transform:none!important;z-index:5000!important;box-shadow:none!important;animation:none!important}
+html.focus-mode .win.focus .bar,html.focus-mode .win.focus .rz{display:none!important}
+.win.focus .body{padding-top:max(env(safe-area-inset-top,0px),0px)}
+.focus-exit{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:14px;z-index:5100;display:flex;align-items:center;gap:8px;border:0;border-radius:99px;padding:10px 16px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--ink);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--md-elev3);font-weight:600;font-size:14px;opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity .2s,transform .2s}
+.focus-exit.show,.focus-exit:focus-visible{opacity:1;pointer-events:auto;transform:none}
+.wb.fc[aria-pressed="true"]{background:var(--tonal-hi)}
+
+/* ===== All windows ===== */
+.tb-n{position:absolute;right:-2px;top:-2px;min-width:17px;height:17px;border-radius:99px;background:var(--primary);color:var(--on-primary);font-style:normal;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)}
+.tb-n[hidden]{display:none}.tb-ic{position:relative}
+.ov{position:absolute;inset:0;z-index:2800;display:flex;flex-direction:column;background:color-mix(in srgb,var(--bg) 62%,transparent);backdrop-filter:blur(28px) saturate(1.25);-webkit-backdrop-filter:blur(28px) saturate(1.25);opacity:0;transition:opacity .2s;padding-top:env(safe-area-inset-top,0px)}
+.ov.in{opacity:1}
+.ov-top{display:flex;align-items:center;gap:10px;padding:18px 24px 10px;font-size:19px}
+.ov-n{background:var(--tonal-hi);border-radius:99px;padding:2px 11px;font-size:13px;font-weight:700}
+.ov-top .sp{flex:1}
+.ov-all{border:0;border-radius:99px;background:var(--tonal-hi);color:var(--ink);font:inherit;font-weight:600;font-size:14px;padding:9px 18px;cursor:pointer}
+.ov-x{width:40px;height:40px;border:0;border-radius:50%;background:var(--surface2);color:var(--ink);cursor:pointer;font-size:15px}
+.ov-wrap{flex:1;min-height:0;overflow:auto;padding:8px 24px 70px}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;align-content:start;max-width:1400px;margin:0 auto}
+.ov-card{position:relative;background:var(--surface);border-radius:28px;box-shadow:var(--md-elev2),0 14px 40px rgba(15,25,60,.16);cursor:pointer;outline:0;overflow:hidden;animation:ovIn .38s var(--md-spring) both;animation-delay:calc(var(--i,0)*45ms);transition:transform .22s var(--md-emph),box-shadow .22s,opacity .2s}
+.ov-card:hover,.ov-card:focus-visible{transform:translateY(-5px);box-shadow:var(--md-elev3),0 22px 54px rgba(15,25,60,.24)}
+.ov-card:focus-visible{outline:3px solid var(--primary)}
+.ov-card.gone{transform:scale(.82) translateY(-20px);opacity:0}
+.ov-card.drag{animation:none}
+@keyframes ovIn{from{opacity:0;transform:translateY(24px) scale(.94)}to{opacity:1;transform:none}}
+.ov-h{display:flex;align-items:center;gap:10px;padding:12px 10px 8px 16px}
+.ov-ic .ico{display:block;width:26px;height:26px}.ov-ic{display:grid;place-items:center;width:26px;height:26px}
+.ov-t{flex:1;min-width:0;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-c{width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer;font-size:13px}
+.ov-c:hover{background:#D93025;color:#fff}
+.ov-p{position:relative;overflow:hidden;margin:0 12px 12px;border-radius:18px;background:var(--surface2);height:210px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--line) 70%,transparent)}
+.ov-badge{position:absolute;left:24px;bottom:22px;background:color-mix(in srgb,var(--ink) 78%,transparent);color:var(--surface);font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:99px}
+.ov-empty{grid-column:1/-1;text-align:center;color:var(--ink2);padding:90px 0}.ov-empty div{font-size:58px;opacity:.6}
+.ov-hint{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));margin:0;text-align:center;color:var(--ink2);font-size:13px;pointer-events:none}
+@media (max-width:760px){
+  .ov-top{padding:14px 18px 6px}
+  .ov-wrap{display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;padding:0 0 70px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .ov-grid{display:flex;gap:16px;padding:0 calc((100vw - min(76vw,330px))/2);width:max-content;max-width:none;margin:0;align-items:center}
+  .ov-card{flex:none;width:min(76vw,330px);scroll-snap-align:center;touch-action:pan-x}
+  .ov-p{height:min(52vh,420px)}
+}
+@media (prefers-reduced-motion:reduce){.ov-card{animation:none}}
+
+/* line icons */
+.ic{flex:none;display:inline-block;vertical-align:-.2em}
+button .ic,a .ic{pointer-events:none}
+.back,.dc-back,.hb-edit,.back2{display:inline-flex;align-items:center;gap:6px}
+.rte-sic svg,.dx-em svg,.dx-cic svg{display:block}.dx-cic{display:inline-grid;vertical-align:middle;margin-right:5px}
+.kn-ib,.kn-bar button,.kn-act button,.kn-eimg button,.kn-rm,.kn-grip{display:inline-grid;place-items:center}
+.dx-new{display:inline-flex;align-items:center;gap:4px}.dx-addcover,.dx-up{display:inline-flex;gap:7px;align-items:center}
+.dx-icon svg{display:block}.dx-pop .ic{display:grid;place-items:center}
+.dx-recent .dx-em,.dx-tpl span{display:grid}
+.pj-b svg,.pj-st svg{vertical-align:-.15em}
+.sv-ic{display:grid;place-items:center}
+.ct-play svg{width:14px;height:14px;margin-left:1px}
+.hb-soc span{display:grid;place-items:center}
+.lb-x,.lb-p,.lb-n,.ov-x,.ov-c,.notif-x,.dx-x{display:inline-grid;place-items:center}
+.kn-addrow{display:inline-flex;align-items:center;gap:6px}
+.dx-b.icon{display:inline-grid;place-items:center}
+.cat .heart svg{display:block}
+.kn-bar button svg{opacity:.9}
+.rte-fb svg,.rb-mini svg{display:block}
+.rb-mini.rb-x{display:inline-grid;place-items:center}
+.ov-empty div{display:grid;place-items:center}
+.jed-add span{display:inline-grid;vertical-align:middle}
+
+/* an uploaded wallpaper replaces the coloured shapes */
+.wall.pic{background-size:cover!important;background-position:center!important}
+.wall.pic>*,.wall.pic svg{display:none!important}

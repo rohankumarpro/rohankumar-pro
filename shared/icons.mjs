@@ -122,6 +122,14 @@ const LEGACY = { "💡": "bulb", "📌": "pin", "⚠️": "warning", "⚠": "war
 export const iconName = (v, fallback = "file-text") => (ICONS[v] ? v : LEGACY[v] || fallback);
 export const iconNames = Object.keys(ICONS);
 export function icon(name, { size = 18, cls = "", sw = 2, fill = false } = {}) {
-  const body = ICONS[iconName(name, "info")];
-  return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="${fill ? "currentColor" : "none"}" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
+  const nm = iconName(name, "info");
+  const S = globalThis.__ICONSET; // the active UI's icon library (shared/icon-set-*.js); the server has none and uses the set below
+  const c = `ic${cls ? " " + cls : ""}`;
+  if (S && S.i && S.i[nm]) {
+    return S.stroke
+      ? `<svg class="${c}" viewBox="${S.vb}" width="${size}" height="${size}" fill="${fill ? "currentColor" : "none"}" stroke="currentColor" stroke-width="${S.sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${S.i[nm]}</svg>`
+      : `<svg class="${c}" viewBox="${S.vb}" width="${size}" height="${size}" fill="currentColor" aria-hidden="true" focusable="false">${S.i[nm]}</svg>`;
+  }
+  const body = ICONS[nm];
+  return `<svg class="${c}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="${fill ? "currentColor" : "none"}" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
 }

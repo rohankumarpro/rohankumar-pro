@@ -1219,8 +1219,8 @@ kbd{font:inherit;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6p
 .cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
 .cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
 </style>
-<script>try{var u=(JSON.parse(localStorage.getItem('desk')||'null')||{}).ui;if(u==='notion'||u==='apple')document.documentElement.dataset.ui=u;else u='material';document.write('<link id="uiCss" rel="stylesheet" href="/css/'+(u==='material'?'material':'ui-'+u)+'.css">')}catch(e){document.write('<link id="uiCss" rel="stylesheet" href="/css/material.css">')}</script>
-<noscript><link rel="stylesheet" href="/css/material.css"></noscript>
+<script>try{var u=(JSON.parse(localStorage.getItem('desk')||'null')||{}).ui;if(u==='notion'||u==='apple')document.documentElement.dataset.ui=u;else u='material';document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/'+(u==='material'?'material':'ui-'+u)+'.css"><script src="/shared/icon-set-'+u+'.js"><\/script>')}catch(e){document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"><\/script>')}</script>
+<noscript><link rel="stylesheet" href="/css/core.css"><link rel="stylesheet" href="/css/material.css"></noscript>
 <script type="module">import { icon } from "/shared/icons.mjs"; window.svgIcon = icon; document.dispatchEvent(new Event("icons-ready"));</script>
 </head>
 <body>
@@ -2114,9 +2114,14 @@ function shape(kind){
 function glyphSvg(g,size=24){return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`}
 let cpN=0;
 function icon(a){
+  const S=window.__ICONSET,ui=document.documentElement.dataset.ui||'material',g=S&&S.a&&S.a[a.id];
   if(a.photo){a={...a,shape:'circle'};const id='cp'+(++cpN);return `<span class="ico photo"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}"><path d="${shape(a.shape)}"/></clipPath></defs><path d="${shape(a.shape)}" fill="#C2FF73"/><g clip-path="url(#${id})"><image class="g-face" href="${PHOTO}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice"/></g></svg></span>`}
+  /* Notion and Apple: a library glyph on a flat tile (the tile itself is drawn by css/ui-*.css) */
+  if(g&&ui==='notion')return `<span class="ico uitile" data-i="${a.id}"><svg viewBox="${S.vb}" fill="none" stroke="currentColor" stroke-width="${S.sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${g}</svg></span>`;
+  if(g&&ui==='apple')return `<span class="ico uitile" data-i="${a.id}"><svg viewBox="${S.vb}" fill="currentColor" aria-hidden="true">${g}</svg></span>`;
   if(typeof ART!=='undefined'&&ART[a.id])return `<span class="ico lay" data-i="${a.id}"><svg viewBox="0 0 100 100"><circle class="icbg" cx="50" cy="50" r="48"/><g class="art">${ART[a.id]}</g></svg></span>`;
-  return `<span class="ico" data-i="${a.id}" style="--ic:var(--${a.color})"><svg viewBox="0 0 100 100"><path d="${shape(a.shape)}" fill="var(--${a.color})"/><svg x="29" y="29" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a.glyph}</svg></svg></span>`}
+  const gl=g?`<svg x="27" y="27" width="46" height="46" viewBox="${S.vb}" fill="var(--glyph)">${g}</svg>`:`<svg x="29" y="29" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a.glyph}</svg>`;
+  return `<span class="ico" data-i="${a.id}" style="--ic:var(--${a.color})"><svg viewBox="0 0 100 100"><path d="${shape(a.shape)}" fill="var(--${a.color})"/>${gl}</svg></span>`}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const APPS=[
@@ -2719,7 +2724,7 @@ function contact(){return `<h1>Let's talk</h1><p>Have a project in mind or just 
 
 const UIS={material:'Material UI',notion:'Notion UI',apple:'Apple UI'};
 function setUI(k){if(!UIS[k])k='material';if(k==='material')delete document.documentElement.dataset.ui;else document.documentElement.dataset.ui=k;
-  const l=document.getElementById('uiCss');if(l)l.setAttribute('href','/css/'+(k==='material'?'material':'ui-'+k)+'.css');save()}
+  save();try{sessionStorage.setItem('uiSwitch','1')}catch(e){}toast('Switching interface…');setTimeout(()=>location.replace('/'),350)}
 function uiPicker(){const cur=document.documentElement.dataset.ui||'material';
   return `<h3>Interface</h3><div class="uis">${Object.keys(UIS).map(k=>`<button data-ui="${k}" aria-pressed="${k===cur}" class="${k===cur?'on':''}"><span class="uip" data-sample="${k}"><i></i><b></b><u></u></span><span class="lb">${UIS[k]}</span></button>`).join('')}</div>`}
 function settings(body){
@@ -2768,7 +2773,24 @@ const WALLS={
     <g class="fl" style="--d:12s;--x:50px;--y:-8px"><path d="M-100 820C380 740 780 900 1180 800S1500 770 1700 810V1000H-100Z" fill="var(--c1)"/></g></svg>`,
   plain:id=>`<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><rect width="1600" height="1000" fill="var(--surface2)"/>${S('cookie',1000,380,8,0,'var(--bg)','','rt|--d:160s')}</svg>`
 };
-function setWall(k){if(!WALLS[k])k="bloom";desk.dataset.wall=k;document.getElementById('wall').innerHTML=WALLS[k]('main')}
+/* Notion and Apple replace the default set with their own wallpapers (Material keeps the four above). All are generated SVG and follow the UI tokens in light and dark. */
+(()=>{const ui=document.documentElement.dataset.ui,V='viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"';
+  const U={
+  notion:{
+    cover:id=>`<svg ${V}><defs><linearGradient id="nc${id}" x1="0" x2="1"><stop offset="0" style="stop-color:var(--c5)"/><stop offset=".5" style="stop-color:var(--c3)"/><stop offset="1" style="stop-color:var(--c6)"/></linearGradient></defs><rect width="1600" height="1000" fill="var(--bg)"/><rect width="1600" height="320" fill="url(#nc${id})"/><g fill="none" stroke="var(--surface)" stroke-width="2" opacity=".55"><path d="M0 250C200 170 420 300 640 230S1060 170 1280 240 1500 230 1600 200"/><path d="M0 285C220 215 440 330 680 270S1080 210 1300 280 1520 270 1600 245"/></g></svg>`,
+    paper:id=>`<svg ${V}><defs><pattern id="np${id}" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" style="fill:var(--ink)" opacity=".14"/></pattern></defs><rect width="1600" height="1000" fill="var(--bg)"/><rect width="1600" height="1000" fill="url(#np${id})"/></svg>`,
+    linework:id=>`<svg ${V}><rect width="1600" height="1000" fill="var(--bg)"/><circle cx="1180" cy="330" r="190" style="fill:var(--c4)"/><g fill="none" style="stroke:var(--ink)" stroke-width="3" stroke-linecap="round" opacity=".62"><circle cx="1210" cy="300" r="190"/><path d="M-20 760C260 640 520 840 800 740S1300 640 1620 760"/><path d="M-20 820C260 700 520 900 800 800S1300 700 1620 820"/><path d="M380 160c0-60 100-60 100 0s-100 60-100 120"/><circle cx="260" cy="470" r="46"/><path d="M700 330l60 60M760 330l-60 60"/></g></svg>`,
+    blocks:id=>`<svg ${V}><rect width="1600" height="1000" fill="var(--bg)"/><g stroke-width="1.5" style="stroke:var(--line)"><rect x="880" y="120" width="300" height="190" rx="14" style="fill:var(--c1)"/><rect x="1210" y="120" width="300" height="190" rx="14" style="fill:var(--c4)"/><rect x="880" y="340" width="300" height="190" rx="14" style="fill:var(--c5)"/><rect x="1210" y="340" width="300" height="190" rx="14" style="fill:var(--c6)"/><rect x="1050" y="560" width="300" height="190" rx="14" style="fill:var(--c3)"/></g><g style="fill:var(--ink)" opacity=".18"><rect x="905" y="150" width="140" height="10" rx="5"/><rect x="1235" y="150" width="110" height="10" rx="5"/><rect x="905" y="370" width="170" height="10" rx="5"/><rect x="1235" y="370" width="130" height="10" rx="5"/><rect x="1075" y="590" width="150" height="10" rx="5"/></g></svg>`
+  },
+  apple:{
+    dunes:id=>`<svg ${V}><defs><linearGradient id="ad${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--w3)"/><stop offset=".6" style="stop-color:var(--w2)"/><stop offset="1" style="stop-color:var(--w4)"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#ad${id})"/><circle cx="1180" cy="340" r="130" style="fill:var(--w4)" opacity=".85"/><path d="M-100 640C300 520 640 700 980 600S1400 520 1700 600V1000H-100Z" style="fill:color-mix(in srgb,var(--w3) 70%,#5B3FA0)"/><path d="M-100 740C260 640 700 830 1060 720S1480 680 1700 730V1000H-100Z" style="fill:color-mix(in srgb,var(--w1) 70%,#2D3F8F)"/><path d="M-100 850C340 780 760 920 1140 840S1500 820 1700 850V1000H-100Z" style="fill:color-mix(in srgb,var(--w1) 45%,#16245E)"/></svg>`,
+    ribbons:id=>`<svg ${V}><defs><linearGradient id="ar${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--w1)"/><stop offset="1" style="stop-color:var(--w3)"/></linearGradient><linearGradient id="as${id}" x1="0" x2="1"><stop offset="0" style="stop-color:var(--w2)"/><stop offset="1" style="stop-color:var(--w3)"/></linearGradient><linearGradient id="at${id}" x1="1" x2="0"><stop offset="0" style="stop-color:var(--w4)"/><stop offset="1" style="stop-color:var(--w1)"/></linearGradient><filter id="ab${id}"><feGaussianBlur stdDeviation="5"/></filter></defs><rect width="1600" height="1000" fill="url(#ar${id})"/><g filter="url(#ab${id})"><path d="M-100 720C300 280 900 940 1700 260V520C900 1100 300 520-100 980Z" fill="url(#as${id})" opacity=".9"/><path d="M-100 300C400 640 900 80 1700 560V780C900 340 400 900-100 520Z" fill="url(#at${id})" opacity=".8"/></g></svg>`,
+    aurora:id=>`<svg ${V}><defs><filter id="au${id}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="110"/></filter></defs><rect width="1600" height="1000" style="fill:var(--bg)"/><g filter="url(#au${id})"><circle cx="1250" cy="220" r="360" style="fill:var(--w1)"/><circle cx="260" cy="820" r="420" style="fill:var(--w2)"/><circle cx="860" cy="640" r="320" style="fill:var(--w3)"/><circle cx="520" cy="140" r="300" style="fill:var(--w4)"/></g></svg>`,
+    graphite:id=>`<svg ${V}><defs><radialGradient id="ag${id}" cx=".5" cy=".3" r=".9"><stop offset="0" style="stop-color:var(--surface)"/><stop offset="1" style="stop-color:var(--bg)"/></radialGradient></defs><rect width="1600" height="1000" fill="url(#ag${id})"/></svg>`
+  }}[ui];
+  if(U){Object.keys(WALLS).forEach(k=>delete WALLS[k]);Object.assign(WALLS,U)}
+})();
+function setWall(k){if(!WALLS[k])k=Object.keys(WALLS)[0];desk.dataset.wall=k;document.getElementById('wall').innerHTML=WALLS[k]('main')}
 
 function inl(t){return esc(t.replace(/\\\*/g,'\u0001')).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/\u0001/g,'*')}
 function md(src){
@@ -3490,6 +3512,7 @@ function tick(){
   const c=document.createElementNS('http://www.w3.org/2000/svg','clipPath');c.id='clip-'+k;c.setAttribute('clipPathUnits','objectBoundingBox');
   const pth=document.createElementNS('http://www.w3.org/2000/svg','path');pth.setAttribute('d',shape(k));pth.setAttribute('transform','scale(.01)');c.appendChild(pth);g.appendChild(c)})})();
 load();
+try{if(sessionStorage.getItem('uiSwitch')){sessionStorage.removeItem('uiSwitch');unlock();openApp('settings')}}catch(e){}
 document.title=`${P.name} — Portfolio`;
 document.getElementById('who').textContent=P.name;
 document.getElementById('wStatus').textContent=P.status;

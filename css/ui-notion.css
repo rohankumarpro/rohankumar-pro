@@ -1,1 +1,149 @@
-/* Notion UI: layout, chrome and component overrides. Phase 2+ fills this in; tokens live in index.html. */
+/* Notion UI: a quiet, document-first workspace. Flat white surfaces, hairline borders, 6-10px corners, no blur, no film grain,
+   command-palette launcher, page-cover lock screen and tag-tinted line-icon tiles (Lucide). Colours, font and radii come from the
+   Notion tokens in index.html; this file only reshapes the chrome. Loaded instead of material.css when the owner picks Notion UI. */
+:root{
+  --n-hair:1px solid var(--line);
+  --n-hover:color-mix(in srgb,var(--ink) 6%,transparent);
+  --n-press:color-mix(in srgb,var(--ink) 10%,transparent);
+}
+html{-webkit-tap-highlight-color:transparent}
+body{letter-spacing:0;font-size:15px}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink2) 30%,transparent) transparent}
+::selection{background:color-mix(in srgb,var(--primary) 26%,transparent)}
+:focus-visible{outline:2px solid color-mix(in srgb,var(--primary) 70%,transparent);outline-offset:1px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,[contenteditable]:focus-visible{outline:0}
+input:focus,textarea:focus,select:focus{box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 45%,transparent)}
+button,a,[role=button]{transition:background-color .12s ease,box-shadow .12s ease,opacity .12s}
+button:active:not(:disabled){background-color:var(--n-press)}
+.grain{display:none!important}
+.wall *{animation:none!important}
+
+/* ---- top bar: a flat page header with a hairline under it ---- */
+.topbar{height:44px;padding:0 10px;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);border-bottom:var(--n-hair);font-size:14px;font-weight:500}
+.pill{background:transparent;backdrop-filter:none;box-shadow:none;border-radius:6px;padding:5px 9px;font-weight:500}
+.pill:hover{background:var(--n-hover)}
+#who{font-weight:600}
+.tb-ic{width:30px;height:30px;padding:0;display:grid;place-items:center;border-radius:6px}
+.tb-ic:hover{background:var(--n-hover)}
+.tb-n{background:var(--primary);color:var(--on-primary)}
+
+/* ---- desktop: pages laid out like a gallery ---- */
+.icons{top:62px;left:16px}
+.dicon{border-radius:8px;padding:8px 4px}
+.dicon:hover{background:var(--n-hover)!important}
+.dicon .lb{text-shadow:none;font-weight:500;font-size:13px;color:var(--ink)}
+.dicon:hover .ico,.dicon:focus-visible .ico{transform:none}
+
+/* icon tiles: Lucide outline on a tag-tinted square */
+.ico.uitile{display:block;background:var(--tb,var(--surface2));color:var(--ink);border-radius:10px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 8%,transparent)}
+.ico.uitile>svg{width:100%;height:100%;padding:24%}
+.ico.photo{border-radius:10px;overflow:hidden}
+.ico.photo svg{border-radius:10px}
+[data-i="projects"]{--tb:var(--c5)}[data-i="journal"]{--tb:var(--c4)}[data-i="photos"]{--tb:var(--c6)}[data-i="notes"]{--tb:var(--c4)}
+[data-i="guestbook"]{--tb:var(--c3)}[data-i="documents"]{--tb:var(--c1)}[data-i="content"]{--tb:var(--c6)}[data-i="resume"]{--tb:var(--c5)}
+[data-i="contact"]{--tb:var(--c2)}[data-i="palette"]{--tb:var(--c3)}[data-i="sketch"]{--tb:var(--c1)}[data-i="focus"]{--tb:var(--c2)}
+[data-i="calculator"]{--tb:var(--c5)}[data-i="timeline"]{--tb:var(--c3)}[data-i="messages"]{--tb:var(--c1)}[data-i="links"]{--tb:var(--c5)}
+[data-i="settings"]{--tb:var(--surface2)}[data-i="services"]{--tb:var(--c2)}[data-i="book"]{--tb:var(--c6)}[data-i="docs"]{--tb:var(--c4)}
+
+/* ---- windows: a page in a frame ---- */
+.win{border-radius:var(--r-win);border:var(--n-hair);box-shadow:var(--shadow);background:var(--surface)}
+.win:not(.top){box-shadow:0 0 0 1px rgba(15,15,15,.05),0 4px 14px rgba(15,15,15,.10)}
+.win.opening,.win.popin,.win.restoring{animation:n-in .16s var(--ease)}
+@keyframes n-in{from{opacity:0;transform:translateY(6px) scale(.995)}to{opacity:1;transform:none}}
+.win .bar{padding:4px 6px 4px 12px;min-height:42px;gap:8px;background:var(--surface);border-bottom:var(--n-hair)}
+.win:not(.top) .bar{opacity:1}
+.win:not(.top) .bar .ttl{color:var(--ink2)}
+.bar .ico{width:22px;height:22px;border-radius:5px}
+.bar .ico.uitile>svg{padding:20%}
+.bar .ttl{font-weight:500;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.wb{width:28px;height:28px;border-radius:6px;background:transparent;color:var(--ink2)}
+.wb:hover{background:var(--n-hover);color:var(--ink)}
+.wb svg{width:14px;height:14px;stroke-width:2}
+.wb.x:hover{background:color-mix(in srgb,#EB5757 18%,transparent);color:#EB5757}
+.win.max{border-radius:0;border-width:0}
+.body{padding:4px 28px 28px}
+.body h1{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.body h3{font-size:15px;font-weight:600}
+.body p{color:var(--ink2)}
+.rz.se::after{border-color:var(--line)}
+
+/* ---- controls ---- */
+.btn{min-height:32px;padding:0 12px;font-weight:500;font-size:14px;box-shadow:inset 0 0 0 1px color-mix(in srgb,#000 12%,transparent)}
+.btn:hover{filter:brightness(.96)}
+.btn.tonal{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.tonal:hover{background:var(--surface2);filter:none}
+.seg{background:var(--surface2);padding:2px;gap:2px;border-radius:var(--r-ctl)}
+.seg button{border-radius:4px;padding:6px 12px;font-weight:500;font-size:14px}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line),0 1px 2px rgba(15,15,15,.08)}
+.chip,.tag,.pj-chip{border-radius:4px;font-weight:500;font-size:13px}
+.search,input.search{border-radius:6px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line)}
+.uis button{border-radius:8px}.uis .lb{font-weight:600}
+
+/* ---- dock: a flat toolbar, no magnification ---- */
+.shelf{height:auto;min-height:50px;padding:5px 6px;gap:2px;bottom:calc(12px + env(safe-area-inset-bottom,0px));border-radius:10px!important;background:var(--surface);backdrop-filter:none;border:var(--n-hair);box-shadow:var(--shadow);align-items:center}
+.shelf .ico,.sbtn .ico{width:34px!important;height:34px!important}
+.sbtn{padding:4px;border-radius:8px}
+.sbtn:hover{background:var(--n-hover)}
+.sbtn.on::after{bottom:-1px;width:12px;height:3px;margin-left:-6px;border-radius:2px;background:var(--ink2)}
+.sbtn .tip,.closeall .tip{border-radius:5px;font-weight:500;background:var(--ink);color:var(--bg)}
+.launch{width:34px;height:34px;margin:4px;border-radius:8px;background:var(--surface2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.launch svg{width:18px;height:18px}
+.closeall{width:28px;height:28px;border-radius:6px;background:transparent}
+.sep{background:var(--line)}
+
+/* ---- launcher: a command palette ---- */
+.launcher{top:14vh;bottom:auto;width:min(620px,calc(100% - 24px));padding:10px;border-radius:12px;border:var(--n-hair);display:flex;flex-direction:column;max-height:min(520px,72vh)}
+.launcher.in{animation:n-pal .16s var(--ease)}
+@keyframes n-pal{from{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.98)}to{opacity:1;transform:translateX(-50%)}}
+@keyframes l-out{to{opacity:0;transform:translateX(-50%) translateY(-6px)}}
+.launcher .lhead{order:1;margin:10px 6px 6px;gap:10px}
+.launcher .lhead img{width:28px;height:28px;border-radius:6px}
+.launcher h2{font-size:13px;font-weight:600;color:var(--ink2);letter-spacing:0}
+.launcher .sub{display:none}
+.launcher .search{order:0;margin:0;padding:11px 14px;font-size:16px;border-radius:8px;background:var(--surface);box-shadow:none;border-bottom:var(--n-hair);border-radius:8px 8px 0 0}
+.launcher .lgrid{order:2;grid-template-columns:1fr;gap:1px;overflow:auto;padding:4px}
+.lgrid .dicon{flex-direction:row;justify-content:flex-start;gap:12px;padding:6px 10px;border-radius:6px;font-size:14px;text-align:left}
+.lgrid .dicon .lb{font-weight:500;font-size:14px}
+.lgrid .dicon .ico{width:28px!important;height:28px!important;border-radius:6px}
+.lgrid .dicon .ico.uitile>svg{padding:20%}
+
+/* ---- quick settings, context menu, dialogs ---- */
+.qs{top:50px;border-radius:10px;border:var(--n-hair);padding:14px;box-shadow:var(--shadow)}
+.ctx{border-radius:8px;padding:4px;border:var(--n-hair)}
+.ctx button{border-radius:5px;padding:7px 10px;font-weight:500}
+.own-card,.dx-card{border-radius:10px}
+
+/* ---- widgets: plain cards ---- */
+.wcard{border-radius:10px;border:var(--n-hair);box-shadow:0 1px 2px rgba(15,15,15,.06)}
+.wclock{width:auto;height:auto;display:block;text-align:right}
+.wclock svg{display:none}
+.wclock .t{text-align:right}
+.wclock .h{font-size:54px;font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+.wclock .d{font-weight:500}
+
+/* ---- lock screen: a page with a cover ---- */
+.lock{background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);justify-content:center;gap:6px}
+.lock::before{content:"";position:absolute;left:0;right:0;top:0;height:32%;background:linear-gradient(90deg,var(--c5),var(--c3) 50%,var(--c6));border-bottom:var(--n-hair)}
+.lock>*{position:relative}
+.lock .lt{font-weight:700;letter-spacing:-.04em;font-size:clamp(72px,14vw,140px)}
+.lock .ld{font-weight:500;font-size:18px}
+.lock img{width:78px;height:78px;border-radius:14px;margin-top:22px;box-shadow:0 0 0 4px var(--bg),0 0 0 5px var(--line)}
+.lock .ln{font-weight:600}
+.lock button.lh{margin-top:8px;padding:8px 14px;border-radius:6px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line);animation:none;color:var(--ink)}
+.lock .lfs{border-radius:6px;box-shadow:none;border:var(--n-hair)}
+
+@media (max-width:760px){
+  .win{border-radius:12px 12px 0 0}
+  .topbar{padding:0 8px}
+  .launcher{top:8vh}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* ===== Focus mode and All windows overview: structure lives in core.css, this is the Notion look ===== */
+.focus-exit{border:var(--n-hair);border-radius:6px;padding:7px 12px;background:var(--surface);color:var(--ink);font-weight:500;font-size:13px;box-shadow:var(--shadow)}
+.wb.fc[aria-pressed="true"]{background:var(--n-press)}
+.ov{background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(6px)}
+.ov-card{border-radius:10px;border:var(--n-hair);box-shadow:var(--shadow)}
+.ov-p{border-radius:6px}
+.ov-n,.ov-all{border-radius:6px;background:var(--surface2)}
+.ov-x,.ov-c{border-radius:6px}
