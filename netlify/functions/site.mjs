@@ -62,6 +62,16 @@ export function cleanSettings(s) {
   if (s?.extra && typeof s.extra === "object") { const ex = {}; for (const k of ["services", "resume", "contact", "timeline"]) { const b = cleanBlocks(s.extra[k]); if (b.length) ex[k] = b; } if (Object.keys(ex).length) o.extra = ex; }
   const rf = safeUrl(s?.resumeFile); if (rf && /^\/u\/[a-f0-9]{10}\.pdf$/.test(rf)) o.resumeFile = rf;
   const tz = str(s?.tz, 40); if (/^[A-Za-z_]+\/[A-Za-z_\-+0-9\/]+$/.test(tz)) o.tz = tz;
+  if (s?.music && Array.isArray(s.music.tracks)) { // the music corner: a few records the owner picked; anyone can play them
+    const THUMB = /^https:\/\/(i\.ytimg\.com|i\.scdn\.co|mosaic\.scdn\.co|image-cdn-[\w-]+\.spotifycdn\.com)\//;
+    const tracks = s.music.tracks.slice(0, 16).map((t) => {
+      const k = t?.k === "s" ? "s" : "y", id = str(t?.id, 60);
+      if (k === "y" && !/^[\w-]{10,60}$/.test(id)) return null; if (k === "s" && !/^[A-Za-z0-9]{22}$/.test(id)) return null;
+      const it = { k, id, type: k === "s" ? (["track", "album", "playlist", "episode", "show"].includes(t?.type) ? t.type : "track") : (t?.type === "playlist" ? "playlist" : "video"), title: str(t?.title, 100), artist: str(t?.artist, 80) };
+      const th = str(t?.thumb, 300); if (th && THUMB.test(th)) it.thumb = th; return it;
+    }).filter(Boolean);
+    o.music = { tracks };
+  }
   if (Array.isArray(s?.videos)) o.videos = s.videos.slice(0, 120).map((v) => { // the YouTube app: videos the owner picked
     const id = str(v?.id, 11); if (!/^[\w-]{11}$/.test(id)) return null;
     const it = { id, title: str(v?.title, 140), author: str(v?.author, 80) }; const note = str(v?.note, 240); if (note) it.note = note; return it;
