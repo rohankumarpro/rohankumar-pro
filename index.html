@@ -1166,7 +1166,7 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 .cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
 .cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
 </style>
-<script>try{var u=(JSON.parse(localStorage.getItem('desk')||'null')||{}).ui;if(u==='notion')u='minimal';if(u==='minimal')document.documentElement.dataset.ui='minimal';else u='material';document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/'+u+'.css"><script src="/shared/icon-set-'+u+'.js"><\/script>'+(u==='minimal'?'<script src="/assets/wallpapers.js"><\/script>':''))}catch(e){document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"><\/script>')}</script>
+<script>try{var u=window.__UI;if(!u){try{u=localStorage.getItem('siteUi')}catch(e){}}else{try{localStorage.setItem('siteUi',u)}catch(e){}}if(u==='minimal')document.documentElement.dataset.ui='minimal';else u='material';document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/'+u+'.css"><script src="/shared/icon-set-'+u+'.js"><\/script>'+(u==='minimal'?'<script src="/assets/wallpapers.js"><\/script>':''))}catch(e){document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"><\/script>')}</script>
 <noscript><link rel="stylesheet" href="/css/core.css"><link rel="stylesheet" href="/css/material.css"></noscript>
 <script type="module">import { icon } from "/shared/icons.mjs"; window.svgIcon = icon; document.dispatchEvent(new Event("icons-ready"));</script>
 </head>
@@ -2452,7 +2452,7 @@ function palette(body){
   body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{PAL.mode=b.dataset.m;body.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x===b));gen()});
   const gen=()=>{genPalette();SFX.play('pop');const sw=body.querySelector('.pal-sw');sw.classList.remove('flip');void sw.offsetWidth;sw.classList.add('flip');draw()};
   body.querySelector('.pal-gen').onclick=gen;
-  body.querySelector('.pal-all').onclick=async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.copy);toast('Copied the whole palette')}catch(x){toast(e.currentTarget.dataset.copy)}SFX.play('tap')};
+  body.querySelector('.pal-all').onclick=async e=>{const t=e.currentTarget.dataset.copy;try{await navigator.clipboard.writeText(t);toast('Copied the whole palette')}catch(x){toast(t)}SFX.play('tap')};
   const w=body.closest('.win');w.tabIndex=-1;w.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.target.matches('input,textarea,button')){e.preventDefault();gen()}});setTimeout(()=>w.focus({preventScroll:true}),60);
   draw();
 }
@@ -2670,8 +2670,14 @@ function contact(){return `<h1>Let's talk</h1><p>Have a project in mind or just 
 <div class="links">${P.links.map(l=>`<a class="btn tonal" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>`}
 
 const UIS={material:'Material UI',minimal:'Minimal UI'};
-function setUI(k){if(!UIS[k])k='material';if(k==='material')delete document.documentElement.dataset.ui;else document.documentElement.dataset.ui=k;
-  save();try{sessionStorage.setItem('uiSwitch','1')}catch(e){}toast('Switching interface…');setTimeout(()=>location.replace('/'),350)}
+function setUI(k){if(!UIS[k])k='material';
+  if(!LIVE.admin)return;
+  const s=(SITE.s||(SITE.s={hiddenApps:[]}));if(k==='minimal')s.ui='minimal';else delete s.ui;
+  toast('Saving interface…');
+  fetch('/api/site',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({settings:s})}).then(r=>{
+    if(!r.ok){toast(r.status===401?'Signed out. Interface not saved.':'Could not save the interface ('+r.status+')');return}
+    try{localStorage.setItem('siteUi',k);sessionStorage.setItem('uiSwitch','1')}catch(e){}
+    toast('Switching interface…');setTimeout(()=>location.replace('/'),350)}).catch(()=>toast('Offline. Interface not saved.'))}
 function uiPicker(){const cur=document.documentElement.dataset.ui||'material';
   return `<h3>Interface</h3><div class="uis">${Object.keys(UIS).map(k=>`<button data-ui="${k}" aria-pressed="${k===cur}" class="${k===cur?'on':''}"><span class="uip" data-sample="${k}"><i></i><b></b><u></u></span><span class="lb">${UIS[k]}</span></button>`).join('')}</div>`}
 function settings(body){
@@ -2965,7 +2971,11 @@ function applyText(){const s=SITE.s||{};
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
   document.title=`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
 function applyHidden(){HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
-async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings}}catch(e){}}
+async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings;
+  /* The owner's interface choice is for everyone. If this page was built with an older one (cached copy), reload once into the right one. */
+  const want=(d.settings&&d.settings.ui==='minimal')?'minimal':'material',have=document.documentElement.dataset.ui||'material';
+  try{localStorage.setItem('siteUi',want)}catch(e){}
+  if(want!==have){let tried='';try{tried=sessionStorage.getItem('uiSync')||''}catch(e){}if(tried!==want){try{sessionStorage.setItem('uiSync',want)}catch(e){}location.reload();return}}}}catch(e){}}
 async function siteInit(){await Promise.all([liveAuth(),siteLoad()]);applyText();applyHidden();ownerChanged()}
 /* Runs whenever the owner signs in or out: pill in the top bar, hidden apps shown dimmed or removed. */
 function ownerChanged(){
@@ -3442,8 +3452,8 @@ LS.onkeydown=e=>{if(e.key==="Enter"){const b=L.querySelector('[data-app]');if(b)
 document.addEventListener('keydown',e=>{if(e.key==="Escape")hideLauncher()});
 desk.addEventListener('pointerdown',e=>{if(!L.hidden&&!e.target.closest('#launcher,#lBtn'))hideLauncher()});
 
-function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music,ui:document.documentElement.dataset.ui||'material'}))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;if(s.ui==='minimal'||s.ui==='notion')document.documentElement.dataset.ui='minimal'}}catch(e){}}
+function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music}))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;}}catch(e){}}
 
 function tick(){
   const d=new Date();

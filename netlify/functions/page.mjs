@@ -19,7 +19,8 @@ export const handler = async (event) => {
       if (!P.mdText || P.status !== 200) return { statusCode: 404, headers: { "content-type": "text/plain; charset=utf-8" }, body: "Not found" };
       return { statusCode: 200, headers: { ...common, "content-type": "text/markdown; charset=utf-8" }, body: P.mdText };
     }
-    return { statusCode: P.status, headers: { ...common, "content-type": "text/html; charset=utf-8" }, body: renderShell(P, { preview }) };
+    const ui = (await store.get("settings", { type: "json" }))?.ui === "minimal" ? "minimal" : "material";
+    return { statusCode: P.status, headers: { ...common, "content-type": "text/html; charset=utf-8" }, body: renderShell(P, { preview, ui }) };
   } catch (e) {
     console.error("page", e);
     // If the extra search-engine content can't be built, still hand over the plain desktop so the site always opens.

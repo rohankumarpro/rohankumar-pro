@@ -62,6 +62,7 @@ export function cleanSettings(s) {
   if (s?.extra && typeof s.extra === "object") { const ex = {}; for (const k of ["services", "resume", "contact", "timeline"]) { const b = cleanBlocks(s.extra[k]); if (b.length) ex[k] = b; } if (Object.keys(ex).length) o.extra = ex; }
   const rf = safeUrl(s?.resumeFile); if (rf && /^\/u\/[a-f0-9]{10}\.pdf$/.test(rf)) o.resumeFile = rf;
   const tz = str(s?.tz, 40); if (/^[A-Za-z_]+\/[A-Za-z_\-+0-9\/]+$/.test(tz)) o.tz = tz;
+  if (s?.ui === "minimal") o.ui = "minimal"; // the interface every visitor gets; Material is the default and is stored as no value
   if (s?.gbAuto === true) o.gbAuto = true; // guestbook notes publish without waiting for approval
   o.hiddenApps = (Array.isArray(s?.hiddenApps) ? s.hiddenApps : [])
     .map((x) => str(x, 30)).filter((x) => /^[a-z0-9_-]+$/.test(x) && !KEEP.includes(x)).slice(0, 40);

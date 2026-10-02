@@ -41,6 +41,7 @@ export function headHtml(P, { preview } = {}) {
 export function renderShell(P, opts = {}) {
   let html = rawIndex();
   if (!html) return `<!doctype html><title>${esc(P.title)}</title><p>${esc(P.desc)}</p>`;
+  if (opts.ui) html = html.replace("<head>", `<head><script>window.__UI=${JSON.stringify(opts.ui)}</script>`);
   html = html.replace(/<!--seo:head-->[\s\S]*?<!--\/seo:head-->/, () => `<!--seo:head-->\n${headHtml(P, opts)}\n<!--/seo:head-->`);
   html = html.replace(/<!--seo:body-->[\s\S]*?<!--\/seo:body-->/, () => `<!--seo:body--><div id="seo">${P.body || ""}</div><!--/seo:body-->`);
   return html;
