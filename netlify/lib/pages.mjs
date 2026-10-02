@@ -15,7 +15,7 @@ export const APP_PAGES = {
   about: { path: "/about", title: "About", index: true }, projects: { path: "/projects", title: "Projects", index: true }, journal: { path: "/journal", title: "Journal", index: true },
   links: { path: "/links", title: "Links", index: true }, resume: { path: "/resume", title: "Resume", index: true }, contact: { path: "/contact", title: "Contact", index: true },
   timeline: { path: "/timeline", title: "Timeline", index: true }, photos: { path: "/photos", title: "Photos", index: true }, notes: { path: "/notes", title: "Notes", index: true },
-  guestbook: { path: "/guestbook", title: "Guestbook", index: true }, content: { path: "/content", title: "Content", index: true },
+  guestbook: { path: "/guestbook", title: "Guestbook", index: true }, content: { path: "/youtube", title: "YouTube", index: true },
   services: { path: "/services", title: "Services", index: true }, book: { path: "/book", title: "Book a call", index: true },
   messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, docs: { path: "/docs", title: "Docs", index: true }, settings: { path: "/settings", title: "Settings", index: false },
   calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
@@ -168,7 +168,12 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
   }
   if (path === "/book") return finish({ title: `Book a call with ${pr.name}`, desc: `Pick a time for a free intro call with ${pr.name}.`, app: "book", noindex: !pr.booking,
     body: `<h1>Book a call</h1><p>${pr.booking ? `<a href="${esc(pr.booking)}">Choose a time</a>` : ""}</p>`, ld: [crumbs([home, { name: "Book a call", path }])] });
-  if (path === "/content") return finish({ title: `Content — ${pr.name}`, desc: `Videos and reels by ${pr.name}.`, app: "content", noindex: true, body: `<h1>Content</h1><p>Videos and reels by ${esc(pr.name)}.</p>` });
+  if (path === "/youtube" || path === "/content") {
+    const vids = Array.isArray(pr.settings.videos) ? pr.settings.videos : [];
+    const lis = vids.map((v) => `<li><a href="https://www.youtube.com/watch?v=${esc(v.id)}" rel="noopener">${esc(v.title || "Video")}</a>${v.author ? ` — ${esc(v.author)}` : ""}${v.note ? `<br>${esc(v.note)}` : ""}</li>`).join("");
+    return finish({ title: `YouTube — ${pr.name}`, desc: `Videos by ${pr.name} on YouTube.`, app: "content", noindex: hidden.has("content") || !vids.length, body: `<h1>YouTube</h1><p>Videos by ${esc(pr.name)}.</p>${lis ? `<ul>${lis}</ul>` : ""}`,
+      mdText: `# YouTube\n\n${vids.map((v) => `- [${v.title || "Video"}](https://www.youtube.com/watch?v=${v.id})${v.author ? " — " + v.author : ""}`).join("\n")}\n` });
+  }
 
   if (path === "/projects" || path.startsWith("/projects/")) {
     const idx = await projectIndex(store), pub = idx.filter((m) => m.status === "published");

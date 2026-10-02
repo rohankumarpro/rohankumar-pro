@@ -1,5 +1,6 @@
 // What a real desktop has that this one was missing: search, notifications, window snapping, installable app,
 // text size, a services page, a booking window, testimonials and the owner's local time.
+import { BRANDS } from "/shared/brands.mjs";
 import { h, $, $$, esc, api, isAdmin, toast, mobile, Up } from "/js/lib.mjs";
 import { R, Install, registerApp, lazyApp } from "/js/os-ext.mjs";
 import { slugify, stripTags } from "/shared/blocks.mjs";
@@ -89,7 +90,11 @@ const GO = { a: "about", p: "projects", j: "journal", n: "notes", d: "docs", l: 
 const topWin = () => { const w = (window.Router || {}).top && Router.top(); return w || null; };
 const winId = (w) => w && w.dataset.app;
 function snapWin(w, side) {
-  if (!w || mobile()) return; w.classList.add("resizing-anim");
+  if (!w || mobile()) return;
+  /* left and right now tile: the window takes that side of the screen and the rest is a slot you can fill (see tiling.mjs) */
+  if ((side === "l" || side === "r") && window.Tiles) { window.Tiles.tile(w.dataset.app, { kind: "edge", side: side === "l" ? "left" : "right" }); return; }
+  if (window.Tiles && w.classList.contains("tiled")) window.Tiles.float(w.dataset.app);
+  w.classList.add("resizing-anim");
   if (side === "max") w.classList.toggle("max");
   else if (side === "restore") { w.classList.remove("max"); }
   else { w.classList.remove("max"); const a = { top: 48, h: innerHeight - 140 }; w.style.top = a.top + "px"; w.style.height = a.h + "px"; w.style.width = innerWidth / 2 - 12 + "px"; w.style.left = (side === "l" ? 8 : innerWidth / 2 + 4) + "px"; }
@@ -205,7 +210,7 @@ function snapping() {
   const wins = $("#wins"); if (!wins) return;
   let prev = null, st = null;
   const area = () => ({ top: 48, h: innerHeight - 140 });
-  const zone = (x, y) => (x < 10 ? "l" : x > innerWidth - 10 ? "r" : y < 52 ? "t" : null);
+  const zone = (x, y) => (y < 52 ? "t" : null); // left and right are tiling drop zones now
   const show = (z) => {
     if (!z) { prev && prev.remove(); prev = null; return; }
     if (!prev) { prev = h("div", { class: "snap-prev" }); document.body.append(prev); }
@@ -278,7 +283,7 @@ applyScale();
 /* ================= new apps: Services, Book a call ================= */
 const ART_ADD = {
   docs: `<rect class="l1" x="22" y="22" width="40" height="52" rx="9" fill="${IBD}"/><rect class="up" x="36" y="28" width="42" height="50" rx="9" fill="${IB}"/><path d="M46 45h22M46 56h22M46 67h12" stroke="#fff" stroke-width="4.5" stroke-linecap="round" fill="none"/>`,
-  content: `<rect class="l1" x="20" y="30" width="60" height="42" rx="13" fill="${IR}"/><path class="rise" d="M43 41v20l17-10z" fill="#fff"/>`,
+  content: `<path class="rise" transform="translate(13 21) scale(3)" d="${BRANDS.youtube.d}" fill="#FF0000"/>`, // the official YouTube play button
   documents: `<rect class="l1" x="20" y="30" width="60" height="44" rx="11" fill="${IG}"/><path class="up" d="M24 34 62 21a4 4 0 0 1 5.4 3.8V32z" fill="#fff"/><rect x="54" y="46" width="28" height="18" rx="9" fill="#fff"/><circle class="rise" cx="65" cy="55" r="3.6" fill="${IK}"/>`,
   services: `<rect class="l1" x="26" y="38" width="48" height="34" rx="8" fill="${IG}"/><path class="up" d="M41 38v-5a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v5" fill="none" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect x="26" y="52" width="48" height="4" fill="#2a8a45"/><circle class="rise" cx="50" cy="56" r="5" fill="#fff"/>`,
   book: `<rect class="l1" x="24" y="30" width="52" height="46" rx="8" fill="${IR}"/><rect x="24" y="44" width="52" height="32" rx="7" fill="#fff"/><path class="up" d="M36 24v12M64 24v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><g class="dots" fill="${IR}"><circle cx="38" cy="56" r="3.5"/><circle cx="50" cy="56" r="3.5"/><circle cx="62" cy="56" r="3.5"/><circle cx="38" cy="67" r="3.5"/><circle cx="50" cy="67" r="3.5"/></g>`,

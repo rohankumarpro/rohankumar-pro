@@ -11,7 +11,7 @@ export const R = {
   take(id) { const p = R.pending; if (p && p.id === id && !p.used) { p.used = true; return p.slug; } return ""; },
   handlers: {},   // app id -> (body, slug, quiet) => shows that item, or the app's main view when slug is empty
   applying: false,
-  alias: { wallet: "documents" }, // the Wallet window keeps its old internal name "documents" so saved settings still work
+  alias: { wallet: "documents", youtube: "content" }, // the Wallet window keeps its old internal name "documents" so saved settings still work
   pathFor(id, slug) { const n = Object.keys(R.alias).find((k) => R.alias[k] === id) || id; return "/" + n + (slug ? "/" + slug : ""); },
   parse(path) {
     const seg = decodeURIComponent(path).replace(/^\/+|\/+$/g, "").split("/");
@@ -84,6 +84,7 @@ lazyApp("journal", "/js/app-journal.mjs", "journalApp");
 lazyApp("notes", "/js/app-notes.mjs", "notesApp");
 lazyApp("about", "/js/app-about.mjs", "aboutApp");
 lazyApp("resume", "/js/app-resume.mjs", "resumeApp");
+lazyApp("content", "/js/app-youtube.mjs", "youtubeApp");
 /* pages that get a free-form editor under their fixed content */
 export function enrichApp(id, key) {
   const a = APPS.find((x) => x.id === id); if (!a) return; const prev = a.render;
