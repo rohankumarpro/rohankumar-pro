@@ -320,7 +320,10 @@
 .bd-pgo:hover{background:var(--bd-card);color:var(--primary)}
 .bd-stage.far .bd-pgo{display:none}
 /* writing in place */
-.bd-it[data-t="page"].editing{cursor:auto}
+.bd-it[data-t="page"].editing{cursor:auto;height:auto!important}
+/* while writing, the card grows with the text (up to about a page tall), then scrolls inside */
+.bd-it[data-t="page"].editing .bd-pg{height:auto;min-height:var(--ph);max-height:max(var(--ph),780px)}
+.bd-it[data-t="page"].editing .bd-pgx{flex:1 1 auto}
 .bd-it[data-t="page"].editing .bd-pg{box-shadow:var(--bd-e3),0 0 0 2px var(--primary)}
 /* the editor's + and drag handles sit in a gutter at the left: give them room inside the card */
 .bd-it.editing .bd-pgx{overflow:auto;-webkit-mask-image:none;mask-image:none;margin-left:-20px;padding-right:2px;user-select:text;-webkit-user-select:text;overscroll-behavior:contain;scrollbar-width:thin}

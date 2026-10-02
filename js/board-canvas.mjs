@@ -210,6 +210,8 @@ export function createCanvas(host, opts = {}) {
   let R = stage.getBoundingClientRect();
   const rect = () => (R = stage.getBoundingClientRect());
   const ro = new ResizeObserver(() => { rect(); schedule("view"); }); ro.observe(stage);
+  // the board only moves by its own pan and zoom: never let the browser scroll it (an editor scrolling to its caret would shift everything)
+  for (const el of [stage, host]) el.addEventListener("scroll", () => { if (el.scrollTop || el.scrollLeft) { el.scrollTop = 0; el.scrollLeft = 0; } });
 
   /* ---------- coordinates ---------- */
   const toW = (cx, cy) => ({ x: (cx - R.left - S.view.x) / S.view.z, y: (cy - R.top - S.view.y) / S.view.z });
@@ -302,6 +304,7 @@ export function createCanvas(host, opts = {}) {
     el.style.translate = `${it.x}px ${it.y}px`;
     el.style.width = it.w + "px";
     el.style.height = autoH(it) ? "" : it.h + "px";
+    if (it.t === "page") el.style.setProperty("--ph", it.h + "px");
     el.style.zIndex = String(Math.round(it.z || 0));
   }
   function paint(it) {
@@ -913,7 +916,7 @@ export function createCanvas(host, opts = {}) {
     if (S.editing && S.editing !== id) finishEdit();
     if (it.t === "page") {
       if (!opts.editPage || S.editing === id) return;
-      S.editing = id; el.classList.add("editing"); select([id]); schedule("ov");
+      S.editing = id; S.freshPage = fresh ? id : null; el.classList.add("editing"); select([id]); schedule("ov");
       const keys = (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(".rte-pop")) { e.preventDefault(); e.stopPropagation(); finishEdit(); stage.focus({ preventScroll: true }); } };
       el.addEventListener("keydown", keys); S.pageKeys = keys;
       Promise.resolve(opts.editPage(it, el, { at: at || (fresh ? "title" : "body") })).then((hd) => { if (S.editing === id) { S.pageEd = hd; if (!hd) finishEdit(); } else if (hd) hd.finish(); });
@@ -955,7 +958,15 @@ export function createCanvas(host, opts = {}) {
     S.editing = null;
     const el = S.els.get(id), it = S.items.get(id);
     if (it && it.t === "page") {
-      if (el) { el.classList.remove("editing"); if (S.pageKeys) el.removeEventListener("keydown", S.pageKeys); }
+      // a page that was just made and left with no title and nothing written goes away by itself, like an empty text box
+      const blank = S.freshPage === id && !(it.title || "").trim() && el && [...el.querySelectorAll(".rte-doc .rb-e")].every((e) => !e.textContent.trim()) && !el.querySelector(".rte-doc img, .rte-doc hr, .rte-doc table, .rte-doc iframe, .rte-doc .rb-cb");
+      S.freshPage = null;
+      if (blank) { const hd = S.pageEd; S.pageEd = null; if (S.pageKeys) el.removeEventListener("keydown", S.pageKeys); S.pageKeys = null; const gone = () => { if (S.items.has(id) && S.editing !== id) { remove([id]); done(); } }; if (hd) hd.finish().then(gone, gone); else gone(); schedule("ov"); return; }
+      if (el) {
+        const grown = Math.round(el.offsetHeight); // the card grew with the writing: keep that size
+        el.classList.remove("editing"); if (S.pageKeys) el.removeEventListener("keydown", S.pageKeys);
+        if (grown > it.h + 4) { begin(); touchI(id); it.h = grown; place(el, it); mark(id); done(); linksOf(id).forEach((l) => schedule("link", l.id)); }
+      }
       const hd = S.pageEd; S.pageEd = null; S.pageKeys = null;
       const redraw = () => { const cur = S.items.get(id); if (cur && S.editing !== id) paint(cur); };
       if (hd) hd.finish().then(redraw, redraw); else redraw();
@@ -1118,9 +1129,13 @@ export function createCanvas(host, opts = {}) {
   host.addEventListener("copy", (e) => { if (!owner || isEditable(e.target) || !S.sel.size) return; const t = copySel(false); if (t) { e.clipboardData.setData("text/plain", t); e.preventDefault(); } });
   host.addEventListener("cut", (e) => { if (!owner || isEditable(e.target) || !S.sel.size) return; const t = copySel(true); if (t) { e.clipboardData.setData("text/plain", t); e.preventDefault(); } });
   host.addEventListener("paste", (e) => { if (!owner || isEditable(e.target)) return; e.preventDefault(); handleData(e.clipboardData, pasteAt()); });
-  stage.addEventListener("dragover", (e) => { if (!owner) return; e.preventDefault(); e.dataTransfer.dropEffect = "copy"; stage.classList.add("dropping"); });
+  // text dragged inside a card being written in belongs to that card's editor: the board neither takes it nor makes a sticky of it
+  let innerDrag = false;
+  stage.addEventListener("dragstart", () => { innerDrag = true; }); document.addEventListener("dragend", () => { innerDrag = false; }, true);
+  const editorDrop = (e) => innerDrag || !!(e.target.closest && e.target.closest('[contenteditable="true"]'));
+  stage.addEventListener("dragover", (e) => { if (!owner || editorDrop(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = "copy"; stage.classList.add("dropping"); });
   stage.addEventListener("dragleave", (e) => { if (e.target === stage) stage.classList.remove("dropping"); });
-  stage.addEventListener("drop", (e) => { if (!owner) return; e.preventDefault(); stage.classList.remove("dropping"); rect(); handleData(e.dataTransfer, toW(e.clientX, e.clientY)); });
+  stage.addEventListener("drop", (e) => { if (!owner) return; if (editorDrop(e)) { innerDrag = false; stage.classList.remove("dropping"); return; } e.preventDefault(); stage.classList.remove("dropping"); rect(); handleData(e.dataTransfer, toW(e.clientX, e.clientY)); });
   function handleData(dt, at) {
     if (!dt) return;
     const files = [...(dt.files || [])];
@@ -1378,6 +1393,8 @@ export function createCanvas(host, opts = {}) {
     select, elOf: (id) => S.els.get(id), rectOf(id) { const it = S.items.get(id); if (!it) return null; rect(); const p = toS(it.x, it.y); return { left: R.left + p.x, top: R.top + p.y, width: it.w * S.view.z, height: it.h * S.view.z }; },
     stageRect: () => rect(),
     focus() { if (!S.inactive) stage.focus({ preventScroll: true }); },
+    // keep a rectangle on screen (in screen pixels), panning the board a little if it runs off the edge
+    reveal(r, pad = 60) { rect(); let dx = 0, dy = 0; if (r.bottom > R.bottom - pad - 70) dy = R.bottom - pad - 70 - r.bottom; else if (r.top < R.top + pad) dy = R.top + pad - r.top; if (r.right > R.right - pad) dx = R.right - pad - r.right; else if (r.left < R.left + pad) dx = R.left + pad - r.left; if (dx || dy) { S.view.x += dx; S.view.y += dy; applyView(); } }, // applied at once, so the next caret position is measured on the moved board
     // live sync: changes another device saved. Whatever this device is editing, dragging or has not sent yet is left alone
     // (it is about to be saved and will be the newer version).
     applyRemote(r) {

@@ -105,10 +105,10 @@ export function loadEditor() {
   }
   return edP;
 }
-export async function makeEditor(host, { blocks, onChange, placeholder, onStatus } = {}) {
+export async function makeEditor(host, { blocks, onChange, placeholder, onStatus, escLeaves } = {}) {
   const { createEditor } = await loadEditor();
   return createEditor(host, {
-    blocks, onChange, placeholder, onStatus,
+    blocks, onChange, placeholder, onStatus, escLeaves,
     upload: (f) => (f.type === "application/pdf" ? Up.file(f) : Up.image(f)),
     library: () => Up.list(), onError: (m) => toast(m),
   });

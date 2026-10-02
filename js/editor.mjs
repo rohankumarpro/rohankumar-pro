@@ -301,7 +301,7 @@ export function createEditor(host, opts = {}) {
     E.dirty = true;
     clearTimeout(E.timers.h); E.timers.h = setTimeout(() => snap(), now ? 0 : 450);
     clearTimeout(E.timers.c);
-    E.timers.c = setTimeout(() => { if (opts.onChange) opts.onChange(blocks()); }, now ? 60 : 700);
+    E.timers.c = setTimeout(() => { E.timers.c = 0; if (opts.onChange) opts.onChange(blocks()); }, now ? 60 : 700);
     renumber();
   }
   function undo() { clearTimeout(E.timers.h); snap(); if (E.hi <= 0) return; E.hi--; const h0 = E.hist[E.hi]; render(JSON.parse(h0.j), true); restoreSel(h0.s || E.hist[E.hi + 1]?.s); touch(true); }
@@ -911,7 +911,7 @@ export function createEditor(host, opts = {}) {
     if (k === "ArrowDown" && !e.shiftKey && !e.metaKey && !e.altKey && onLastLine(ed)) { const nx = nextAny(el); if (nx) { e.preventDefault(); focusBlock(nx, "start"); } return; }
     if (k === "ArrowLeft" && !e.shiftKey && atStart(ed)) { const pv = prevAny(el); if (pv) { e.preventDefault(); focusBlock(pv, "end"); } return; }
     if (k === "ArrowRight" && !e.shiftKey && atEnd(ed)) { const nx = nextAny(el); if (nx) { e.preventDefault(); focusBlock(nx, "start"); } return; }
-    if (k === "Escape") { e.preventDefault(); selectBlock(el); }
+    if (k === "Escape" && !opts.escLeaves) { e.preventDefault(); selectBlock(el); } // escLeaves: Esc goes to whoever holds the editor (a card on a board stops editing)
   }
   function keySelected(e, el) {
     const k = e.key;
@@ -926,7 +926,7 @@ export function createEditor(host, opts = {}) {
     const el = rbOf(ta), k = e.key;
     if (k === "Tab") { e.preventDefault(); document.execCommand("insertText", false, "  "); return; }
     if (k === "Backspace" && !ta.value) { e.preventDefault(); removeBlock(el); return; }
-    if (k === "Escape") { e.preventDefault(); selectBlock(el); return; }
+    if (k === "Escape") { if (!opts.escLeaves) { e.preventDefault(); selectBlock(el); } return; }
     if (k === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); const n = el.nextElementSibling?.classList.contains("rb") ? el.nextElementSibling : insertAfter(el, { t: "p", h: "" }, false); focusBlock(n, "start"); return; }
     if (k === "ArrowUp" && ta.selectionStart === 0 && !ta.value.slice(0, 0).includes("\n")) { const pv = prevAny(el); if (pv && ta.selectionStart === 0 && ta.selectionEnd === 0) { e.preventDefault(); focusBlock(pv, "end"); } return; }
     if (k === "ArrowDown" && ta.selectionStart === ta.value.length) { const nx = nextAny(el); if (nx) { e.preventDefault(); focusBlock(nx, "start"); } }
@@ -1093,7 +1093,8 @@ export function createEditor(host, opts = {}) {
     setBlocks(arr) { render(arr); },
     focus(where = "end") { const l = textBlocks(); const t = where === "start" ? l[0] : l[l.length - 1]; if (t) focusBlock(t, where); },
     undo, redo,
-    flush() { clearTimeout(E.timers.c); clearTimeout(E.timers.h); snap(); return blocks(); },
+    // flush(true): a change still waiting to be reported is reported now, so whoever flushes before saving sees it
+    flush(report) { const pend = !!E.timers.c; clearTimeout(E.timers.c); E.timers.c = 0; clearTimeout(E.timers.h); snap(); const b = blocks(); if (report && pend && opts.onChange) opts.onChange(b); return b; },
     uploading: () => E.uploading,
     isEmpty() { const b = blocks(); return !b.length || (b.length === 1 && b[0].t === "p" && !b[0].h); },
     insertImages(files) { const l = flat(); addImages([...files], l[l.length - 1]); },

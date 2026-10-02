@@ -365,7 +365,7 @@ export async function boardsApp(body, key) {
       if (r.ok) {
         Object.assign(b, r.data.board);
         const sdoc = r.data.doc, newer = !cached || (sdoc.rev || 0) >= (cached.rev || 0); // never let an older copy replace a newer one this device already saw saved
-        if (newer && (!cached || JSON.stringify(cached.items) !== JSON.stringify(sdoc.items) || JSON.stringify(cached.links) !== JSON.stringify(sdoc.links))) cv.load(sdoc, cv.view.z ? cv.view : view);
+        if (newer && (!cached || JSON.stringify(cached.items) !== JSON.stringify(sdoc.items) || JSON.stringify(cached.links) !== JSON.stringify(sdoc.links))) cv.load(sdoc, cached ? cv.view : view); // first time on this device: no view yet, so the board is fitted to the screen
         if (newer) { try { if (JSON.stringify(sdoc).length < 1_500_000) ls.set("bdDoc:" + id, sdoc); } catch {} }
         drawTop();
       }

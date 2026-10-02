@@ -237,7 +237,7 @@ export function pageWindows(layer, ctx) {
     w.blocks = blocks;
     const host = w.bodyEl; host.innerHTML = "";
     if (w.owner) {
-      w.ed = await makeEditor(host, { blocks, placeholder: w.inline ? "Type '/' for blocks…" : "Type '/' for blocks, or just start writing…", onChange: () => touch(w), onStatus: (s) => { if (s) status(w, s); } });
+      w.ed = await makeEditor(host, { blocks, escLeaves: w.inline, placeholder: w.inline ? "Type '/' for blocks…" : "Type '/' for blocks, or just start writing…", onChange: () => touch(w), onStatus: (s) => { if (s) status(w, s); } });
       if (!W.has(w.id) || W.get(w.id) !== w) { try { w.ed.destroy(); } catch {} return; }
       if (w.focusAt === "body") w.ed.focus("end");
       else if (fresh || !(item(w)?.title)) setTimeout(() => w.titleEl?.focus(), 80);
@@ -275,8 +275,9 @@ export function pageWindows(layer, ctx) {
     await api("/api/boards?page=" + id, { method: "PUT", body: { blocks, base: 0 } });
     toast(msg);
   }
-  async function flushAll() { await Promise.all([...W.values()].map((w) => (w.saveT || w.dirty ? save(w) : true))); }
-  function beacon() { for (const w of W.values()) if (w.dirty && w.ed) api("/api/boards?page=" + w.id, { method: "PUT", body: { blocks: w.ed.getBlocks(), base: w.updated }, keepalive: true }); }
+  const report = (w) => { if (w.ed) { try { w.ed.flush(true); } catch {} } }; // writing from the last moment counts too
+  async function flushAll() { await Promise.all([...W.values()].map((w) => (report(w), w.saveT || w.dirty ? save(w) : true))); }
+  function beacon() { for (const w of W.values()) if ((report(w), w.dirty) && w.ed) api("/api/boards?page=" + w.id, { method: "PUT", body: { blocks: w.ed.getBlocks(), base: w.updated }, keepalive: true }); }
 
   /* ---------- window actions ---------- */
   async function minimize(id) {
@@ -296,7 +297,7 @@ export function pageWindows(layer, ctx) {
   async function close(id) {
     const w = W.get(id); if (!w) return;
     if (w.inline) return w.finish();
-    if (w.ed) { try { w.ed.flush(); } catch {} }
+    if (w.ed) { try { w.ed.flush(true); } catch {} }
     if (w.saveT || w.dirty) await save(w);
     W.delete(id);
     if (w.docked) await w.el.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(24px)" }], { duration: 160, easing: "cubic-bezier(.2,0,0,1)" }).finished.catch(() => {});
@@ -340,7 +341,7 @@ export function pageWindows(layer, ctx) {
     const w = { id: it.id, el: card, inline: true, ed: null, blocks: [], updated: 0, saveT: 0, dirty: false, owner: true, saving: false, bodyEl, titleEl: ta, stEl, footEl: null, focusAt: at === "title" ? "title" : "body" };
     w.finish = async () => {
       if (W.get(it.id) !== w) return;
-      if (w.ed) { try { w.ed.flush(); } catch {} }
+      if (w.ed) { try { w.ed.flush(true); } catch {} }
       if (w.saveT || w.dirty) await save(w);
       W.delete(it.id);
       if (w.ed) { try { w.ed.destroy(); } catch {} }
@@ -348,6 +349,15 @@ export function pageWindows(layer, ctx) {
     };
     W.set(it.id, w);
     if (at === "title") setTimeout(() => { ta.focus(); ta.select(); }, 30);
+    // keep the line being written in view: scroll inside the card, and pan the board if the card runs off screen
+    const keepCaret = () => requestAnimationFrame(() => {
+      const sl = getSelection(); if (!sl.rangeCount || !bodyEl.contains(sl.anchorNode)) return;
+      let r = sl.getRangeAt(0).getBoundingClientRect(); if (!r.height) { const n = sl.anchorNode.nodeType === 1 ? sl.anchorNode : sl.anchorNode.parentElement; r = n.getBoundingClientRect(); }
+      const c = bodyEl.getBoundingClientRect();
+      if (r.bottom > c.bottom - 8) bodyEl.scrollTop += r.bottom - c.bottom + 28; else if (r.top < c.top + 4) bodyEl.scrollTop -= c.top - r.top + 28;
+      const r2 = sl.getRangeAt(0).getBoundingClientRect(); if (r2.height) ctx.canvas()?.reveal(r2);
+    });
+    bodyEl.addEventListener("input", keepCaret); bodyEl.addEventListener("keyup", (e) => { if (/^(Enter|Arrow|Page|Home|End|Backspace)/.test(e.key)) keepCaret(); });
     await loadBody(w, false);
     return w;
   }
