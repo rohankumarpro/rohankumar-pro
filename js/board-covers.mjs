@@ -45,18 +45,18 @@ export const COVERS = {
 };
 export const coverCss = (c) => (!c ? "" : c.k && COVERS[c.k] ? `${COVERS[c.k].css} center/cover` : "");
 
-// Sticky and section colours: soft fills (light and dark) and a strong accent for lines and labels.
+// Sticky and section colours: soft fills (dark ones are Google Keep's dark palette) and a strong accent for lines and labels.
 export const COLORS = {
-  yellow: { name: "Yellow", fill: "#FFF0A8", dark: "#5B5121", ink: "#F9AB00" },
-  orange: { name: "Orange", fill: "#FFD9B8", dark: "#6B452A", ink: "#FA7B17" },
-  red: { name: "Red", fill: "#FFCDC9", dark: "#6E3530", ink: "#EA4335" },
-  pink: { name: "Pink", fill: "#FDD3EA", dark: "#6A3452", ink: "#E8458B" },
-  purple: { name: "Purple", fill: "#E6DAFF", dark: "#4A3D70", ink: "#A142F4" },
-  blue: { name: "Blue", fill: "#D3E3FD", dark: "#2E4A72", ink: "#4285F4" },
-  teal: { name: "Teal", fill: "#C4EEE8", dark: "#22524D", ink: "#12B5CB" },
-  green: { name: "Green", fill: "#D5F1D0", dark: "#2D532F", ink: "#34A853" },
-  grey: { name: "Grey", fill: "#E8EAED", dark: "#3A3E46", ink: "#80868B" },
-  white: { name: "White", fill: "#FFFFFF", dark: "#2B2F37", ink: "#5F6368" },
+  yellow: { name: "Yellow", fill: "#FFF0A8", dark: "#7C4A03", ink: "#F9AB00" },
+  orange: { name: "Orange", fill: "#FFD9B8", dark: "#692B17", ink: "#FA7B17" },
+  red: { name: "Red", fill: "#FFCDC9", dark: "#77172E", ink: "#EA4335" },
+  pink: { name: "Pink", fill: "#FDD3EA", dark: "#6C394F", ink: "#E8458B" },
+  purple: { name: "Purple", fill: "#E6DAFF", dark: "#472E5B", ink: "#A142F4" },
+  blue: { name: "Blue", fill: "#D3E3FD", dark: "#284255", ink: "#4285F4" },
+  teal: { name: "Teal", fill: "#C4EEE8", dark: "#0C625D", ink: "#12B5CB" },
+  green: { name: "Green", fill: "#D5F1D0", dark: "#264D3B", ink: "#34A853" },
+  grey: { name: "Grey", fill: "#E8EAED", dark: "#3C3F43", ink: "#80868B" },
+  white: { name: "White", fill: "#FFFFFF", dark: "#2D2E31", ink: "#5F6368" },
 };
 export const STICKY = ["yellow", "orange", "red", "pink", "purple", "blue", "teal", "green", "grey", "white"];
 export const LINE = ["grey", "blue", "red", "yellow", "green", "purple", "pink", "orange", "teal"];

@@ -134,7 +134,7 @@ document.addEventListener("keydown", (e) => {
     if (used) { e.preventDefault(); e.stopPropagation(); }
     return;
   }
-  if (typing || mod) return;
+  if (typing || mod || ae?.closest?.("[data-own-keys]")) return; // an app that handles its own single-key shortcuts (Boards)
   if (chord && Date.now() - chord < 1600) { chord = 0; const id = GO[k]; if (id) { e.preventDefault(); openApp(id); } return; }
   if (k === "/" && !e.shiftKey) { e.preventDefault(); Spot.show(); }
   else if (k === "?" || (k === "/" && e.shiftKey)) { e.preventDefault(); shortcuts(); }

@@ -3,7 +3,7 @@
 import { h, $, $$, esc, api, isAdmin, toast, mobile, confirmBox } from "/js/lib.mjs";
 import { R } from "/js/os-ext.mjs";
 import { ICONS } from "/shared/icons.mjs";
-import { createCanvas, menu, closeMenu, I } from "/js/board-canvas.mjs";
+import { createCanvas, menu, closeMenu, I, shortcuts } from "/js/board-canvas.mjs";
 import { pageWindows, download } from "/js/board-page.mjs";
 import { COVERS, coverCss, COLORS } from "/js/board-covers.mjs";
 
@@ -14,6 +14,8 @@ const rid = () => Math.random().toString(36).slice(2, 8) + Math.random().toStrin
 const name = (b) => (b && b.title && b.title.trim()) || "Untitled board";
 const ago = (ts) => { if (!ts) return ""; const s = (Date.now() - ts) / 1000; if (s < 60) return "just now"; if (s < 3600) return Math.round(s / 60) + " min ago"; if (s < 86400) return Math.round(s / 3600) + " h ago"; if (s < 86400 * 7) return Math.round(s / 86400) + " d ago"; return new Date(ts).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }); };
 const COVER_KEYS = Object.keys(COVERS);
+const BOARD_ICONS = ["sparkles", "bulb", "palette", "video", "pencil", "rocket", "target", "camera", "music", "brain", "star", "heart", "flame", "leaf", "globe", "chart", "calendar", "book", "home", "coffee"].filter((n) => ICONS[n]);
+const STATUS = { saved: ["cloud-done", "All changes saved"], saving: ["cloud-up", "Saving…"], unsaved: ["cloud", "Saving soon…"], offline: ["cloud-off", "Offline. Your changes are kept on this device and saved when you're back online."] };
 const PV = { page: "var(--surface)", image: "var(--bd-img)", frame: "transparent", link: "var(--surface)", text: "transparent" };
 
 /* ---------- templates: a quick start for the kinds of boards made most ---------- */
@@ -70,29 +72,32 @@ export async function boardsApp(body, key) {
   }
   body.innerHTML = `<div class="ba bdc" data-side="${ls.get("baSide", !mobile()) ? "on" : "off"}"><aside class="ba-side" aria-label="Boards"></aside><section class="ba-main"></section><div class="ba-scrim"></div></div>`;
   const root = $(".ba", body), side = $(".ba-side", root), main = $(".ba-main", root);
-  const A = { boards: [], cur: null, cv: null, pw: null, view: "home", status: "saved" };
+  const A = { boards: [], cur: null, cv: null, pw: null, view: "home", status: "saved", q: "" };
   R.handlers.boards = (b, k) => (k ? openBoard(k, "replace") : home("replace"));
 
   async function load() { const r = await api("/api/boards"); if (r.ok) A.boards = r.data.boards; else if (!A.boards.length) A.boards = ls.get("baList", []); if (r.ok) ls.set("baList", A.boards.map((b) => ({ ...b, preview: b.preview }))); return r.ok; }
   const live = () => A.boards.filter((b) => !b.trashed).sort((a, b) => (b.fav - a.fav) || (b.updated - a.updated));
+  const found = () => { const q = A.q.trim().toLowerCase(); return q ? live().filter((b) => name(b).toLowerCase().includes(q)) : live(); };
   const byId = (id) => A.boards.find((b) => b.id === id);
 
   /* ----- sidebar ----- */
   function drawSide() {
-    const list = live(), bin = A.boards.filter((b) => b.trashed).length;
-    side.innerHTML = `<div class="ba-sh"><span class="ba-mark" aria-hidden="true">${markSvg()}</span><b>Boards</b><button class="ba-ib" data-tg title="Hide the sidebar" aria-label="Hide the sidebar">${I("panel-left", 18)}</button></div>
-      <button class="ba-new" data-new>${I("plus", 18)}<span>New board</span></button>
+    const list = found(), bin = A.boards.filter((b) => b.trashed).length;
+    side.innerHTML = `<div class="ba-sh"><button class="ba-new" data-new>${I("plus", 20)}<span>New board</span></button><button class="ba-ib" data-tg title="Hide the sidebar" aria-label="Hide the sidebar">${I("panel-left", 18)}</button></div>
+      <label class="ba-search">${I("search", 18)}<input type="search" placeholder="Search boards" aria-label="Search boards" autocomplete="off" value="${esc(A.q)}"></label>
       <nav class="ba-nav"><button class="ba-nv${A.view === "home" ? " on" : ""}" data-home>${I("home", 18)}<span>Home</span></button></nav>
-      <div class="ba-sec">Your boards</div>
-      <div class="ba-list" role="list">${list.map((b) => `<button class="ba-row${A.cur && A.cur.id === b.id ? " on" : ""}" role="listitem" data-open="${b.id}"><span class="ba-th" style="${b.cover ? `background:${coverCss(b.cover) || `url('${esc(b.cover.src || "")}') center/cover`}` : ""}">${b.icon && ICONS[b.icon] ? I(b.icon, 14) : ""}</span><span class="ba-rt">${esc(name(b))}</span>${b.fav ? `<span class="ba-fav">${I("star", 13)}</span>` : ""}</button>`).join("") || '<p class="ba-none">No boards yet.</p>'}</div>
+      <div class="ba-sec"><span>Your boards</span>${live().length ? `<em>${live().length}</em>` : ""}</div>
+      <div class="ba-list" role="list">${list.map((b) => `<button class="ba-row${A.cur && A.cur.id === b.id ? " on" : ""}" role="listitem" data-open="${b.id}"><span class="ba-th" style="${b.cover ? `background:${coverCss(b.cover) || `url('${esc(b.cover.src || "")}') center/cover`}` : ""}">${b.icon && ICONS[b.icon] ? I(b.icon, 14) : ""}</span><span class="ba-rt">${esc(name(b))}</span>${b.fav ? `<span class="ba-fav">${I("star", 13)}</span>` : ""}</button>`).join("") || `<p class="ba-none">${A.q ? "No board matches." : "No boards yet."}</p>`}</div>
       <nav class="ba-nav ba-nav2"><button class="ba-nv${A.view === "bin" ? " on" : ""}" data-bin>${I("trash", 18)}<span>Bin</span>${bin ? `<em>${bin}</em>` : ""}</button></nav>`;
     $("[data-tg]", side).onclick = () => toggleSide();
+    const sq = $(".ba-search input", side);
+    sq.oninput = () => { A.q = sq.value; const pos = sq.selectionStart; drawSide(); const n = $(".ba-search input", side); n.focus(); try { n.setSelectionRange(pos, pos); } catch {} if (A.view === "home") drawGrid(); };
+    sq.onkeydown = (e) => { if (e.key === "Escape" && sq.value) { e.preventDefault(); sq.value = ""; sq.oninput(); } if (e.key === "Enter") { const f = found()[0]; if (f) openBoard(f.id); } };
     $("[data-new]", side).onclick = (e) => newBoardMenu(e.currentTarget);
     $("[data-home]", side).onclick = () => home();
     $("[data-bin]", side).onclick = () => showBin();
     $$("[data-open]", side).forEach((b) => (b.onclick = () => { openBoard(b.dataset.open); if (mobile()) setSide(false); }));
   }
-  const markSvg = () => `<svg viewBox="0 0 24 24" width="22" height="22"><rect x="2" y="3" width="9" height="8" rx="2.4" fill="#4285F4"/><rect x="13" y="3" width="9" height="11" rx="2.4" fill="#FBBC04"/><rect x="2" y="13" width="9" height="8" rx="2.4" fill="#34A853"/><rect x="13" y="16" width="9" height="5" rx="2.4" fill="#EA4335"/></svg>`;
   function setSide(on) { ls.set("baSide", on); root.dataset.side = on ? "on" : "off"; }
   function toggleSide() { setSide(root.dataset.side !== "on"); }
   $(".ba-scrim", root).onclick = () => setSide(false);
@@ -104,12 +109,18 @@ export async function boardsApp(body, key) {
     const hr = new Date().getHours(), hi = hr < 5 ? "Working late" : hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
     main.innerHTML = `<div class="ba-home"><header class="ba-hh"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><div><h1>${hi}</h1><p>Your boards for ideas, notes, scripts and moodboards.</p></div></header>
       <section class="ba-tpl" aria-label="Start a board">${Object.entries(T).map(([k, t]) => `<button class="ba-tc" data-tpl="${k}"><span class="ba-tcv" style="background:${coverCss({ k: t.cover })}"><span class="ba-tci">${I(k === "blank" ? "plus" : t.icon, 22)}</span></span><b>${t.name}</b><small>${t.desc}</small></button>`).join("")}</section>
-      <div class="ba-gh"><h2>Recent boards</h2><span class="ba-cnt">${live().length || ""}</span></div>
-      <section class="ba-grid">${live().map(card).join("") || `<div class="ba-empty">${I("sparkles", 26)}<b>No boards yet</b><p>Pick a starting point above.</p></div>`}</section></div>`;
+      <div class="ba-gh"><h2>Recent boards</h2><span class="ba-cnt"></span></div>
+      <section class="ba-grid"></section></div>`;
+    drawGrid();
     $("[data-tg]", main).onclick = () => toggleSide();
     $$("[data-tpl]", main).forEach((b) => (b.onclick = () => newBoard(b.dataset.tpl)));
-    wireCards(main);
     R.item(body, "", "Boards", mode);
+  }
+  function drawGrid() {
+    const g = $(".ba-grid", main); if (!g) return; const list = found();
+    $(".ba-cnt", main).textContent = A.q ? `${list.length} found` : live().length || "";
+    g.innerHTML = list.map(card).join("") || (A.q ? `<div class="ba-empty">${I("search", 26)}<b>No board matches “${esc(A.q)}”</b></div>` : `<div class="ba-empty">${I("sparkles", 26)}<b>No boards yet</b><p>Pick a starting point above.</p></div>`);
+    wireCards(main);
   }
   function card(b) {
     const cv = b.cover ? (b.cover.k ? coverCss(b.cover) : `url('${esc(b.cover.src)}') center/cover`) : "";
@@ -130,6 +141,7 @@ export async function boardsApp(body, key) {
       ...(inBoard ? [] : [{ t: "Open", i: "open", run: () => openBoard(b.id) }]),
       { t: "Rename", i: "pencil", run: () => rename(b) },
       { t: "Change cover", i: "image", sub: [{ tiles: COVER_KEYS.map((k) => ({ bg: coverCss({ k }), name: COVERS[k].name, on: !!(b.cover && b.cover.k === k), run: () => setMeta(b, { cover: { k } }) })) }, "-", { t: "No cover", i: "x", run: () => setMeta(b, { cover: null }) }] },
+      { t: "Change icon", i: "smile", sub: [{ chips: BOARD_ICONS.map((n) => ({ i: n, title: n.replace(/-/g, " "), on: b.icon === n, run: () => setMeta(b, { icon: n }) })) }, "-", { t: "No icon", i: "x", run: () => setMeta(b, { icon: "" }) }] },
       { t: b.fav ? "Remove from favourites" : "Add to favourites", i: "star", run: () => setMeta(b, { fav: !b.fav }) },
       { t: "Duplicate", i: "dup", run: () => duplicateBoard(b) },
       ...(inBoard ? [{ t: "Safety copies", i: "history", run: () => boardHistory(b) }, { t: "Download a backup (.json)", i: "download", run: () => exportJson(b) }] : []),
@@ -142,7 +154,7 @@ export async function boardsApp(body, key) {
     if (r.ok) Object.assign(b, r.data.board); else toast("Could not save that change");
     refreshChrome();
   }
-  function refreshChrome() { drawSide(); if (A.view === "home") { const g = $(".ba-grid", main); if (g) { g.innerHTML = live().map(card).join(""); wireCards(main); } } if (A.view === "board") drawTop(); }
+  function refreshChrome() { drawSide(); if (A.view === "home") drawGrid(); if (A.view === "board") drawTop(); }
   async function rename(b) {
     if (A.view === "board" && A.cur && A.cur.id === b.id) { const t = $(".ba-title", main); if (t) { t.focus(); t.select(); return; } }
     const v = prompt("Board name", b.title || ""); if (v == null) return; setMeta(b, { title: v.trim().slice(0, 120) });
@@ -224,19 +236,20 @@ export async function boardsApp(body, key) {
     if (!b) { toast("That board isn't here any more."); return home("replace"); }
     A.view = "board"; A.cur = b; drawSide();
     main.innerHTML = `<div class="ba-board"><div class="ba-canvas"></div><div class="ba-pages"></div>
-      <div class="ba-top"><button class="ba-ib" data-tg title="Boards" aria-label="Show the sidebar">${I("panel-left", 18)}</button><span class="ba-bi"></span><input class="ba-title" maxlength="120" aria-label="Board name" placeholder="Untitled board"><span class="ba-st" aria-live="polite"></span><button class="ba-ib" data-bm title="Board options" aria-label="Board options">${I("more", 18)}</button></div></div>`;
+      <div class="ba-top"><button class="ba-ib" data-tg title="Show the sidebar" aria-label="Show the sidebar">${I("panel-left", 18)}</button><button class="ba-bi" data-bi title="Cover and icon" aria-label="Cover and icon"></button><input class="ba-title" maxlength="120" aria-label="Board name" placeholder="Untitled board"><span class="ba-st" role="status" tabindex="-1"></span><button class="ba-ib" data-bm title="Board options" aria-label="Board options">${I("more", 18)}</button></div></div>`;
     const cvHost = $(".ba-canvas", main), pages = $(".ba-pages", main);
     $("[data-tg]", main).onclick = () => toggleSide();
-    $("[data-bm]", main).onclick = (e) => { const r = e.currentTarget.getBoundingClientRect(); menu(r.left, r.bottom + 6, boardMenu(b, true)); };
+    $("[data-bm]", main).onclick = (e) => { const r = e.currentTarget.getBoundingClientRect(); menu(r.left, r.bottom + 6, boardMenu(b, true), { ret: $(".bd-stage", main) }); };
+    $("[data-bi]", main).onclick = (e) => { const r = e.currentTarget.getBoundingClientRect(); menu(r.left, r.bottom + 6, [{ head: "Cover" }, { tiles: COVER_KEYS.map((k) => ({ bg: coverCss({ k }), name: COVERS[k].name, on: !!(b.cover && b.cover.k === k), run: () => setMeta(b, { cover: { k } }) })) }, { head: "Icon" }, { chips: BOARD_ICONS.map((n) => ({ i: n, title: n, on: b.icon === n, run: () => setMeta(b, { icon: n }) })) }, "-", { t: "No icon", i: "x", run: () => setMeta(b, { icon: "" }) }, { t: "No cover", i: "image", run: () => setMeta(b, { cover: null }) }], { ret: $(".bd-stage", main) }); };
     const title = $(".ba-title", main);
     title.oninput = () => { b.title = title.value; drawSide(); clearTimeout(A.tT); A.tT = setTimeout(() => setMeta(b, { title: title.value.trim().slice(0, 120) }), 700); };
     title.onkeydown = (e) => { if (e.key === "Enter" || e.key === "Escape") { e.preventDefault(); title.blur(); $(".bd-stage", main)?.focus(); } };
-    drawTop();
+    drawTop(); setStatus("saved");
     const cv = createCanvas(cvHost, {
       owner: true, boardId: id,
       send: async (patch) => { const r = await api("/api/boards?id=" + id + "&a=patch", { method: "POST", body: patch }); if (r.ok) { Object.assign(b, r.data.board); clearTimeout(A.cT); A.cT = setTimeout(() => { if (A.cv === cv) { try { const snap = cv.snapshot(); if (JSON.stringify(snap).length < 1_500_000) ls.set("bdDoc:" + id, snap); } catch {} } }, 1500); } else if (r.status >= 400 && r.status < 500 && r.status !== 401 && r.status !== 408 && r.status !== 429) { toast(r.data.error || "A change could not be saved"); return true; } return r.ok; },
       persist: (p) => { if (p) ls.set("bdPend:" + id, p); else ls.del("bdPend:" + id); },
-      onStatus: (s) => { A.status = s; const e = $(".ba-st", main); if (e) { e.textContent = { saved: "Saved", saving: "Saving…", unsaved: "Unsaved", offline: "Offline · kept on this device" }[s] || ""; e.dataset.s = s; } },
+      onStatus: (s) => setStatus(s),
       onView: (v) => { clearTimeout(A.vT); A.vT = setTimeout(() => ls.set("bdView:" + id, v), 400); },
       openPage: (it, o) => A.pw && A.pw.open(it, o),
       copyPage: (from, to) => api("/api/boards?a=copypage", { method: "POST", body: { from, to } }),
@@ -246,7 +259,7 @@ export async function boardsApp(body, key) {
       boardMenu: () => [{ t: "Board options", i: "settings", sub: boardMenu(b, true) }],
     });
     A.cv = cv;
-    A.pw = pageWindows(pages, { canvas: () => A.cv, owner: true, removeItem: (pid) => A.cv && A.cv.removeItem(pid) });
+    A.pw = pageWindows(pages, { canvas: () => A.cv, owner: true, removeItem: (pid) => A.cv && A.cv.removeItem(pid), boardName: () => name(A.cur), onClosed: () => A.cv && A.cv.focus() });
     // show the last copy straight away, then the server's
     const cached = ls.get("bdDoc:" + id, null), view = ls.get("bdView:" + id, null);
     if (doc) cv.load(doc, view);
@@ -261,6 +274,12 @@ export async function boardsApp(body, key) {
     cv.applyPending(ls.get("bdPend:" + id, null));
     if (fresh) setTimeout(() => { title.focus(); }, 60);
     else setTimeout(() => $(".bd-stage", main)?.focus({ preventScroll: true }), 30);
+  }
+  function setStatus(s) {
+    A.status = s; const e = $(".ba-st", main); if (!e || e.dataset.s === s) return;
+    const [ic, tip] = STATUS[s] || STATUS.saved;
+    e.dataset.s = s; e.dataset.tip = tip; e.setAttribute("aria-label", tip);
+    e.innerHTML = I(ic, 19) + (s === "offline" ? "<span>Offline</span>" : "");
   }
   function drawTop() {
     const b = A.cur; if (!b) return; const t = $(".ba-title", main), bi = $(".ba-bi", main); if (!t) return;

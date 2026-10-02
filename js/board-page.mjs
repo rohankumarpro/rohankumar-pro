@@ -40,7 +40,7 @@ export function pageWindows(layer, ctx) {
     const off = (cascade++ % 6) * 28;
     const geo = { x: phone ? 0 : Math.max(12, Math.round((b.width - ww) / 2) + off - 40), y: phone ? 0 : Math.max(12, Math.round((b.height - hh) / 2) + off - 20), w: ww, h: hh };
     const el = h("section", { class: "bp-win" + (phone ? " phone" : ""), role: "dialog", "aria-label": label(it) });
-    el.innerHTML = `<header class="bp-bar"><span class="bp-bi"></span><b class="bp-bt"></b><span class="bp-st" aria-live="polite"></span>
+    el.innerHTML = `<header class="bp-bar"><span class="bp-bi"></span><span class="bp-crumb"></span><b class="bp-bt"></b><span class="bp-st" aria-live="polite"></span>
         <button class="bp-wb" data-a="more" title="More" aria-label="More">${I("more", 18)}</button>${phone ? "" : `<button class="bp-wb" data-a="min" title="Minimise" aria-label="Minimise">${I("minus", 18)}</button><button class="bp-wb" data-a="max" title="Maximise (double-click the bar)" aria-label="Maximise">${I("fit", 17)}</button>`}<button class="bp-wb" data-a="close" title="Close" aria-label="Close">${I("x", 18)}</button></header>
       <div class="bp-scroll"><div class="bp-page"><div class="bp-cover"></div><div class="bp-head"><button class="bp-icon" aria-label="Page icon"></button>${owner ? '<div class="bp-adds"></div>' : ""}<textarea class="bp-title" rows="1" placeholder="Untitled" maxlength="160" aria-label="Page title" ${owner ? "" : "readonly"}></textarea></div><div class="bp-body"><div class="bp-load"><span class="rb-spin"></span></div></div><footer class="bp-foot"></footer></div></div>
       ${phone ? "" : '<i class="bp-rz" data-rz="se"></i><i class="bp-rz e" data-rz="e"></i><i class="bp-rz s" data-rz="s"></i><i class="bp-rz w" data-rz="w"></i>'}`;
@@ -110,6 +110,7 @@ export function pageWindows(layer, ctx) {
   function drawBar(w) {
     const it = item(w); if (!it) return;
     w.el.querySelector(".bp-bt").textContent = label(it);
+    const cr = w.el.querySelector(".bp-crumb"); if (cr && ctx.boardName) cr.textContent = ctx.boardName();
     w.el.querySelector(".bp-bi").innerHTML = I(it.icon && ICONS[it.icon] ? it.icon : "file-text", 17);
     w.el.setAttribute("aria-label", label(it));
     const chip = [...tray.children].find((c) => c.title === "Show " + label(it)); if (chip) drawTray();
@@ -248,7 +249,7 @@ export function pageWindows(layer, ctx) {
     if (to && to.width > 8 && to.left < lb.right && to.top < lb.bottom && to.left + to.width > lb.left && to.top + to.height > lb.top && !w.max) {
       const a = flip(w.el, { x: to.left - lb.left, y: to.top - lb.top, w: to.width, h: to.height }, w.geo, false); await a.finished.catch(() => {});
     } else await w.el.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(30px) scale(.94)" }], { duration: 180, easing: "cubic-bezier(.2,0,0,1)" }).finished.catch(() => {});
-    w.min = true; w.el.hidden = true; drawTray();
+    w.min = true; w.el.hidden = true; drawTray(); ctx.onClosed && ctx.onClosed();
   }
   function restore(id) {
     const w = W.get(id); if (!w) return;
@@ -262,7 +263,7 @@ export function pageWindows(layer, ctx) {
     W.delete(id);
     if (!w.el.hidden && !w.el.classList.contains("phone")) { const to = ctx.canvas()?.rectOf(id), lb = bounds(); if (to && to.width > 8 && !w.max) await flip(w.el, { x: to.left - lb.left, y: to.top - lb.top, w: to.width, h: to.height }, w.geo, false).finished.catch(() => {}); }
     if (w.ed) { try { w.ed.destroy(); } catch {} }
-    w.el.remove(); drawTray();
+    w.el.remove(); drawTray(); ctx.onClosed && ctx.onClosed();
   }
   function moreMenu(w) {
     const it = item(w);

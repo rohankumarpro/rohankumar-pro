@@ -40,6 +40,11 @@ const EXTRA = {
   section: '<rect x="3.5" y="6.5" width="17" height="13" rx="2.5"/><path d="M3.5 4h7"/>',
   page: '<rect x="4" y="3.5" width="16" height="17" rx="3"/><path d="M4 9h16M8 13h8M8 16.5h5"/>',
   ungroup: '<rect x="3.5" y="6.5" width="17" height="13" rx="2.5" stroke-dasharray="3 3"/><path d="M3.5 4h7"/>',
+  cloud: '<path d="M7.2 18.5h10.3a4 4 0 0 0 .7-7.94 6.2 6.2 0 0 0-11.9 1.4A3.3 3.3 0 0 0 7.2 18.5z"/>',
+  "cloud-done": '<path d="M7.2 18.5h10.3a4 4 0 0 0 .7-7.94 6.2 6.2 0 0 0-11.9 1.4A3.3 3.3 0 0 0 7.2 18.5z"/><path d="m9.6 13.6 1.9 1.9 3.4-3.4"/>',
+  "cloud-up": '<path d="M7.2 18.5h10.3a4 4 0 0 0 .7-7.94 6.2 6.2 0 0 0-11.9 1.4A3.3 3.3 0 0 0 7.2 18.5z"/><path d="M12 16v-4.6M10 13.3l2-2 2 2"/>',
+  "cloud-off": '<path d="M9 7.2a6.2 6.2 0 0 1 9.2 3.36 4 4 0 0 1 1.9 6.7M15.8 18.5H7.2a3.3 3.3 0 0 1-.9-6.5 6 6 0 0 1 .6-2.5M3.5 3.5l17 17"/>',
+  keyboard: '<rect x="2.5" y="6" width="19" height="12" rx="3"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M6.5 13.8h.01M17 13.8h.01M9.5 14h5"/>',
 };
 export const I = (n, s = 18) => (EXTRA[n] ? `<svg class="ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${EXTRA[n]}</svg>` : icon(n, { size: s }));
 
@@ -67,6 +72,52 @@ const isImgUrl = (s) => isUrl(s) && /\.(jpe?g|png|webp|gif|avif)(\?.*)?$/i.test(
 })();
 
 /* ---------- menus: one Material menu for every right-click and "more" button ---------- */
+/* ---------- Material tooltips: every button that has a title gets a small dark label (with its shortcut) instead of the browser's ---------- */
+let tipEl = null, tipT = 0, tipFor = null;
+const TIP_ROOTS = ".ba,.bd,.bd-menus,.bp-pop,.bp-win,.bd-keys";
+function tipText(el) {
+  if (el.title) { el.dataset.tip = el.title; el.removeAttribute("title"); }
+  const t = el.dataset.tip || "", m = t.match(/^(.*?)\s*\(([^()]{1,14})\)$/);
+  return m ? [m[1], m[2]] : [t, ""];
+}
+function hideTip() { clearTimeout(tipT); tipFor = null; if (tipEl) tipEl.classList.remove("on"); }
+function showTip(el) {
+  if (!el.isConnected || el.closest("[hidden]")) return;
+  const [label, k] = tipText(el); if (!label) return;
+  if (!tipEl) { tipEl = h("div", { class: "bd-tip", role: "tooltip" }); document.body.append(tipEl); }
+  tipEl.innerHTML = esc(label) + (k ? `<kbd>${esc(k)}</kbd>` : "");
+  const r = el.getBoundingClientRect(), w = tipEl.offsetWidth, hh = tipEl.offsetHeight;
+  let y = r.bottom + 8; if (y + hh > innerHeight - 8 || el.closest(".bd-tools,.bd-zoom,.bp-tray")) y = r.top - hh - 8;
+  tipEl.style.left = clamp(r.left + r.width / 2 - w / 2, 8, innerWidth - w - 8) + "px"; tipEl.style.top = Math.max(8, y) + "px";
+  tipEl.classList.add("on");
+}
+(function tips() {
+  document.addEventListener("pointerover", (e) => {
+    const el = e.target.closest && e.target.closest("[title],[data-tip]");
+    if (el === tipFor) return; hideTip();
+    if (!el || e.pointerType === "touch" || !el.closest(TIP_ROOTS) || !el.matches("button,[role=button],a,.ba-st,.bd-tb")) return;
+    tipText(el); tipFor = el; tipT = setTimeout(() => showTip(el), openMenu ? 120 : 450);
+  }, true);
+  for (const ev of ["pointerdown", "keydown", "wheel", "blur"]) (ev === "blur" ? window : document).addEventListener(ev, hideTip, { capture: true, passive: true });
+})();
+
+/* ---------- the keyboard shortcuts sheet ---------- */
+export function shortcuts(ret) {
+  const K = (k) => k.split(" ").map((x) => `<kbd>${esc(x)}</kbd>`).join("");
+  const sec = (t, rows) => `<section><h3>${t}</h3>${rows.map(([a, k]) => `<div class="bd-kr"><span>${a}</span><span class="bd-kk">${K(k)}</span></div>`).join("")}</section>`;
+  const d = h("div", { class: "bd-keys", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" });
+  d.innerHTML = `<div class="bd-kc"><header><b>Keyboard shortcuts</b><button class="bd-kx" aria-label="Close" title="Close (Esc)">${I("x", 20)}</button></header><div class="bd-kg">
+    ${sec("Tools", [["Select", "V"], ["Move around", "H"], ["Page", "P"], ["Sticky note", "S"], ["Text", "T"], ["Picture", "I"], ["Link", "L"], ["Section", "F"], ["Connector", "C"]])}
+    ${sec("Editing", [["Undo", "Ctrl Z"], ["Redo", "Ctrl ⇧ Z"], ["Copy · Cut · Paste", "Ctrl C"], ["Duplicate", "Ctrl D"], ["Delete", "Del"], ["Select all", "Ctrl A"], ["Put in a section", "Ctrl G"], ["Lock or unlock", "Ctrl ⇧ L"], ["Bring to front · back", "Ctrl ]"], ["Nudge", "↑ ↓ ← →"]])}
+    ${sec("Notes and view", [["Edit the selection", "Enter"], ["Next sticky beside", "Tab"], ["Next sticky below", "⇧ Tab"], ["Finish editing", "Esc"], ["Pan", "Space drag"], ["Zoom", "Ctrl scroll"], ["Zoom in · out", "Ctrl +"], ["Zoom to 100%", "Ctrl 0"], ["Show everything", "⇧ 1"], ["Zoom to selection", "⇧ 2"], ["This sheet", "?"]])}
+  </div></div>`;
+  const close = () => { d.remove(); document.removeEventListener("keydown", key, true); ret && ret.focus({ preventScroll: true }); };
+  const key = (e) => { if (e.key === "Escape" || e.key === "?") { e.preventDefault(); e.stopPropagation(); close(); } };
+  d.addEventListener("pointerdown", (e) => { if (e.target === d) close(); });
+  d.querySelector(".bd-kx").onclick = close;
+  document.body.append(d); document.addEventListener("keydown", key, true); d.querySelector(".bd-kx").focus();
+}
+
 let openMenu = null;
 export function closeMenu() { if (openMenu) { openMenu.remove(); openMenu = null; } }
 export function menu(x, y, items, { minW, ret } = {}) {
@@ -138,7 +189,7 @@ export function createCanvas(host, opts = {}) {
   const M = (x, y, items) => menu(x, y, items, { ret: stage });
 
   host.classList.add("bd", "bdc");
-  host.innerHTML = `<div class="bd-stage${owner ? " own" : ""}" tabindex="0" aria-label="Board canvas"><div class="bd-grid"></div>
+  host.innerHTML = `<div class="bd-stage${owner ? " own" : ""}" tabindex="0" aria-label="Board canvas" data-own-keys><div class="bd-grid"></div>
       <div class="bd-world"><div class="bd-frames"></div><svg class="bd-links" width="1" height="1" overflow="visible"><g class="bd-lg"></g><path class="bd-ghost" d=""/></svg><div class="bd-items"></div><div class="bd-labels"></div></div>
       <div class="bd-ov"><svg class="bd-guides" width="100%" height="100%"></svg><div class="bd-marq" hidden></div><div class="bd-selbox" hidden></div><div class="bd-anchors"></div><div class="bd-qbar" hidden></div></div>
       <div class="bd-empty" hidden></div>
@@ -148,7 +199,7 @@ export function createCanvas(host, opts = {}) {
       ${tb("page", "page", "Page", "P")}${tb("sticky", "sticky", "Sticky note", "S")}${tb("text", "type", "Text", "T")}${tb("image", "image", "Picture", "I")}${tb("link", "link", "Link", "L")}${tb("frame", "frame", "Section", "F")}${tb("connector", "connector", "Connector", "C")}
     </div>` : ""}
     <div class="bd-zoom" role="group" aria-label="Zoom">
-      <button data-z="out" title="Zoom out (Ctrl -)" aria-label="Zoom out">${I("minus", 18)}</button><button data-z="pct" class="bd-pct" title="Zoom options">100%</button><button data-z="in" title="Zoom in (Ctrl +)" aria-label="Zoom in">${I("plus", 18)}</button><i class="bd-tsep"></i><button data-z="fit" title="Show everything (Shift 1)" aria-label="Show everything">${I("fit", 18)}</button>
+      <button data-z="out" title="Zoom out (Ctrl −)" aria-label="Zoom out">${I("minus", 18)}</button><button data-z="pct" class="bd-pct" title="Zoom options">100%</button><button data-z="in" title="Zoom in (Ctrl +)" aria-label="Zoom in">${I("plus", 18)}</button><i class="bd-tsep"></i><button data-z="fit" title="Show everything (⇧ 1)" aria-label="Show everything">${I("fit", 18)}</button><button data-z="keys" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">${I("keyboard", 19)}</button>
     </div>`;
   function tb(t, ic, label, k) { return `<button class="bd-tb" data-tool="${t}"${t === "sticky" ? ' data-c="yellow"' : ""} title="${label} (${k})" aria-label="${label}" aria-pressed="${t === "select"}">${I(ic, 20)}</button>`; }
 
@@ -237,7 +288,7 @@ export function createCanvas(host, opts = {}) {
     return "";
   }
   function place(el, it) {
-    el.style.transform = `translate(${it.x}px,${it.y}px)`;
+    el.style.translate = `${it.x}px ${it.y}px`;
     el.style.width = it.w + "px";
     el.style.height = autoH(it) ? "" : it.h + "px";
     el.style.zIndex = String(Math.round(it.z || 0));
@@ -393,7 +444,7 @@ export function createCanvas(host, opts = {}) {
   function status(s) { opts.onStatus && opts.onStatus(s); }
 
   /* ---------- changing things (always through these, so undo and saving just work) ---------- */
-  function put(it) { begin(); touchI(it.id); S.items.set(it.id, it); paint(it); mark(it.id); linksOf(it.id).forEach((l) => schedule("link", l.id)); refreshEmpty(); return it; }
+  function put(it) { const fresh = !S.items.has(it.id); begin(); touchI(it.id); S.items.set(it.id, it); const el = paint(it); if (fresh) { el.classList.add("bd-new"); setTimeout(() => el.classList.remove("bd-new"), 360); } mark(it.id); linksOf(it.id).forEach((l) => schedule("link", l.id)); refreshEmpty(); return it; }
   function upd(id, patch) { const it = S.items.get(id); if (!it) return; begin(); touchI(id); Object.assign(it, patch); for (const k in patch) if (patch[k] === undefined) delete it[k]; paint(it); mark(id); linksOf(id).forEach((l) => schedule("link", l.id)); schedule("ov"); }
   function remove(ids) {
     begin();
@@ -700,7 +751,7 @@ export function createCanvas(host, opts = {}) {
       let dx = (e.clientX - d.sx) / S.view.z, dy = (e.clientY - d.sy) / S.view.z;
       if (e.shiftKey) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }
       const [sx, sy, lines] = snap(d, dx, dy, e); d.dx = sx; d.dy = sy;
-      for (const id of d.ids) { const it = S.items.get(id), st = d.start.get(id); if (!it) continue; it.x = Math.round(st[0] + sx); it.y = Math.round(st[1] + sy); const el = S.els.get(id); if (el) el.style.transform = `translate(${it.x}px,${it.y}px)`; }
+      for (const id of d.ids) { const it = S.items.get(id), st = d.start.get(id); if (!it) continue; it.x = Math.round(st[0] + sx); it.y = Math.round(st[1] + sy); const el = S.els.get(id); if (el) el.style.translate = `${it.x}px ${it.y}px`; }
       for (const lid of d.links) schedule("link", lid);
       drawGuides(lines); schedule("ov");
       edgePan(e);
@@ -793,7 +844,9 @@ export function createCanvas(host, opts = {}) {
   }
   function dbl(e) {
     if (S.dead) return;
-    const hi = hitInfo(e);
+    // the first click captured the pointer, so the event's target is the stage: look at what is really under the pointer
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const hi = hitInfo(under && stage.contains(under) ? { target: under } : e);
     if (hi.qbar || hi.anc || hi.hd) return;
     const id = hi.el && hi.el.dataset.id, it = id && S.items.get(id);
     if (hi.lk && owner) { editLinkLabel(hi.lk.dataset.lid); return; }
@@ -1028,7 +1081,15 @@ export function createCanvas(host, opts = {}) {
   }
 
   /* ---------- keyboard ---------- */
-  host.addEventListener("keydown", (e) => {
+  host.addEventListener("keydown", onKey);
+  // when nothing has focus (a window just closed), keys still reach the board if its window is on top
+  const isTop = () => { const w = host.closest(".win"); return !!(host.offsetParent && w && !w.classList.contains("min") && (w.classList.contains("top") || document.querySelectorAll(".win:not(.min)").length === 1)) && !document.querySelector(".bd-keys,.own-dlg,.bd-menus,.lb-ov"); };
+  const loose = () => { const a = document.activeElement; return !a || a === document.body || a === document.documentElement; };
+  const docKey = (e) => { if (!e.defaultPrevented && loose() && isTop()) { onKey(e); if (e.defaultPrevented) stage.focus({ preventScroll: true }); } };
+  const docKeyUp = (e) => { if (e.key === " " && S.space) { S.space = false; stage.classList.remove("space"); } };
+  const docPaste = (e) => { if (loose() && isTop() && owner) { e.preventDefault(); handleData(e.clipboardData, pasteAt()); } };
+  document.addEventListener("keydown", docKey); document.addEventListener("keyup", docKeyUp); document.addEventListener("paste", docPaste);
+  function onKey(e) {
     if (S.dead || isEditable(e.target)) return;
     const k = e.key, mod = e.ctrlKey || e.metaKey;
     if (k === " " && !S.space) { S.space = true; stage.classList.add("space"); e.preventDefault(); return; }
@@ -1040,6 +1101,7 @@ export function createCanvas(host, opts = {}) {
     if (e.shiftKey && (k === "!" || e.code === "Digit1")) { e.preventDefault(); fitAll(); return; }
     if (e.shiftKey && (k === "@" || e.code === "Digit2")) { e.preventDefault(); fitTo(bbox(S.sel.size ? S.sel : S.items.keys()), { max: 2 }); return; }
     if (k === "Escape") { if (S.tool !== "select") setTool("select"); else clearSel(); closeMenu(); return; }
+    if (k === "?" || (mod && k === "/")) { e.preventDefault(); shortcuts(stage); return; }
     if (!owner) return;
     if (mod && (k === "a" || k === "A")) { e.preventDefault(); selectAll(); return; }
     if (mod && (k === "d" || k === "D")) { e.preventDefault(); duplicate([...S.sel]); return; }
@@ -1057,7 +1119,7 @@ export function createCanvas(host, opts = {}) {
       const map = { v: "select", h: "hand", p: "page", s: "sticky", t: "text", i: "image", l: "link", f: "frame", c: "connector" }, t = map[k.toLowerCase()];
       if (t) { e.preventDefault(); if (t === "image") { setTool("select"); pickImages(); } else if (t === "link") { setTool("select"); askLink(); } else setTool(t); }
     }
-  });
+  }
   host.addEventListener("keyup", (e) => { if (e.key === " ") { S.space = false; stage.classList.remove("space"); } });
   window.addEventListener("blur", () => { S.space = false; stage.classList.remove("space"); });
 
@@ -1077,7 +1139,7 @@ export function createCanvas(host, opts = {}) {
   }));
   host.querySelectorAll("[data-z]").forEach((b) => b.addEventListener("click", () => {
     const k = b.dataset.z;
-    if (k === "in") zoomBy(1.25); else if (k === "out") zoomBy(0.8); else if (k === "fit") fitAll();
+    if (k === "in") zoomBy(1.25); else if (k === "out") zoomBy(0.8); else if (k === "fit") fitAll(); else if (k === "keys") shortcuts(stage);
     else { const r = b.getBoundingClientRect(); M(r.left, r.top - 8, [{ t: "Zoom in", i: "zoom-in", k: "Ctrl +", run: () => zoomBy(1.25) }, { t: "Zoom out", i: "zoom-out", k: "Ctrl −", run: () => zoomBy(0.8) }, "-", { t: "Zoom to 50%", run: () => zoomTo(0.5) }, { t: "Zoom to 100%", k: "Ctrl 0", run: () => zoomTo(1) }, { t: "Zoom to 200%", run: () => zoomTo(2) }, "-", { t: "Show everything", i: "fit", k: "Shift 1", run: () => fitAll() }, { t: "Zoom to selection", k: "Shift 2", disabled: !S.sel.size, run: () => fitTo(bbox(S.sel), { max: 2 }) }]); }
   }));
   function zoomTo(z) { rect(); const cx = R.width / 2, cy = R.height / 2; animateTo({ z, x: cx - (cx - S.view.x) * (z / S.view.z), y: cy - (cy - S.view.y) * (z / S.view.z) }, 200); }
@@ -1210,6 +1272,7 @@ export function createCanvas(host, opts = {}) {
     focusItem(id) { const it = S.items.get(id); if (!it) return; select([id]); fitTo(it, { max: Math.max(1, S.view.z) }); },
     select, elOf: (id) => S.els.get(id), rectOf(id) { const it = S.items.get(id); if (!it) return null; rect(); const p = toS(it.x, it.y); return { left: R.left + p.x, top: R.top + p.y, width: it.w * S.view.z, height: it.h * S.view.z }; },
     stageRect: () => rect(),
-    destroy() { S.dead = true; ro.disconnect(); cancelAnimationFrame(raf); closeMenu(); clearTimeout(Q.t); },
+    focus() { stage.focus({ preventScroll: true }); },
+    destroy() { S.dead = true; ro.disconnect(); document.removeEventListener("keydown", docKey); document.removeEventListener("keyup", docKeyUp); document.removeEventListener("paste", docPaste); hideTip(); cancelAnimationFrame(raf); closeMenu(); clearTimeout(Q.t); },
   };
 }
