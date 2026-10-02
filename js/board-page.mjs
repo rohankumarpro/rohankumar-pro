@@ -17,8 +17,9 @@ export const Bodies = {
   get: (id) => BODY.get(id) || null,
   onChange(f) { listeners.add(f); return () => listeners.delete(f); },
   // ask for the writing of some cards; they arrive in one request and each card is redrawn
-  want(id) {
-    if (BODY.has(id) || wantQ.has(id)) return; wantQ.add(id); clearTimeout(wantT);
+  refresh(id) { Bodies.want(id, true); }, // another device saved this page: fetch it again
+  want(id, force) {
+    if ((BODY.has(id) && !force) || wantQ.has(id)) return; wantQ.add(id); clearTimeout(wantT);
     wantT = setTimeout(async () => {
       const ids = [...wantQ]; wantQ = new Set();
       for (let i = 0; i < ids.length; i += 60) {
@@ -38,6 +39,13 @@ export function pageWindows(layer, ctx) {
   const W = new Map(); // item id -> window state
   let zTop = 10, cascade = 0;
   const tray = h("div", { class: "bp-tray", role: "toolbar", "aria-label": "Minimised pages" });
+  // live sync: an open page follows what another device saved, unless there is typing here that is not saved yet
+  const offLive = Bodies.onChange((id) => {
+    const w = W.get(id), bd = BODY.get(id);
+    if (!w || !w.ed || w.dirty || w.saveT || w.saving || !bd || bd.updated <= w.updated) return;
+    w.updated = bd.updated; w.blocks = bd.blocks; w.ed.setBlocks(bd.blocks); foot(w);
+    if (!w.inline) { status(w, "Updated from your other device"); setTimeout(() => { if (w.stEl && /other device/.test(w.stEl.textContent)) status(w, ""); }, 4000); }
+  });
   layer.append(tray);
   const bounds = () => layer.getBoundingClientRect();
 
@@ -347,7 +355,7 @@ export function pageWindows(layer, ctx) {
   return {
     open, close, minimize, restore, flushAll, beacon, inline, isOpen: (id) => W.has(id) && !W.get(id).inline,
     refresh(id) { const w = W.get(id); if (w) drawHead(w); },
-    closeAll: async () => { for (const id of [...W.keys()]) await close(id); },
+    closeAll: async () => { for (const id of [...W.keys()]) await close(id); offLive(); },
     finishInline: async () => { for (const w of [...W.values()]) if (w.inline) await w.finish(); },
     dirty: () => [...W.values()].some((w) => w.dirty || w.saveT),
   };

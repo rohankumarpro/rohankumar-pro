@@ -2,6 +2,7 @@
 //   GET                          the list of boards
 //   GET ?id=<id>                 one board: {board, doc:{items, links, updated}}
 //   GET ?id=<id>&a=history       earlier copies of a board (times and item counts)
+//   GET ?id=<id>&a=since&rev=<n> live sync: what changed since revision n ({same} when nothing did)
 //   GET ?page=<itemId>           the writing inside a page card: {blocks, updated}
 //   GET ?page=<itemId>&a=history earlier versions of that writing
 //   GET ?pages=<id>,<id>…        the writing of several page cards at once (up to 60): {pages:{id:{blocks, updated}}}
@@ -24,7 +25,7 @@ import { getStore } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { isPreviewHost } from "../lib/store.mjs";
 import { maybeSnapshot } from "../lib/snapshots.mjs";
-import { listBoards, reorder, docsInfo, importDocs, metaOf, createBoard, loadBoard, updateMeta, patchBoard, purgeBoard, loadPage, savePage, unfurl, okId, histKey, pageHistKey, pageKey, boardKey, boardsStore, loadIndex } from "../lib/boards.mjs";
+import { listBoards, reorder, docsInfo, importDocs, changesSince, metaOf, createBoard, loadBoard, updateMeta, patchBoard, purgeBoard, loadPage, savePage, unfurl, okId, histKey, pageHistKey, pageKey, boardKey, boardsStore, loadIndex } from "../lib/boards.mjs";
 
 export default async (req) => {
   const u = new URL(req.url), raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
@@ -55,6 +56,7 @@ async function run(event) {
         if (q.a === "history") return json({ history: (await store.get(pageHistKey(q.page), { type: "json" })) ?? [] });
         const p = await loadPage(store, q.page); return json({ blocks: p.blocks || [], updated: p.updated || 0 });
       }
+      if (q.id && q.a === "since") { const r = await changesSince(store, q.id, Number(q.rev)); return r ? json(r) : json({ error: "Not found" }, 404); }
       const all = q.id ? await loadIndex(store) : await listBoards(store);
       if (!q.id) return json({ boards: all.map(metaOf) });
       const meta = all.find((x) => x.id === q.id); if (!meta) return json({ error: "Not found" }, 404);

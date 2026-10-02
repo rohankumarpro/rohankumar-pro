@@ -10,6 +10,8 @@ import { COVERS, coverCss, COLORS } from "/js/board-covers.mjs";
 
 if (!document.querySelector('link[href="/css/boards.css"]')) document.head.append(h("link", { rel: "stylesheet", href: "/css/boards.css" }));
 
+// each open tab is its own "device" for live sync
+const DEV = (() => { try { let d = sessionStorage.getItem("bdDev"); if (!d) { d = Math.random().toString(36).slice(2, 12); sessionStorage.setItem("bdDev", d); } return d; } catch { return Math.random().toString(36).slice(2, 12); } })();
 const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
 const rid = () => Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8);
 const name = (b) => (b && b.title && b.title.trim()) || "Untitled board";
@@ -279,6 +281,7 @@ export async function boardsApp(body, key) {
 
   /* ----- one board ----- */
   async function leaveBoard() {
+    if (A.stopLive) { A.stopLive(); A.stopLive = null; }
     if (!A.cv) return;
     await flushBoard();
     if (A.pw) await A.pw.closeAll();
@@ -306,7 +309,7 @@ export async function boardsApp(body, key) {
     title.onkeydown = (e) => { if (e.key === "Enter" || e.key === "Escape") { e.preventDefault(); title.blur(); $(".bd-stage", main)?.focus(); } };
     drawTop(); setStatus("saved");
     const cv = createCanvas(cvHost, {
-      owner: true, boardId: id,
+      owner: true, boardId: id, dev: DEV,
       send: async (patch) => {
         const r = await api("/api/boards?id=" + id + "&a=patch", { method: "POST", body: patch });
         if (r.ok) { Object.assign(b, r.data.stat || {}); clearTimeout(A.cT); A.cT = setTimeout(() => { if (A.cv === cv) { try { const snap = cv.snapshot(); if (JSON.stringify(snap).length < 1_500_000) ls.set("bdDoc:" + id, snap); } catch {} } }, 1500); return { ok: true, rev: r.data.rev }; }
@@ -369,10 +372,41 @@ export async function boardsApp(body, key) {
       else if (!cached) { main.querySelector(".ba-canvas").innerHTML = `<div class="ba-empty">${r.status === 0 ? "You're offline and this board hasn't been opened on this device yet." : "Could not open this board."}</div>`; return; }
     } else ls.set("bdDoc:" + id, doc);
     cv.applyPending(ls.get("bdPend:" + id, null));
+    A.stopLive = startLive(id, cv);
     setView(page ? "db" : ls.get("bdMode:" + id, mobile() ? "db" : "board"), { quiet: true });
     if (page) openInDb(page);
     if (fresh) setTimeout(() => { title.focus(); }, 60);
     else if (A.bview === "board") setTimeout(() => $(".bd-stage", main)?.focus({ preventScroll: true }), 30);
+  }
+  /* ----- live sync between devices: ask for what changed since this board's revision ----- */
+  // every 2.5 s while another device is editing this board; otherwise every 12 s, only while this window has focus,
+  // and at once when you come back to it. Tabs you are not looking at never ask.
+  function startLive(id, cv) {
+    let t = 0, fastUntil = 0, inflight = false, stopped = false, cacheT = 0;
+    const tick = async () => {
+      clearTimeout(t); if (stopped || A.cv !== cv || document.visibilityState !== "visible") return;
+      if (!inflight) {
+        inflight = true;
+        const r = await api(`/api/boards?id=${id}&a=since&rev=${cv.syncRev}`);
+        inflight = false;
+        if (stopped || A.cv !== cv) return;
+        if (r.ok) {
+          if (!r.data.same) {
+            const res = cv.applyRemote(r.data);
+            res.pages.forEach((pid) => Bodies.refresh(pid));
+            if (res.n) { clearTimeout(cacheT); cacheT = setTimeout(() => { if (A.cv === cv) { try { const snap = cv.snapshot(); if (JSON.stringify(snap).length < 1_500_000) ls.set("bdDoc:" + id, snap); } catch {} } }, 1500); }
+          }
+          if (r.data.by && r.data.by !== DEV && r.data.now - r.data.updated < 90000) fastUntil = Date.now() + 90000;
+        }
+      }
+      const fast = Date.now() < fastUntil;
+      if (!fast && !document.hasFocus()) return; // idle and looking elsewhere: wait until you come back
+      t = setTimeout(tick, fast ? 2500 : 12000);
+    };
+    const wake = () => { if (document.visibilityState === "visible") tick(); };
+    addEventListener("focus", wake); document.addEventListener("visibilitychange", wake);
+    setTimeout(tick, 1500);
+    return () => { stopped = true; clearTimeout(t); clearTimeout(cacheT); removeEventListener("focus", wake); document.removeEventListener("visibilitychange", wake); };
   }
   function setStatus(s) {
     A.status = s; const e = $(".ba-st", main); if (!e || e.dataset.s === s) return;

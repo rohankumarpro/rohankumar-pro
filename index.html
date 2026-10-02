@@ -4140,7 +4140,7 @@ function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
   const addChips=()=>(ui.chips||[]).forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cc-chip'+(c.pri?' pri':'');b.textContent=c.t;b.onclick=c.fn;chatUI.appendChild(b)});
   if(ui.inputLast)addChips();
   if(ui.input){const f=document.createElement('form');f.className='cc-form';f.innerHTML=`<input type="${ui.input.type||'text'}" maxlength="${ui.input.max||120}" placeholder="${esc(ui.input.ph||'')}" aria-label="${esc(ui.input.ph||'Your answer')}"><button type="submit">Send</button>`;
-    f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return;ui.input.done(v)};chatUI.appendChild(f);if(!ui.inputLast)setTimeout(()=>f.querySelector('input').focus({preventScroll:true}),30)}
+    f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return;ui.input.done(v)};chatUI.appendChild(f);if(!ui.inputLast)setTimeout(()=>{const ae=document.activeElement;if(!ae||ae===document.body||chatEl.contains(ae)||cat.contains(ae))f.querySelector('input').focus({preventScroll:true})},30)}
   if(!ui.inputLast)addChips();
 }
 const moreChip={t:'Ask me about Rohan',fn:()=>askMenu()};
@@ -4167,6 +4167,9 @@ function maybeTalk(){
   const gap=V.stage===0?20000:60000;
   if(n-bootAt<gap||n-lastTalk<gap||n-C.lastPoke<15000||n-(C.cameOut||0)<15000||n-C.awakeSince<6000)return;
   if(document.querySelector('.win.top .cc-form, .win.top input:focus'))return;
+  /* never start a chat for the owner, and never interrupt someone who is working in a window or typing */
+  if(LIVE.admin)return;
+  {const ae=document.activeElement;if(ae&&ae!==document.body&&(ae.closest('.win')||ae.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)))return}
   const s=V.stage;V.stage++;saveV();STAGES[s]();
 }
 

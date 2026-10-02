@@ -182,12 +182,19 @@ export async function patchBoard(store, id, p) {
   const rev = doc.rev || 0;
   if (base != null && base > rev && !p.full) return { stale: true, rev };
   const before = Object.keys(doc.items || {}).length, prevItems = doc.items || {}, prevLinks = doc.links || {};
+  // live sync: everything written in this save is tagged with the new revision, and removals are remembered for a while,
+  // so another device can ask "what changed since revision N" and get just that
+  const nr = Math.max(rev, base || 0) + 1, gone = Array.isArray(doc.gone) ? doc.gone.slice() : [];
   if (p.full) { doc.items = {}; doc.links = {}; } else { doc.items = { ...prevItems }; doc.links = { ...prevLinks }; }
-  for (const it of Array.isArray(p.full ? p.items : p.up) ? (p.full ? p.items : p.up) : []) { const c = cleanItem(it); if (c) doc.items[c.id] = c; }
-  if (!p.full) for (const k of Array.isArray(p.del) ? p.del : []) if (okId(k)) delete doc.items[k];
-  for (const l of Array.isArray(p.full ? p.links : p.lup) ? (p.full ? p.links : p.lup) : []) { const c = cleanLink(l); if (c) doc.links[c.id] = c; }
-  if (!p.full) for (const k of Array.isArray(p.ldel) ? p.ldel : []) if (okId(k)) delete doc.links[k];
-  for (const [k, l] of Object.entries(doc.links)) if (!doc.items[l.a] || !doc.items[l.b]) delete doc.links[k]; // a connector never points at nothing
+  for (const it of Array.isArray(p.full ? p.items : p.up) ? (p.full ? p.items : p.up) : []) { const c = cleanItem(it); if (c) { c._r = nr; doc.items[c.id] = c; } }
+  if (!p.full) for (const k of Array.isArray(p.del) ? p.del : []) if (okId(k) && doc.items[k]) { delete doc.items[k]; gone.push({ id: k, r: nr }); }
+  for (const l of Array.isArray(p.full ? p.links : p.lup) ? (p.full ? p.links : p.lup) : []) { const c = cleanLink(l); if (c) { c._r = nr; doc.links[c.id] = c; } }
+  if (!p.full) for (const k of Array.isArray(p.ldel) ? p.ldel : []) if (okId(k) && doc.links[k]) { delete doc.links[k]; gone.push({ id: k, r: nr, l: 1 }); }
+  if (p.full) { for (const k of Object.keys(prevItems)) if (!doc.items[k]) gone.push({ id: k, r: nr }); for (const k of Object.keys(prevLinks)) if (!doc.links[k]) gone.push({ id: k, r: nr, l: 1 }); }
+  for (const [k, l] of Object.entries(doc.links)) if (!doc.items[l.a] || !doc.items[l.b]) { delete doc.links[k]; gone.push({ id: k, r: nr, l: 1 }); } // a connector never points at nothing
+  if (gone.length > 1500) { const cut = gone.splice(0, gone.length - 1500); doc.goneFrom = Math.max(doc.goneFrom || 0, cut[cut.length - 1].r); }
+  doc.gone = gone;
+  if (typeof p.dev === "string") doc.by = p.dev.replace(/[^\w-]/g, "").slice(0, 24); // which device wrote last (others then check more often)
   if (Object.keys(doc.items).length > MAX_ITEMS) throw Object.assign(new Error("full"), { code: 400, msg: `A board holds at most ${MAX_ITEMS} items` });
   // safety copy: every ten minutes, and always before a change that removes most of the board
   const after = Object.keys(doc.items).length, shrunk = before >= 8 && after < before * 0.5;
@@ -196,11 +203,23 @@ export async function patchBoard(store, id, p) {
     if (before && (shrunk || !hist.length || Date.now() - hist[0].ts > HIST_EVERY)) await store.setJSON(histKey(id), [{ ts: Date.now(), items: prevItems, links: prevLinks }, ...hist].slice(0, HIST_KEEP));
   } catch {}
   if (p.meta && typeof p.meta === "object" && "preview" in p.meta) doc.preview = cleanPreview(p.meta.preview);
-  doc.updated = Date.now(); doc.rev = Math.max(rev, base || 0) + 1;
+  doc.updated = Date.now(); doc.rev = nr;
   await store.setJSON(boardKey(id), doc);
   const stat = statOf(doc);
   await store.setJSON(statKey(id), stat);
   return { stat, rev: doc.rev, updated: doc.updated };
+}
+
+// What changed on a board since revision `since` (for another open device): changed items and connectors, and removals.
+// If the board has moved on too far to tell, the whole board is sent instead.
+export async function changesSince(store, id, since) {
+  const doc = await store.get(boardKey(id), { type: "json" }); if (!doc) return null;
+  const rev = doc.rev || 0, head = { rev, by: doc.by || "", updated: doc.updated || 0, now: Date.now() };
+  if (!(since >= 0) || since >= rev) return { ...head, same: since >= rev };
+  if (since < (doc.goneFrom || 0)) return { ...head, full: { items: doc.items || {}, links: doc.links || {}, rev } };
+  const items = Object.values(doc.items || {}).filter((x) => (x._r || 0) > since), links = Object.values(doc.links || {}).filter((x) => (x._r || 0) > since);
+  const gone = (doc.gone || []).filter((g) => g.r > since);
+  return { ...head, items, links, del: gone.filter((g) => !g.l && !doc.items[g.id]).map((g) => g.id), ldel: gone.filter((g) => g.l && !doc.links[g.id]).map((g) => g.id) };
 }
 
 export async function purgeBoard(store, id, bk) {
