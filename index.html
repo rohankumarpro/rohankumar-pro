@@ -131,7 +131,7 @@ a{color:var(--primary)}
 .wclock .h{font-size:var(--fs-13);font-weight:var(--fw-x);letter-spacing:-.03em}
 .wclock .d{font-size:var(--fs-4);font-weight:var(--fw-m);color:var(--ink2);margin-top:calc(8 * var(--u))}
 .wcard{background:var(--surface);border-radius:var(--r-8);padding:calc(16 * var(--u)) calc(20 * var(--u));max-width:260px;box-shadow:var(--shadow)}
-.wcard .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:calc(8 * var(--u));box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 25%,transparent)}
+.wcard .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--sdot,var(--ok));margin-right:calc(8 * var(--u));box-shadow:0 0 0 4px color-mix(in srgb,var(--sdot,var(--ok)) 25%,transparent)}
 .wcard b{font-size:var(--fs-5)}.wcard p{margin:calc(6 * var(--u)) 0 0;color:var(--ink2);font-size:var(--fs-4);line-height:1.45}
 
 /* windows */
@@ -318,6 +318,18 @@ html.tile-live,html.tile-live *,html.tile-dragging,html.tile-dragging *{user-sel
 .mu-th{grid-area:th;width:44px;height:44px;border-radius:var(--r-3);overflow:hidden;background:var(--mu-c);display:block}.mu-th img{width:100%;height:100%;object-fit:cover;display:block}
 .mu-ed{grid-area:ed;display:flex;flex-direction:column;gap:4px;min-width:0}.mu-ed input{width:100%;box-sizing:border-box;background:var(--surface)!important;border:0;border-radius:var(--r-3);padding:6px 10px;font:inherit;font-size:var(--fs-3);color:var(--ink)}
 .mu-row small{grid-area:sm;color:var(--ink2);font-size:var(--fs-2)}.mu-rb{grid-area:rb;display:flex;gap:2px}.mu-rb button{border:0;background:none;color:var(--ink2);width:28px;height:28px;border-radius:50%;cursor:pointer;display:grid;place-items:center;font:inherit}.mu-rb button:hover{background:var(--surface)}.mu-rb button:disabled{opacity:.3}.mu-rb .danger{color:var(--danger)}.mu-rb svg{width:14px;height:14px}
+/* owner: edit app dialog */
+.ae-card{width:min(460px,92vw);max-height:88vh;overflow:auto;display:flex;flex-direction:column;gap:calc(12 * var(--u))}
+.ae-h{display:flex;align-items:center;gap:calc(12 * var(--u))}.ae-h>div{flex:1;min-width:0;display:flex;flex-direction:column}.ae-h small{color:var(--ink2);font-size:var(--fs-2)}
+.ae-prev .ico{width:52px;height:52px;display:block}.ae-prev svg{width:100%;height:100%}
+.ae-x{border:0;background:var(--surface2);width:32px;height:32px;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--ink)}
+.ae-l{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-3);color:var(--ink2);font-weight:var(--fw-m)}
+.ae-l input,.ae-l textarea{font:inherit;color:var(--ink);background:var(--surface2);border:0;border-radius:var(--r-4);padding:10px 12px;resize:vertical}
+.ae-cols{display:flex;gap:8px;flex-wrap:wrap}.ae-col{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}.ae-col.on{border-color:var(--ink)}
+.ae-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;max-height:210px;overflow:auto;padding:2px}
+.ae-grid button{height:44px;border:0;border-radius:var(--r-4);background:var(--surface2);color:var(--ink);display:grid;place-items:center;cursor:pointer}.ae-grid button:hover{background:var(--surface3)}.ae-grid button.on{outline:2px solid var(--primary)}
+.ae-up{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.wcard.st .wedit{opacity:1;top:auto;bottom:8px;right:8px}
 .sel{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--u));width:100%;min-height:calc(40 * var(--u));padding:0 calc(12 * var(--u)) 0 calc(14 * var(--u));border:0;border-radius:var(--r-5);background:var(--surface2);color:var(--ink);font:inherit;font-size:var(--fs-4);font-weight:var(--fw-m);cursor:pointer;text-align:left;transition:background var(--d-1)}
 .sel:hover{background:var(--surface3)}.sel>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sel svg{flex:none;width:16px;height:16px;color:var(--ink2);transition:transform var(--d-2) var(--ease)}.sel[aria-expanded=true] svg{transform:rotate(180deg)}
 select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;margin:0!important;padding:0!important}
@@ -672,7 +684,7 @@ button.tl-item:hover b{text-decoration:underline;text-underline-offset:3px}
 .lkp h1{font-size:var(--fs-10);margin:0}
 .body .lk-r{margin:calc(4 * var(--u)) 0 calc(12 * var(--u))}
 .lk-s{display:inline-flex;align-items:center;font-size:var(--fs-3);font-weight:var(--fw-m);background:var(--surface2);padding:calc(6 * var(--u)) calc(14 * var(--u)) calc(6 * var(--u)) calc(10 * var(--u));border-radius:var(--r-pill)}
-.lk-s .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:calc(8 * var(--u));box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+.lk-s .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sdot,var(--ok));margin-right:calc(8 * var(--u));box-shadow:0 0 0 3px color-mix(in srgb,var(--sdot,var(--ok)) 25%,transparent)}
 .lk-list{display:flex;flex-direction:column;gap:calc(8 * var(--u));margin-top:calc(8 * var(--u));text-align:left}
 .lk-g{font-size:var(--fs-2)!important;font-weight:var(--fw-b);color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;margin:calc(18 * var(--u)) calc(4 * var(--u)) 2px!important}
 .lk{display:flex;align-items:center;gap:calc(14 * var(--u));width:100%;border:0;background:var(--surface2);color:var(--ink);text-decoration:none;text-align:left;border-radius:var(--r-7);padding:calc(10 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u));transition:transform var(--d-3) var(--ease-spring),background var(--d-2)}
@@ -2185,6 +2197,7 @@ function shape(kind){
 function glyphSvg(g,size=24){return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`}
 let cpN=0;
 function icon(a){
+  {const E=SITE.s&&SITE.s.appEdits&&SITE.s.appEdits[a.id];if(E){if(E.icon&&window.__customIcon){const c=window.__customIcon(a,E);if(c)return c}if(E.color)a={...a,color:E.color}}}
   const S=window.__ICONSET,g=S&&S.a&&S.a[a.id];
   if(a.photo){a={...a,shape:'circle'};const id='cp'+(++cpN);return `<span class="ico photo"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}"><path d="${shape(a.shape)}"/></clipPath></defs><path d="${shape(a.shape)}" fill="#C2FF73"/><g clip-path="url(#${id})"><image class="g-face" href="${PHOTO}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice"/></g></svg></span>`}
   if(typeof ART!=='undefined'&&ART[a.id])return `<span class="ico lay" data-i="${a.id}"><svg viewBox="0 0 100 100"><circle class="icbg" cx="50" cy="50" r="48"/><g class="art">${ART[a.id]}</g></svg></span>`;
@@ -3143,12 +3156,13 @@ function applyText(){const s=SITE.s||{};
   PHOTO=s.photo||'/img/avatar.jpg';PHOTO_POP=s.photo||'/img/avatar-pop.webp';{const li=document.getElementById('lkImg');if(li&&li.getAttribute('src')!==PHOTO)li.src=PHOTO}
   {const w=document.getElementById('wall');if(w){if(s.wallpaper){w.style.backgroundImage='url("'+s.wallpaper+'")';w.classList.add('pic')}else{w.style.backgroundImage='';w.classList.remove('pic')}}}
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
-  document.title=window.__STANDALONE?`${P.name} — Links`:`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
-function applyHidden(){HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
+  document.title=window.__STANDALONE?`${P.name} — Links`:`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist);window.__applyStatusDot&&__applyStatusDot()}
+function applyHidden(){window.__applyAppEdits&&__applyAppEdits();HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
 async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings}}catch(e){}}
 async function siteInit(){await Promise.all([liveAuth(),siteLoad()]);applyText();applyHidden();ownerChanged();window.__musicRefresh&&__musicRefresh()}
 /* Runs whenever the owner signs in or out: pill in the top bar, hidden apps shown dimmed or removed. */
 function ownerChanged(){
+  window.__ownerEditUI&&__ownerEditUI();
   let p=document.getElementById('ownPill');
   if(LIVE.admin){if(!p){p=document.createElement('button');p.id='ownPill';p.className='pill topbtn ownpill';p.innerHTML='<i></i>Owner mode';p.title='Open System Settings';p.onclick=()=>openApp('settings');const tb=document.querySelector('.topbar');tb.insertBefore(p,tb.lastElementChild)}}
   else if(p)p.remove();
@@ -3485,7 +3499,7 @@ function ownerPlaceItems(id){
   if(!LIVE.admin)return[];const a=APPS.find(x=>x.id===id);if(!a)return[];const s=SITE.s||(SITE.s={hiddenApps:[]});
   const set=(k)=>{const hid=new Set(s.hiddenApps||[]);s.place=s.place||{};if(k==='hidden')hid.add(id);else{hid.delete(id);s.place[id]=k}s.hiddenApps=[...hid];applyHidden();siteSave();SFX.play('pop')};
   const here=appPlace(a);
-  return[null,here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(['settings','notes'].includes(id)?[]:[["Hide from visitors",()=>set('hidden')]])]}
+  return[null,["Rename or change icon…",()=>window.__editApp&&__editApp(id)],here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(['settings','notes'].includes(id)?[]:[["Hide from visitors",()=>set('hidden')]])]}
 function ctxItemsFor(e){
   const t=e.target,el=t.closest?t:t.parentElement,out=[],sel=String(getSelection()||'').trim();
   const fld=el.closest('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea,[contenteditable="true"],[contenteditable=""]');
@@ -3526,7 +3540,7 @@ function ctxItemsFor(e){
   if(el.closest('.cat,#cat'))return window.MOCHI?[window.MOCHI.asleep()?["Wake Mochi gently",()=>MOCHI.wake()]:["Talk to Mochi",()=>MOCHI.talk()],...(window.MOCHI.asleep()?[]:[["Let Mochi nap",()=>MOCHI.sleep()]]),["Hide Mochi",()=>{desk.dataset.cat="off";save()}]]:[];
   if(el.closest('.mw,#musicW'))return(window.musicCtx&&window.musicCtx())||[["Hide the music widget",()=>{desk.dataset.music="off";save()}]];
   if(el.closest('#wStatus,.statusw,.wstatus,[data-w=status]'))return[["Hide the status widget",()=>{desk.dataset.status="off";save()}],...(LIVE.admin?[["Edit status in Settings",()=>openApp('settings')]]:[])];
-  if(el.closest('.widgets'))return[["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],["Settings",()=>openApp('settings')]];
+  if(el.closest('.widgets'))return[...(LIVE.admin&&el.closest('.wcard.st')?[["Edit this card…",()=>window.__editStatus&&__editStatus()],null]:[]),["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],["Settings",()=>openApp('settings')]];
   return out;
 }
 function trim(o){while(o.length&&o[o.length-1]===null)o.pop();return o.filter((x,i)=>x!==null||(i>0&&o[i-1]!==null))}

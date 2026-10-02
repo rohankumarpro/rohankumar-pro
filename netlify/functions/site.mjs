@@ -5,6 +5,7 @@ import { contentStore } from "../lib/store.mjs";
 import { saveJSON } from "../lib/safe.mjs";
 import { cleanBlocks, cleanInline, safeUrl, safeImg } from "../../shared/blocks.mjs";
 import { ICONS as ICON_SET } from "../../shared/icons.mjs";
+import { BRANDS as BRAND_LOGOS } from "../../shared/brands.mjs";
 
 // Apps that can never be hidden, so the owner can't lock themselves out.
 const KEEP = ["settings", "notes"];
@@ -84,6 +85,23 @@ export function cleanSettings(s) {
     for (const [k, v] of Object.entries(s.place).slice(0, 60)) if (/^[a-z0-9_-]{1,30}$/.test(k) && (v === "desktop" || v === "drawer")) pl[k] = v;
     if (Object.keys(pl).length) o.place = pl;
   }
+  if (s?.appEdits && typeof s.appEdits === "object") { // the owner's own names and icons for apps
+    const ed = {};
+    for (const [k, v] of Object.entries(s.appEdits).slice(0, 60)) {
+      if (!/^[a-z0-9_-]{1,30}$/.test(k) || !v || typeof v !== "object") continue;
+      const e = {}, t = str(v.title, 30); if (t) e.title = t;
+      if (/^c[1-6]$/.test(v.color)) e.color = v.color;
+      const ic = v.icon;
+      if (ic && typeof ic === "object") {
+        if (ic.k === "glyph" && ICON_SET[ic.v]) e.icon = { k: "glyph", v: ic.v };
+        else if (ic.k === "brand" && BRAND_LOGOS[ic.v]) e.icon = { k: "brand", v: ic.v };
+        else if (ic.k === "img") { const im = safeImg(ic.v); if (im) e.icon = { k: "img", v: im }; }
+      }
+      if (Object.keys(e).length) ed[k] = e;
+    }
+    if (Object.keys(ed).length) o.appEdits = ed;
+  }
+  if (["green", "amber", "red", "blue", "grey"].includes(s?.statusDot)) o.statusDot = s.statusDot;
   o.hiddenApps = (Array.isArray(s?.hiddenApps) ? s.hiddenApps : [])
     .map((x) => str(x, 30)).filter((x) => /^[a-z0-9_-]+$/.test(x) && !KEEP.includes(x)).slice(0, 40);
   return o;
