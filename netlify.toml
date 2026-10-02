@@ -65,6 +65,13 @@
   status = 404
   force = true
 
+# A deck shared from Design with a private link: a static page (no function runs to show it)
+[[redirects]]
+  from = "/present/*"
+  to = "/present.html"
+  status = 200
+  force = true
+
 # ---- Every window has its own address. The server sends the desktop with that page's text already inside it. ----
 [[redirects]]
   from = "/"
@@ -149,6 +156,11 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+[[headers]]
+  for = "/present.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
 [[headers]]
   for = "/js/*"
   [headers.values]

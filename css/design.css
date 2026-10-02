@@ -1,0 +1,170 @@
+/* Design: home, editor, panels, colour picker and the presenter. Uses the site's colour tokens, so light and dark both work. */
+.dz-host{padding:0!important;overflow:hidden!important}
+.dz-home{height:100%;overflow:auto;padding:28px 32px 40px;box-sizing:border-box;font-family:var(--font);color:var(--ink)}
+.dz-hh h1{margin:0;font-size:32px;font-weight:700;letter-spacing:-.02em}
+.dz-hh p{margin:6px 0 0;color:var(--ink2);font-size:15px}
+.dz-home h2{margin:30px 0 14px;font-size:17px;font-weight:600}.dz-home h2 small{color:var(--ink2);font-weight:500;margin-left:6px}
+.dz-note{color:var(--ink2);font-size:14px}
+.dz-start{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;margin-top:22px}
+.dz-st{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px;border:0;border-radius:20px;background:var(--surface2);color:var(--ink);cursor:pointer;text-align:left;font:inherit;transition:transform .15s,background .15s}
+.dz-st:hover{transform:translateY(-2px);background:color-mix(in srgb,var(--primary) 9%,var(--surface2))}
+.dz-st b{font-size:14px;font-weight:600}.dz-st small{font-size:12.5px;color:var(--ink2)}
+.dz-stp{width:100%;height:96px;border-radius:14px;margin-bottom:8px;display:grid;place-items:center;background:linear-gradient(135deg,#C9DCFF,#F7D9F0 55%,#FFE6C2);color:#3A3F4A}
+.dz-stp i{display:block;max-height:74px;max-width:74%;height:74px;background:#fff;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.dz-stp.thumb i{height:auto;width:74%}.dz-stp.post i,.dz-stp.story i{height:74px;width:auto}
+.dz-stp.deck{display:flex;align-items:center;justify-content:center;gap:5px;padding:0 8px;box-sizing:border-box}.dz-stp.deck i{flex:0 1 30%;height:auto;aspect-ratio:16/9;max-width:30%}
+.dz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.dz-card{position:relative;border-radius:20px;background:var(--surface2);overflow:hidden;cursor:pointer;outline:0;transition:transform .15s,box-shadow .15s}
+.dz-card:hover,.dz-card:focus-visible{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.dz-card:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.dz-card.trashed{opacity:.7}
+.dz-thumb{aspect-ratio:16/10;display:grid;place-items:center;background:color-mix(in srgb,var(--ink) 5%,var(--surface2));color:var(--ink2);overflow:hidden}
+.dz-thumb img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.dz-cb{padding:12px 44px 14px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.dz-cb b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dz-cb small{font-size:12px;color:var(--ink2)}
+.dz-cm{position:absolute;right:8px;bottom:12px;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--ink2);display:grid;place-items:center;cursor:pointer}
+.dz-cm:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.dz-bin{margin-top:28px}.dz-bin summary{cursor:pointer;font-weight:600;margin-bottom:12px}
+
+/* the editor */
+.dz{display:grid;grid-template-columns:240px minmax(0,1fr) 272px;grid-template-rows:52px minmax(0,1fr);height:100%;font-family:var(--font);color:var(--ink);background:var(--surface)}
+.dz.ro{grid-template-columns:minmax(0,1fr)}.dz.ro .dz-left,.dz.ro .dz-props{display:none}
+.dz-top{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--line);min-width:0}
+.dz-name{min-width:60px;max-width:220px;flex:0 1 220px;border:0;background:transparent;color:var(--ink);font:600 14px var(--font);padding:7px 10px;border-radius:10px;outline:0}
+.dz-name:hover{background:var(--surface2)}.dz-name:focus{background:var(--surface2);box-shadow:inset 0 0 0 2px var(--primary)}
+.dz-status{font-size:12px;color:var(--ink2);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.dz-status[data-k=offline],.dz-status[data-k=error]{color:#B3261E}
+.dz-tools{display:flex;align-items:center;gap:2px;margin:0 auto;padding:4px;border-radius:14px;background:var(--surface2)}
+.dz-tb{width:36px;height:36px;border:0;border-radius:10px;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.dz-tb:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.dz-tb[aria-pressed=true]{background:var(--primary);color:#fff}
+.dz-tb.dz-more{width:22px}
+.dz-right{display:flex;align-items:center;gap:6px;margin-left:auto}
+.dz-tools+.dz-right{margin-left:0}
+.dz-zoom{border:0;background:transparent;color:var(--ink);font:500 13px var(--font);padding:8px 10px;border-radius:10px;cursor:pointer;min-width:58px}
+.dz-zoom:hover{background:var(--surface2)}
+.dz-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border:0;border-radius:999px;background:var(--surface2);color:var(--ink);font:600 13px var(--font);cursor:pointer;white-space:nowrap}
+.dz-btn:hover{background:color-mix(in srgb,var(--ink) 10%,var(--surface2))}
+.dz-btn.primary{background:var(--primary);color:#fff}.dz-btn.primary:hover{filter:brightness(1.06)}
+.dz-btn.wide{width:100%}
+.dz-ib{width:36px;height:36px;border:0;border-radius:10px;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.dz-ib:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.dz-ib.sm{width:28px;height:28px;border-radius:8px}
+.dz-ib.on{background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--primary)}
+.dz-ib i,.dz-ib u,.dz-ib s{font:600 14px Georgia,serif}
+.dz-left,.dz-props{min-height:0;overflow:auto;background:var(--surface);font-size:12.5px}
+.dz-left{border-right:1px solid var(--line);display:flex;flex-direction:column}
+.dz-props{border-left:1px solid var(--line)}
+.dz-tabs{display:flex;gap:4px;padding:8px 8px 4px;position:sticky;top:0;background:var(--surface);z-index:1}
+.dz-tabs button{flex:1;height:30px;border:0;border-radius:9px;background:transparent;color:var(--ink2);font:600 12.5px var(--font);cursor:pointer}
+.dz-tabs button[aria-selected=true]{background:var(--surface2);color:var(--ink)}
+.dz-layers{flex:1;overflow:auto;padding:4px 0 20px}
+.dz-stage{position:relative;overflow:hidden;outline:0;min-width:0;min-height:0;touch-action:none}
+.dz-stage.drop{box-shadow:inset 0 0 0 3px var(--primary)}
+.dz-cv{position:absolute;left:0;top:0;display:block}
+.dz-over{position:absolute;inset:0;pointer-events:none}
+.dz-te{position:absolute;transform-origin:0 0;pointer-events:auto;outline:0;caret-color:#0D99FF;min-height:1em;word-break:break-word;overflow-wrap:break-word;cursor:text}
+.dz-te::selection,.dz-te *::selection{background:rgba(13,153,255,.3)}
+
+/* layers */
+.dz-tree{display:flex;flex-direction:column}
+.dz-row{display:flex;align-items:center;gap:2px;height:30px;padding:0 6px 0 calc(6px + var(--d) * 14px);cursor:default;border-radius:0;color:var(--ink);user-select:none}
+.dz-row:hover,.dz-row.hov{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.dz-row.sel{background:color-mix(in srgb,#0D99FF 16%,transparent)}
+.dz-row.hid{opacity:.5}
+.dz-row.drag{opacity:.4}
+.dz-row.drop-a{box-shadow:inset 0 2px 0 #0D99FF}.dz-row.drop-b{box-shadow:inset 0 -2px 0 #0D99FF}.dz-row.drop-in{box-shadow:inset 0 0 0 2px #0D99FF}
+.dz-tw{width:18px;height:18px;border:0;background:transparent;color:var(--ink2);display:grid;place-items:center;cursor:pointer;padding:0;flex:none}
+.dz-tw.none{visibility:hidden}
+.dz-ri{width:20px;display:grid;place-items:center;color:var(--ink2);flex:none}.dz-ri.mask{color:#0D99FF}
+.dz-rn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.dz-rb{width:24px;height:24px;border:0;border-radius:6px;background:transparent;color:var(--ink2);display:grid;place-items:center;cursor:pointer;opacity:0;flex:none}
+.dz-row:hover .dz-rb,.dz-rb.on{opacity:1}
+.dz-rb:hover{background:color-mix(in srgb,var(--ink) 9%,transparent)}
+.dz-empty{padding:16px;color:var(--ink2);line-height:1.5}
+.dz-slides{padding:6px 10px 20px;display:flex;flex-direction:column;gap:8px}
+.dz-hint{margin:0;color:var(--ink2);line-height:1.45;font-size:12px}.dz-hint.sm{font-size:11.5px;margin-top:6px}
+.dz-sl-list{display:flex;flex-direction:column;gap:4px}
+.dz-slide{display:flex;align-items:center;gap:8px;padding:8px 6px 8px 10px;border-radius:12px;background:var(--surface2);cursor:pointer}
+.dz-slide:hover .dz-rb{opacity:1}.dz-slide.out{opacity:.75}
+.dz-sn{width:20px;height:20px;border-radius:6px;background:var(--surface);display:grid;place-items:center;font-weight:700;font-size:11px;flex:none}
+.dz-st2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.dz-slide small{color:var(--ink2);font-size:11px;white-space:nowrap}
+.dz-slides h4{margin:8px 0 0;font-size:12px;color:var(--ink2);font-weight:600}
+.dz-sbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.dz-share{margin-top:10px;padding:12px;border-radius:14px;background:var(--surface2);display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+
+/* properties */
+.dz-pp{display:flex;flex-direction:column;padding-bottom:30px}
+.dz-sec{padding:12px 12px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.dz-sec h3{margin:0;font-size:12px;font-weight:600}
+.dz-sh{display:flex;align-items:center;justify-content:space-between}
+.dz-pr{display:flex;align-items:center;gap:6px;min-width:0}
+.dz-num{display:flex;align-items:center;flex:1 1 0;min-width:0;height:30px;border-radius:8px;background:var(--surface2);padding:0 0 0 2px;cursor:default}
+.dz-num:focus-within{box-shadow:inset 0 0 0 1.5px #0D99FF}
+.dz-nl{min-width:22px;padding:0 4px 0 6px;color:var(--ink2);font-size:11.5px;cursor:ew-resize;user-select:none;white-space:nowrap}
+.dz-num input{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--ink);font:500 12.5px var(--font);height:100%;outline:0;padding:0 6px 0 0}
+.dz-num.wide{flex:1}
+.dz-sel{flex:1 1 0;min-width:0;height:30px;border:0;border-radius:8px;background:var(--surface2);color:var(--ink);font:500 12.5px var(--font);padding:0 6px}
+.dz-swb{width:30px;height:30px;flex:none;border-radius:8px;border:0;cursor:pointer;background:conic-gradient(#ddd 25%,#fff 0 50%,#ddd 0 75%,#fff 0) 0 0/10px 10px;position:relative;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 18%,transparent)}
+.dz-swb::after{content:"";position:absolute;inset:0;border-radius:8px;background:var(--c);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 14%,transparent)}
+.dz-hexi{flex:1;min-width:0;width:64px;height:30px;border:0;border-radius:8px;background:var(--surface2);color:var(--ink);font:500 12.5px var(--font);padding:0 8px;text-transform:uppercase;outline:0}
+.dz-hexi:focus{box-shadow:inset 0 0 0 1.5px #0D99FF}
+.dz-hexv{flex:1;font-weight:500;color:var(--ink2);font-size:12px}
+.dz-ft{flex:1;font-weight:500}
+.dz-align{display:flex;flex-wrap:wrap;gap:2px}
+.dz-rad{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
+.dz-chk{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer}
+.dz-chip{height:28px;padding:0 10px;border:0;border-radius:8px;background:var(--surface2);color:var(--ink);font:500 12px var(--font);cursor:pointer;white-space:nowrap}
+.dz-chip:hover{background:color-mix(in srgb,var(--ink) 10%,var(--surface2))}
+.dz-chip.on{background:color-mix(in srgb,var(--primary) 18%,var(--surface2));color:var(--primary)}
+.dz-bools{display:flex;flex-wrap:wrap;gap:4px}
+.dz-seg{display:flex;gap:2px;background:var(--surface2);border-radius:9px;padding:2px}.dz-seg.wide{flex:1}.dz-seg.wide .dz-chip{flex:1;padding:0 4px;background:transparent}.dz-seg.wide .dz-chip.on{background:var(--surface)}
+.dz-font{flex:1;display:flex;align-items:center;justify-content:space-between;height:32px;padding:0 10px;border:0;border-radius:8px;background:var(--surface2);color:var(--ink);font-size:14px;cursor:pointer;min-width:0}
+.dz-pre{display:flex;flex-direction:column;gap:2px}.dz-pre small{color:var(--ink2);font-weight:600;font-size:11.5px;margin:6px 0 2px}
+.dz-preb{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:0;border-radius:9px;background:transparent;color:var(--ink);font:500 12.5px var(--font);cursor:pointer;text-align:left}
+.dz-preb:hover{background:var(--surface2)}.dz-preb small{color:var(--ink2);font-size:11.5px}
+.dz-keys{display:flex;flex-direction:column;gap:4px}.dz-keys div{display:flex;justify-content:space-between;gap:8px;color:var(--ink2)}
+.dz-keys kbd{font:500 11px var(--font);background:var(--surface2);color:var(--ink);border-radius:5px;padding:2px 6px;white-space:nowrap}
+
+/* colour picker and font list */
+.dz-pick{position:fixed;z-index:2147483300;width:256px;box-sizing:border-box;padding:12px;border-radius:16px;background:var(--bd-card,var(--surface));color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.24),0 0 0 1px color-mix(in srgb,var(--line) 50%,transparent);display:flex;flex-direction:column;gap:10px;font:12.5px var(--font)}
+.dz-sv{position:relative;height:150px;border-radius:10px;overflow:hidden;cursor:crosshair;touch-action:none}
+.dz-sv canvas{width:100%;height:100%;display:block}
+.dz-svk{position:absolute;width:14px;height:14px;margin:-7px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(0,0,0,.3);pointer-events:none}
+.dz-sl{position:relative;height:12px;border-radius:6px;cursor:pointer;touch-action:none}
+.dz-sl.hue{background:linear-gradient(90deg,red,#ff0,lime,cyan,blue,#f0f,red)}
+.dz-sl.alpha{background:conic-gradient(#ccc 25%,#fff 0 50%,#ccc 0 75%,#fff 0) 0 0/8px 8px}
+.dz-sl.alpha b{position:absolute;inset:0;border-radius:6px}
+.dz-sl i{position:absolute;top:50%;width:14px;height:14px;margin:-7px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 1px 3px rgba(0,0,0,.3);pointer-events:none}
+.dz-prow{display:flex;gap:6px}
+.dz-eye{width:30px;height:30px;border:0;border-radius:8px;background:var(--surface2);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.dz-hex,.dz-al{height:30px;border:0;border-radius:8px;background:var(--surface2);color:var(--ink);font:500 12.5px var(--font);padding:0 8px;outline:0;min-width:0}
+.dz-hex{flex:1;text-transform:uppercase}.dz-al{width:56px}
+.dz-sws small{display:block;color:var(--ink2);font-size:11px;margin-bottom:4px}
+.dz-sws div{display:flex;flex-wrap:wrap;gap:5px}
+.dz-sws button{width:20px;height:20px;border-radius:6px;border:0;background:var(--c);cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.dz-sws .dz-add{background:var(--surface2);color:var(--ink2);font-weight:700;line-height:1}
+.dz-gbar{display:flex;gap:4px;flex-wrap:wrap}
+.dz-gstops{position:relative;height:16px;border-radius:8px;cursor:copy;margin:2px 7px}
+.dz-gstops i{position:absolute;top:-3px;width:14px;height:22px;margin-left:-7px;border-radius:5px;background:var(--c);box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(0,0,0,.25);cursor:grab;outline:0}
+.dz-gstops i.on{box-shadow:0 0 0 2px #fff,0 0 0 4px #0D99FF}
+.dz-fonts{width:260px;max-height:400px}
+.dz-fq{height:34px;border:0;border-radius:9px;background:var(--surface2);color:var(--ink);font:13px var(--font);padding:0 10px;outline:0}
+.dz-fq:focus{box-shadow:inset 0 0 0 1.5px #0D99FF}
+.dz-fl{overflow:auto;max-height:330px;display:flex;flex-direction:column}
+.dz-fi{border:0;background:transparent;color:var(--ink);text-align:left;padding:8px 10px;border-radius:8px;font-size:15px;cursor:pointer}
+.dz-fi:hover,.dz-fi.on{background:var(--surface2)}
+
+/* presenting */
+.dz-present{position:fixed;inset:0;z-index:2147483400;background:#000;outline:0;cursor:none}
+.dz-present.ui{cursor:default}
+.dz-present canvas{position:absolute;left:0;top:0}
+.dz-pbar{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:rgba(32,33,36,.86);color:#fff;opacity:0;transition:opacity .25s;font:600 13px var(--font,system-ui)}
+.dz-present.ui .dz-pbar{opacity:1}
+.dz-pbar button{width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer}
+.dz-pbar button:hover{background:rgba(255,255,255,.14)}
+.dz-pn{padding:0 10px;font-variant-numeric:tabular-nums;min-width:52px;text-align:center}
+.dz-pload{position:absolute;inset:0;display:grid;place-items:center;color:#9AA0A6;font:500 14px var(--font,system-ui)}
+@media (max-width:760px){.dz-home{padding:18px 16px 30px}.dz-hh h1{font-size:26px}.dz-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}.dz-top .dz-btn span{display:none}.dz-top .dz-btn{padding:0 10px}.dz-name{max-width:130px}}
+@media (prefers-reduced-motion:reduce){.dz-st,.dz-card,.dz-pbar{transition:none}}
