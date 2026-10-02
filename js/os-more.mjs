@@ -307,7 +307,7 @@ function newApps() {
   if (typeof ART !== "undefined") Object.assign(ART, ART_ADD);
   const SV = { id: "services", title: "Services", shape: "clover", color: "c1", glyph: G.work || G.folder, w: 640, h: 640, render: () => "" };
   const BK = { id: "book", title: "Book a call", shape: "cookie", color: "c2", glyph: G.mail, w: 560, h: 680, render: () => "" };
-  const DX = { id: "docs", title: "Docs", shape: "squircle", color: "c3", glyph: G.docs || G.folder, w: 940, h: 640, render: () => "" };
+  const DX = { id: "docs", title: "Docs", shape: "squircle", color: "c3", glyph: G.docs || G.folder, w: 1240, h: 780, render: () => "" };
   registerApp(DX); registerApp(SV); registerApp(BK);
   lazyApp("docs", "/js/app-docs.mjs", "docsApp");
   lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services"); lazyApp("book", "/js/app-book.mjs", "bookApp");
