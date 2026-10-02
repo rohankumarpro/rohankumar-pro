@@ -1,7 +1,7 @@
 // Every public address of the site (/about, /projects/<slug>, /journal/<slug> ...) described as data:
 // what the page is called, how it reads in search results, the text a crawler should see, and which window the desktop opens.
 import { esc, renderBlocks, blocksText, stripTags, slugify, firstImage, readMinutes, wordCount, blocksToMd } from "../../shared/blocks.mjs";
-import { SITE, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate, docsPublic, docBySlug } from "./site-data.mjs";
+import { SITE, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate } from "./site-data.mjs";
 import { hrefOf } from "./hub.mjs";
 import { CAROUSELS } from "./media.mjs";
 
@@ -17,7 +17,7 @@ export const APP_PAGES = {
   timeline: { path: "/timeline", title: "Timeline", index: true }, photos: { path: "/photos", title: "Photos", index: true }, notes: { path: "/notes", title: "Notes", index: true },
   guestbook: { path: "/guestbook", title: "Guestbook", index: true }, content: { path: "/youtube", title: "YouTube", index: true },
   services: { path: "/services", title: "Services", index: true }, book: { path: "/book", title: "Book a call", index: true },
-  messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, docs: { path: "/docs", title: "Docs", index: true }, settings: { path: "/settings", title: "Settings", index: false },
+  messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, settings: { path: "/settings", title: "Settings", index: false },
   calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
   focus: { path: "/focus", title: "Focus timer", index: false }, search: { path: "/search", title: "Search", index: false },
   boards: { path: "/boards", title: "Boards", index: false },
@@ -116,22 +116,6 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     return finish({ title: `Photos — ${pr.name}`, desc: `A gallery of photos by ${pr.name}.`, app: "photos", noindex: !ph.length || hidden.has("photos"),
       body: `<h1>Photos</h1><ul>${ph.map((p) => `<li><img src="/api/photo?id=${esc(p.id)}&amp;s=t" alt="${esc(p.caption || "Photo by " + pr.name)}" loading="lazy">${p.caption ? `<p>${esc(p.caption)}</p>` : ""}</li>`).join("")}</ul>`,
       image: ph[0] ? `/api/photo?id=${ph[0].id}&s=f` : OG_DEFAULT, ld: [{ "@type": "ImageGallery", name: `Photos — ${pr.name}`, url: `${SITE}/photos` }, crumbs([home, { name: "Photos", path }])] });
-  }
-
-  if (path === "/docs") {
-    const ds = await docsPublic(store);
-    return finish({ title: `Docs — ${pr.name}`, desc: `Guides, notes and write-ups by ${pr.name}.`, app: "docs", noindex: !ds.length || hidden.has("docs"),
-      body: `<h1>Docs</h1><ul>${ds.map((d) => `<li><a href="/docs/${esc(d.slug)}">${esc(d.title || "Untitled")}</a>${d.desc ? `<p>${esc(d.desc)}</p>` : ""}</li>`).join("")}</ul>`,
-      mdText: `# Docs\n\n${ds.map((d) => `- [${d.title || "Untitled"}](${SITE}/docs/${d.slug}.md)`).join("\n")}\n`, ld: [crumbs([home, { name: "Docs", path }])] });
-  }
-  if (path.startsWith("/docs/")) {
-    const d = await docBySlug(store, path.slice(6));
-    if (!d || hidden.has("docs")) return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "docs", noindex: true, notFound: true, body: `<h1>Page not found</h1><p><a href="/docs">Back to Docs</a></p>` });
-    const plain = trim(d.desc || blocksText(d.blocks), 160), img = d.cover?.src || firstImage(d.blocks) || OG_DEFAULT, iso = new Date(d.created || Date.now()).toISOString().slice(0, 10), mod = new Date(d.updated || Date.now()).toISOString();
-    return finish({ title: `${d.title || "Untitled"} — ${pr.name}`, desc: plain, app: "docs", slug: d.slug, type: "article", image: img, noindex: !!d.noindex, published: iso, modified: mod,
-      body: `<article><nav aria-label="Breadcrumb"><a href="/docs">Docs</a></nav><h1>${esc(d.title || "Untitled")}</h1>${renderBlocks(d.blocks, { hBase: 2 })}</article>`,
-      mdText: `# ${d.title || "Untitled"}\n\n${blocksToMd(d.blocks)}\n`,
-      ld: [{ "@type": "Article", "@id": `${SITE}/docs/${d.slug}#doc`, headline: (d.title || "Untitled").slice(0, 110), description: plain, url: `${SITE}/docs/${d.slug}`, image: [abs(img)], datePublished: iso, dateModified: mod.slice(0, 10), author: { "@id": `${SITE}/#person` }, publisher: { "@id": `${SITE}/#person` }, inLanguage: "en", wordCount: wordCount(d.blocks) }, crumbs([home, { name: "Docs", path: "/docs" }, { name: d.title || "Untitled", path }])] });
   }
 
   if (path === "/guestbook") {

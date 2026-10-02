@@ -47,11 +47,3 @@ export const loadNotes = async (store) => arr(await store.get("notes", { type: "
 export async function loadGuestbook(store) { return arr(await gbAll(store)).filter((e) => e.status === "approved").sort((a, b) => b.ts - a.ts); }
 export { blocksOf, isoDate };
 
-// Docs published to the web
-import { loadIndex as loadDocIndex, publicMetas as docMetas, pageKey as docKey } from "./docs.mjs";
-export const docsPublic = async (store) => docMetas(await loadDocIndex(store)).sort((a, b) => b.updated - a.updated);
-export async function docBySlug(store, slug) {
-  const m = (await docsPublic(store)).find((x) => x.slug === slug); if (!m) return null;
-  const pg = (await store.get(docKey(m.id), { type: "json" })) ?? { blocks: [] };
-  return { ...m, blocks: pg.blocks || [] };
-}

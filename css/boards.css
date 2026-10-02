@@ -70,6 +70,12 @@
 .ba-tci{width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,#fff 88%,transparent);color:#1f1f1f;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .ba-tc b{padding:0 16px;font-size:15px;font-weight:var(--fw-m)}
 .ba-tc small{padding:0 16px;color:var(--ink2);font-size:12.5px;line-height:1.35}
+.ba-docs{display:flex;align-items:center;gap:16px;margin:-12px 0 30px;padding:16px 18px;border-radius:22px;background:var(--bd-tonal);box-shadow:var(--bd-e1)}
+.ba-docs[hidden]{display:none}
+.ba-docs b{font-size:15.5px}.ba-docs p{margin:4px 0 0;color:var(--ink2);font-size:13.5px;line-height:1.45}
+.ba-docs .btn{flex:none;margin-left:auto}
+.ba-dci{width:46px;height:46px;border-radius:14px;background:var(--bd-card);color:var(--primary);display:grid;place-items:center;flex:none}
+@media (max-width:760px){.ba-docs{flex-wrap:wrap}.ba-docs .btn{width:100%}}
 .ba-gh{display:flex;align-items:baseline;gap:10px;margin:0 0 14px}
 .ba-gh h2{margin:0;font-size:18px;font-weight:var(--fw-b)}
 .ba-cnt{color:var(--ink2);font-size:13px}

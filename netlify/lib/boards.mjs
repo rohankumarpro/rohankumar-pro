@@ -220,6 +220,45 @@ export async function purgeBoard(store, id, bk) {
   return true;
 }
 
+/* ---------- bringing in the old Docs pages ----------
+   Docs was removed as an app; its pages stay where they are (docs-index, doc-<id>), untouched. This copies them, once,
+   onto a new board as page cards (a Docs database becomes a page with a table). Nothing in Docs is changed or deleted. */
+export const DOCS_DONE = "boards-docs-imported";
+const GRAD_TO_COVER = { g1: "m3", g2: "m2", g3: "m6", g4: "m13", g5: "m1", g6: "m15", g7: "m12", g8: "m10" };
+export async function docsInfo(store) {
+  const idx = (await store.get("docs-index", { type: "json" })) ?? [];
+  return { count: idx.filter((m) => !m.trashed).length, imported: (await store.get(DOCS_DONE, { type: "json" })) || null };
+}
+export async function importDocs(store) {
+  const idx = ((await store.get("docs-index", { type: "json" })) ?? []).filter((m) => !m.trashed);
+  if (!idx.length) return null;
+  // the pages in their tree order, each child right after its parent
+  const ids = new Set(idx.map((m) => m.id));
+  const kids = (pid) => idx.filter((m) => (pid === null ? !m.parent || !ids.has(m.parent) : m.parent === pid)).sort((a, b) => (a.order || 0) - (b.order || 0) || (a.created || 0) - (b.created || 0));
+  const seen = new Set(), order = [];
+  const walk = (pid, depth) => { for (const m of kids(pid)) { if (seen.has(m.id)) continue; seen.add(m.id); order.push([m, depth]); walk(m.id, depth + 1); } };
+  walk(null, 0); for (const m of idx) if (!seen.has(m.id)) order.push([m, 0]);
+  const items = [], cols = 4, W = 320, H = 240, G = 48, rid = () => Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8);
+  let n = 0;
+  for (const [m, depth] of order.slice(0, MAX_ITEMS)) {
+    const pg = (await store.get(`doc-${m.id}`, { type: "json" })) ?? {};
+    let blocks = Array.isArray(pg.blocks) ? pg.blocks : [];
+    if (m.kind === "db" && pg.db && Array.isArray(pg.db.cols)) { // a database: its rows as a table
+      const cols2 = pg.db.cols.slice(0, 8), cell = (c, v) => { if (v == null || v === "") return ""; if (Array.isArray(v)) return v.map((x) => (c.opts || []).find((o) => o.id === x)?.name || "").filter(Boolean).join(", "); if (c.opts) return (c.opts.find((o) => o.id === v) || {}).name || ""; if (v === true) return "Yes"; return String(v); };
+      const rows = [cols2.map((c) => c.name || "")].concat((pg.db.rows || []).slice(0, 39).map((r) => cols2.map((c) => cell(c, (r.c || {})[c.id]).replace(/[<>&]/g, (ch) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[ch])))));
+      blocks = [...blocks, { t: "table", rows }];
+    }
+    const id = rid(), cover = m.cover ? (m.cover.grad ? { k: GRAD_TO_COVER[m.cover.grad] || "m1" } : m.cover.src ? { src: m.cover.src, fy: m.cover.fy ?? 50 } : null) : null;
+    const clean = cleanBlocks(blocks);
+    items.push(cleanItem({ id, t: "page", x: (n % cols) * (W + G) + depth * 24, y: Math.floor(n / cols) * (H + G), w: W, h: H, z: n + 1, title: m.title || "", icon: m.icon || "", cover, snip: blocksText(clean, " ").replace(/\s+/g, " ").trim().slice(0, 320), words: wordCount(clean), edited: m.updated || Date.now(), ts: m.updated || Date.now() }));
+    await store.setJSON(pageKey(id), { id, blocks: clean, updated: Date.now() });
+    n++;
+  }
+  const r = await createBoard(store, { title: "From Docs", icon: "file-text", cover: { k: "m4" }, items: items.filter(Boolean), links: [] });
+  await store.setJSON(DOCS_DONE, { ts: Date.now(), board: r.meta.id, count: items.length });
+  return r;
+}
+
 /* ---------- the writing inside a page card ---------- */
 export async function loadPage(store, id) { return (await store.get(pageKey(id), { type: "json" })) ?? { id, blocks: [], updated: 0 }; }
 

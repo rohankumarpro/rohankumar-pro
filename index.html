@@ -3530,7 +3530,7 @@ function hideCtx(){ctx.hidden=true}
 desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;if(e.target.closest('.win,#shelf,.icons,.widgets,.cat,.jar,.launcher,.qs,.ctx,.topbar,.mw,.shelfw,.lock,#toast,.cat-chat,#boot,.dock-handle,.qrbig,#tiles,.tile-ghost'))return;
   if(!L.hidden||!qs.hidden||!ctx.hidden)return;if(window.__tapMin&&__tapMin())minimizeAll()},true);
 /* Our own right-click menu, everywhere. The browser's menu never shows. What it offers depends on what was clicked. */
-/* ---- Every app can add its own right-click items:  registerCtx('docs',(target,event)=>[["Label",()=>{...}],null,["Delete",fn,'danger']]) ---- */
+/* ---- Every app can add its own right-click items:  registerCtx('boards',(target,event)=>[["Label",()=>{...}],null,["Delete",fn,'danger']]) ---- */
 const APP_CTX={};
 window.registerCtx=(id,fn)=>{APP_CTX[id]=fn};
 const copyText=async(t,msg)=>{try{await navigator.clipboard.writeText(t);toast(msg||'Copied')}catch(x){toast('Could not copy')}};

@@ -149,12 +149,29 @@ export async function boardsApp(body, key) {
     const hr = new Date().getHours(), hi = hr < 5 ? "Working late" : hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
     main.innerHTML = `<div class="ba-home"><header class="ba-hh"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><div><h1>${hi}</h1><p>Your boards for ideas, notes, scripts and moodboards.</p></div></header>
       <section class="ba-tpl" aria-label="Start a board">${Object.entries(T).map(([k, t]) => `<button class="ba-tc" data-tpl="${k}"><span class="ba-tcv" style="background:${coverCss({ k: t.cover })}"><span class="ba-tci">${I(k === "blank" ? "plus" : t.icon, 22)}</span></span><b>${t.name}</b><small>${t.desc}</small></button>`).join("")}</section>
+      <div class="ba-docs" hidden></div>
       <div class="ba-gh"><h2>Recent boards</h2><span class="ba-cnt"></span></div>
       <section class="ba-grid"></section></div>`;
     drawGrid();
     $("[data-tg]", main).onclick = () => toggleSide();
     $$("[data-tpl]", main).forEach((b) => (b.onclick = () => newBoard(b.dataset.tpl)));
+    offerDocs();
     R.item(body, "", "Boards", mode);
+  }
+  // Docs was retired: its pages are still stored, and can be copied onto a board in one go
+  async function offerDocs() {
+    const r = await api("/api/boards?a=docs"); const el = $(".ba-docs", main);
+    if (!el || !r.ok || !r.data.count || r.data.imported) return;
+    const n = r.data.count;
+    el.hidden = false;
+    el.innerHTML = `<span class="ba-dci">${I("file-text", 22)}</span><div><b>Your ${n} Docs page${n === 1 ? "" : "s"} can live here now</b><p>Docs has been retired. Bring its pages onto a board, where you can write in them, arrange them and see them in the Database view. Your Docs pages stay saved as they are.</p></div><button class="btn" data-imp>Bring them in</button>`;
+    $("[data-imp]", el).onclick = async (e) => {
+      e.currentTarget.disabled = true; e.currentTarget.textContent = "Bringing them in…";
+      const x = await api("/api/boards?a=importdocs", { method: "POST", body: {} });
+      if (!x.ok) { toast(x.data.error || "Could not bring them in. Try again."); e.currentTarget.disabled = false; e.currentTarget.textContent = "Bring them in"; return; }
+      A.boards.push(x.data.board); toast(`${n} page${n === 1 ? "" : "s"} brought in`);
+      openBoard(x.data.board.id, "push", { doc: x.data.doc });
+    };
   }
   function drawGrid() {
     const g = $(".ba-grid", main); if (!g) return; const list = found();

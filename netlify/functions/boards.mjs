@@ -6,6 +6,8 @@
 //   GET ?page=<itemId>&a=history earlier versions of that writing
 //   GET ?pages=<id>,<id>…        the writing of several page cards at once (up to 60): {pages:{id:{blocks, updated}}}
 //   PUT ?a=order {ids}           the order boards are listed in
+//   GET ?a=docs                  how many old Docs pages there are, and whether they were brought in
+//   POST ?a=importdocs           copy the old Docs pages onto a new board (Docs itself is left untouched)
 //   GET ?a=link&url=<url>        a preview of a web address (title, picture, site)
 //   POST {title?, icon?, cover?, items?, links?}       new board
 //   POST ?id=<id>&a=patch {up, del, lup, ldel, meta?, base}  change items and connectors (409 {stale} if the read was old)
@@ -22,7 +24,7 @@ import { getStore } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
 import { isPreviewHost } from "../lib/store.mjs";
 import { maybeSnapshot } from "../lib/snapshots.mjs";
-import { listBoards, reorder, metaOf, createBoard, loadBoard, updateMeta, patchBoard, purgeBoard, loadPage, savePage, unfurl, okId, histKey, pageHistKey, pageKey, boardKey, boardsStore, loadIndex } from "../lib/boards.mjs";
+import { listBoards, reorder, docsInfo, importDocs, metaOf, createBoard, loadBoard, updateMeta, patchBoard, purgeBoard, loadPage, savePage, unfurl, okId, histKey, pageHistKey, pageKey, boardKey, boardsStore, loadIndex } from "../lib/boards.mjs";
 
 export default async (req) => {
   const u = new URL(req.url), raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
@@ -43,6 +45,7 @@ async function run(event) {
 
     if (m === "GET") {
       if (q.a === "link") { const r = await unfurl(q.url || ""); return r ? json(r) : json({ error: "That address can't be previewed" }, 400); }
+      if (q.a === "docs") return json(await docsInfo(store));
       if (q.pages) {
         const ids = String(q.pages).split(",").filter(okId).slice(0, 60), out = {};
         await Promise.all(ids.map(async (id) => { const p = await loadPage(store, id); out[id] = { blocks: p.blocks || [], updated: p.updated || 0 }; }));
@@ -76,6 +79,11 @@ async function run(event) {
         const r = await patchBoard(store, q.id, { up: Object.values(h.items), lup: Object.values(h.links || {}), del, ldel }); if (!r) return json({ error: "Not found" }, 404);
         const doc = await loadBoard(store, q.id);
         return json({ ok: true, doc: { items: doc.items, links: doc.links, updated: doc.updated, rev: doc.rev || 0 } });
+      }
+      if (q.a === "importdocs") {
+        const r = await importDocs(store); if (!r) return json({ error: "There are no Docs pages to bring in" }, 404);
+        await maybeSnapshot(store, backups());
+        return json({ ok: true, board: metaOf(r.meta), doc: { items: r.doc.items, links: r.doc.links, updated: r.doc.updated, rev: r.doc.rev } });
       }
       if (q.a === "copypage") {
         if (!okId(b.from) || !okId(b.to)) return json({ error: "Bad page" }, 400);
