@@ -296,6 +296,7 @@ applyScale();
 
 /* ================= new apps: Services, Book a call ================= */
 const ART_ADD = {
+  boards: `<rect class="l1" x="19" y="21" width="35" height="29" rx="8.5" fill="${IB}"/><rect class="up" x="58" y="21" width="24" height="41" rx="8.5" fill="${IY}"/><rect class="rise" x="19" y="54" width="35" height="26" rx="8.5" fill="${IG}"/><rect x="58" y="66" width="24" height="14" rx="7" fill="${IR}"/>`,
   docs: `<rect class="l1" x="22" y="22" width="40" height="52" rx="9" fill="${IBD}"/><rect class="up" x="36" y="28" width="42" height="50" rx="9" fill="${IB}"/><path d="M46 45h22M46 56h22M46 67h12" stroke="#fff" stroke-width="4.5" stroke-linecap="round" fill="none"/>`,
   music: `<circle class="l1" cx="50" cy="50" r="29" fill="#2B2625"/><circle cx="50" cy="50" r="21" fill="none" stroke="#4A4240" stroke-width="1.4"/><circle cx="50" cy="50" r="15" fill="none" stroke="#3B3534" stroke-width="1"/><g class="rise"><circle cx="50" cy="50" r="9.5" fill="#E4572E"/><circle cx="50" cy="50" r="2.2" fill="#fff"/></g><path d="M50 21a29 29 0 0 1 21 9" stroke="#fff" stroke-opacity=".22" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   content: `<g class="rise"><path transform="translate(20 19) scale(2.5)" d="${BRANDS.youtube.d}" fill="#FF0000"/></g>`, // the official YouTube play button
@@ -308,7 +309,9 @@ function newApps() {
   const SV = { id: "services", title: "Services", shape: "clover", color: "c1", glyph: G.work || G.folder, w: 640, h: 640, render: () => "" };
   const BK = { id: "book", title: "Book a call", shape: "cookie", color: "c2", glyph: G.mail, w: 560, h: 680, render: () => "" };
   const DX = { id: "docs", title: "Docs", shape: "squircle", color: "c3", glyph: G.docs || G.folder, w: 1240, h: 780, render: () => "" };
-  registerApp(DX); registerApp(SV); registerApp(BK);
+  const BD = { id: "boards", title: "Boards", shape: "squircle", color: "c5", glyph: G.docs || G.folder, w: 1320, h: 840, ownerOnly: true, render: () => "" };
+  registerApp(DX); registerApp(BD); registerApp(SV); registerApp(BK);
+  lazyApp("boards", "/js/app-boards.mjs", "boardsApp");
   lazyApp("docs", "/js/app-docs.mjs", "docsApp");
   lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services"); lazyApp("book", "/js/app-book.mjs", "bookApp");
   if (!EDITABLE.includes("services")) EDITABLE.push("services");
@@ -323,5 +326,5 @@ function init() {
   if (isAdmin()) setInterval(() => Notif.gather().catch(() => {}), 120000);
   document.addEventListener("owner-changed", () => Notif.gather().catch(() => {}));
 }
-const _oc = window.ownerChanged; window.ownerChanged = function () { const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); Notif.gather().catch(() => {}); }, 50); return r; };
+const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined" && open.boards) { try { closeWin(open.boards, "boards", true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); Notif.gather().catch(() => {}); }, 50); return r; };
 if (document.readyState === "complete") init(); else addEventListener("load", init);

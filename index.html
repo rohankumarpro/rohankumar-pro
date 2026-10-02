@@ -3184,7 +3184,7 @@ var HIDDEN=new Set();
 var SITE={s:null,saveT:null,status:''};
 const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),timeline:JSON.parse(JSON.stringify(TIMELINE)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
 const NEVER_HIDE=['settings','notes'];
-function appVisible(id){return !HIDDEN.has(id)||!!LIVE.admin}
+function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return !!LIVE.admin;return !HIDDEN.has(id)||!!LIVE.admin}
 function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=s.now||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
   const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=s.bio||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.timeline=A('timeline');P.qrs=A('qrs');
@@ -3545,6 +3545,7 @@ function ctxItemsFor(e){
   const fld=el.closest('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea,[contenteditable="true"],[contenteditable=""]');
   const win=el.closest('.win'),a=el.closest('a[href]'),img=el.closest('img'),ico=el.closest('[data-app]');
   let mine=[];if(win&&!el.closest('.lock')){try{mine=(APP_CTX[win.dataset.app]&&APP_CTX[win.dataset.app](el,e,win))||[]}catch(x){console.error('ctx',win.dataset.app,x)}}
+  if(mine.handled)return null;/* the app showed its own menu */
   const own=!!mine.replace;
   /* 1. what you clicked on, character by character */
   if(fld){const ro=fld.readOnly||fld.disabled,txt=()=>fld.value!=null?fld.value.slice(fld.selectionStart,fld.selectionEnd):sel;
@@ -3586,7 +3587,7 @@ function ctxItemsFor(e){
 function trim(o){while(o.length&&o[o.length-1]===null)o.pop();return o.filter((x,i)=>x!==null||(i>0&&o[i-1]!==null))}
 document.addEventListener('contextmenu',e=>{
   e.preventDefault();hideLauncher();
-  const own=ctxItemsFor(e);
+  const own=ctxItemsFor(e);if(own===null){hideCtx();return}
   showCtx(e.clientX,e.clientY,own.length?own:undefined);
 },true);
 /* phones: a long press opens the same menu (iOS never sends one by itself) */
