@@ -321,3 +321,20 @@ hr{border:0;border-top:0;height:calc(16 * var(--u))}
 .spot-ic{border-radius:var(--r-4);background:var(--surface2)}
 .spot-g{font:500 11px/16px var(--mono);letter-spacing:.06em;color:var(--ink2)}
 .gbf input,.gbf textarea{background:var(--surface)!important}
+/* ---- reading content keeps the sans; the small mono label is for settings and forms only ---- */
+.article h3,.bk-doc h3,.jr-content h3,.rb h3{font:var(--fw-b) var(--fs-7)/1.3 var(--font);letter-spacing:-.01em;text-transform:none;color:var(--ink);margin:calc(28 * var(--u)) 0 calc(6 * var(--u))}
+/* quotes and callouts are tonal planes, never a ruled edge */
+.bk-doc blockquote,.rb[data-t="quote"] .rb-row{border-left:0;border-radius:var(--r-6);background:var(--surface2);padding:calc(14 * var(--u)) calc(20 * var(--u))}
+/* journal editor: cover and title are bare planes, not capsules or boxes */
+.jed-add{border:0;border-radius:var(--r-6)}.jed-add:hover{background:var(--surface3)}.jed-cover{border-radius:var(--r-6)}
+.jed-title,.jed-excerpt{background:none!important;box-shadow:none!important;border-radius:0!important;padding:calc(4 * var(--u)) 0!important}
+.jed-excerpt{padding-bottom:calc(14 * var(--u))!important;border-bottom:0}
+/* QR codes sit on a white rounded square with a quiet margin, so no corner of the code is ever clipped */
+button.dc-qr,.dc-qr{border-radius:var(--r-4)!important;padding:calc(8 * var(--u))!important;box-sizing:border-box;box-shadow:none}
+/* fields that sit on a tonal card get the white plane, so they read as fields */
+.hbe-card input:not([type=checkbox]):not([type=color]),.hbe-card textarea,.ed-card input:not([type=checkbox]),.ed-card textarea,.pj-row input,.pj-row textarea{background:var(--surface)!important}
+.hbe-card .hbe-bs{background:var(--surface)!important}
+.hbe-add .hint{background:none!important;padding:0!important;color:var(--ink2)}
+/* bare text surfaces (page titles, notes, search) never get the field ring or a box */
+.dx-title:focus,.jed-title:focus,.jed-excerpt:focus,.kn-ti:focus,.kn-ta:focus,.dx-search input:focus,.dx-isr:focus{box-shadow:none!important;outline:0!important}
+.dx-search:focus-within{box-shadow:0 0 0 2px var(--ring)}

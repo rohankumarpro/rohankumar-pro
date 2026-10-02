@@ -8,25 +8,13 @@ const I = (n, size = 16) => icon(n, { size });
 const pageIco = (p, size = 17) => I(p && p.icon && ICONS[p.icon] ? p.icon : "file-text", size);
 
 const D = { pages: null, open: null, ed: null, saveT: null, blocks: [], status: "", loaded: false };
+const CACHE = {}; // pages just made here: the server can take a moment to list them, so open them from what we sent
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
 const PAGE_ICONS = ["file-text", "file", "folder", "bookmark", "checkbox", "target", "rocket", "bulb", "star", "heart", "flame", "sparkles", "leaf", "globe", "home", "wallet", "brain", "palette", "video", "music", "camera", "laptop", "settings", "wrench", "chart", "trend", "calendar", "clock", "chat", "mail", "phone", "lock", "flask", "compass", "coffee", "plane", "trophy", "gift", "graduation", "cat", "shield", "map", "user", "pencil", "tag", "image", "table", "code"];
 const GRADS = { g1: "linear-gradient(135deg,#a8e6cf,#dcedc1)", g2: "linear-gradient(135deg,#ffd3b6,#ffaaa5)", g3: "linear-gradient(135deg,#c3cfe2,#c3b1e1)", g4: "linear-gradient(135deg,#fddb92,#d1fdff)", g5: "linear-gradient(135deg,#84fab0,#8fd3f4)", g6: "linear-gradient(135deg,#fbc2eb,#a6c1ee)", g7: "linear-gradient(135deg,#cfd9df,#e2ebf0)", g8: "linear-gradient(135deg,#2e6b57,#1b3a30)" };
-const P = (t) => ({ t: "p", h: esc(t) });
-const H = (n, t) => ({ t: "h" + n, h: esc(t) });
-const LI = (t) => ({ t: "ul", h: esc(t) });
-const TD = (t, c) => ({ t: "todo", h: esc(t), ...(c ? { c: true } : {}) });
-const TEMPLATES = [
-  { name: "Blank page", icon: "file-text", title: "", blocks: [] },
-  { name: "Meeting notes", icon: "calendar", title: "Meeting notes", blocks: [H(2, "Details"), P("Date · People · Goal"), H(2, "Agenda"), LI("Topic one"), LI("Topic two"), H(2, "Notes"), P(""), H(2, "Action items"), TD("First action"), TD("Second action")] },
-  { name: "Project brief", icon: "target", title: "Project brief", blocks: [{ t: "callout", h: esc("One sentence on what this project is and why it matters."), e: "target", tone: "blue" }, H(2, "Goals"), LI("Goal"), H(2, "Scope"), P(""), H(2, "Timeline"), LI("Week 1"), LI("Week 2"), H(2, "Deliverables"), TD("Deliverable")] },
-  { name: "To-do list", icon: "checkbox", title: "To-do", blocks: [TD("First thing"), TD("Second thing"), TD("Third thing")] },
-  { name: "Daily log", icon: "file-text", title: "Today", blocks: [H(2, "Focus"), P(""), H(2, "Wins"), LI(""), H(2, "Tomorrow"), TD("")] },
-  { name: "Wiki page", icon: "folder", title: "Wiki page", blocks: [{ t: "toc" }, H(2, "Overview"), P(""), H(2, "Details"), P(""), H(2, "Related"), P("")] },
-];
-
 /* ---------- data helpers ---------- */
 const live = () => (D.pages || []).filter((p) => !p.trashed);
 const byId = (id) => (D.pages || []).find((p) => p.id === id);
@@ -90,18 +78,20 @@ export async function docsApp(body, slug) {
       const m = pages.filter((p) => label(p).toLowerCase().includes(q.text.toLowerCase()));
       tree = m.length ? m.map((p) => `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:0"><span class="dx-tw nokid"></span><button class="dx-nm" data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><span class="dx-t">${esc(label(p))}</span></button></div></div>`).join("") : '<p class="dx-none">No pages match.</p>';
     } else tree = kids(null).map((p) => row(p, 0)).join("") || `<p class="dx-none">${owner ? "No pages yet. Make your first one." : "Nothing is published yet."}</p>`;
-    side.innerHTML = `<div class="dx-sh"><b>Docs</b>${owner ? `<button class="dx-new" data-new aria-label="New page" title="New page">${I("plus", 15)}<span>New</span></button>` : ""}</div>
+    side.innerHTML = `<div class="dx-sh"><b>Docs</b><button class="dx-ib dx-tg" data-tg aria-label="Hide the sidebar" title="Hide the sidebar (Ctrl+\\)">${I("panel-left", 18)}</button></div>
+      ${owner ? `<button class="dx-newrow" data-new>${I("plus", 16)}<span>New page</span></button>` : ""}
       <label class="dx-search">${I("search", 16)}<input type="search" placeholder="Search pages" value="${esc(q.text)}" aria-label="Search pages" autocomplete="off"></label>
-      <div class="dx-scroll"><button class="dx-home${D.open ? "" : " on"}" data-home>${I("home", 17)}<span>Home</span></button>
+      <div class="dx-scroll"><button class="dx-home${D.open ? "" : " on"}" data-home>${I("home", 16)}<span>Home</span></button>
       ${!q.text && favs.length ? `<h4>Favorites</h4>${favs.map((p) => `<div class="dx-node"><div class="dx-it${D.open && D.open.id === p.id ? " on" : ""}" data-id="${p.id}" style="--d:0"><span class="dx-tw nokid"></span><button class="dx-nm" data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><span class="dx-t">${esc(label(p))}</span></button></div></div>`).join("")}` : ""}
       <h4>${q.text ? "Results" : owner ? "Pages" : "Published"}</h4><div role="tree">${tree}</div>
-      ${owner ? `<button class="dx-home dx-trash" data-trash>${I("trash", 17)}<span>Bin${trashed.length ? ` (${trashed.length})` : ""}</span></button>` : ""}</div>`;
+      ${owner ? `<button class="dx-home dx-trash" data-trash>${I("trash", 16)}<span>Bin${trashed.length ? ` (${trashed.length})` : ""}</span></button>` : ""}</div>`;
     const search = $(".dx-search input", side);
     search.oninput = () => { q.text = search.value; const pos = search.selectionStart; drawSide(); const s2 = $(".dx-search input", side); s2.focus(); s2.setSelectionRange(pos, pos); };
     $$("[data-go]", side).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
     $$("[data-tw]", side).forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const id = b.dataset.tw; open[id] = !open[id]; ls.set("dxOpen", open); drawSide(); }));
     $$("[data-add]", side).forEach((b) => (b.onclick = (e) => { e.stopPropagation(); open[b.dataset.add] = true; ls.set("dxOpen", open); newPage({ parent: b.dataset.add }); }));
     $("[data-new]", side)?.addEventListener("click", () => newPage({}));
+    $("[data-tg]", side)?.addEventListener("click", () => toggleSide());
     $("[data-home]", side).onclick = () => home();
     $("[data-trash]", side)?.addEventListener("click", showTrash);
     if (owner) wireDrag();
@@ -137,20 +127,23 @@ export async function docsApp(body, slug) {
   }
 
   /* ----- pages ----- */
-  async function newPage({ parent = null, template } = {}) {
-    const t = template || TEMPLATES[0];
-    const r = await api("/api/docs", { method: "POST", body: { title: t.title, icon: t.icon === "file-text" ? "" : t.icon, parent, blocks: t.blocks } });
+  async function newPage({ parent = null } = {}) {
+    const r = await api("/api/docs", { method: "POST", body: { title: "", icon: "", parent, blocks: [] } });
     if (!r.ok) return toast(r.data.error || "Could not create the page");
-    D.pages.push(r.data.page); drawSide(); await openId(r.data.page.id, { fresh: true });
+    const pg = r.data.page; D.pages.push(pg); CACHE[pg.id] = { blocks: [] };
+    if (mobile()) root.dataset.view = "page";
+    drawSide(); await openId(pg.id, { fresh: true });
   }
   function home(mode = "push") {
     flush(); D.open = null; root.dataset.view = "list"; drawSide();
-    const recent = live().slice().sort((a, b) => b.updated - a.updated).slice(0, 6);
-    main.innerHTML = `<div class="dx-home-view">${mobile() ? "" : ""}<h1>${owner ? "Your workspace" : "Docs"}</h1><p class="dx-lead">${owner ? "Notes, plans and write-ups. Pages are private until you publish them." : "Guides and write-ups published by Rohan."}</p>
-      ${owner ? `<h3>Start with a template</h3><div class="dx-tpl">${TEMPLATES.map((t, i) => `<button data-tpl="${i}"><span>${I(t.icon, 26)}</span><b>${esc(t.name)}</b></button>`).join("")}</div>` : ""}
-      ${recent.length ? `<h3>${owner ? "Recently edited" : "Pages"}</h3><div class="dx-recent">${recent.map((p) => `<button data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}${p.pub ? " · Published" : ""}</small></button>`).join("")}</div>` : (owner ? "" : '<div class="dx-empty"><h2>Nothing here yet</h2><p>Pages published by Rohan will show up here.</p></div>')}</div>`;
-    $$("[data-tpl]", main).forEach((b) => (b.onclick = () => newPage({ template: TEMPLATES[+b.dataset.tpl] })));
+    const recent = live().slice().sort((a, b) => b.updated - a.updated).slice(0, 12);
+    main.innerHTML = `<div class="dx-top">${mobile() ? "" : `<button class="dx-ib dx-tg" data-tg aria-label="Show the sidebar" title="Show the sidebar">${I("panel-left", 18)}</button>`}<span class="dx-crumbs"></span></div>
+      <div class="dx-scrollmain"><div class="dx-home-view"><h1>${owner ? "Your workspace" : "Docs"}</h1><p class="dx-lead">${owner ? "Notes, plans and write-ups. Pages are private until you publish them." : "Guides and write-ups published by Rohan."}</p>
+      ${owner ? `<button class="btn dx-hbtn" data-new>${I("plus", 16)}<span>New page</span></button>` : ""}
+      ${recent.length ? `<h3>${owner ? "Recently edited" : "Pages"}</h3><div class="dx-recent">${recent.map((p) => `<button data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}${p.pub ? " · Published" : ""}</small></button>`).join("")}</div>` : (owner ? '<div class="dx-empty"><h2>No pages yet</h2><p>Make your first one with “New page”.</p></div>' : '<div class="dx-empty"><h2>Nothing here yet</h2><p>Pages published by Rohan will show up here.</p></div>')}</div></div>`;
     $$("[data-go]", main).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
+    $("[data-new]", main)?.addEventListener("click", () => newPage({}));
+    $("[data-tg]", main)?.addEventListener("click", () => toggleSide());
     R.item(body, "", "Docs — Rohan Kumar", mode);
   }
   function openKey(key, mode) { const p = find(key); if (p) return openId(p.id, { mode }); toast("That page isn't available."); return home(mode); }
@@ -158,15 +151,17 @@ export async function docsApp(body, slug) {
   async function openId(id, { mode = "push", fresh } = {}) {
     await flush();
     const meta = byId(id); if (!meta) return home(mode);
-    const r = await api("/api/docs?id=" + id);
-    if (!r.ok) { toast(r.status === 404 ? "That page isn't available." : "Could not open the page"); return home(mode); }
-    D.open = { ...meta }; D.blocks = r.data.blocks; D.status = "";
+    let blocks;
+    if (CACHE[id]) blocks = CACHE[id].blocks;
+    else { const r = await api("/api/docs?id=" + id); if (!r.ok) { toast(r.status === 404 ? "That page isn't available." : "Could not open the page"); return home(mode); } blocks = r.data.blocks; }
+    delete CACHE[id];
+    D.open = { ...meta }; D.blocks = blocks; D.status = "";
     root.dataset.view = "page"; drawSide();
     const editable = owner && !meta.trashed;
-    main.innerHTML = `<div class="dx-top"><button class="dx-back" data-back aria-label="Back to pages">${I("chevron-left", 20)}</button><nav class="dx-crumbs" aria-label="Breadcrumb"></nav><span class="dx-st"></span>
-        ${editable ? `<button class="dx-b" data-share>Share</button><button class="dx-b icon" data-menu aria-label="More" title="More">${I("more", 18)}</button>` : `<button class="dx-b" data-copy>Copy link</button>`}</div>
+    main.innerHTML = `<div class="dx-top"><button class="dx-back" data-back aria-label="Back to pages">${I("chevron-left", 20)}</button><button class="dx-ib dx-tg" data-tg aria-label="Show the sidebar" title="Show the sidebar (Ctrl+\\)">${I("panel-left", 18)}</button><nav class="dx-crumbs" aria-label="Breadcrumb"></nav><span class="dx-st"></span>
+        ${editable ? `<button class="dx-b" data-share>Share</button><button class="dx-b icon" data-menu aria-label="More" title="More">${I("more", 18)}</button>` : `<button class="dx-b" data-copy>Copy link</button><button class="dx-b icon" data-pdf aria-label="Save as PDF" title="Save as PDF">${I("download", 18)}</button>`}</div>
       <div class="dx-scrollmain"><div class="dx-page${ls.get("dxWide", false) ? " wide" : ""}"><div class="dx-cover" data-cover></div>
-        <div class="dx-head"><button class="dx-icon" data-icon aria-label="Page icon"></button><textarea class="dx-title" rows="1" placeholder="Untitled" maxlength="160" aria-label="Page title" ${editable ? "" : "readonly"}></textarea></div>
+        <div class="dx-head"><button class="dx-icon" data-icon aria-label="Page icon"></button>${editable ? '<div class="dx-adds"></div>' : ""}<textarea class="dx-title" rows="1" placeholder="Untitled" maxlength="160" aria-label="Page title" ${editable ? "" : "readonly"}></textarea></div>
         <div class="dx-body"></div><div class="dx-subs"></div><footer class="dx-foot"></footer></div></div>`;
     const title = $(".dx-title", main), host = $(".dx-body", main);
     title.value = meta.title || "";
@@ -174,7 +169,9 @@ export async function docsApp(body, slug) {
     setTimeout(fit, 0); title.addEventListener("input", () => { fit(); D.open.title = title.value; const m = byId(id); if (m) m.title = title.value; touch(); drawCrumbs(); const t = $(`.dx-it[data-id="${id}"] .dx-t`, side); if (t) t.textContent = label(D.open); });
     title.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); D.ed && D.ed.focus("start"); } });
     $("[data-back]", main).onclick = () => { home(); };
-    drawCrumbs(); drawCover(); drawIcon(); drawSubs(); drawFoot();
+    $("[data-tg]", main).onclick = () => toggleSide();
+    $("[data-pdf]", main)?.addEventListener("click", () => exportPdf());
+    drawCrumbs(); drawCover(); drawIcon(); drawAdds(); drawSubs(); drawFoot();
     if (editable) {
       D.ed = await makeEditor(host, { blocks: D.blocks, placeholder: "Type '/' for blocks, or just start writing…", onChange: () => { touch(); drawFoot(); }, onStatus: (s) => { if (s) setStatus(s); } });
       if (fresh || !meta.title) setTimeout(() => title.focus(), 50);
@@ -191,35 +188,59 @@ export async function docsApp(body, slug) {
   }
   function drawIcon() {
     const b = $("[data-icon]", main); if (!b) return; const ic = D.open.icon;
-    b.innerHTML = ic && ICONS[ic] ? I(ic, 52) : (owner ? I("smile", 30) : ""); b.classList.toggle("empty", !ic); if (!ic && !owner) b.hidden = true;
-    b.onclick = () => { if (!owner) return; iconPicker(b); };
+    b.innerHTML = ic && ICONS[ic] ? I(ic, 44) : ""; b.classList.toggle("empty", !(ic && ICONS[ic]));
+    b.onclick = () => { if (owner) iconPicker(b); };
+  }
+  function drawAdds() {
+    const el = $(".dx-adds", main); if (!el || !D.open) return;
+    el.innerHTML = `${D.open.icon && ICONS[D.open.icon] ? "" : `<button data-ai>${I("smile", 15)}Add icon</button>`}${D.open.cover ? "" : `<button data-ac>${I("image", 15)}Add cover</button>`}`;
+    $("[data-ai]", el)?.addEventListener("click", (e) => iconPicker(e.currentTarget));
+    $("[data-ac]", el)?.addEventListener("click", (e) => coverPicker(e.currentTarget));
   }
   function iconPicker(anchor) {
     const m = popup(anchor, [], { align: "left" }); m.classList.add("dx-emoji");
-    m.innerHTML = `<div class="dx-eg">${PAGE_ICONS.map((e) => `<button data-e="${e}" aria-label="${e.replace(/-/g, " ")}" title="${e.replace(/-/g, " ")}">${I(e, 20)}</button>`).join("")}</div><div class="dx-er"><button data-rm>Remove icon</button></div>`;
-    const set = (v) => { D.open.icon = v; const mm = byId(D.open.id); if (mm) mm.icon = v; m.remove(); drawIcon(); drawCrumbs(); drawSide(); touch(true); };
-    $$("[data-e]", m).forEach((b) => (b.onclick = () => set(b.dataset.e)));
-    $("[data-rm]", m).onclick = () => set("");
+    const draw = (qx = "") => {
+      const list = PAGE_ICONS.filter((e) => !qx || e.replace(/-/g, " ").includes(qx.toLowerCase()));
+      $(".dx-eg", m).innerHTML = list.map((e) => `<button data-e="${e}" aria-label="${e.replace(/-/g, " ")}" title="${e.replace(/-/g, " ")}">${I(e, 20)}</button>`).join("") || '<p class="hint" style="grid-column:1/-1;margin:6px">No icon matches.</p>';
+      $$("[data-e]", m).forEach((b) => (b.onclick = () => set(b.dataset.e)));
+    };
+    m.innerHTML = `<input class="dx-isr" type="search" placeholder="Search icons" aria-label="Search icons" autocomplete="off"><div class="dx-eg"></div><div class="dx-er"><button data-rm>Remove icon</button></div>`;
+    const set = (v) => { D.open.icon = v; const mm = byId(D.open.id); if (mm) mm.icon = v; m.remove(); drawIcon(); drawAdds(); drawCrumbs(); drawSide(); touch(true); };
+    draw(); $(".dx-isr", m).oninput = (e) => draw(e.target.value.trim()); $("[data-rm]", m).onclick = () => set("");
+    setTimeout(() => $(".dx-isr", m)?.focus(), 30);
+  }
+  function coverPicker(anchor) {
+    const m = popup(anchor, [], { align: "left" }); m.classList.add("dx-coverpick");
+    m.innerHTML = `<div class="dx-gr">${Object.keys(GRADS).map((g) => `<button data-g="${g}" style="background:${GRADS[g]}" aria-label="Colour ${g}"></button>`).join("")}</div><button class="dx-up" data-up>${I("upload", 16)}<span>Upload a picture</span></button>`;
+    $$("[data-g]", m).forEach((x) => (x.onclick = () => { D.open.cover = { grad: x.dataset.g }; m.remove(); drawCover(); drawAdds(); touch(true); }));
+    $("[data-up]", m).onclick = async () => { m.remove(); try { const f = (await Up.pick("image/*"))[0]; if (!f) return; setStatus("Uploading…"); const r = await Up.image(f); D.open.cover = { src: r.url, fy: 50 }; drawCover(); drawAdds(); touch(true); } catch (e) { toast(e.message || "Upload failed"); } };
   }
   function drawCover() {
     const el = $("[data-cover]", main); if (!el || !D.open) return; const c = D.open.cover;
     el.className = "dx-cover" + (c ? " has" : "");
     el.style.background = c && c.grad ? GRADS[c.grad] : "";
-    el.innerHTML = c && c.src ? `<img src="${esc(c.src)}" alt="" style="object-position:50% ${c.fy ?? 50}%">` : "";
-    if (!owner) return;
-    el.insertAdjacentHTML("beforeend", c ? `<div class="dx-cb"><button data-c="change">Change cover</button><button data-c="remove">Remove</button></div>` : `<button class="dx-addcover" data-c="add">${I("image", 15)}<span>Add cover</span></button>`);
+    el.innerHTML = c && c.src ? `<img src="${esc(c.src)}" alt="" draggable="false" style="object-position:50% ${c.fy ?? 50}%">` : "";
+    if (!owner || !c) return;
+    el.insertAdjacentHTML("beforeend", `<div class="dx-cb">${c.src ? '<button data-c="pos">Reposition</button>' : ""}<button data-c="change">Change cover</button><button data-c="remove">Remove</button></div>`);
     $$("[data-c]", el).forEach((b) => (b.onclick = () => {
-      if (b.dataset.c === "remove") { D.open.cover = null; drawCover(); touch(true); return; }
-      const m = popup(b, [], { align: "left" }); m.classList.add("dx-coverpick");
-      m.innerHTML = `<div class="dx-gr">${Object.keys(GRADS).map((g) => `<button data-g="${g}" style="background:${GRADS[g]}" aria-label="Colour ${g}"></button>`).join("")}</div><button class="dx-up" data-up>${I("upload", 16)}<span>Upload a picture</span></button>`;
-      $$("[data-g]", m).forEach((x) => (x.onclick = () => { D.open.cover = { grad: x.dataset.g }; m.remove(); drawCover(); touch(true); }));
-      $("[data-up]", m).onclick = async () => { m.remove(); try { const f = (await Up.pick("image/*"))[0]; if (!f) return; setStatus("Uploading…"); const r = await Up.image(f); D.open.cover = { src: r.url, fy: 50 }; drawCover(); touch(true); } catch (e) { toast(e.message || "Upload failed"); } };
+      const a = b.dataset.c;
+      if (a === "remove") { D.open.cover = null; drawCover(); drawAdds(); touch(true); return; }
+      if (a === "change") { coverPicker(b); return; }
+      /* reposition: drag the picture up or down, then press Done */
+      el.classList.add("repos"); const img = $("img", el), bar = $(".dx-cb", el); bar.innerHTML = '<button data-done>Done</button>';
+      let y0 = null, fy0 = c.fy ?? 50;
+      const down = (e) => { y0 = e.clientY; fy0 = c.fy ?? 50; el.setPointerCapture(e.pointerId); };
+      const move = (e) => { if (y0 == null) return; const h = el.getBoundingClientRect().height || 200; c.fy = Math.max(0, Math.min(100, fy0 - ((e.clientY - y0) / h) * 120)); img.style.objectPosition = `50% ${c.fy}%`; };
+      const up = () => { y0 = null; };
+      el.addEventListener("pointerdown", down); el.addEventListener("pointermove", move); el.addEventListener("pointerup", up);
+      $("[data-done]", bar).onclick = (ev) => { ev.stopPropagation(); el.removeEventListener("pointerdown", down); el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); touch(true); drawCover(); };
     }));
   }
   function drawSubs() {
     const el = $(".dx-subs", main); if (!el || !D.open) return; const ch = kids(D.open.id);
-    el.innerHTML = ch.length ? `<h3>Pages inside</h3><div class="dx-recent">${ch.map((p) => `<button data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}</small></button>`).join("")}</div>` : "";
+    el.innerHTML = `${ch.length ? `<h3>Pages inside</h3><div class="dx-recent">${ch.map((p) => `<button data-go="${p.id}"><span class="dx-em">${pageIco(p)}</span><b>${esc(label(p))}</b><small>${ago(p.updated)}</small></button>`).join("")}</div>` : ""}${owner && !D.open.trashed ? `<button class="dx-addsub" data-sub>${I("plus", 16)}<span>Add a page inside</span></button>` : ""}`;
     $$("[data-go]", el).forEach((b) => (b.onclick = () => openId(b.dataset.go)));
+    $("[data-sub]", el)?.addEventListener("click", () => { open[D.open.id] = true; ls.set("dxOpen", open); newPage({ parent: D.open.id }); });
   }
   function drawFoot() {
     const el = $(".dx-foot", main); if (!el || !D.open) return;
@@ -227,6 +248,26 @@ export async function docsApp(body, slug) {
     el.textContent = `${words} word${words === 1 ? "" : "s"} · ${Math.max(1, Math.round(words / 220))} min read${D.open.updated ? " · Edited " + ago(D.open.updated) : ""}`;
   }
   function setStatus(s) { D.status = s; const e = $(".dx-st", main); if (e) e.textContent = s; }
+
+  /* ----- sidebar: hide it for more room (remembered) ----- */
+  const applySide = () => { root.dataset.side = ls.get("dxSide", true) ? "on" : "off"; };
+  function toggleSide() { ls.set("dxSide", !ls.get("dxSide", true)); applySide(); }
+  applySide();
+
+  /* ----- save as PDF: print only this page (title, cover, text), so the browser's "Save as PDF" gets a clean document ----- */
+  async function exportPdf() {
+    if (!D.open) return; const p = D.open;
+    const blocksNow = D.ed ? D.ed.getBlocks() : D.blocks;
+    const c = h("div", { id: "print-one" });
+    const cov = p.cover && p.cover.src ? `<img src="${esc(p.cover.src)}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:14px">` : "";
+    c.innerHTML = `${cov}<h1>${esc(label(p))}</h1><div class="bk-doc"></div>`;
+    showBlocks($(".bk-doc", c), blocksNow);
+    document.body.append(c); document.body.classList.add("print-one");
+    const imgs = $$("img", c).filter((i) => !i.complete); await Promise.race([Promise.all(imgs.map((i) => new Promise((r) => { i.onload = i.onerror = r; }))), new Promise((r) => setTimeout(r, 2500))]);
+    const fin = () => { c.remove(); document.body.classList.remove("print-one"); window.removeEventListener("afterprint", fin); };
+    window.addEventListener("afterprint", fin); setTimeout(() => window.print(), 60);
+    toast("Choose “Save as PDF” as the printer");
+  }
 
   /* ----- saving ----- */
   function touch(now) { if (!owner || !D.open) return; clearTimeout(D.saveT); setStatus("Unsaved…"); D.saveT = setTimeout(save, now ? 0 : 1100); }
@@ -259,7 +300,7 @@ export async function docsApp(body, slug) {
         { t: ls.get("dxWide", false) ? "Normal width" : "Full width", i: "width", run: () => { const w = !ls.get("dxWide", false); ls.set("dxWide", w); $(".dx-page", main).classList.toggle("wide", w); } },
         { t: "Export as Markdown", i: "download", run: () => { const md = `# ${label(p)}\n\n${blocksToMd(D.ed ? D.ed.getBlocks() : D.blocks)}\n`, a = h("a", { href: URL.createObjectURL(new Blob([md], { type: "text/markdown" })), download: (slugify(label(p)) || "page") + ".md" }); a.click(); } },
         { t: "Page history", i: "history", run: historyDialog },
-        { t: "Print / Save as PDF", i: "print", run: () => window.print() },
+        { t: "Save as PDF", i: "print", run: exportPdf },
         "-",
         { t: "Move to bin", i: "trash", danger: true, run: async () => { await flush(); const r = await api("/api/docs?id=" + p.id, { method: "PUT", body: { trashed: true } }); if (r.ok) { await load(true); toast("Moved to the bin"); home(); } } },
       ]);
@@ -317,5 +358,10 @@ export async function docsApp(body, slug) {
   if (slug) openKey(slug, "replace"); else home("replace");
   if (mobile()) root.dataset.view = slug ? "page" : "list";
   // keep the window address and the page in step when the user presses the back button
-  body.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); if (owner) { save().then(() => toast("Saved")); } } });
+  body.addEventListener("keydown", (e) => {
+    const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+    if (mod && k === "s") { e.preventDefault(); if (owner) { save().then(() => toast("Saved")); } }
+    else if (mod && e.key === "\\") { e.preventDefault(); toggleSide(); }
+    else if (mod && e.altKey && k === "n" && owner) { e.preventDefault(); newPage({ parent: D.open ? D.open.id : null }); }
+  });
 }

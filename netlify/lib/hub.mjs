@@ -1,9 +1,10 @@
 // The Links hub: a link-in-bio page. Cleaning, defaults and the "what should visitors see right now" rules.
 import { safeUrl, safeImg, rid, cleanInline, stripTags } from "../../shared/blocks.mjs";
+import { BRAND_KEYS } from "../../shared/brands.mjs";
 
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
 export const TYPES = ["link", "header", "text", "divider", "app", "embed", "email", "phone", "whatsapp", "copy", "countdown", "vcard", "subscribe", "image", "map"];
-export const SOCIALS = ["instagram", "youtube", "linkedin", "behance", "dribbble", "figma", "x", "github", "tiktok", "facebook", "threads", "pinterest", "reddit", "spotify", "medium", "whatsapp", "telegram", "email", "website"];
+export const SOCIALS = [...BRAND_KEYS, "email", "website"];
 export const PRESETS = ["mint", "midnight", "sunset", "paper", "lilac", "mono", "ocean", "neon"];
 const COLORS = ["c1", "c2", "c3", "c4", "c5", "c6"];
 const hex = (v, d) => (/^#[0-9a-f]{6}$/i.test(String(v || "")) ? String(v).toLowerCase() : d);
@@ -40,6 +41,11 @@ function cleanItem(i) {
     if (safeImg(i.thumb)) o.thumb = safeImg(i.thumb);
     if (i.badge) o.badge = str(i.badge, 16);
     o.style = pick(i.style, ["default", "featured", "outline"], "default"); o.anim = pick(i.anim, ["none", "pulse", "shine", "wiggle", "bounce"], "none");
+    // How one link looks: a button, a card with a full picture, or just an icon in a grid. The icon is a brand logo, one of ours, or the owner's own picture.
+    o.look = pick(i.look, ["button", "card", "icon"], "button");
+    if (BRAND_KEYS.includes(i.brand)) o.brand = i.brand;
+    if (safeImg(i.iconImg)) o.iconImg = safeImg(i.iconImg);
+    if (safeImg(i.img)) o.img = safeImg(i.img);
   }
   if (i.type === "link") { o.url = safeUrl(i.url, { relative: false }); if (!o.url) return null; if (i.slug) o.slug = str(i.slug, 40).toLowerCase().replace(/[^a-z0-9-]/g, ""); }
   if (i.type === "app") { o.app = str(i.app, 30).replace(/[^\w-]/g, ""); if (!o.app) return null; }
@@ -69,7 +75,7 @@ export function cleanHub(h) {
       accent: t.accent ? hex(t.accent, "") : "", bg: t.bg ? hex(t.bg, "") : "", bg2: t.bg2 ? hex(t.bg2, "") : "", text: t.text ? hex(t.text, "") : "", bgImg: safeImg(t.bgImg),
       pattern: pick(t.pattern, ["none", "dots", "grid", "waves", "noise"], "none"),
     },
-    socials: (Array.isArray(h?.socials) ? h.socials : []).slice(0, 14).map((s) => ({ type: pick(s?.type, SOCIALS, "website"), url: s?.type === "email" ? str(s.url, 120) : safeUrl(s?.url, { relative: false }) })).filter((s) => s.url),
+    socials: (Array.isArray(h?.socials) ? h.socials : []).slice(0, 14).map((s) => { const o = { type: pick(s?.type, SOCIALS, "website"), url: s?.type === "email" ? str(s.url, 120) : safeUrl(s?.url, { relative: false }) }; if (safeImg(s?.img)) o.img = safeImg(s.img); return o; }).filter((s) => s.url),
     items: (Array.isArray(h?.items) ? h.items : []).slice(0, 200).map(cleanItem).filter(Boolean),
     settings: { share: h?.settings?.share !== false, qr: h?.settings?.qr !== false, vcard: h?.settings?.vcard !== false },
     vcard: { name: str(h?.vcard?.name, 80), org: str(h?.vcard?.org, 80), title: str(h?.vcard?.title, 80), email: str(h?.vcard?.email, 120), phone: str(h?.vcard?.phone, 30), url: safeUrl(h?.vcard?.url, { relative: false }), note: str(h?.vcard?.note, 200) },

@@ -165,7 +165,7 @@ function composer(body) {
     }
     const n = draw.n || (draw.n = { id: uid(), title: "", text: "", color: "c0", kind: mode === "list" ? "list" : undefined, items: mode === "list" ? [{ id: uid(), t: "" }] : undefined, created: Date.now(), ts: Date.now() });
     host.innerHTML = `<div class="kn-compose-card ${n.color}">${n.img ? `<img class="kn-img" src="${esc(n.img)}" alt="">` : ""}<input class="kn-ti" placeholder="Title" maxlength="120" aria-label="Title" value="${esc(n.title)}">
-      ${n.kind === "list" ? '<div class="kn-items"></div>' : `<textarea class="kn-ta" rows="3" placeholder="Take a note…" aria-label="Note text" maxlength="10000">${esc(n.text)}</textarea>`}
+      ${n.kind === "list" ? '<div class="kn-items"></div>' : `<textarea class="kn-ta" rows="3" placeholder="Take a note…" aria-label="Note text">${esc(n.text)}</textarea>`}
       <div class="kn-bar"><button data-a="color" aria-label="Colour" title="Colour">${I("palette")}</button><button data-a="img" aria-label="Add image" title="Add image">${I("image")}</button><button data-a="mode" aria-label="${n.kind === "list" ? "Show as text" : "Show as checklist"}" title="${n.kind === "list" ? "Show as text" : "Show as checklist"}">${I(n.kind === "list" ? "text" : "checkbox")}</button><button data-a="pin" class="${n.pin ? "on" : ""}" aria-label="Pin" title="Pin">${I("pin")}</button><span class="sp"></span><button class="kn-done" data-a="done">Close</button></div></div>`;
     const card = $(".kn-compose-card", host);
     const ti = $(".kn-ti", host), ta = $(".kn-ta", host);
@@ -238,7 +238,7 @@ async function openNote(body, id, mode = "push") {
   const owner = isAdmin(), editable = owner && !n.trashed;
   let editor = null;
   const close = async (m = "push") => {
-    if (editor) { n.blocks = editor.getBlocks(); n.text = blocksText(n.blocks).slice(0, 10000); try { editor.destroy(); } catch {} editor = null; }
+    if (editor) { n.blocks = editor.getBlocks(); n.text = blocksText(n.blocks).slice(0, 1000000); try { editor.destroy(); } catch {} editor = null; }
     if (editable) { if (n.kind === "list") n.items = (n.items || []).filter((i) => i.t.trim() || false); const empty = !(n.title || "").trim() && !(n.text || "").trim() && !(n.items && n.items.length) && !n.img && !(n.blocks && n.blocks.length); if (empty) N.list = N.list.filter((x) => x.id !== n.id); persist(); }
     mh.innerHTML = ""; mh.__close = null; body.classList.remove("kn-open");
     R.item(body, "", "Notes — Rohan Kumar", m === "replace" ? "replace" : "push"); drawNav(body); drawLists(body);
@@ -259,14 +259,14 @@ async function openNote(body, id, mode = "push") {
     if (editor) { try { editor.destroy(); } catch {} editor = null; }
     content.innerHTML = "";
     if (n.blocks && n.blocks.length) {
-      if (editable) editor = await makeEditor(content, { blocks: n.blocks, onChange: () => { n.blocks = editor.getBlocks(); n.text = blocksText(n.blocks).slice(0, 10000); touchNote(n); }, placeholder: "Write…" });
+      if (editable) editor = await makeEditor(content, { blocks: n.blocks, onChange: () => { n.blocks = editor.getBlocks(); n.text = blocksText(n.blocks).slice(0, 1000000); touchNote(n); }, placeholder: "Write…" });
       else showBlocks(content, n.blocks);
     } else if (n.kind === "list" || (n.items && n.items.length)) {
       if (!n.items) n.items = [];
       if (editable) itemsEditor(content, n, () => touchNote(n));
       else content.innerHTML = `<ul class="kn-li">${n.items.map((i) => `<li class="${i.d ? "d" : ""}"><span class="kn-cb${i.d ? " on" : ""}"></span><span>${esc(i.t)}</span></li>`).join("")}</ul>`;
     } else if (editable) {
-      content.innerHTML = `<textarea class="kn-ta" placeholder="Note" maxlength="10000" aria-label="Note text">${esc(n.text || "")}</textarea>`;
+      content.innerHTML = `<textarea class="kn-ta" placeholder="Note" aria-label="Note text">${esc(n.text || "")}</textarea>`;
       const ta = $("textarea", content); fit(ta); ta.oninput = () => { n.text = ta.value; fit(ta); touchNote(n); };
       if (!n.title && !n.text) $(".kn-ti", mh).focus(); else if (!n.title) ta.focus();
     } else content.innerHTML = `<p class="kn-tx full">${esc(n.text || "").replace(/\n/g, "<br>")}</p>`;

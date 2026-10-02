@@ -232,6 +232,32 @@ a{color:var(--primary)}
 .btn{display:inline-flex;align-items:center;gap:calc(8 * var(--u));border:0;border-radius:var(--r-ctl);padding:calc(12 * var(--u)) calc(20 * var(--u));font-weight:var(--fw-b);text-decoration:none;background:var(--primary);color:var(--on-primary)}
 .btn.tonal{background:var(--surface2);color:var(--ink)}
 .links{display:flex;flex-wrap:wrap;gap:calc(10 * var(--u));margin-top:calc(16 * var(--u))}
+html.standalone #desk,html.standalone #boot,html.standalone .topbar{display:none!important}
+html.standalone,html.standalone body{height:100%;overflow:hidden;background:var(--bg)}
+#standalone{position:fixed;inset:0;overflow:auto;overscroll-behavior:contain;padding:0!important;background:var(--bg)}
+#standalone .hub{min-height:100%}
+
+/* Timeline editor */
+.tle h1{margin-top:0}.tle-top{display:flex;align-items:center;gap:calc(8 * var(--u));margin:calc(4 * var(--u)) 0 calc(14 * var(--u));flex-wrap:wrap}.tle-top .sp{flex:1}
+.tle-clear{border:0;background:none;color:var(--ink2);font:inherit;font-size:var(--fs-4);cursor:pointer;padding:calc(8 * var(--u)) calc(10 * var(--u));border-radius:var(--r-pill)}.tle-clear:hover{background:var(--tint,rgba(127,127,127,.12));color:var(--ink)}
+.tle-list{display:flex;flex-direction:column;gap:calc(8 * var(--u))}
+.tle-row{background:var(--surface2);border-radius:var(--r-6);padding:calc(8 * var(--u))}
+.tle-main{display:flex;align-items:center;gap:calc(8 * var(--u));flex-wrap:wrap}
+.tle-s{flex:none;background:var(--surface)}.tle-s button{padding:calc(6 * var(--u)) calc(12 * var(--u));font-size:var(--fs-3)}
+.tle-t{flex:1;min-width:140px}.tle-d{width:132px;flex:none}
+.tle-main input,.tle-more textarea,.tle-more input[type=text],.tle-two input:not([type=range]){background:var(--surface)!important;border:0;border-radius:var(--r-4);font:inherit;font-size:var(--fs-4);color:var(--ink);padding:calc(9 * var(--u)) calc(12 * var(--u))}
+.tle-ib{flex:none;width:32px;height:32px;border:0;background:none;color:var(--ink2);border-radius:50%;cursor:pointer;display:grid;place-items:center;transition:background var(--d-1),transform var(--d-2)}.tle-ib:hover{background:var(--tint,rgba(127,127,127,.15));color:var(--ink)}.tle-ib.on{transform:rotate(180deg)}
+.tle-more{display:flex;flex-direction:column;gap:calc(8 * var(--u));padding:calc(8 * var(--u)) calc(2 * var(--u)) calc(2 * var(--u))}.tle-more[hidden]{display:none}.tle-more textarea{width:100%;resize:vertical;box-sizing:border-box}
+.tle-two{display:flex;gap:calc(8 * var(--u));align-items:center;flex-wrap:wrap}.tle-two>input{flex:1;min-width:120px}.tle-p{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:var(--fs-3);color:var(--ink2)}.tle-p.off{opacity:.35;pointer-events:none}.tle-p input{width:120px}.tle-p output{min-width:3ch}
+.tle-mv{display:flex;gap:calc(6 * var(--u))}.tle-mv button{border:0;background:var(--surface);color:var(--ink2);font:inherit;font-size:var(--fs-3);border-radius:var(--r-pill);padding:calc(5 * var(--u)) calc(10 * var(--u));cursor:pointer;display:inline-flex;gap:4px;align-items:center}.tle-mv button:hover{color:var(--ink)}
+.tl-edit{margin:0 0 calc(10 * var(--u))}
+.sel{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--u));width:100%;min-height:calc(40 * var(--u));padding:0 calc(12 * var(--u)) 0 calc(14 * var(--u));border:0;border-radius:var(--r-5);background:var(--surface2);color:var(--ink);font:inherit;font-size:var(--fs-4);font-weight:var(--fw-m);cursor:pointer;text-align:left;transition:background var(--d-1)}
+.sel:hover{background:var(--surface3)}.sel>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sel svg{flex:none;width:16px;height:16px;color:var(--ink2);transition:transform var(--d-2) var(--ease)}.sel[aria-expanded=true] svg{transform:rotate(180deg)}
+select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;margin:0!important;padding:0!important}
+.selmenu{position:fixed;z-index:99999;max-height:min(300px,60vh);overflow:auto;padding:calc(6 * var(--u));background:var(--surface);border-radius:var(--r-5);box-shadow:var(--shadow);animation:selin var(--d-1) var(--ease)}
+.selmenu button{display:flex;align-items:center;justify-content:space-between;gap:calc(14 * var(--u));width:100%;padding:calc(9 * var(--u)) calc(12 * var(--u));border:0;border-radius:var(--r-3);background:none;color:var(--ink);font:inherit;font-size:var(--fs-4);font-weight:var(--fw-m);text-align:left;cursor:pointer}
+.selmenu button:hover,.selmenu button:focus-visible{background:var(--surface2);outline:0}.selmenu button[aria-selected=true]{font-weight:var(--fw-b)}.selmenu svg{flex:none;width:16px;height:16px;color:var(--ink)}
+@keyframes selin{from{opacity:0;transform:translateY(-4px)}}
 .seg{display:inline-flex;background:var(--surface2);border-radius:var(--r-ctl);padding:calc(4 * var(--u));gap:calc(4 * var(--u))}
 .seg button{border:0;background:none;padding:calc(8 * var(--u)) calc(16 * var(--u));border-radius:var(--r-ctl);font-weight:var(--fw-m)}
 .seg button.on{background:var(--primary);color:var(--on-primary)}
@@ -268,7 +294,7 @@ a{color:var(--primary)}
 /* quick panel */
 .status{border:0;cursor:pointer;color:var(--ink);font-weight:var(--fw-m)}
 .status:hover{background:var(--surface)}
-.qs{position:absolute;top:52px;right:14px;z-index:960;width:min(380px,calc(100% - 28px));max-height:calc(100% - 150px);overflow:auto;background:var(--surface);border-radius:var(--r-9);padding:calc(20 * var(--u));box-shadow:var(--shadow);animation:drop var(--d-2) var(--ease-spring);transform-origin:top right}
+.qs{position:absolute;top:52px;right:14px;z-index:960;width:min(380px,calc(100% - 28px));max-height:calc(100% - 96px);overflow:auto;overscroll-behavior:contain;background:var(--surface);border-radius:var(--r-9);padding:calc(20 * var(--u));box-shadow:var(--shadow);animation:drop var(--d-2) var(--ease-spring);transform-origin:top right}
 .qs[hidden]{display:none}
 @keyframes drop{from{opacity:0;transform:scale(.9) translateY(-8px)}}
 .qt{font-size:var(--fs-12);font-weight:var(--fw-x);letter-spacing:-.04em;line-height:1}
@@ -284,10 +310,15 @@ a{color:var(--primary)}
 .sysrow small{display:block;color:var(--ink2);font-weight:500}
 .bar2{height:6px;border-radius:var(--r-3);background:var(--line);margin-top:calc(6 * var(--u));overflow:hidden}.bar2 i{display:block;height:100%;background:var(--primary)}
 .cal{background:var(--surface2);border-radius:var(--r-7);padding:calc(14 * var(--u))}
-.cal b{display:block;margin-bottom:calc(8 * var(--u))}
-.cal .g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:var(--fs-3)}
-.cal .g span{padding:calc(6 * var(--u)) 0;border-radius:50%}
-.cal .g .h{color:var(--ink2);font-weight:var(--fw-b);font-size:var(--fs-1)}
+.cal-h{display:flex;align-items:center;gap:calc(2 * var(--u));margin-bottom:calc(8 * var(--u))}.cal-h b{margin:0}.cal-h .sp{flex:1}
+.cal-n,.cal-t{border:0;background:none;color:var(--ink);cursor:pointer;border-radius:50%;width:calc(28 * var(--u));height:calc(28 * var(--u));display:grid;place-items:center;padding:0;transition:background var(--d-1)}.cal-n svg{width:16px;height:16px}.cal-n:hover,.cal-t:hover{background:var(--tint,rgba(127,127,127,.15))}
+.cal-t{width:auto;border-radius:var(--r-pill);padding:0 calc(10 * var(--u));font:inherit;font-size:var(--fs-3);font-weight:var(--fw-m)}
+.cal .g{display:grid;grid-template-columns:repeat(7,1fr);gap:calc(2 * var(--u));text-align:center;font-size:var(--fs-3)}
+.cal .g span{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;position:relative}
+.cal .g .e{pointer-events:none}.cal .g .dy.ev::after{content:"";position:absolute;bottom:14%;width:4px;height:4px;border-radius:50%;background:var(--primary)}.cal .g .today.ev::after{background:var(--on-primary)}
+.cal .g .h{aspect-ratio:auto;height:calc(22 * var(--u));color:var(--ink2);font-weight:var(--fw-b);font-size:var(--fs-1)}
+.cal-ev{display:flex;flex-direction:column;gap:calc(2 * var(--u));margin-top:calc(10 * var(--u))}.cal-ev button{display:flex;align-items:center;gap:calc(10 * var(--u));border:0;background:none;color:var(--ink);text-align:left;padding:calc(7 * var(--u)) calc(8 * var(--u));border-radius:var(--r-4);cursor:pointer;font:inherit}.cal-ev button:hover{background:var(--tint,rgba(127,127,127,.12))}
+.cal-ev i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--ink3,#999)}.cal-ev i.now{background:var(--primary)}.cal-ev b{display:block;font-size:var(--fs-4);font-weight:var(--fw-m)}.cal-ev small{color:var(--ink2);font-size:var(--fs-2)}
 .cal .g .today{background:var(--primary);color:var(--on-primary);font-weight:var(--fw-x)}
 
 /* avatar */
@@ -309,9 +340,9 @@ a{color:var(--primary)}
 .post b{font-size:var(--fs-7);display:block;margin:2px 0 calc(4 * var(--u));line-height:1.25}
 .post small,.meta{color:var(--ink2);font-size:var(--fs-3);font-weight:var(--fw-m)}
 .post span{display:block;color:var(--ink2);line-height:1.5}
-.abar{position:sticky;top:-4px;z-index:3;margin:0 -24px calc(8 * var(--u));padding:calc(8 * var(--u)) calc(24 * var(--u)) 0;background:var(--surface)}
+.abar{position:sticky;top:-4px;z-index:3;margin:0 -24px calc(8 * var(--u));padding:calc(8 * var(--u)) calc(24 * var(--u)) 0;background:var(--surface);box-shadow:0 -24px 0 var(--surface)}
 .abar .back{margin-bottom:calc(8 * var(--u))}
-.rprog{height:4px;margin:0 -24px}
+.rprog{height:2px;margin:0 -24px;overflow:hidden}
 .upd{display:inline-block;font-style:normal;font-size:var(--fs-2);font-weight:var(--fw-b);background:color-mix(in srgb,var(--primary) 14%,var(--surface));color:var(--ink);padding:calc(4 * var(--u)) calc(10 * var(--u));border-radius:var(--r-pill);margin-top:calc(6 * var(--u))}
 .car{margin:calc(26 * var(--u)) auto;max-width:440px;outline-offset:6px}
 .car .vp{position:relative;overflow:hidden;border-radius:var(--r-7);aspect-ratio:var(--ar,4/5);background:#000;touch-action:pan-y;cursor:grab;box-shadow:0 10px 30px rgba(0,0,0,.15)}
@@ -400,7 +431,7 @@ a{color:var(--primary)}
 .ow-row{margin:calc(16 * var(--u)) 0 calc(8 * var(--u))}
 .ed-btn{float:right;position:sticky;top:0;z-index:5;border:0;border-radius:var(--r-pill);padding:calc(8 * var(--u)) calc(16 * var(--u));font:inherit;font-weight:var(--fw-b);cursor:pointer;background:var(--primary);color:var(--on-primary);margin:0 0 calc(8 * var(--u)) calc(8 * var(--u));box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .ed-card{border:1px solid rgba(127,127,127,.35);border-radius:var(--r-6);padding:calc(6 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));margin:calc(10 * var(--u)) 0}.ed-ctl{display:flex;flex-wrap:wrap;gap:calc(8 * var(--u));margin-top:calc(8 * var(--u))}.ed-ctl button{font:inherit;font-size:var(--fs-3);padding:calc(6 * var(--u)) calc(12 * var(--u));border-radius:var(--r-pill);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;cursor:pointer}.ed-ctl button:disabled{opacity:.35;cursor:default}.ed-ctl .ed-del{margin-left:auto;color:#d33}
-.ed-add{margin:calc(6 * var(--u)) 0}.ed-act{position:sticky;bottom:0;display:flex;gap:calc(10 * var(--u));justify-content:flex-end;padding:calc(12 * var(--u)) 0;background:linear-gradient(transparent,var(--surface,#fff) 40%)}
+.ed-add{margin:calc(6 * var(--u)) 0}.ed-act{position:sticky;bottom:calc(-12 * var(--u));display:flex;gap:calc(10 * var(--u));justify-content:flex-end;margin:calc(8 * var(--u)) calc(-24 * var(--u)) calc(-12 * var(--u));padding:calc(14 * var(--u)) calc(24 * var(--u));background:var(--surface,#fff);box-shadow:0 -14px 14px -10px var(--surface,#fff)}
 .ed textarea,.ed select{font:inherit;font-size:var(--fs-5);padding:calc(9 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;width:100%}
 .ph-st{font-size:var(--fs-3);opacity:.75}.ph-add{cursor:pointer;padding:calc(9 * var(--u)) calc(16 * var(--u));font-size:var(--fs-4)}.ph-own{gap:calc(8 * var(--u));padding-top:0}.ph-own .ph-cap{flex:1;min-width:0;font:inherit;font-size:var(--fs-5);padding:calc(8 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 .ph-own button{font:inherit;padding:calc(8 * var(--u)) calc(12 * var(--u));border-radius:var(--r-pill);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;cursor:pointer}.ph-own button:disabled{opacity:.35;cursor:default}.ph-own .ed-del{color:#d33}
@@ -996,6 +1027,8 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 .ft-c small{color:var(--ink2);font-weight:var(--fw-m)}
 .ft.running .ft-ring{animation:ft-breathe 4s ease-in-out infinite}
 @keyframes ft-breathe{50%{transform:scale(1.02)}}
+.ft-time{cursor:text}.ft-modes{flex-wrap:nowrap;justify-content:center}.ft-modes button{white-space:nowrap}.ft-adj button{white-space:nowrap}.ft-adj{display:flex;gap:calc(6 * var(--u));align-items:center}.ft-adj button{border:0;border-radius:var(--r-pill);background:var(--surface2);color:var(--ink);font:inherit;font-size:var(--fs-4);font-weight:var(--fw-m);min-width:calc(44 * var(--u));height:calc(34 * var(--u));padding:0 calc(14 * var(--u));cursor:pointer;transition:background var(--d-1)}.ft-adj button:hover{background:var(--surface3)}.ft-adj .ft-edit{background:var(--tint,var(--surface2))}
+.ft-in{width:5.2ch;max-width:100%;text-align:center;background:none!important;border:0!important;outline:0;color:inherit;font:inherit;font-size:var(--fs-12);font-weight:var(--fw-x);letter-spacing:-.03em;font-variant-numeric:tabular-nums;padding:0!important;box-shadow:none!important;border-radius:0!important}
 .ft-btns{display:flex;gap:calc(10 * var(--u))}
 .body .ft-s{margin:0;display:flex;align-items:center;gap:calc(10 * var(--u));font-size:var(--fs-3);font-weight:var(--fw-m)}
 .ft-dots{display:flex;gap:calc(5 * var(--u))}.ft-dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}.ft-dots i.on{background:var(--primary)}
@@ -2025,6 +2058,7 @@ const NOTES = [
 /* ================================================= */
 let PHOTO = "/img/avatar.jpg";
 let PHOTO_POP = "/img/avatar-pop.webp";
+window.getPhoto=()=>PHOTO;
 
 const G = {
   play:'<rect x="3" y="5" width="18" height="14" rx="4"/><path d="M10 9.5v5l4.5-2.5z"/>',
@@ -2084,7 +2118,7 @@ const APPS=[
   {id:"contact",title:"Contact",shape:"clover",color:"c2",glyph:G.mail,w:460,h:380,render:contact},
   {id:"palette",drawer:true,title:"Palette",shape:"clover",color:"c6",glyph:G.spark,w:700,h:600,render:palette},
   {id:"sketch",drawer:true,title:"Sketch",shape:"squircle",color:"c1",glyph:G.pen,w:760,h:580,render:sketch},
-  {id:"focus",drawer:true,title:"Focus",shape:"circle",color:"c2",glyph:G.spark,w:380,h:540,render:focusApp},
+  {id:"focus",drawer:true,title:"Focus",shape:"circle",color:"c2",glyph:G.spark,w:420,h:620,render:focusApp},
   {id:"calculator",drawer:true,title:"Calculator",shape:"flower",color:"c6",glyph:G.calc,w:340,h:540,render:calculator},
   {id:"timeline",title:"Timeline",shape:"sun",color:"c3",glyph:G.tl,w:560,h:640,render:timeline},
   {id:"messages",title:"Messages",shape:"cookie",color:"c1",glyph:G.msg,w:420,h:620,render:messages},
@@ -2421,9 +2455,53 @@ function timeline(body,filter){
     h+='</ol>'}
   body.innerHTML=h+'</div>';
   body.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>timeline(body,b.dataset.f));
-  if(LIVE.admin)edBtn(body);
+  if(LIVE.admin)tlOwner(body);
   body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{openApp('journal');const jb=open.journal&&open.journal.querySelector('.body');if(jb)readPost(jb,+b.dataset.a)});
 }
+/* ============ Timeline editor (owner): one row per entry, nothing pre-filled that you have to overwrite ============ */
+function tlOwner(body){
+  if(body.querySelector('.ed-btn.tl-edit'))return;
+  const b=document.createElement('button');b.className='btn tonal ed-btn tl-edit';b.innerHTML=`${LI_('pencil',16)}<span>Edit timeline</span>`;b.onclick=()=>tlEdit(body);
+  const root=body.querySelector('.tl');(root||body).prepend(b)}
+function tlEdit(body){
+  const s=SITE.s||(SITE.s={hiddenApps:[]}),sample=!Array.isArray(s.timeline);
+  let list=JSON.parse(JSON.stringify(sample?(P.timeline||TIMELINE):s.timeline)),saveT=null;
+  const today=()=>new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const ST=[['now','Now'],['next','Next'],['done','Done']];
+  const stat=t=>{const el=body.querySelector('.ow-st');if(el)el.textContent=t};
+  const persist=()=>{clearTimeout(saveT);stat('Saving…');saveT=setTimeout(()=>{
+    s.timeline=list.filter(t=>String(t.title||'').trim()).map(t=>{const o={status:t.status||'now',title:String(t.title).trim()};for(const k of ['tag','date','detail','img'])if(t[k]&&String(t[k]).trim())o[k]=String(t[k]).trim();
+      if(o.status==='now'&&t.progress!=null&&t.progress!==''&&Number.isFinite(+t.progress))o.progress=Math.max(0,Math.min(100,Math.round(+t.progress)));return o});
+    applyText();siteSave();stat('Saved');setTimeout(()=>{const e=body.querySelector('.ow-st');if(e&&e.textContent==='Saved')e.textContent=''},1500)},500)};
+  const row=(t,i)=>`<div class="tle-row" data-i="${i}"><div class="tle-main">
+      <div class="seg tle-s" role="group" aria-label="Status">${ST.map(([k,l])=>`<button type="button" data-s="${k}" class="${(t.status||'now')===k?'on':''}">${l}</button>`).join('')}</div>
+      <input class="tle-t" data-k="title" placeholder="What is it?" value="${esc(t.title||'')}" maxlength="120" aria-label="Title">
+      <input class="tle-d" data-k="date" placeholder="Date" value="${esc(t.date||'')}" maxlength="40" aria-label="Date">
+      <button type="button" class="tle-ib" data-a="more" aria-label="More options" title="Note, tag, progress">${LI_('chevron-down',16)}</button>
+      <button type="button" class="tle-ib" data-a="del" aria-label="Delete entry" title="Delete">${LI_('x',16)}</button></div>
+    <div class="tle-more" hidden><textarea data-k="detail" rows="2" maxlength="300" placeholder="A note (optional)">${esc(t.detail||'')}</textarea>
+      <div class="tle-two"><input data-k="tag" placeholder="Tag (optional)" value="${esc(t.tag||'')}" maxlength="40" aria-label="Tag"><label class="tle-p ${(t.status||'now')==='now'?'':'off'}">Progress <input type="range" min="0" max="100" data-k="progress" value="${t.progress==null?0:t.progress}"><output>${t.progress==null?'':t.progress+'%'}</output></label></div>
+      <div class="tle-mv"><button type="button" data-a="up">${LI_('arrow-up',14)}Up</button><button type="button" data-a="dn">${LI_('arrow-down',14)}Down</button></div></div></div>`;
+  const draw=(focus)=>{
+    body.innerHTML=`<div class="tle"><h1>Timeline</h1><p class="ow-top"><small>${sample?'These are sample entries. Edit them, or clear them and start fresh.':'Saves for every visitor. Dates like “12 Mar 2026” also appear on the calendar.'}</small><span class="ow-st"></span></p>
+      <div class="tle-top"><button type="button" class="btn tle-add">${LI_('plus',16)}<span>Add entry</span></button>${list.length?`<button type="button" class="tle-clear">${sample?'Clear sample entries':'Clear all'}</button>`:''}<span class="sp"></span><button type="button" class="btn tonal tle-done">Done</button></div>
+      <div class="tle-list">${list.length?list.map(row).join(''):'<p class="hint tle-empty">Nothing here yet. Add your first entry.</p>'}</div></div>`;
+    body.querySelector('.tle-done').onclick=()=>{clearTimeout(saveT);persistNow();rerenderApp('timeline')};
+    body.querySelector('.tle-add').onclick=()=>{list.unshift({status:'now',title:'',date:today()});draw(0);persist()};
+    const cl=body.querySelector('.tle-clear');if(cl)cl.onclick=async()=>{if(await confirmBoxSite(sample?'Remove all the sample entries?':'Remove every entry?')){list=[];draw();persist()}};
+    body.querySelectorAll('.tle-row').forEach(r=>{const i=+r.dataset.i,t=list[i];
+      r.querySelectorAll('[data-s]').forEach(x=>x.onclick=()=>{t.status=x.dataset.s;r.querySelectorAll('[data-s]').forEach(y=>y.classList.toggle('on',y===x));r.querySelector('.tle-p').classList.toggle('off',t.status!=='now');persist()});
+      r.querySelectorAll('[data-k]').forEach(el=>el.oninput=()=>{t[el.dataset.k]=el.value;if(el.dataset.k==='progress')r.querySelector('output').textContent=el.value+'%';persist()});
+      r.querySelectorAll('[data-a]').forEach(x=>x.onclick=()=>{const a=x.dataset.a;
+        if(a==='more'){const m=r.querySelector('.tle-more');m.hidden=!m.hidden;x.classList.toggle('on',!m.hidden);return}
+        if(a==='del'){list.splice(i,1);draw();persist();return}
+        const j=a==='up'?i-1:i+1;if(j<0||j>=list.length)return;[list[i],list[j]]=[list[j],list[i]];draw();persist()})});
+    if(focus!=null){const f=body.querySelector(`.tle-row[data-i="${focus}"] .tle-t`);if(f)f.focus()}
+    body.scrollTop=0};
+  const persistNow=()=>{s.timeline=list.filter(t=>String(t.title||'').trim()).map(t=>{const o={status:t.status||'now',title:String(t.title).trim()};for(const k of ['tag','date','detail','img'])if(t[k]&&String(t[k]).trim())o[k]=String(t[k]).trim();
+    if(o.status==='now'&&t.progress!=null&&t.progress!==''&&Number.isFinite(+t.progress))o.progress=Math.max(0,Math.min(100,Math.round(+t.progress)));return o});applyText();siteSave()};
+  draw()}
+const confirmBoxSite=m=>new Promise(res=>{const d=document.createElement('div');d.className='own-dlg';d.innerHTML=`<div class="own-card" role="dialog" aria-modal="true"><p>${esc(m)}</p><div class="own-row"><button class="no">Cancel</button><button class="yes">Remove</button></div></div>`;document.body.append(d);const f=v=>{d.remove();res(v)};d.querySelector('.no').onclick=()=>f(false);d.querySelector('.yes').onclick=()=>f(true);d.addEventListener('click',e=>{if(e.target===d)f(false)});d.querySelector('.yes').focus()});
 const pk=a=>a[Math.floor(Math.random()*a.length)];
 /* ============ Palette (colour tool) ============ */
 const PAL={cols:[],locked:[false,false,false,false,false],mode:'analogous'};
@@ -2490,6 +2568,11 @@ function sketch(body){
 /* ============ Focus timer ============ */
 const FT={mode:'focus',dur:25*60,left:25*60,base:25*60,run:false,t0:0,sessions:0,iv:null};
 const FT_MODES={focus:[25,'Focus'],short:[5,'Short break'],long:[15,'Long break']};
+try{const sv=JSON.parse(localStorage.getItem('ftModes')||'{}');for(const k in sv)if(FT_MODES[k]&&sv[k]>0)FT_MODES[k][0]=sv[k]}catch(e){}
+const ftSave=()=>{try{localStorage.setItem('ftModes',JSON.stringify(Object.fromEntries(Object.entries(FT_MODES).map(([k,v])=>[k,v[0]]))))}catch(e){}};
+/* any length you like, in minutes (fractions allowed): the mode remembers it */
+function ftSetLen(min){min=Math.max(1/6,Math.min(999,+min||0));if(!min)return;FT_MODES[FT.mode][0]=Math.round(min*60)/60;ftSave();ftSet(FT.mode)}
+function ftParse(t){t=String(t).trim();if(!t)return 0;if(t.includes(':')){const[m,sx]=t.split(':');return (+m||0)+(+sx||0)/60}return +t.replace(',','.')||0}
 function ftTick(){if(!FT.run)return;FT.left=Math.max(0,FT.base-(Date.now()-FT.t0)/1000);
   if(FT.left<=0){FT.run=false;clearInterval(FT.iv);if(FT.mode==='focus')FT.sessions++;SFX.play('chime');toast(FT.mode==='focus'?'Focus session done. Take a break!':'Break over. Back to it!',3500);
     ftSet(FT.mode==='focus'?(FT.sessions%4===0?'long':'short'):'focus');return}
@@ -2500,15 +2583,22 @@ function ftToggle(){if(FT.run){FT.run=false;clearInterval(FT.iv);FT.base=FT.left
 function ftFmt(s){s=Math.ceil(s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function ftPill(){let p=document.getElementById('ftPill');if(!p){p=document.createElement('button');p.id='ftPill';p.className='pill topbtn ftpill';p.onclick=()=>openApp('focus');const tb=document.querySelector('.topbar');tb.insertBefore(p,tb.lastElementChild)}
   p.hidden=!(FT.run||FT.left<FT.dur);p.innerHTML=`<span class="ftdot ${FT.run?'on':''}"></span>${FT_MODES[FT.mode][1]} · ${ftFmt(FT.left)}`}
-function ftDraw(b){const pr=b.querySelector('.ft-prog');if(!pr)return;b.querySelector('.ft-time').textContent=ftFmt(FT.left);
+function ftDraw(b){const pr=b.querySelector('.ft-prog');if(!pr)return;if(!b.querySelector('.ft-time'))return;b.querySelector('.ft-time').textContent=ftFmt(FT.left);
   pr.style.strokeDashoffset=(FT.left/FT.dur*603).toFixed(1);b.querySelector('.ft-go').textContent=FT.run?'Pause':(FT.left<FT.dur?'Resume':'Start');b.querySelector('.ft').classList.toggle('running',FT.run)}
 function focusApp(body){
   body.innerHTML=`<div class="ft"><div class="jtags ft-modes">${Object.entries(FT_MODES).map(([k,[m,l]])=>`<button data-m="${k}" class="${k===FT.mode?'on':''}">${l}</button>`).join('')}</div>
     <div class="ft-ring"><svg viewBox="0 0 220 220"><circle cx="110" cy="110" r="96" class="ft-bg"/><circle cx="110" cy="110" r="96" class="ft-prog"/></svg><div class="ft-c"><div class="ft-time">${ftFmt(FT.left)}</div><small>${FT_MODES[FT.mode][1]}</small></div></div>
+    <div class="ft-adj" role="group" aria-label="Set the length"><button data-d="-5">−5</button><button data-d="-1">−1</button><button class="ft-edit" aria-label="Type a length">Set time</button><button data-d="1">+1</button><button data-d="5">+5</button></div>
     <div class="ft-btns"><button class="btn ft-go">Start</button><button class="btn tonal ft-reset">Reset</button></div>
     <p class="ft-s"><span class="ft-dots">${[0,1,2,3].map(i=>`<i class="${i<FT.sessions%4?'on':''}"></i>`).join('')}</span>${FT.sessions} session${FT.sessions===1?'':'s'} done</p></div>`;
   body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{SFX.play('toggle');ftSet(b.dataset.m)});
   body.querySelector('.ft-go').onclick=ftToggle;
+  const lock=()=>FT.run||FT.left<FT.dur;
+  body.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{if(lock()){toast('Reset the timer to change its length');return}SFX.play('tap');ftSetLen(FT_MODES[FT.mode][0]+(+b.dataset.d))});
+  const askLen=()=>{if(lock()){toast('Reset the timer to change its length');return}const tm=body.querySelector('.ft-time');
+    const inp=document.createElement('input');inp.className='ft-in';inp.inputMode='decimal';inp.value=String(FT_MODES[FT.mode][0]);inp.setAttribute('aria-label','Minutes, or mm:ss');tm.replaceWith(inp);inp.focus();inp.select();
+    const done=ok=>{inp.onblur=null;if(ok)ftSetLen(ftParse(inp.value));else focusApp(body)};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();done(true)}else if(e.key==='Escape'){e.preventDefault();done(false)}};inp.onblur=()=>done(true)};
+  body.querySelector('.ft-time').onclick=askLen;body.querySelector('.ft-edit').onclick=askLen;
   body.querySelector('.ft-reset').onclick=()=>{SFX.play('tap');ftSet(FT.mode)};
   ftDraw(body);
 }
@@ -2969,7 +3059,7 @@ function applyText(){const s=SITE.s||{};
   PHOTO=s.photo||'/img/avatar.jpg';PHOTO_POP=s.photo||'/img/avatar-pop.webp';{const li=document.getElementById('lkImg');if(li&&li.getAttribute('src')!==PHOTO)li.src=PHOTO}
   {const w=document.getElementById('wall');if(w){if(s.wallpaper){w.style.backgroundImage='url("'+s.wallpaper+'")';w.classList.add('pic')}else{w.style.backgroundImage='';w.classList.remove('pic')}}}
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
-  document.title=`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
+  document.title=window.__STANDALONE?`${P.name} — Links`:`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
 function applyHidden(){HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
 async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings;
   /* The owner's interface choice is for everyone. If this page was built with an older one (cached copy), reload once into the right one. */
@@ -2985,7 +3075,7 @@ function ownerChanged(){
   desk.classList.toggle('owner',!!LIVE.admin);
   renderIcons();
   const sw=open.settings;if(sw)settings(sw.querySelector('.body'));
-  EDITABLE.concat('photos').forEach(rerenderApp);gbInit()}
+  EDITABLE.concat(['photos','resume','links','projects','timeline']).forEach(rerenderApp);gbInit()}
 function siteSave(){clearTimeout(SITE.saveT);SITE.status='Saving…';siteStatus();
   SITE.saveT=setTimeout(async()=>{try{const r=await fetch('/api/site',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({settings:SITE.s})});
     if(r.status===401){LIVE.admin=false;SITE.status='Signed out. Changes not saved.';ownerChanged();return}
@@ -2999,15 +3089,17 @@ function ownerPanel(body){
   sec.innerHTML=`<h2>System settings</h2><p class="ow-top"><small>Owner only. Changes save automatically and show for every visitor.</small><span class="ow-st">${esc(SITE.status)}</span></p>
   <h3>About you</h3>${f('name','Name',P.name,60)}${f('role','Role',P.role,80)}${f('status','Status (desktop widget and Links)',P.status,80)}${f('now','What you are up to now',P.now,300)}
   <h3>On repeat</h3>${f('song','Song',P.music.song,80)}${f('artist','Artist',P.music.artist,80)}
-  <h3>Apps visible to visitors</h3><p class="hint">Switch an app off to hide it from visitors. You will still see it, dimmed.</p>
-  <div class="ow-apps">${apps.map(a=>`<label class="ow-app"><input type="checkbox" data-a="${a.id}" ${hid.has(a.id)?'':'checked'}><span>${esc(a.title)}</span></label>`).join('')}</div>
+  <h3>Where each app lives</h3><p class="hint">Desktop shows the app on the desktop and in the app drawer. Drawer keeps it only in the drawer. Hidden removes it for visitors (you still see it, dimmed).</p>
+  <div class="ow-places">${APPS.map(a=>{const hide=hid.has(a.id),can=!NEVER_HIDE.includes(a.id),pl=hide?'hidden':appPlace(a);return `<div class="ow-pl" data-app="${a.id}"><span class="ow-pln">${icon(a)}<b>${esc(a.title)}</b></span><div class="seg" role="group" aria-label="${esc(a.title)} placement">${['desktop','drawer'].concat(can?['hidden']:[]).map(k=>`<button data-pl="${k}" class="${pl===k?'on':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`}).join('')}</div>
   <h3>Guestbook</h3><label class="ow-app"><input type="checkbox" id="gbAuto" ${SITE.s&&SITE.s.gbAuto?'checked':''}><span>Publish notes right away (otherwise each note waits for your approval)</span></label>
   <h3>Mochi's inbox</h3><p class="hint">What visitors tell Mochi: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
   <div class="ow-row"><button class="btn tonal ow-out">Sign out</button></div>`;
   body.appendChild(sec);
   const cur=()=>{if(!SITE.s)SITE.s={hiddenApps:[]};return SITE.s};
   sec.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{const s=cur(),v=i.value.trim();if(v)s[i.dataset.k]=v;else delete s[i.dataset.k];applyText();siteSave()});
-  sec.querySelectorAll('[data-a]').forEach(c=>c.onchange=()=>{const s=cur(),set=new Set(s.hiddenApps||[]);if(c.checked)set.delete(c.dataset.a);else set.add(c.dataset.a);s.hiddenApps=[...set];applyHidden();siteSave()});
+  sec.querySelectorAll('.ow-pl [data-pl]').forEach(b=>b.onclick=()=>{const s=cur(),row=b.closest('.ow-pl'),id=row.dataset.app,k=b.dataset.pl,set=new Set(s.hiddenApps||[]);
+    s.place=s.place||{};if(k==='hidden')set.add(id);else{set.delete(id);s.place[id]=k}s.hiddenApps=[...set];
+    row.querySelectorAll('[data-pl]').forEach(x=>x.classList.toggle('on',x===b));applyHidden();siteSave();SFX.play('toggle')});
   sec.querySelector('#gbAuto').onchange=e=>{cur().gbAuto=e.target.checked;siteSave()};
   const ib=sec.querySelector('.ow-inbox');ib.onclick=()=>mochiInbox(body);
   fetch('/api/mochi',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(!d)return;let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}const n=d.visitors.filter(v=>(v.updated||0)>seen).length;if(n)ib.textContent=`Open inbox (${n} new)`}).catch(()=>{});
@@ -3043,7 +3135,7 @@ const SV_DEF={
     {title:"Brand guidelines",icon:"menu",text:"A handbook your team can actually use, so the brand stays consistent as it grows.",price:"",points:["Logo and colour rules","Typography and layout","Examples of use"]}],
   process:[{title:"Discover",text:"We talk about your business, your customers and what you want the brand to do."},{title:"Define",text:"We agree the direction in words before any pixels."},{title:"Design",text:"I design the identity and share it in clear rounds of feedback."},{title:"Deliver",text:"You get final files, guidelines and help launching it."}],
   faq:[{q:"How long does a project take?",a:"It depends on the scope. A logo and identity usually takes a few weeks. We agree a timeline before we start."},{q:"What do you need from me to get started?",a:"A short description of your business, who it is for, and a few brands you like. A call helps even more."},{q:"Do I own the final designs?",a:"Yes. Once the project is paid for, the final files are yours."}]};
-const EDITABLE=['about','resume','contact','links','projects','documents','timeline'];
+const EDITABLE=['about','resume','contact','links','projects','documents'];
 function rerenderApp(id){const w=open[id];if(!w)return;const a=APPS.find(x=>x.id===id),body=w.querySelector('.body');body.classList.remove('editing');body.scrollTop=0;
   const html=a.render(body);if(typeof html==='string')body.innerHTML=html;wire(body)}
 function edBtn(body){const w=body.closest('.win');const id=w&&w.dataset.app;if(!EDITABLE.includes(id)||body.classList.contains('editing')||body.querySelector('.ed-btn'))return;
@@ -3080,7 +3172,7 @@ function edOpen(id,body){
   const fld=(f,v,at)=>{const a=`data-f="${f.k}" ${at||''}`;
     if(f.type==='area')return`<label class="ow-f">${f.label}<textarea ${a} rows="3" maxlength="${f.max}">${esc(v||'')}</textarea></label>`;
     if(f.type==='select')return`<label class="ow-f">${f.label}<select ${a}>${f.opts.map(o=>`<option value="${esc(o[0])}" ${o[0]===(v||'')?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`;
-    if(f.type==='image')return`<div class="ow-f ow-img"><span>${f.label}</span><div class="ow-imgrow"><span class="ow-thumb">${v?`<img src="${esc(v)}" alt="">`:LI_('image',22)}</span><input type="hidden" ${a} value="${esc(v||'')}"><button type="button" class="btn tonal" data-imgpick>${LI_('upload',16)}<span>${v?'Replace':'Upload picture'}</span></button>${v?`<button type="button" class="btn tonal" data-imgrm>${LI_('trash',16)}<span>Remove</span></button>`:''}</div></div>`;
+    if(f.type==='image'){const pv=v||(f.k==='photo'?PHOTO:'');return`<div class="ow-f ow-img${f.k==='photo'?' round':''}"><span>${f.label}</span><div class="ow-imgrow"><span class="ow-thumb">${pv?`<img src="${esc(pv)}" alt="">`:LI_('image',22)}</span><input type="hidden" ${a} value="${esc(v||'')}"><button type="button" class="btn tonal" data-imgpick>${LI_('upload',16)}<span>${v?'Replace':'Upload picture'}</span></button>${v?`<button type="button" class="btn tonal" data-imgrm>${LI_('trash',16)}<span>Remove</span></button>`:''}</div></div>`}
     if(f.type==='check')return`<label class="ow-app"><input type="checkbox" ${a} ${v?'checked':''}><span>${f.label}</span></label>`;
     return`<label class="ow-f">${f.label}<input ${a} maxlength="${f.max}" value="${esc(v||'')}"></label>`};
   const draw=()=>{
@@ -3225,7 +3317,7 @@ function openApp(id,opt){
   w.style.top=Math.max(52,(innerHeight-H)/2-50+cascade*28)+'px';
   cascade=(cascade+1)%5;
   const B=(cls,label,path)=>`<button class="wb ${cls}" aria-label="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">${path}</svg></button>`;
-  w.innerHTML=`<div class="bar">${icon(a)}<span class="ttl">${a.title}</span>${B('fc','Focus mode (full screen, no distractions)','<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>')}${B('mn','Minimize','<path d="M6 12h12"/>')}${B('mx','Maximize','<rect x="5" y="5" width="14" height="14" rx="3"/>')}${B('x','Close','<path d="M6 6l12 12M18 6 6 18"/>')}</div><div class="body"></div><div class="rz e"></div><div class="rz w"></div><div class="rz s"></div><div class="rz se"></div><div class="rz sw"></div>`;
+  w.innerHTML=`<div class="bar">${icon(a)}<span class="ttl">${a.title}</span>${B('fc','Focus mode (this app fills the whole screen)','<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>')}${B('mn','Minimize','<path d="M6 12h12"/>')}${B('mx','Maximize','<rect x="5" y="5" width="14" height="14" rx="3"/>')}${B('x','Close','<path d="M6 6l12 12M18 6 6 18"/>')}</div><div class="body"></div><div class="rz e"></div><div class="rz w"></div><div class="rz s"></div><div class="rz se"></div><div class="rz sw"></div>`;
   wins.appendChild(w);open[id]=w;if(!RUN.includes(id))RUN.push(id);shelf.fresh=id;
   if(lastOrigin&&Date.now()-lastOrigin.t<1500){w.style.transformOrigin=`${lastOrigin.x-parseFloat(w.style.left)}px ${lastOrigin.y-parseFloat(w.style.top)}px`;w.classList.add('opening')}else w.classList.add('popin');
   w.addEventListener('animationend',e=>{if(e.target===w){w.classList.remove('opening','popin','restoring');w.style.transformOrigin=''}});lastOrigin=null;
@@ -3282,25 +3374,61 @@ function drag(w){
 /* ============ context menu & lock ============ */
 const ctx=document.getElementById('ctx'),lockEl=document.getElementById('lock');
 function isDark(){const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia('(prefers-color-scheme: dark)').matches}
-function showCtx(x,y){SFX.play('tap');
-  const items=[["Open About me",()=>openApp('about')],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
+const canFull=()=>!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen)&&!/iPhone|iPad|iPod/.test(navigator.userAgent);
+function osFullToggle(){const d=document,r=d.documentElement;try{if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);else(r.requestFullscreen||r.webkitRequestFullscreen).call(r)}catch(e){toast('Full screen is not available here')}}
+function showCtx(x,y,custom){SFX.play('tap');
+  const items=custom||[["Open About me",()=>openApp('about')],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
     [isDark()?"Switch to light mode":"Switch to dark mode",()=>{document.documentElement.dataset.theme=isDark()?"light":"dark";save()}],
-    ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),["Lock screen",lock],
+    ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],
     ...(desk.dataset.cat==="off"?[["Bring Mochi back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake Mochi gently",()=>MOCHI.wake()]]:[["Talk to Mochi",()=>MOCHI.talk()],["Let Mochi nap",()=>MOCHI.sleep()]]),
     ...(desk.dataset.status==="off"?[["Show status widget",()=>{desk.dataset.status="on";save()}]]:[]),
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
     ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),
     ...(localStorage.getItem('iconOrder')?[["Reset icon layout",()=>{try{localStorage.removeItem('iconOrder')}catch(e){}renderIcons();SFX.play('pop')}]]:[]),null,["Settings",()=>openApp('settings')]];
   ctx.innerHTML=items.map((it,i)=>it?`<button role="menuitem" data-i="${i}">${it[0]}</button>`:'<hr>').join('');
+  ctx.onmousedown=e=>e.preventDefault();
   ctx.querySelectorAll('button').forEach(b=>b.onclick=()=>{hideCtx();items[b.dataset.i][1]()});
   ctx.hidden=false;
   ctx.style.left=Math.min(x,innerWidth-ctx.offsetWidth-8)+'px';ctx.style.top=Math.min(y,innerHeight-ctx.offsetHeight-8)+'px';
-  ctx.querySelector('button').focus();
+  ctx.querySelector('button').focus({focusVisible:false,preventScroll:true});
 }
 function hideCtx(){ctx.hidden=true}
 desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;if(e.target.closest('.win,#shelf,.icons,.widgets,.cat,.jar,.launcher,.qs,.ctx,.topbar,.mw,.shelfw,.lock,#toast,.cat-chat,#boot,.dock-handle,.qrbig'))return;
   if(!L.hidden||!qs.hidden||!ctx.hidden)return;minimizeAll()},true);
-desk.addEventListener('contextmenu',e=>{if(e.target.closest('.win,#launcher,#ctx,input,textarea,a'))return;e.preventDefault();hideLauncher();showCtx(e.clientX,e.clientY)});
+/* Our own right-click menu, everywhere. The browser's menu never shows. What it offers depends on what was clicked. */
+function ctxItemsFor(e){
+  const t=e.target,el=t.closest?t:t.parentElement,out=[],sel=String(getSelection()||'').trim();
+  const fld=el.closest('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea,[contenteditable="true"],[contenteditable=""]');
+  const win=el.closest('.win'),a=el.closest('a[href]'),img=el.closest('img'),ico=el.closest('[data-app]');
+  if(fld){const ro=fld.readOnly||fld.disabled,txt=()=>fld.value!=null?fld.value.slice(fld.selectionStart,fld.selectionEnd):sel;
+    if(!ro)out.push(["Cut",async()=>{const v=txt();if(!v)return;try{await navigator.clipboard.writeText(v)}catch(x){}fld.focus();document.execCommand('delete')}]);
+    out.push(["Copy",async()=>{const v=txt();if(v){try{await navigator.clipboard.writeText(v)}catch(x){document.execCommand('copy')}}}]);
+    if(!ro)out.push(["Paste",async()=>{fld.focus();try{const v=await navigator.clipboard.readText();document.execCommand('insertText',false,v)}catch(x){toast('Allow clipboard access to paste, or press Ctrl+V')}}]);
+    out.push(["Select all",()=>{fld.focus();if(fld.select&&fld.value!=null)fld.select();else document.execCommand('selectAll')}]);
+  }else if(sel)out.push(["Copy",async()=>{try{await navigator.clipboard.writeText(sel)}catch(x){document.execCommand('copy')}}]);
+  if(a&&!fld){const href=a.href;if(/^https?:|^mailto:|^tel:/.test(href)){out.push(["Open link",()=>{if(/^https?:/.test(href))window.open(href,'_blank','noopener');else location.href=href}]);out.push([href.startsWith('mailto:')?"Copy email address":"Copy link address",async()=>{try{await navigator.clipboard.writeText(href.replace(/^mailto:|^tel:/,''))}catch(x){}toast('Copied')}])}}
+  if(img&&img.src&&!/^data:/.test(img.src)&&!img.closest('.ico')){out.push(["Open picture",()=>window.open(img.src,'_blank','noopener')]);out.push(["Copy picture address",async()=>{try{await navigator.clipboard.writeText(img.src)}catch(x){}toast('Copied')}])}
+  if(win&&!el.closest('.lock')){const id=win.dataset.app,max=win.classList.contains('max');
+    if(out.length)out.push(null);
+    out.push(["Focus mode",()=>Focus.toggle(win)]);
+    if(!mobile())out.push([max?"Restore size":"Maximise",()=>win.querySelector('.mx').click()]);
+    out.push(["Minimise",()=>win.querySelector('.mn').click()],["Close "+(win.getAttribute('aria-label')||'app'),()=>win.querySelector('.x').click()]);
+  }else if(ico&&ico.dataset.app&&APPS.find(x=>x.id===ico.dataset.app)){const id=ico.dataset.app,ap=APPS.find(x=>x.id===id);
+    out.push(["Open "+ap.title,()=>openApp(id)]);
+    if(open[id])out.push(["Close "+ap.title,()=>closeWin(open[id],id)]);
+  }
+  return out;
+}
+document.addEventListener('contextmenu',e=>{
+  if(e.target.closest&&e.target.closest('.lock'))return e.preventDefault();
+  e.preventDefault();hideLauncher();
+  const own=ctxItemsFor(e);
+  if(!own.length||e.target.closest('.dock-handle')){showCtx(e.clientX,e.clientY);return}
+  /* a short desktop section after the specific items */
+  const base=[["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
+    ...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],["Settings",()=>openApp('settings')]];
+  showCtx(e.clientX,e.clientY,[...own,null,...base]);
+},true);
 desk.addEventListener('pointerdown',e=>{if(!ctx.hidden&&!e.target.closest('#ctx'))hideCtx()});
 function lock(){hideLauncher();hideCtx();desk.classList.add('is-locked');lockEl.classList.remove('off');lockEl.setAttribute('aria-hidden','false');lockEl.tabIndex=0;lockEl.focus();keepAwake()}
 function unlock(){if(lockEl.classList.contains('off'))return;desk.classList.remove('is-locked');lockEl.classList.add('off');lockEl.setAttribute('aria-hidden','true');releaseAwake()}
@@ -3317,7 +3445,7 @@ const swipeLock=()=>matchMedia('(pointer:coarse)').matches&&matchMedia('(hover:n
   lockEl.addEventListener('pointerup',end);lockEl.addEventListener('pointercancel',end);
   lockEl.addEventListener('click',e=>{if(swipeLock()&&e.detail!==0)return;unlock()});
 })();
-document.addEventListener('keydown',e=>{if(!lockEl.classList.contains('off')){if(!['Tab','Enter',' ','Escape'].includes(e.key)&&!/^F\d+$/.test(e.key))e.preventDefault()}else if(e.key==="Escape")hideCtx()},true);
+document.addEventListener('keydown',e=>{if(!lockEl.classList.contains('off')){if(e.key==='Enter'||e.key===' '||e.code==='Space'){if(e.target.closest&&e.target.closest('#lkFs'))return;e.preventDefault();unlock();return}if(!['Tab','Escape'].includes(e.key)&&!/^F\d+$/.test(e.key))e.preventDefault()}else if(e.key==="Escape")hideCtx()},true);
 /* lock screen: starts locked, opens only on tap/click, full screen + keep-awake for screensaver use */
 let screenWL=null;
 async function keepAwake(){try{if(!lockEl.classList.contains('off')&&navigator.wakeLock&&!screenWL){screenWL=await navigator.wakeLock.request('screen');screenWL.addEventListener('release',()=>{screenWL=null})}}catch(e){}}
@@ -3340,16 +3468,63 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 document.getElementById('who').onclick=lock;
 document.getElementById('lLock').onclick=lock;
 
+/* ============ dropdowns: one custom menu replaces every native <select> (the real <select> stays in the page, hidden, so values and change events work as before) ============ */
+(()=>{
+  const CH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',CK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  let menu=null,owner=null;
+  const label=sel=>{const o=sel.options[sel.selectedIndex];return o?o.textContent:''};
+  function close(){if(menu){menu.remove();menu=null}if(owner){owner.setAttribute('aria-expanded','false');owner=null}}
+  function openMenu(sel,btn){
+    close();owner=btn;btn.setAttribute('aria-expanded','true');
+    menu=document.createElement('div');menu.className='selmenu';menu.setAttribute('role','listbox');
+    menu.innerHTML=[...sel.options].map((o,i)=>`<button type="button" role="option" data-i="${i}" aria-selected="${i===sel.selectedIndex}" ${o.disabled?'disabled':''}><span>${esc(o.textContent)}</span>${i===sel.selectedIndex?CK:''}</button>`).join('');
+    document.body.appendChild(menu);
+    const r=btn.getBoundingClientRect(),mh=menu.offsetHeight,below=innerHeight-r.bottom-12;
+    menu.style.minWidth=Math.max(r.width,160)+'px';menu.style.left=Math.max(8,Math.min(r.left,innerWidth-menu.offsetWidth-8))+'px';
+    menu.style.top=(below>=mh||below>r.top?r.bottom+6:Math.max(8,r.top-mh-6))+'px';
+    menu.onmousedown=e=>e.preventDefault();
+    menu.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel.selectedIndex=+b.dataset.i;sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));btn.firstElementChild.textContent=label(sel);close();btn.focus();SFX.play('tap')});
+    (menu.querySelector('[aria-selected=true]')||menu.firstElementChild).focus();
+  }
+  function enhance(sel){
+    if(sel.dataset.enh)return;sel.dataset.enh='1';
+    const btn=document.createElement('button');btn.type='button';btn.className='sel';btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');
+    if(sel.getAttribute('aria-label'))btn.setAttribute('aria-label',sel.getAttribute('aria-label'));
+    btn.innerHTML=`<span>${esc(label(sel))}</span>${CH}`;
+    sel.after(btn);sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
+    btn.onclick=e=>{e.preventDefault();e.stopPropagation();owner===btn?close():openMenu(sel,btn)};
+    sel.addEventListener('change',()=>{btn.firstElementChild.textContent=label(sel)});
+    new MutationObserver(()=>{btn.firstElementChild.textContent=label(sel)}).observe(sel,{childList:true,subtree:true,attributes:true});
+  }
+  let q=0;const scan=()=>{q=0;document.querySelectorAll('select:not([data-enh])').forEach(enhance)};
+  new MutationObserver(()=>{if(!q)q=requestAnimationFrame(scan)}).observe(document.body,{childList:true,subtree:true});scan();
+  document.addEventListener('pointerdown',e=>{if(menu&&!e.target.closest('.selmenu,.sel'))close()},true);
+  document.addEventListener('keydown',e=>{if(!menu)return;const bs=[...menu.querySelectorAll('button:not([disabled])')],i=bs.indexOf(document.activeElement);
+    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();const o=owner;close();o&&o.focus()}
+    else if(e.key==='ArrowDown'){e.preventDefault();(bs[i+1]||bs[0]).focus()}else if(e.key==='ArrowUp'){e.preventDefault();(bs[i-1]||bs[bs.length-1]).focus()}},true);
+  addEventListener('resize',close);document.addEventListener('scroll',e=>{if(menu&&!e.target.closest?.('.selmenu'))close()},true);
+})();
+
 /* ============ quick settings ============ */
 const qs=document.getElementById('qs'),stBtn=document.getElementById('stBtn');
 const BAT={level:null,charging:false};
 const IC={moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',wave:'<path d="M3 12c3-6 6 6 9 0s6 6 9 0"/>',dots:'<circle cx="7" cy="8" r="1.2"/><circle cx="16" cy="6" r="1.2"/><circle cx="12" cy="13" r="1.2"/><circle cx="6" cy="17" r="1.2"/><circle cx="17" cy="16" r="1.2"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'};
 const tsvg=g=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`;
+const QCAL={y:null,m:null};
+const MON=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+/* The timeline keeps free text dates ("Sep 2026", "12 Mar 2026", "2026-03-12"): read what we can so it shows on the calendar. */
+function tlWhen(t){const x=String(t||'').trim();let m=x.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);if(m)return{y:+m[1],m:+m[2]-1,d:m[3]?+m[3]:0};
+  m=x.match(/(?:(\d{1,2})(?:st|nd|rd|th)?\s+)?([A-Za-z]{3,9})\.?\s*(?:(\d{1,2})(?:st|nd|rd|th)?,?\s+)?(\d{4})/);
+  if(m){const mi=MON.indexOf(m[2].slice(0,3).toLowerCase());if(mi>=0)return{y:+m[4],m:mi,d:+(m[1]||m[3]||0)}}return null}
+function qsEvents(y,m){return (P.timeline||[]).map(t=>({t,w:tlWhen(t.date)})).filter(e=>e.w&&e.w.y===y&&e.w.m===m)}
 function drawQS(){
-  const d=new Date(),y=d.getFullYear(),m=d.getMonth(),first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate();
-  let cells=["M","T","W","T","F","S","S"].map(x=>`<span class="h">${x}</span>`).join('')+'<span></span>'.repeat(first);
-  for(let i=1;i<=days;i++)cells+=`<span class="${i===d.getDate()?'today':''}">${i}</span>`;
+  const d=new Date();if(QCAL.y==null){QCAL.y=d.getFullYear();QCAL.m=d.getMonth()}
+  const y=QCAL.y,m=QCAL.m,first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),isNow=y===d.getFullYear()&&m===d.getMonth();
+  const ev=qsEvents(y,m),evDays=new Set(ev.filter(e=>e.w.d).map(e=>e.w.d));
+  let cells=["M","T","W","T","F","S","S"].map(x=>`<span class="h">${x}</span>`).join('')+'<span class="e"></span>'.repeat(first);
+  for(let i=1;i<=days;i++)cells+=`<span class="dy${isNow&&i===d.getDate()?' today':''}${evDays.has(i)?' ev':''}">${i}</span>`;
+  const agenda=ev.length?`<div class="cal-ev">${ev.slice(0,4).map(e=>`<button data-tl="1"><i class="${e.t.status||'now'}"></i><span><b>${esc(e.t.title)}</b><small>${esc(e.t.date||'')}${e.t.tag?' · '+esc(e.t.tag):''}</small></span></button>`).join('')}</div>`:'';
   const gr=desk.dataset.grain, bat=BAT.level==null?`<div>Battery<small>Not shared by this browser</small></div>`
     :`<div>Battery ${Math.round(BAT.level*100)}%<small>${BAT.charging?'Charging':'On battery'}</small><div class="bar2"><i style="width:${Math.round(BAT.level*100)}%"></i></div></div>`;
   qs.innerHTML=`<div class="qt">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div><div class="qd">${d.toLocaleDateString([], {weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
@@ -3359,19 +3534,23 @@ function drawQS(){
     <button class="tile ${gr!=='off'?'on':''}" data-q="grain">${tsvg(IC.dots)}<span>Grain<small>${gr[0].toUpperCase()+gr.slice(1)}</small></span></button>
     <button class="tile ${SFX.on?'on':''}" data-q="sound">${tsvg(SFX.on?'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>':'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="m17 9 5 5M22 9l-5 5"/>')}<span>Sound<small>${SFX.on?'On':'Off'}</small></span></button>
     <button class="tile" data-q="lock">${tsvg(IC.lock)}<span>Lock<small>Lock screen</small></span></button>
+    ${canFull()?`<button class="tile ${(document.fullscreenElement||document.webkitFullscreenElement)?'on':''}" data-q="full">${tsvg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')}<span>Full screen<small>${(document.fullscreenElement||document.webkitFullscreenElement)?'On':'Off'}</small></span></button>`:''}
   </div>
   <div class="sysrow"><div>${navigator.onLine?'Online':'Offline'}<small>${navigator.onLine?'Connected':'No connection'}</small></div>${bat}</div>
-  <div class="cal"><b>${d.toLocaleDateString([], {month:'long',year:'numeric'})}</b><div class="g">${cells}</div></div>`;
+  <div class="cal"><div class="cal-h"><b>${new Date(y,m,1).toLocaleDateString([], {month:'long',year:'numeric'})}</b><span class="sp"></span>${isNow?'':'<button class="cal-t" data-cal="today">Today</button>'}<button class="cal-n" data-cal="-1" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button><button class="cal-n" data-cal="1" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></div><div class="g">${cells}</div>${agenda}</div>`;
+  qs.querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>{const v=b.dataset.cal;if(v==='today'){QCAL.y=null}else{const dt=new Date(QCAL.y,QCAL.m+ +v,1);QCAL.y=dt.getFullYear();QCAL.m=dt.getMonth()}SFX.play('tap');drawQS()});
+  qs.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{hideQS();openApp('timeline')});
   qs.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const q=b.dataset.q;
     if(q==="dark")document.documentElement.dataset.theme=isDark()?"light":"dark";
     if(q==="motion")desk.dataset.motion=desk.dataset.motion==="on"?"off":"on";
     if(q==="grain"){const o=["off","soft","strong"];desk.dataset.grain=o[(o.indexOf(desk.dataset.grain)+1)%3]}
     if(q==="lock"){hideQS();lock();return}
+    if(q==="full"){osFullToggle();setTimeout(drawQS,250);return}
     if(q==="sound"){SFX.set(!SFX.on);SFX.play('toggle')}else SFX.play('toggle');
     save();drawQS()});
 }
 function hideQS(){qs.hidden=true;stBtn.setAttribute('aria-expanded','false')}
-stBtn.onclick=e=>{e.stopPropagation();if(qs.hidden){hideLauncher();hideCtx();drawQS();qs.hidden=false;stBtn.setAttribute('aria-expanded','true')}else hideQS()};
+stBtn.onclick=e=>{e.stopPropagation();if(qs.hidden){hideLauncher();hideCtx();QCAL.y=null;drawQS();qs.hidden=false;stBtn.setAttribute('aria-expanded','true')}else hideQS()};
 desk.addEventListener('pointerdown',e=>{if(!qs.hidden&&!e.target.closest('#qs,#stBtn'))hideQS()});
 document.addEventListener('keydown',e=>{if(e.key==="Escape")hideQS()});
 document.getElementById('stHide').onclick=()=>{desk.dataset.status="off";save()};
@@ -3492,8 +3671,9 @@ siteInit();
 setWall(desk.dataset.wall);
 document.getElementById('clockShape').setAttribute('d',shape('cookie'));
 /* ============ desktop icons: arrange by dragging ============ */
+function appPlace(a){const o=SITE.s&&SITE.s.place&&SITE.s.place[a.id];return o==='desktop'||o==='drawer'?o:(a.drawer?'drawer':'desktop')}
 function renderIcons(){let ord=[];try{ord=JSON.parse(localStorage.getItem('iconOrder')||'[]')}catch(e){}
-  const list=APPS.filter(a=>!a.drawer&&appVisible(a.id)).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});
+  const list=APPS.filter(a=>appPlace(a)==='desktop'&&appVisible(a.id)).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});
   const g=document.getElementById('icons');g.innerHTML=list.map(a=>`<button class="dicon${HIDDEN.has(a.id)?' hid':''}" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('');
   g.querySelectorAll('.dicon').forEach(b=>b.onclick=e=>{if(iconDrag.suppress){iconDrag.suppress=false;return}openApp(b.dataset.app,{toggle:true})})}
 const iconDrag={suppress:false};

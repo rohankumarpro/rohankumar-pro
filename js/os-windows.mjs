@@ -21,7 +21,6 @@ export const Focus = {
     document.documentElement.classList.add("focus-mode");
     Focus.btn = h("button", { class: "focus-exit", "aria-label": "Leave focus mode", title: "Leave focus mode (Esc)", html: svg(ICON.unfocus, 20) + "<span>Exit focus</span>", onclick: () => Focus.leave() });
     document.body.append(Focus.btn); Focus.poke();
-    try { const el = document.documentElement; if (!document.fullscreenElement && el.requestFullscreen && !/iPhone|iPad|iPod/.test(navigator.userAgent)) el.requestFullscreen({ navigationUI: "hide" }).catch(() => {}); } catch {}
     toast("Focus mode. Press Esc to leave.");
     $$(".wb.fc", w).forEach((b) => b.setAttribute("aria-pressed", "true"));
   },
@@ -30,7 +29,6 @@ export const Focus = {
     w.classList.remove("focus"); document.documentElement.classList.remove("focus-mode");
     $$(".wb.fc", w).forEach((b) => b.setAttribute("aria-pressed", "false"));
     Focus.btn && Focus.btn.remove(); Focus.btn = null; clearTimeout(Focus.hideT);
-    try { if (document.fullscreenElement && !quiet) document.exitFullscreen().catch(() => {}); } catch {}
     window.dispatchEvent(new Event("resize"));
   },
   toggle(w) { Focus.w === w ? Focus.leave() : Focus.enter(w); },
@@ -40,7 +38,6 @@ document.addEventListener("click", (e) => { const b = e.target.closest(".wb.fc")
 document.addEventListener("pointermove", (e) => { if (Focus.w && (e.clientY < 70 || e.clientX > innerWidth - 160)) Focus.poke(); }, { passive: true });
 document.addEventListener("touchstart", (e) => { if (Focus.w && e.touches[0].clientY < 60) Focus.poke(); }, { passive: true });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && Focus.w && !document.querySelector(".own-dlg, .spot-ov, .kbd-ov")) { Focus.leave(); } }, true);
-document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && Focus.w) Focus.leave(true); });
 new MutationObserver(() => { if (Focus.w && !Focus.w.isConnected) Focus.leave(true); }).observe(document.getElementById("wins") || document.body, { childList: true });
 window.Focus = Focus;
 
@@ -94,7 +91,7 @@ export const Overview = {
   draw() {
     const ov = Overview.el; if (!ov) return; const wins = Overview.wins();
     ov.innerHTML = `<div class="ov-top"><b>Open apps</b><span class="ov-n">${wins.length}</span><span class="sp"></span>${wins.length ? '<button class="ov-all">Close all</button>' : ""}<button class="ov-x" aria-label="Close overview">${icon("x", { size: 18 })}</button></div>
-      <div class="ov-wrap"><div class="ov-grid">${wins.length ? "" : '<div class="ov-empty"><div>${icon("window", { size: 56 })}</div><p>No apps are open.</p></div>'}</div></div><p class="ov-hint">${mobile() ? "Swipe a card up to close it" : "Click to switch. Delete closes a window. Esc leaves."}</p>`;
+      <div class="ov-wrap"><div class="ov-grid">${wins.length ? "" : `<div class="ov-empty"><div>${icon("window", { size: 56 })}</div><p>No apps are open.</p></div>`}</div></div><p class="ov-hint">${mobile() ? "Swipe a card up to close it" : "Click to switch. Delete closes a window. Esc leaves."}</p>`;
     const grid = $(".ov-grid", ov);
     wins.forEach((w, i) => {
       const id = w.dataset.app, title = $(".ttl", w)?.textContent || id, ic = $(".bar .ico", w)?.outerHTML || "";

@@ -1,3 +1,4 @@
+[hidden]{display:none!important}
 /* Shared by every UI (Material, Notion, Apple): behaviour and layout that must not change with the look.
    Focus mode, the All-windows overview, icon layout helpers and picture wallpapers. Each css/ui-*.css only restyles on top of this. */
 /* ===== Focus mode: one app, truly full screen ===== */

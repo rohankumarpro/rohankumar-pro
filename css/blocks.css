@@ -17,7 +17,7 @@
 .bk-doc h2,.bk-doc h3,.bk-doc h4{line-height:1.2;letter-spacing:-.015em;margin-bottom:0;scroll-margin-top:12px}
 .bk-doc>h2{font-size:var(--bk-h1);margin-top:1.8em}.bk-doc>h3{font-size:var(--bk-h2);margin-top:1.5em}.bk-doc>h4{font-size:var(--bk-h3);margin-top:1.3em}
 .bk-doc h2:first-child,.bk-doc h3:first-child,.bk-doc h4:first-child{margin-top:0}
-.bk-doc a{color:var(--primary);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.bk-doc a:not(.btn){color:var(--primary);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .bk-doc strong{font-weight:750}
 .bk-doc code{font-family:var(--mono);font-size:.88em;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-3);padding:.1em .4em}
 .bk-doc kbd{font-family:var(--mono);font-size:.82em;border:1px solid var(--line);border-bottom-width:2px;border-radius:var(--r-3);padding:.05em .4em;background:var(--surface2)}

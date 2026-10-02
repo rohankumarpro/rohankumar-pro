@@ -46,7 +46,7 @@ function card(p) {
       ${p.featured ? `<em class="pj-b">${I("star", 12)} Featured</em>` : ""}${p.status !== "published" && isAdmin() ? `<em class="pj-b d">${p.status === "draft" ? "Draft" : "Unlisted"}</em>` : ""}</span>
     <span class="pj-m"><b>${esc(p.title)}</b><small>${esc([p.field, p.year].filter(Boolean).join(" · "))}</small></span>
     ${views || likes ? `<span class="pj-st"><span title="Appreciations">${I("heart", 13)} ${fmtNum(likes)}</span><span title="Views">${I("eye", 13)} ${fmtNum(views)}</span></span>` : ""}
-    ${isAdmin() ? `<button class="pj-more" data-id="${esc(p.id)}" aria-label="Project options" title="Options">⋯</button>` : ""}</a>`;
+    ${isAdmin() ? `<button class="pj-more" data-id="${esc(p.id)}" aria-label="Project options" title="Options"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="18.5" cy="12" r="1.9"/></svg></button>` : ""}</a>`;
 }
 function grid(body, quiet) {
   body.scrollTop = 0; body.onscroll = null;
@@ -60,14 +60,14 @@ function grid(body, quiet) {
     if (sort === "order") shown = [...shown.filter((p) => p.featured), ...shown.filter((p) => !p.featured)];
     root.innerHTML = `<div class="nt-head"><h1>Projects</h1>${isAdmin() ? `<div class="nt-tools"><span class="nt-status">${esc(PR.status)}</span><button class="pj-new">+ New project</button></div>` : ""}</div>
       ${isAdmin() && PR.seeded ? '<p class="hint">These are sample projects. Edit one, or add your own.</p>' : ""}
-      <div class="pj-tools"><input type="search" class="jr-search" placeholder="Search projects" aria-label="Search projects" value="${esc(q)}"><select class="pj-sort" aria-label="Sort"><option value="order"${sort === "order" ? " selected" : ""}>Featured</option><option value="new"${sort === "new" ? " selected" : ""}>Newest</option><option value="popular"${sort === "popular" ? " selected" : ""}>Popular</option></select></div>
+      <div class="pj-tools"><input type="search" class="jr-search" placeholder="Search projects" aria-label="Search projects" value="${esc(q)}"><div class="seg pj-sort" role="group" aria-label="Sort">${[["order","Featured"],["new","Newest"],["popular","Popular"]].map(([k, l]) => `<button data-s="${k}" class="${sort === k ? "on" : ""}">${l}</button>`).join("")}</div></div>
       ${fields.length > 1 ? `<div class="jtags"><button class="${!field ? "on" : ""}" data-f="">All <span>${all.length}</span></button>${fields.map((f) => `<button class="${field === f ? "on" : ""}" data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>` : ""}
       ${shown.length ? `<div class="pj-grid">${shown.map(card).join("")}</div>` : `<p class="nt-hint">${q || field ? "Nothing matches that." : "No projects yet."}</p>`}`;
     $$("[data-f]", root).forEach((b) => (b.onclick = () => { field = b.dataset.f; draw(); }));
     $$("a.pj-card", root).forEach((a) => (a.onclick = (e) => { if (e.target.closest(".pj-more")) { e.preventDefault(); return; } if (e.metaKey || e.ctrlKey) return; e.preventDefault(); detail(body, a.dataset.slug); }));
     $$(".pj-more", root).forEach((b) => (b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); cardMenu(b, body); }));
     const se = $(".jr-search", root); se.oninput = () => { q = se.value.trim().toLowerCase(); const pos = se.selectionStart; draw(); const n = $(".jr-search", root); n.focus(); n.setSelectionRange(pos, pos); };
-    $(".pj-sort", root).onchange = (e) => { sort = e.target.value; draw(); };
+    $$(".pj-sort [data-s]", root).forEach((b) => (b.onclick = () => { sort = b.dataset.s; draw(); }));
     const nb = $(".pj-new", root); if (nb) nb.onclick = () => studio(body, null);
   };
   draw();

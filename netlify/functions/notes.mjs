@@ -14,7 +14,7 @@ const clean = (list) =>
     const o = {
       id: /^[\w-]{3,16}$/.test(n?.id || "") ? n.id : rid(),
       title: str(n?.title, 120),
-      text: blocks.length ? blocksText(blocks).slice(0, 10000) : String(n?.text ?? "").slice(0, 10000),
+      text: blocks.length ? blocksText(blocks).slice(0, 1000000) : String(n?.text ?? "").slice(0, 1000000),
       color: COLORS.includes(n?.color) ? n.color : "c0",
     };
     if (blocks.length) o.blocks = blocks;

@@ -75,8 +75,9 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
       mdText = `# About ${pr.name}\n\n${pr.role}\n\n${pr.bio}\n\n${blocksToMd(pr.story)}\n\n## Skills\n\n${pr.skills.map((s) => `- ${s}`).join("\n")}\n`;
     } else if (id === "resume") {
       title = `Resume — ${pr.name}`; desc = `${pr.name}, ${pr.role}. Experience, education and skills.`;
-      body = `<h1>Resume — ${esc(pr.name)}</h1><p>${esc(pr.role)}</p><h2>Experience and education</h2>${exp}${pr.skills.length ? `<h2>Skills</h2><ul>${pr.skills.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}`;
-      mdText = `# Resume — ${pr.name}\n\n${pr.role}\n\n${pr.experience.map((e) => `## ${e.title}\n\n${e.time}\n\n${e.text}`).join("\n\n")}\n`;
+      const rd = Array.isArray(pr.settings.resumeDoc) ? pr.settings.resumeDoc : null; // the owner wrote the page as a document
+      body = rd ? `<h1>Resume — ${esc(pr.name)}</h1>${renderBlocks(rd, { hBase: 2 })}` : `<h1>Resume — ${esc(pr.name)}</h1><p>${esc(pr.role)}</p><h2>Experience and education</h2>${exp}${pr.skills.length ? `<h2>Skills</h2><ul>${pr.skills.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}`;
+      mdText = rd ? `# Resume — ${pr.name}\n\n${blocksToMd(rd)}\n` : `# Resume — ${pr.name}\n\n${pr.role}\n\n${pr.experience.map((e) => `## ${e.title}\n\n${e.time}\n\n${e.text}`).join("\n\n")}\n`;
     } else {
       title = `Contact ${pr.name}`; desc = `Get in touch with ${pr.name}: book a call${pr.email ? " or send an email" : ""}.`;
       body = `<h1>Contact ${esc(pr.name)}</h1><p>${pr.booking ? `<a href="${esc(pr.booking)}">Book a call</a>` : ""}${pr.email ? ` · <a href="mailto:${esc(pr.email)}">${esc(pr.email)}</a>` : ""}</p><ul>${links}</ul>`;

@@ -247,9 +247,9 @@ window.settingsExtra = function (body) {
   if (isAdmin()) {
     const S = (SITE.s = SITE.s || { hiddenApps: [] });
     const picRow = (title, key, hint) => {
-      const row = h("div", { class: "ow-imgrow" });
+      const row = h("div", { class: "ow-imgrow" + (key === "photo" ? " round" : "") });
       const draw = () => {
-        row.innerHTML = `<span class="ow-thumb">${S[key] ? `<img src="${esc(S[key])}" alt="">` : svg(ICO.image, 22)}</span>`;
+        row.innerHTML = `<span class="ow-thumb" ${key === "photo" ? 'style="border-radius:50%"' : ""}>${S[key] || key === "photo" ? `<img src="${esc(S[key] || (window.getPhoto ? window.getPhoto() : "/img/avatar.jpg"))}" alt="">` : svg(ICO.image, 22)}</span>`;
         const up = h("button", { class: "btn tonal", html: svg(ICO.upload, 16) + `<span>${S[key] ? "Replace" : "Upload picture"}</span>`, onclick: async () => {
           try { const f = (await Up.pick("image/*"))[0]; if (!f) return; up.disabled = true; up.lastChild.textContent = "Uploading…"; const r = await Up.image(f, { max: 2200 }); S[key] = r.url; siteSave(); applyText(); draw(); toast("Saved"); } catch (e) { up.disabled = false; toast(e.message || "Upload failed"); draw(); }
         } });

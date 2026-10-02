@@ -93,14 +93,19 @@ export function enrichApp(id, key) {
   };
 }
 window.enrichApp = enrichApp;
-for (const [id, key] of [["resume", "resume"], ["contact", "contact"], ["timeline", "timeline"]]) enrichApp(id, key);
-for (const id of ["projects", "links"]) { const i = EDITABLE.indexOf(id); if (i >= 0) EDITABLE.splice(i, 1); }
+for (const [id, key] of [["contact", "contact"], ["timeline", "timeline"]]) enrichApp(id, key);
+for (const id of ["projects", "links", "resume"]) { const i = EDITABLE.indexOf(id); if (i >= 0) EDITABLE.splice(i, 1); }
 
 /* ---------- first load: open the window the address asks for ---------- */
 export const moreReady = new Promise((res) => { window.__resolveMore = res; });
 (async function boot() {
   const rt = window.__ROUTE__ || {};
   const p = location.pathname;
+  if (window.__STANDALONE === "links") {
+    const box = document.createElement("div"); box.id = "standalone"; box.className = "body"; document.body.append(box);
+    try { const m = await import("/js/app-links.mjs"); await m.linksStandalone(box); } catch (e) { console.error("links page", e); box.innerHTML = '<p style="padding:40px;text-align:center">Could not load the links. <a href="/">Open the desktop</a></p>'; }
+    return;
+  }
   if (rt.status === 404 && p !== "/") { setTimeout(() => toast("That page doesn't exist. Here is the desktop."), 900); history.replaceState({}, "", "/"); return; }
   if (p === "/") return;
   // Apps added by the extras file (Docs, Services, Book a call) exist only once it has loaded, so wait for it before opening an address.

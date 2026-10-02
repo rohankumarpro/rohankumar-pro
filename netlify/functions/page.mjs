@@ -20,7 +20,7 @@ export const handler = async (event) => {
       return { statusCode: 200, headers: { ...common, "content-type": "text/markdown; charset=utf-8" }, body: P.mdText };
     }
     const ui = (await store.get("settings", { type: "json" }))?.ui === "minimal" ? "minimal" : "material";
-    return { statusCode: P.status, headers: { ...common, "content-type": "text/html; charset=utf-8" }, body: renderShell(P, { preview, ui }) };
+    return { statusCode: P.status, headers: { ...common, "content-type": "text/html; charset=utf-8" }, body: renderShell(P, { preview, ui, standalone: P.status === 200 && P.app === "links" && !q.p?.endsWith(".md") ? "links" : "" }) };
   } catch (e) {
     console.error("page", e);
     // If the extra search-engine content can't be built, still hand over the plain desktop so the site always opens.

@@ -4,6 +4,7 @@ import { h, $, $$, esc, api, isAdmin, toast, mobile, Up, share, confirmBox, fmtN
 import { embedInfo, safeUrl } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
 import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
+import { BRANDS, BRAND_KEYS, brandSvg, brandOfUrl } from "/shared/brands.mjs";
 const I = (n, size = 16) => _ic(n, { size });
 
 const H = { hub: null, saved: false, stats: null };
@@ -51,6 +52,11 @@ async function load(force) {
   H.hub = r.ok ? r.data.hub : { v: 1, profile: {}, theme: { preset: "mint" }, socials: [], items: [], settings: { share: true, qr: true, vcard: true }, vcard: {} };
   H.saved = !!(r.ok && r.data.saved);
 }
+/* The dedicated /links address: only the link page, no desktop around it. */
+export async function linksStandalone(box) {
+  await load(true);
+  renderHub(box, H.hub, { owner: false, track: true });
+}
 export async function linksApp(body) {
   R.handlers.links = (b) => linksApp(b);
   await load(true);
@@ -67,12 +73,27 @@ function themeVars(hub) {
   return { "--hb-bg": t.bgImg ? `center/cover url(${t.bgImg})` : bg, "--hb-fg": t.text || p.fg, "--hb-mut": t.text || p.mut, "--hb-card": p.card, "--hb-ac": t.accent || p.accent, "--hb-on": t.accent ? contrast(t.accent) : p.on, "--hb-line": p.line, "--hb-font": FONTS[t.font && t.font !== "sans" ? t.font : p.font || "sans"] };
 }
 function contrast(hex) { const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111111" : "#ffffff"; }
-function socialBtn(s) { const [name, bg, ch] = SOC[s.type] || SOC.website; const href = s.type === "email" ? `mailto:${s.url}` : s.url; return `<a class="hb-soc" href="${esc(href)}" target="_blank" rel="me noopener" aria-label="${esc(name)}" title="${esc(name)}" style="background:${bg}"><span>${_ICONS[ch] ? I(ch, 20) : ch}</span></a>`; }
+function socialBtn(s) { const b = BRANDS[s.type]; const name = b ? b.n : s.type === "email" ? "Email" : "Website"; const href = s.type === "email" ? `mailto:${s.url}` : s.url;
+  const mark = s.img ? `<img src="${esc(s.img)}" alt="">` : b ? brandSvg(s.type, 22) : glyph(s.type === "email" ? "mail" : "globe", 22);
+  return `<a class="hb-soc" href="${esc(href)}" target="_blank" rel="me noopener" aria-label="${esc(name)}" title="${esc(name)}">${mark}</a>`; }
+const GLYPH_OF = { email: "mail", phone: "phone", whatsapp: "chat", map: "pin", copy: "copy", vcard: "person", app: "spark", countdown: "clock", subscribe: "mail" };
+function iconMark(i, size = 22) { if (i.iconImg) return `<img class="hb-ci" src="${esc(i.iconImg)}" alt="" style="width:${size}px;height:${size}px">`; if (i.brand) return brandSvg(i.brand, size); return glyph(i.icon || GLYPH_OF[i.type] || "link", size); }
 function itemHtml(i, st, hub) {
   const th = hub.theme || {};
   const cls = ["hb-it", i.style === "featured" ? "hb-feat" : i.style === "outline" ? "hb-out" : "", i.anim && i.anim !== "none" ? "an-" + i.anim : ""].filter(Boolean).join(" ");
-  const ico = i.thumb ? `<img class="hb-th" src="${esc(i.thumb)}" alt="" loading="lazy">` : `<span class="hb-ic" style="--ic:var(--${i.color || "c1"})">${glyph(i.icon || { email: "mail", phone: "phone", whatsapp: "chat", map: "pin", copy: "copy", vcard: "person", app: "spark", countdown: "clock", subscribe: "heart" }[i.type] || "link")}</span>`;
+    const ico = i.thumb ? `<img class="hb-th" src="${esc(i.thumb)}" alt="" loading="lazy">` : `<span class="hb-ic" style="--ic:var(--${i.color || "c1"})">${iconMark(i, 22)}</span>`;
   const inner = `${ico}<span class="hb-t"><b>${esc(i.title)}</b>${i.sub ? `<small>${esc(i.sub)}</small>` : ""}</span>${i.badge ? `<em class="hb-badge">${esc(i.badge)}</em>` : ""}<svg class="hb-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+  /* one link, three looks: a card with a full picture, an icon on its own, or a button */
+  if (i.look === "card" && ["link", "app", "email", "phone", "whatsapp", "map", "copy", "vcard", "countdown"].includes(i.type)) {
+    const attrs = i.type === "app" ? `data-app="${esc(i.app)}"` : i.type === "copy" ? `data-copy="${esc(i.text)}"` : `href="${esc(hrefOf(i))}"${/^https?:/.test(hrefOf(i)) ? ' target="_blank" rel="noopener"' : ""}`;
+    const tag = i.type === "app" || i.type === "copy" ? "button" : "a";
+    return `<${tag} class="hb-it hb-card" ${attrs} data-id="${esc(i.id)}">${i.img ? `<img class="hb-cimg" src="${esc(i.img)}" alt="" loading="lazy">` : `<span class="hb-cph">${i.brand ? brandSvg(i.brand, 44) : glyph(i.icon || "link", 40)}</span>`}<span class="hb-cap2"><b>${esc(i.title)}</b>${i.sub ? `<small>${esc(i.sub)}</small>` : ""}</span>${i.badge ? `<em class="hb-badge">${esc(i.badge)}</em>` : ""}</${tag}>`;
+  }
+  if (i.look === "icon" && ["link", "app", "email", "phone", "whatsapp", "map", "copy", "vcard", "countdown"].includes(i.type)) {
+    const attrs = i.type === "app" ? `data-app="${esc(i.app)}"` : i.type === "copy" ? `data-copy="${esc(i.text)}"` : `href="${esc(hrefOf(i))}"${/^https?:/.test(hrefOf(i)) ? ' target="_blank" rel="noopener"' : ""}`;
+    const tag = i.type === "app" || i.type === "copy" ? "button" : "a";
+    return `<${tag} class="hb-it hb-ico" ${attrs} data-id="${esc(i.id)}" aria-label="${esc(i.title)}" title="${esc(i.title)}">${iconMark(i, 26)}</${tag}>`;
+  }
   switch (i.type) {
     case "header": return `<h2 class="hb-h${i.collapsible ? " hb-col" : ""}" data-id="${esc(i.id)}"${i.collapsible ? ` role="button" tabindex="0" aria-expanded="${!i.closed}"` : ""}>${esc(i.title)}${i.collapsible ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>' : ""}</h2>`;
     case "text": return `<p class="hb-p">${i.html || esc(i.title)}</p>`;
@@ -95,11 +116,16 @@ export function renderHub(box, hub, { owner, onEdit, preview, track } = {}) {
   const root = h("div", { class: "hub", "data-shape": th.shape || "round", "data-fill": th.fill || "soft", "data-layout": th.layout || "list", "data-align": th.align || "center", "data-pattern": th.pattern || "none" });
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
   let list = "", closed = false;
+  let run = [];
+  const flushIcons = () => { if (run.length) { list += `<div class="hb-icons">${run.join("")}</div>`; run = []; } };
   for (const i of items) {
     if (i.type === "header") closed = !!(i.collapsible && i.closed);
+    if (i.look === "icon" && i.type !== "header" && !closed && ["link", "app", "email", "phone", "whatsapp", "map", "copy", "vcard", "countdown"].includes(i.type)) { run.push(itemHtml(i, null, hub)); continue; }
+    flushIcons();
     const dim = (i.hidden || (i.start && i.start > now) || (i.end && i.end <= now)) ? ` data-dim="${i.hidden ? "Hidden" : i.start > now ? "Scheduled" : "Expired"}"` : "";
     list += `<div class="hb-row${closed && i.type !== "header" ? " shut" : ""}"${dim} data-for="${esc(i.id)}">${itemHtml(i, null, hub)}</div>`;
   }
+  flushIcons();
   root.innerHTML = `<div class="hb-pat"></div><div class="hb-in">${owner && onEdit ? `<button class="hb-edit">${I("pencil", 15)} Edit page</button>` : ""}
     <header class="hb-head"><img class="hb-av" src="${esc(pr.avatar)}" alt="${esc(pr.name)}" width="96" height="96"><h1>${esc(pr.name)}</h1>${pr.role ? `<p class="hb-role">${esc(pr.role)}</p>` : ""}${pr.status ? `<span class="hb-status"><i></i>${esc(pr.status)}</span>` : ""}${pr.bio ? `<p class="hb-bio">${esc(pr.bio)}</p>` : ""}</header>
     ${hub.socials.length ? `<div class="hb-socs">${hub.socials.map(socialBtn).join("")}</div>` : ""}
@@ -177,6 +203,20 @@ function builder(body) {
   };
   const advanced = (it) => ["link", "app", "email", "phone", "whatsapp", "map", "copy", "countdown", "vcard", "subscribe"].includes(it.type);
   const dtVal = (ms) => { if (!ms) return ""; const d = new Date(ms); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+  const LINKY = ["link", "app", "email", "phone", "whatsapp", "map", "copy", "vcard", "countdown"];
+  /* Look: how this one link appears (button, card with a picture, or a bare icon), and which icon it uses */
+  const lookUi = (it) => {
+    const look = it.look || "button";
+    const picker = `<div class="hbe-icopick"><input class="hbe-bs" data-bsearch placeholder="Search logos: instagram, youtube…" aria-label="Search logos" autocomplete="off">
+      <div class="hbe-brands">${BRAND_KEYS.map((k) => `<button type="button" class="${it.brand === k && !it.iconImg ? "on" : ""}" data-brand="${k}" title="${esc(BRANDS[k].n)}" aria-label="${esc(BRANDS[k].n)}">${brandSvg(k, 22)}</button>`).join("")}</div>
+      <div class="hbe-icons">${ICON_KEYS.map((k) => `<button type="button" class="${!it.brand && !it.iconImg && (it.icon || "") === k ? "on" : ""}" data-icon="${k}" aria-label="${k}" title="${k}">${glyph(k, 18)}</button>`).join("")}</div>
+      <div class="hbe-imgrow">${it.iconImg ? `<img class="hb-ci" src="${esc(it.iconImg)}" alt="">` : ""}<button type="button" class="rb-mini" data-pick="iconImg">${it.iconImg ? "Replace your icon" : "Upload your own icon"}</button>${it.iconImg ? '<button type="button" class="rb-mini" data-clear="iconImg">Remove</button>' : ""}</div></div>`;
+    return `<div class="ow-f">Look<div class="seg hbe-look" role="group" aria-label="Look">${[["button", "Button"], ["card", "Card"], ["icon", "Icon"]].map(([v, l]) => `<button type="button" data-look="${v}" class="${look === v ? "on" : ""}">${l}</button>`).join("")}</div>
+      <small class="hint">${look === "card" ? "A large card with a picture." : look === "icon" ? "Just the icon. Icons next to each other sit in one row." : "A normal link button."}</small></div>
+      ${look === "card" ? `<div class="ow-f">Card picture<div class="hbe-imgrow">${it.img ? `<img src="${esc(it.img)}" alt="">` : ""}<button type="button" class="rb-mini" data-pick="img">${it.img ? "Replace" : "Upload a picture"}</button>${it.img ? '<button type="button" class="rb-mini" data-clear="img">Remove</button>' : ""}</div></div>` : ""}
+      ${look !== "card" || !it.img ? `<div class="ow-f">Icon${look === "button" ? " <small>(optional)</small>" : ""}${picker}</div>` : ""}
+      ${look === "button" ? `<div class="ow-f">Small picture instead of icon<div class="hbe-imgrow">${it.thumb ? `<img src="${esc(it.thumb)}" alt="">` : ""}<button type="button" class="rb-mini" data-pick="thumb">${it.thumb ? "Replace" : "Upload"}</button>${it.thumb ? '<button type="button" class="rb-mini" data-clear="thumb">Remove</button>' : ""}</div></div>` : ""}`;
+  };
   function itemCard(it, i) {
     const open = B.open === it.id, F = fieldsFor(it), tp = TYPES.find((t) => t[0] === it.type) || TYPES[0];
     const clicks = H.stats?.items?.[it.id];
@@ -191,23 +231,22 @@ function builder(body) {
     return `<div class="hbe-card${it.hidden ? " off" : ""}${open ? " open" : ""}" data-id="${it.id}" data-i="${i}"><div class="hbe-ch"><button class="hbe-grip" aria-label="Drag to reorder" title="Drag to reorder">⋮⋮</button><span class="hbe-ti">${glyph(tp[2], 18)}</span>
       <div class="hbe-sum" data-a="toggle"><b>${esc(it.title || it.url || it.text || tp[1])}</b><small>${esc(tp[1])}${it.type === "link" && it.url ? " · " + esc(it.url.replace(/^https?:\/\//, "").slice(0, 36)) : ""}${clicks ? ` · ${clicks} click${clicks === 1 ? "" : "s"}` : ""}${it.start && it.start > Date.now() ? " · scheduled" : ""}</small></div>
       <button class="hbe-eye" data-a="hide" aria-label="${it.hidden ? "Show" : "Hide"}" title="${it.hidden ? "Hidden. Click to show" : "Visible. Click to hide"}">${I(it.hidden ? "eye-off" : "eye", 17)}</button><button class="hbe-x" data-a="del" aria-label="Delete" title="Delete">${I("x", 16)}</button></div>
-      ${open ? `<div class="hbe-cb">${F.map(inp).join("")}${it.type === "header" ? `<label class="ow-app"><input type="checkbox" data-k="collapsible" ${it.collapsible ? "checked" : ""}><span>Let visitors collapse this section</span></label>` : ""}
+      ${open ? `<div class="hbe-cb">${F.map(inp).join("")}${LINKY.includes(it.type) ? lookUi(it) : ""}${it.type === "header" ? `<label class="ow-app"><input type="checkbox" data-k="collapsible" ${it.collapsible ? "checked" : ""}><span>Let visitors collapse this section</span></label>` : ""}
         ${advanced(it) ? `<details class="hbe-adv"><summary>More options</summary>
           ${it.type !== "subscribe" && it.type !== "countdown" ? `<label class="ow-f">Small text<input data-k="sub" value="${esc(it.sub || "")}" maxlength="160"></label>` : ""}
-          <div class="pj-two"><label class="ow-f">Badge<input data-k="badge" value="${esc(it.badge || "")}" maxlength="16" placeholder="New"></label><label class="ow-f">Style<select data-k="style">${[["default", "Normal"], ["featured", "Featured"], ["outline", "Outline"]].map(([v, l]) => `<option value="${v}"${(it.style || "default") === v ? " selected" : ""}>${l}</option>`).join("")}</select></label></div>
+          <label class="ow-f">Badge<input data-k="badge" value="${esc(it.badge || "")}" maxlength="16" placeholder="New"></label>
           <div class="pj-two"><label class="ow-f">Attention<select data-k="anim">${[["none", "None"], ["pulse", "Pulse"], ["shine", "Shine"], ["wiggle", "Wiggle"], ["bounce", "Bounce"]].map(([v, l]) => `<option value="${v}"${(it.anim || "none") === v ? " selected" : ""}>${l}</option>`).join("")}</select></label><label class="ow-f">Colour<select data-k="color">${["c1", "c2", "c3", "c4", "c5", "c6"].map((c) => `<option value="${c}"${(it.color || "c1") === c ? " selected" : ""}>${c.replace("c", "Tone ")}</option>`).join("")}</select></label></div>
-          <div class="ow-f">Icon<div class="hbe-icons">${ICON_KEYS.map((k) => `<button class="${(it.icon || "") === k ? "on" : ""}" data-icon="${k}" aria-label="${k}" title="${k}">${glyph(k, 18)}</button>`).join("")}</div></div>
-          <div class="ow-f">Picture instead of icon<div class="hbe-imgrow">${it.thumb ? `<img src="${esc(it.thumb)}" alt="">` : ""}<button class="rb-mini" data-pick="thumb">${it.thumb ? "Replace" : "Upload"}</button>${it.thumb ? '<button class="rb-mini" data-clearthumb>Remove</button>' : ""}</div></div>
           <div class="pj-two"><label class="ow-f">Show from<input type="datetime-local" data-k="start" data-ms="1" value="${dtVal(it.start)}"></label><label class="ow-f">Hide after<input type="datetime-local" data-k="end" data-ms="1" value="${dtVal(it.end)}"></label></div>
           ${it.type === "link" ? `<label class="ow-f">Short link <small>${esc(location.host)}/go/<b>${esc(it.slug || it.id)}</b> counts every click</small><input data-k="slug" value="${esc(it.slug || "")}" maxlength="40" placeholder="${esc(it.id)}"></label>` : ""}</details>` : ""}</div>` : ""}</div>`;
   }
   function drawLinks() {
-    main.innerHTML = `<div class="hbe-add"><button class="btn" data-a="add">+ Add</button><span class="hint">Drag ⋮⋮ to reorder. Items outside their schedule are hidden from visitors automatically.</span></div><div class="hbe-types" hidden>${TYPES.map(([t, l, ic]) => `<button data-newtype="${t}">${glyph(ic, 22)}<span>${l}</span></button>`).join("")}</div>
+    main.innerHTML = `<div class="hbe-add"><button class="btn" data-a="add">${I("plus", 16)} Add link</button><button class="hbe-more" data-a="more">More blocks</button><span class="hint">Drag ⋮⋮ to reorder.</span></div><div class="hbe-types" hidden>${TYPES.map(([t, l, ic]) => `<button data-newtype="${t}">${glyph(ic, 22)}<span>${l}</span></button>`).join("")}</div>
       <div class="hbe-list">${B.hub.items.map(itemCard).join("") || '<p class="hint">Nothing here yet. Add your first link.</p>'}</div>`;
     wireCards();
   }
   function wireCards() {
-    $("[data-a=add]", main)?.addEventListener("click", () => { const t = $(".hbe-types", main); t.hidden = !t.hidden; });
+    $("[data-a=add]", main)?.addEventListener("click", () => { const it = { id: rid(), type: "link", title: "", url: "", look: "button" }; B.hub.items.unshift(it); B.open = it.id; drawLinks(); touch(); $(`.hbe-card[data-id="${it.id}"] [data-k=url]`, main)?.focus(); });
+    $("[data-a=more]", main)?.addEventListener("click", () => { const t = $(".hbe-types", main); t.hidden = !t.hidden; });
     $$("[data-newtype]", main).forEach((b) => (b.onclick = () => {
       const t = b.dataset.newtype, it = { id: rid(), type: t, title: { link: "New link", header: "New section", embed: "", app: "", email: "", phone: "", whatsapp: "", map: "My location", copy: "Copy", countdown: "Launch day", subscribe: "Stay in the loop", vcard: "Save my contact", image: "", text: "", divider: "" }[t] ?? "" };
       if (t === "link") it.url = "https://"; if (t === "app") it.app = "journal"; if (t === "countdown") it.date = Date.now() + 7 * 86400000; if (t === "subscribe") it.button = "Subscribe"; if (t === "embed") it.url = "";
@@ -220,8 +259,11 @@ function builder(body) {
         if (a === "toggle") { B.open = B.open === it.id ? null : it.id; drawLinks(); return; }
         if (a === "hide") { it.hidden = !it.hidden; if (!it.hidden) delete it.hidden; drawLinks(); touch(); return; }
         if (a === "del") { if (await confirmBox("Delete this item?")) { B.hub.items.splice(i, 1); drawLinks(); touch(); } return; }
-        const ic = e.target.closest("[data-icon]"); if (ic) { it.icon = it.icon === ic.dataset.icon ? undefined : ic.dataset.icon; if (!it.icon) delete it.icon; drawLinks(); touch(); return; }
-        const pk = e.target.closest("[data-pick]"); if (pk) { const f = (await Up.pick("image/*"))[0]; if (!f) return; try { const r = await Up.image(f, { max: 1200 }); it[pk.dataset.pick] = r.url; drawLinks(); touch(); } catch (x) { toast(x.message); } return; }
+        const lk = e.target.closest("[data-look]"); if (lk) { it.look = lk.dataset.look; if (it.look === "button") delete it.look; drawLinks(); touch(); return; }
+        const br = e.target.closest("[data-brand]"); if (br) { const same = it.brand === br.dataset.brand && !it.iconImg; delete it.iconImg; delete it.icon; if (same) delete it.brand; else { it.brand = br.dataset.brand; if (!it.title || it.title === "New link") it.title = BRANDS[it.brand].n; } drawLinks(); touch(); return; }
+        const ic = e.target.closest("[data-icon]"); if (ic) { const same = !it.brand && !it.iconImg && it.icon === ic.dataset.icon; delete it.brand; delete it.iconImg; if (same) delete it.icon; else it.icon = ic.dataset.icon; drawLinks(); touch(); return; }
+        const cl = e.target.closest("[data-clear]"); if (cl) { delete it[cl.dataset.clear]; drawLinks(); touch(); return; }
+        const pk = e.target.closest("[data-pick]"); if (pk) { const f = (await Up.pick("image/*"))[0]; if (!f) return; try { const r = await Up.image(f, { max: pk.dataset.pick === "iconImg" ? 256 : 1200 }); it[pk.dataset.pick] = r.url; if (pk.dataset.pick === "iconImg") { delete it.brand; delete it.icon; } drawLinks(); touch(); } catch (x) { toast(x.message); } return; }
         if (e.target.closest("[data-clearthumb]")) { delete it.thumb; drawLinks(); touch(); }
       });
       $$("[data-k]", c).forEach((el) => {
@@ -231,9 +273,11 @@ function builder(body) {
           if (el.dataset.ms) v = v ? new Date(v).getTime() : 0;
           if (v === "" || v === 0 || v === false) delete it[k]; else it[k] = v;
           if (k === "title") { const s = $(".hbe-sum b", c); if (s) s.textContent = v || ""; }
+          if (k === "url" && it.type === "link") { const bk = brandOfUrl(v); if (bk && !it.iconImg && !it.icon) { it.brand = bk; $$("[data-brand]", c).forEach((x) => x.classList.toggle("on", x.dataset.brand === bk)); if (!it.title || it.title === BRANDS[it._auto]?.n) { it.title = BRANDS[bk].n; it._auto = bk; const t = $("[data-k=title]", c); if (t) t.value = it.title; const s2 = $(".hbe-sum b", c); if (s2) s2.textContent = it.title; } } }
           touch();
         });
       });
+      const bs = $("[data-bsearch]", c); if (bs) bs.addEventListener("input", () => { const q = bs.value.trim().toLowerCase(); $$("[data-brand]", c).forEach((x) => { x.hidden = !!q && !(x.dataset.brand + " " + BRANDS[x.dataset.brand].n).toLowerCase().includes(q); }); });
       // drag to reorder: a line shows where it will land
       const grip = $(".hbe-grip", c);
       grip.addEventListener("pointerdown", (e) => {
@@ -279,13 +323,14 @@ function builder(body) {
       <div class="hbe-imgrow"><img class="av" src="${esc(p.avatar || "/img/avatar.jpg")}" alt=""><button class="rb-mini" data-pickav>${p.avatar ? "Replace picture" : "Upload a picture"}</button>${p.avatar ? '<button class="rb-mini" data-rmav>Use default</button>' : ""}</div>
       <label class="ow-f">Name<input data-p="name" value="${esc(p.name || "")}" maxlength="60" placeholder="${esc(siteName())}"></label><label class="ow-f">Role<input data-p="role" value="${esc(p.role || "")}" maxlength="80" placeholder="${esc((typeof P !== "undefined" && P.role) || "")}"></label>
       <label class="ow-f">Status line<input data-p="status" value="${esc(p.status || "")}" maxlength="80" placeholder="${esc((typeof P !== "undefined" && P.status) || "Open to new projects")}"></label><label class="ow-f">Bio<textarea data-p="bio" rows="3" maxlength="400">${esc(p.bio || "")}</textarea></label>
-      <h3>Social icons</h3><div class="pj-rows" data-socs>${soc.map((x, i) => `<div class="pj-row"><select data-s="type" data-i="${i}">${Object.entries(SOC).map(([k, [n]]) => `<option value="${k}"${x.type === k ? " selected" : ""}>${n}</option>`).join("")}</select><input data-s="url" data-i="${i}" value="${esc(x.url)}" placeholder="https://…" maxlength="300"><button class="rb-mini" data-su="${i}" aria-label="Move up">${I("arrow-up", 14)}</button><button class="rb-mini rb-x" data-sx="${i}" aria-label="Remove">${I("x", 14)}</button></div>`).join("")}</div><button class="rb-mini" data-addsoc>+ Add social icon</button>
+      <h3>Social icons</h3><div class="pj-rows" data-socs>${soc.map((x, i) => `<div class="pj-row"><select data-s="type" data-i="${i}">${BRAND_KEYS.map((k) => `<option value="${k}"${x.type === k ? " selected" : ""}>${esc(BRANDS[k].n)}</option>`).join("")}<option value="email"${x.type === "email" ? " selected" : ""}>Email</option><option value="website"${x.type === "website" ? " selected" : ""}>Website</option></select><input data-s="url" data-i="${i}" value="${esc(x.url)}" placeholder="https://…" maxlength="300"><button class="rb-mini" data-sp="${i}" title="Use your own icon picture">${x.img ? "Own icon ✓" : "Own icon"}</button><button class="rb-mini" data-su="${i}" aria-label="Move up">${I("arrow-up", 14)}</button><button class="rb-mini rb-x" data-sx="${i}" aria-label="Remove">${I("x", 14)}</button></div>`).join("")}</div><button class="rb-mini" data-addsoc>+ Add social icon</button>
       <h3>On the page</h3><label class="ow-app"><input type="checkbox" data-set="share" ${s.share !== false ? "checked" : ""}><span>Share button</span></label><label class="ow-app"><input type="checkbox" data-set="qr" ${s.qr !== false ? "checked" : ""}><span>QR code button</span></label><label class="ow-app"><input type="checkbox" data-set="vcard" ${s.vcard !== false ? "checked" : ""}><span>“Save contact” button (needs the contact card below)</span></label>
       <h3>Contact card <small>(what “Save contact” downloads)</small></h3><div class="pj-two"><label class="ow-f">Full name<input data-v="name" value="${esc(v.name || "")}" maxlength="80"></label><label class="ow-f">Company<input data-v="org" value="${esc(v.org || "")}" maxlength="80"></label></div><div class="pj-two"><label class="ow-f">Job title<input data-v="title" value="${esc(v.title || "")}" maxlength="80"></label><label class="ow-f">Phone<input data-v="phone" value="${esc(v.phone || "")}" maxlength="30" type="tel"></label></div><div class="pj-two"><label class="ow-f">Email<input data-v="email" value="${esc(v.email || "")}" maxlength="120" type="email"></label><label class="ow-f">Website<input data-v="url" value="${esc(v.url || "")}" maxlength="300" inputmode="url"></label></div>`;
     $$("[data-p]", main).forEach((el) => (el.oninput = () => { const k = el.dataset.p; if (el.value.trim()) p[k] = el.value; else delete p[k]; touch(); }));
     $$("[data-v]", main).forEach((el) => (el.oninput = () => { const k = el.dataset.v; if (el.value.trim()) v[k] = el.value; else delete v[k]; touch(false); }));
     $$("[data-set]", main).forEach((el) => (el.onchange = () => { s[el.dataset.set] = el.checked; touch(); }));
-    $$("[data-s]", main).forEach((el) => { const f = () => { soc[+el.dataset.i][el.dataset.s] = el.value; touch(); }; el.addEventListener(el.tagName === "SELECT" ? "change" : "input", f); });
+    $$("[data-s]", main).forEach((el) => { const f = () => { const row = soc[+el.dataset.i]; row[el.dataset.s] = el.value; if (el.dataset.s === "url") { const bk = brandOfUrl(el.value); if (bk && bk !== row.type) { row.type = bk; const sel = el.parentElement.querySelector("select"); if (sel) { sel.value = bk; sel.dispatchEvent(new Event("change")); } } } touch(); }; el.addEventListener(el.tagName === "SELECT" ? "change" : "input", f); });
+    $$("[data-sp]", main).forEach((b) => (b.onclick = async () => { const row = soc[+b.dataset.sp]; if (row.img) { delete row.img; drawProfile(); touch(); return; } const f = (await Up.pick("image/*"))[0]; if (!f) return; try { const r = await Up.image(f, { max: 256 }); row.img = r.url; drawProfile(); touch(); } catch (e) { toast(e.message); } }));
     $$("[data-sx]", main).forEach((b) => (b.onclick = () => { soc.splice(+b.dataset.sx, 1); drawProfile(); touch(); }));
     $$("[data-su]", main).forEach((b) => (b.onclick = () => { const i = +b.dataset.su; if (i > 0) { [soc[i - 1], soc[i]] = [soc[i], soc[i - 1]]; drawProfile(); touch(); } }));
     $("[data-addsoc]", main).onclick = () => { soc.push({ type: "instagram", url: "https://" }); drawProfile(); };
