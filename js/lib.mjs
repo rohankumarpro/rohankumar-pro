@@ -61,6 +61,21 @@ async function mustLoad(url) {
 }
 const b64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(blob); });
 const uploadError = (r) => r.status === 401 ? "You are signed out. Sign in again as the owner." : r.status === 0 ? "No connection, or the picture is too big for the server. Try a smaller one." : r.status === 413 ? "That picture is too big to upload. Try a smaller one." : (r.data.error || "Upload failed") + (r.data.detail ? ": " + r.data.detail : "") + " (" + r.status + ")";
+// The picture social sites show when a page is shared: 1200 x 630, cropped from the middle of a picture already on the site
+// (a little above the middle for tall pictures, where faces and titles usually are), saved as a small JPEG every app accepts.
+export async function shareImage(src) {
+  const im = await new Promise((res, rej) => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => res(i); i.onerror = () => rej(new Error("Could not read that picture.")); i.src = src; });
+  const W = 1200, H = 630, sw = im.naturalWidth, sh = im.naturalHeight; if (!sw || !sh) throw new Error("Could not read that picture.");
+  const k = Math.max(W / sw, H / sh), cw = W / k, ch = H / k, cx = (sw - cw) / 2, cy = Math.max(0, Math.min(sh - ch, (sh - ch) * (sh > sw ? 0.3 : 0.5)));
+  const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.imageSmoothingQuality = "high"; x.drawImage(im, cx, cy, cw, ch, 0, 0, W, H);
+  const enc = (q) => new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", q));
+  let blob = await enc(0.84); if (blob.size > 330000) blob = await enc(0.74); if (blob.size > 330000) blob = await enc(0.62);
+  const r = await api("/api/upload", { method: "POST", body: { full: await b64(blob), name: "share.jpg", w: W, h: H } });
+  if (!r.ok) throw new Error(uploadError(r));
+  return r.data.url.replace(/^\/api\/u\?f=/, "/u/"); // the clean address every share preview accepts
+}
+
 export const Up = {
   // Shrinks a picture in the browser, then stores a full size and a small copy. Returns {url, thumb, w, h, name}.
   async image(file, { max = 2000 } = {}) {
@@ -105,10 +120,10 @@ export function loadEditor() {
   }
   return edP;
 }
-export async function makeEditor(host, { blocks, onChange, placeholder, onStatus, escLeaves } = {}) {
+export async function makeEditor(host, { blocks, onChange, placeholder, onStatus, escLeaves, reveal } = {}) {
   const { createEditor } = await loadEditor();
   return createEditor(host, {
-    blocks, onChange, placeholder, onStatus, escLeaves,
+    blocks, onChange, placeholder, onStatus, escLeaves, reveal,
     upload: (f) => (f.type === "application/pdf" ? Up.file(f) : Up.image(f)),
     library: () => Up.list(), onError: (m) => toast(m),
   });

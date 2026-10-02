@@ -468,6 +468,7 @@ export function createEditor(host, opts = {}) {
   }
   const cleanEmpty = (ed) => { $$("strong,em,u,s,code,mark,span,a,sub,sup", ed).forEach((n) => { if (!n.textContent && !n.querySelector("br,img")) n.remove(); }); ed.normalize(); };
   function toggleMark(tag, attrs) {
+    if (E.cross && crossSel()) { crossMark(tag, attrs); return; }
     const r = range(); if (!r || r.collapsed) return;
     const ed = edAt(r.commonAncestorContainer); if (!ed) return;
     if (isMarked(r, markMatch(tag), ed)) removeMark(tag); else applyMark(tag, attrs);
@@ -475,6 +476,7 @@ export function createEditor(host, opts = {}) {
   }
   function setColor(kind, value) {
     const tag = kind === "bg" ? "mark" : "span", attr = kind === "bg" ? "data-bg" : "data-tc";
+    if (E.cross && crossSel()) { crossEach(() => (!value ? removeMark(tag, attr) : applyMark(tag, { [attr]: value }, { replace: true }))); return; }
     if (!value) removeMark(tag, attr); else applyMark(tag, { [attr]: value }, { replace: true });
     updateBars();
   }
@@ -598,6 +600,13 @@ export function createEditor(host, opts = {}) {
     const a = closestMark(r.startContainer, markMatch("a"), ed); const saved = r.cloneRange();
     askText(anchorRect, { title: "Link", value: a ? a.getAttribute("href") : "", placeholder: "Paste or type a link", allowEmpty: !!a, onDone: (v) => { const s = sel(); s.removeAllRanges(); s.addRange(saved); setLink(v); } });
   }
+  // one click highlight (yellow), a second click on highlighted text takes it off; other colours stay in the colour menu
+  const HL_ICO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>';
+  function toggleHighlight() {
+    if (E.cross && crossSel()) { crossMark("mark", { "data-bg": "yellow" }, "data-bg"); return; }
+    const r = range(), ed = r && edAt(r.commonAncestorContainer); if (!ed) return;
+    setColor("bg", isMarked(r, markMatch("mark", "data-bg"), ed) ? "" : "yellow");
+  }
   function colorPop(anchorRect) {
     const saved = range()?.cloneRange();
     const row = (kind, title) => h("div", { class: "rte-cr" }, h("small", {}, title), h("div", {}, h("button", { type: "button", class: "rte-cw def", title: "Default", onclick: () => pick(kind, "") }, "A"), COLORS.map((c) => h("button", { type: "button", class: "rte-cw " + kind, "data-c": c, title: c, "aria-label": c + (kind === "bg" ? " background" : " text"), onclick: () => pick(kind, c) }, "A"))));
@@ -612,6 +621,7 @@ export function createEditor(host, opts = {}) {
     bar.append(h("button", { type: "button", class: "rte-fb turn", "data-k": "turn", title: "Turn into" }, "Text"));
     markBtns.forEach(([k, t, ico, fn]) => bar.append(h("button", { type: "button", class: "rte-fb", "data-k": k, title: t, "aria-label": t, html: ico, onclick: fn })));
     bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "link", title: "Link (Ctrl+K)", "aria-label": "Link", html: I("link", 16), onclick: (e) => linkAsk(e.currentTarget.getBoundingClientRect()) }));
+    bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "hl", title: "Highlight (Ctrl+Shift+H)", "aria-label": "Highlight", html: HL_ICO, onclick: toggleHighlight }));
     bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "color", title: "Colour", "aria-label": "Colour", html: '<span class="rte-ca">A</span>', onclick: (e) => colorPop(e.currentTarget.getBoundingClientRect()) }));
     bar.append(h("button", { type: "button", class: "rte-fb", "data-k": "clear", title: "Clear formatting", "aria-label": "Clear formatting", html: I("eraser", 16), onclick: clearFormatting }));
     bar.addEventListener("pointerdown", (e) => { if (!e.target.closest("input")) e.preventDefault(); });
@@ -624,7 +634,7 @@ export function createEditor(host, opts = {}) {
     bar.append(
       B(I("plus", 18), "Add block", () => { const ed = edAt(sel().anchorNode); const el = ed && rbOf(ed); if (!el) return; const n = isEmptyHtml(htmlOf(ed)) && el.dataset.t === "p" ? el : insertAfter(el, { t: "p", h: "" }); focusBlock(n, "start"); const e2 = edOf(n); document.execCommand("insertText", false, "/"); }),
       B("<b>B</b>", "Bold", () => toggleMark("strong"), "b"), B("<i>I</i>", "Italic", () => toggleMark("em"), "i"), B("<u>U</u>", "Underline", () => toggleMark("u"), "u"), B("<s>S</s>", "Strikethrough", () => toggleMark("s"), "s"), B("&lt;/&gt;", "Code", () => toggleMark("code"), "c"),
-      B(I("link", 18), "Link", (e) => linkAsk(e.currentTarget.getBoundingClientRect())), B('<span class="rte-ca">A</span>', "Colour", (e) => colorPop(e.currentTarget.getBoundingClientRect())),
+      B(I("link", 18), "Link", (e) => linkAsk(e.currentTarget.getBoundingClientRect())), B(HL_ICO.replace(/16/g, "18"), "Highlight", toggleHighlight, "hl"), B('<span class="rte-ca">A</span>', "Colour", (e) => colorPop(e.currentTarget.getBoundingClientRect())),
       B("Aa", "Turn into", (e) => { const el = rbOf(sel().anchorNode); if (el) turnPop(e.currentTarget.getBoundingClientRect(), el); }),
       B(I("indent", 18), "Indent", () => { const el = rbOf(sel().anchorNode); if (el) indent(el, 1); }), B(I("outdent", 18), "Outdent", () => { const el = rbOf(sel().anchorNode); if (el) indent(el, -1); }),
       B(I("undo", 18), "Undo", undo), B(I("redo", 18), "Redo", redo), B(I("chevron-down", 18), "Hide keyboard", () => { document.activeElement?.blur(); }));
@@ -634,20 +644,22 @@ export function createEditor(host, opts = {}) {
   function updateBars() {
     if (E.destroyed) return;
     const s = sel(), r = s.rangeCount ? s.getRangeAt(0) : null;
-    const ed = r ? edAt(r.commonAncestorContainer) : null;
+    const cross = !!(E.cross && r && crossSel());
+    const ed = r ? (cross ? edAt(r.startContainer) : edAt(r.commonAncestorContainer)) : null;
     const inside = ed && host.contains(ed);
     // floating bar over a selection
     if (inside && !r.collapsed && !isTouch() && r.toString().trim()) {
       const bar = E.fbar || (E.fbar = buildFbar());
       const rc = r.getBoundingClientRect(), el = rbOf(ed);
       $(".turn", bar).textContent = el ? label(el.dataset.t) : "Text";
-      $(".turn", bar).style.display = el && ed === edOf(el) ? "" : "none";
+      $(".turn", bar).style.display = el && ed === edOf(el) && !cross ? "" : "none";
+      $$('.rte-fb[data-k="link"]', bar).forEach((b) => { b.style.display = cross ? "none" : ""; });
       bar.classList.add("show");
       const bw = bar.offsetWidth, bh = bar.offsetHeight;
       let y = rc.top - bh - 10; if (y < 8) y = rc.bottom + 10;
       bar.style.left = Math.min(Math.max(8, rc.left + rc.width / 2 - bw / 2), innerWidth - bw - 8) + "px"; bar.style.top = y + "px";
-      const m = (tag, attr) => isMarked(r, markMatch(tag, attr), ed);
-      const st = { b: m("strong"), i: m("em"), u: m("u"), s: m("s"), c: m("code"), link: m("a"), color: m("span", "data-tc") || m("mark", "data-bg") };
+      const m = cross ? (tag, attr) => crossParts(r).every((p) => isMarked(p.rr, markMatch(tag, attr), p.ed)) : (tag, attr) => isMarked(r, markMatch(tag, attr), ed);
+      const st = { b: m("strong"), i: m("em"), u: m("u"), s: m("s"), c: m("code"), link: m("a"), hl: m("mark", "data-bg"), color: m("span", "data-tc") };
       $$(".rte-fb[data-k]", bar).forEach((b) => b.classList.toggle("on", !!st[b.dataset.k]));
     } else if (E.fbar) E.fbar.classList.remove("show");
     // bar docked above the keyboard on touch screens
@@ -853,12 +865,87 @@ export function createEditor(host, opts = {}) {
     inlineMd(ed, e); slashDetect(ed, el); touch();
   });
 
+  /* ---------- find in this page (Ctrl+F) ----------
+     Matches are painted with the CSS highlight API, so the writing itself is never changed while searching. */
+  function findOpen() {
+    if (E.find) { E.find.inp.focus(); E.find.inp.select(); return; }
+    const inp = h("input", { type: "text", class: "rte-fin", placeholder: "Find in page", "aria-label": "Find in page", spellcheck: "false" });
+    const cnt = h("span", { class: "rte-fcount" });
+    const B = (ico, title, fn) => h("button", { type: "button", class: "rte-fbtn", title, "aria-label": title, html: I(ico, 16), onclick: fn });
+    const bar = h("div", { class: "rte-find rte-ui", role: "search" }, h("span", { class: "rte-fic", html: I("search", 16) }), inp, cnt,
+      B("chevron-up", "Previous (Shift+Enter)", () => findStep(-1)), B("chevron-down", "Next (Enter)", () => findStep(1)), B("x", "Close (Esc)", () => findClose(true)));
+    const pre = sel().toString().replace(ZW, "").trim();
+    E.find = { bar, inp, cnt, hits: [], i: -1 };
+    document.body.append(bar); findPlace();
+    if (pre && pre.length < 80 && !/\n/.test(pre)) inp.value = pre;
+    inp.addEventListener("input", () => findRun(true));
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); findStep(e.shiftKey ? -1 : 1); }
+      else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); findClose(true); }
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") { e.preventDefault(); inp.select(); }
+      e.stopPropagation();
+    });
+    inp.focus(); inp.select(); if (inp.value) findRun(true);
+  }
+  function findPlace() {
+    const f = E.find; if (!f) return;
+    // on a board card it sits just above the card, so it never covers the writing; in a page window, at its top right
+    const card = host.closest(".bd-it"), hr = (card || scroller() || host).getBoundingClientRect(), bw = f.bar.offsetWidth || 320, bh = f.bar.offsetHeight || 44;
+    const top = card && hr.top - bh - 10 >= 8 ? hr.top - bh - 10 : Math.max(hr.top, 0) + 8;
+    f.bar.style.top = Math.max(8, Math.min(top, innerHeight - bh - 8)) + "px";
+    f.bar.style.left = Math.max(8, Math.min(card ? hr.left : hr.right - bw - 8, innerWidth - bw - 8)) + "px";
+  }
+  function findRun(jump) {
+    const f = E.find; if (!f) return;
+    const q = f.inp.value.toLowerCase(); f.hits = [];
+    if (q) {
+      for (const ed of $$(".rb-e", root)) {
+        if (!visible(ed)) continue;
+        const nodes = [], w = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT); let n, txt = "";
+        while ((n = w.nextNode())) { if (n.parentElement.closest(".rte-ui")) continue; nodes.push([n, txt.length]); txt += n.data; }
+        const low = txt.toLowerCase(); let at = low.indexOf(q);
+        const pos = (o) => { for (let k = nodes.length - 1; k >= 0; k--) if (o >= nodes[k][1]) return [nodes[k][0], Math.min(o - nodes[k][1], nodes[k][0].data.length)]; return null; };
+        while (at >= 0 && f.hits.length < 2000) { const a = pos(at), b = pos(at + q.length); if (a && b) { const r = document.createRange(); r.setStart(a[0], a[1]); r.setEnd(b[0], b[1]); f.hits.push(r); } at = low.indexOf(q, at + Math.max(1, q.length)); }
+      }
+    }
+    if (jump) {
+      // start from the first match at or after where the caret was
+      const ref = E.findRef; f.i = f.hits.length ? 0 : -1;
+      if (ref && f.hits.length) { const k = f.hits.findIndex((r) => r.compareBoundaryPoints(Range.START_TO_START, ref) >= 0); f.i = k < 0 ? 0 : k; }
+    } else if (f.i >= f.hits.length) f.i = f.hits.length - 1;
+    findPaint();
+  }
+  function findStep(d) { const f = E.find; if (!f || !f.hits.length) return; f.i = (f.i + d + f.hits.length) % f.hits.length; findPaint(); }
+  function findPaint() {
+    const f = E.find; if (!f) return;
+    f.cnt.textContent = f.inp.value ? (f.hits.length ? `${f.i + 1} of ${f.hits.length}` : "No results") : "";
+    f.bar.classList.toggle("none", !!f.inp.value && !f.hits.length);
+    if (window.CSS && CSS.highlights && window.Highlight) {
+      CSS.highlights.set("rte-find", new Highlight(...f.hits));
+      if (f.hits[f.i]) CSS.highlights.set("rte-find-cur", new Highlight(f.hits[f.i])); else CSS.highlights.delete("rte-find-cur");
+    }
+    const r = f.hits[f.i]; if (!r) return;
+    // bring the match into view inside whatever scrolls the page (never the board or the window around it)
+    const sc = scroller(), rc = r.getBoundingClientRect();
+    if (sc) { const sr = sc.getBoundingClientRect(); if (rc.top < sr.top + 40 || rc.bottom > sr.bottom - 40) sc.scrollTop += rc.top - sr.top - sr.height / 3; }
+    if (opts.reveal) opts.reveal(r.getBoundingClientRect());
+    findPlace();
+  }
+  function findClose(focusHit) {
+    const f = E.find; if (!f) return; E.find = null;
+    f.bar.remove();
+    if (window.CSS && CSS.highlights) { CSS.highlights.delete("rte-find"); CSS.highlights.delete("rte-find-cur"); }
+    const r = f.hits[f.i];
+    if (focusHit && r && r.startContainer.isConnected) { const ed = edAt(r.startContainer); if (ed) { ed.focus({ preventScroll: true }); const s0 = sel(); s0.removeAllRanges(); s0.addRange(r); } }
+  }
+
   /* ---------- keys ---------- */
   const prevAny = (el) => { const l = flat().filter(visible), i = l.indexOf(el); return i > 0 ? l[i - 1] : null; };
   const nextAny = (el) => { const l = flat().filter(visible), i = l.indexOf(el); return i >= 0 && i < l.length - 1 ? l[i + 1] : null; };
   const crossSel = () => { const s = sel(); if (!s.rangeCount || s.isCollapsed) return false; const a = edAt(s.anchorNode), b = edAt(s.focusNode); if (!a || !b || a === b) return false; const A = rbOf(a), B = rbOf(b); return edOf(A) === a && edOf(B) === b; };
   function deleteCross() {
     const r = range(), a = edAt(r.startContainer), b = edAt(r.endContainer);
+    exitCross();
     const f = fragHtml;
     const ra = document.createRange(); ra.selectNodeContents(a); ra.setEnd(r.startContainer, r.startOffset);
     const rb = document.createRange(); rb.selectNodeContents(b); rb.setStart(r.endContainer, r.endOffset);
@@ -866,6 +953,103 @@ export function createEditor(host, opts = {}) {
     const A = rbOf(a), B = rbOf(b), fl = flat(), ia = fl.indexOf(A), ib = fl.indexOf(B);
     for (let k = ib; k > ia; k--) { const x = fl[k]; if (x.isConnected && !x.contains(A)) x.remove(); }
     a.innerHTML = cleanInline(head + tl); ensureOne(); renumber(); caretTo(a, off); touch(true);
+    return a;
+  }
+
+  /* ---------- selecting across blocks ----------
+     Each block is its own editable box, so the browser stops a selection at the block's edge. When a drag, Shift+Arrow or a
+     second Ctrl+A goes past it, the whole page becomes one editable area for as long as the selection spans blocks. While it
+     does, every change goes through the editor (typing, deleting, Enter, paste, copy, cut, formatting), never the browser. */
+  function enterCross() { if (E.cross) return; E.cross = true; root.setAttribute("contenteditable", "true"); root.classList.add("rte-cross"); }
+  function exitCross(keepCaret) {
+    if (!E.cross) return; E.cross = false;
+    const r = range(), saved = r && root.contains(r.startContainer) ? r.cloneRange() : null;
+    root.removeAttribute("contenteditable"); root.classList.remove("rte-cross");
+    if (keepCaret && saved) { const ed = edAt(saved.startContainer) || edAt(saved.endContainer); if (ed) { ed.focus({ preventScroll: true }); const s0 = sel(); s0.removeAllRanges(); s0.addRange(saved); } }
+  }
+  // where the caret would land under the pointer, kept inside a text block (the nearest one, for gaps between blocks)
+  function caretAt(x, y) {
+    let node = null, offset = 0;
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (r) { node = r.startContainer; offset = r.startOffset; } }
+    else if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); if (p) { node = p.offsetNode; offset = p.offset; } }
+    if (node && edAt(node) && !(node.nodeType === 3 ? node.parentElement : node).closest(".rte-ui")) return { node, offset };
+    let best = null, bd = Infinity;
+    for (const el of textBlocks()) { const ed = edOf(el), rc = ed.getBoundingClientRect(); const d = y < rc.top ? rc.top - y : y > rc.bottom ? y - rc.bottom : 0; if (d < bd) { bd = d; best = ed; } }
+    if (!best) return null;
+    const rc = best.getBoundingClientRect(), end = y > rc.bottom || (y >= rc.top && x > rc.right);
+    const r = document.createRange(); r.selectNodeContents(best); r.collapse(!end); return { node: r.startContainer, offset: r.startOffset };
+  }
+  // the selection cut into one piece per text block it touches
+  function crossParts(r = range()) {
+    if (!r) return [];
+    const out = [];
+    for (const el of textBlocks()) {
+      const ed = edOf(el); if (!r.intersectsNode(ed)) continue;
+      const rr = document.createRange(); rr.selectNodeContents(ed);
+      if (ed.contains(r.startContainer)) rr.setStart(r.startContainer, r.startOffset);
+      if (ed.contains(r.endContainer)) rr.setEnd(r.endContainer, r.endOffset);
+      if (!rr.collapsed) out.push({ el, ed, rr });
+    }
+    return out;
+  }
+  const crossText = () => crossParts().map((p) => p.rr.toString().replace(ZW, "")).join("\n");
+  function crossHtml() {
+    const tagOf = (t) => (/^h[1-3]$/.test(t) ? t : t === "quote" ? "blockquote" : t === "code" ? "pre" : "p");
+    return crossParts().map((p) => { const tg = tagOf(p.el.dataset.t); return `<${tg}>${cleanInline(fragHtml(p.rr))}</${tg}>`; }).join("");
+  }
+  // run a one-block formatting command on each piece, then select the whole span again
+  function crossEach(fn) {
+    const parts = crossParts(); if (!parts.length) return;
+    const s0 = sel(), outs = [];
+    for (const p of parts) { s0.removeAllRanges(); s0.addRange(p.rr); fn(p); const r = range(); if (r) outs.push(r.cloneRange()); }
+    if (outs.length) { const f = outs[0], l = outs[outs.length - 1]; s0.setBaseAndExtent(f.startContainer, f.startOffset, l.endContainer, l.endOffset); }
+    touch(); rafBars();
+  }
+  function crossMark(tag, attrs, attr) {
+    const m = markMatch(tag, attr), parts = crossParts();
+    const on = parts.length && parts.every((p) => !p.rr.toString().replace(ZW, "").trim() || isMarked(p.rr, m, p.ed));
+    crossEach(() => (on ? removeMark(tag, attr) : applyMark(tag, attrs, { replace: !!attr })));
+  }
+  function selectAllBlocks() {
+    const l = textBlocks(); if (!l.length) return;
+    enterCross();
+    const a = document.createRange(); a.selectNodeContents(edOf(l[0])); const b = document.createRange(); b.selectNodeContents(edOf(l[l.length - 1]));
+    sel().setBaseAndExtent(a.startContainer, a.startOffset, b.endContainer, b.endOffset);
+  }
+  // a selection whose end ran past the text (into the gap under the last block, a picture, the margin) is pulled back onto text
+  function clampCross() {
+    const s0 = sel(); if (!s0.rangeCount || s0.isCollapsed || (edAt(s0.anchorNode) && edAt(s0.focusNode))) return;
+    const parts = crossParts(); if (!parts.length) return;
+    const fwd = s0.anchorNode === s0.focusNode ? s0.anchorOffset <= s0.focusOffset : !!(s0.anchorNode.compareDocumentPosition(s0.focusNode) & Node.DOCUMENT_POSITION_FOLLOWING);
+    const first = parts[0].rr, last = parts[parts.length - 1].rr;
+    const an = edAt(s0.anchorNode) ? [s0.anchorNode, s0.anchorOffset] : fwd ? [first.startContainer, first.startOffset] : [last.endContainer, last.endOffset];
+    const fo = edAt(s0.focusNode) ? [s0.focusNode, s0.focusOffset] : fwd ? [last.endContainer, last.endOffset] : [first.startContainer, first.startOffset];
+    try { s0.setBaseAndExtent(an[0], an[1], fo[0], fo[1]); } catch {}
+  }
+  function crossKey(e) {
+    clampCross();
+    const k = e.key, mod = e.metaKey || e.ctrlKey, lk = k.toLowerCase();
+    if (!crossSel()) { exitCross(true); return false; }
+    if (mod && !e.altKey) {
+      if (lk === "c" || lk === "x" || lk === "v") return true; // copy, cut and paste events do the work
+      if (lk === "a") { e.preventDefault(); selectAllBlocks(); return true; }
+      if (lk === "z" || lk === "y") { e.preventDefault(); exitCross(true); (lk === "y" || e.shiftKey) ? redo() : undo(); return true; }
+      const mk2 = !e.shiftKey ? { b: ["strong"], i: ["em"], u: ["u"], e: ["code"] }[lk] : { s: ["s"], x: ["s"], h: ["mark", { "data-bg": "yellow" }, "data-bg"] }[lk];
+      if (mk2) { e.preventDefault(); crossMark(...mk2); return true; }
+      e.preventDefault(); return true;
+    }
+    if (k === "Escape" || (!e.shiftKey && /^Arrow/.test(k))) {
+      e.preventDefault(); const r = range(), back = k === "ArrowLeft" || k === "ArrowUp" || k === "Escape" ? false : true;
+      const node = back ? r.endContainer : r.startContainer, off = back ? r.endOffset : r.startOffset;
+      exitCross(); const ed = edAt(node); if (ed) { ed.focus({ preventScroll: true }); const c = document.createRange(); c.setStart(node, off); c.collapse(true); const s0 = sel(); s0.removeAllRanges(); s0.addRange(c); }
+      return true;
+    }
+    if (e.shiftKey && /^(Arrow|Home|End|Page)/.test(k)) return true; // the browser grows or shrinks the selection
+    if (k === "Backspace" || k === "Delete") { e.preventDefault(); deleteCross(); return true; }
+    if (k === "Enter") { e.preventDefault(); const a = deleteCross(); if (a) enter(rbOf(a), a); return true; }
+    if (k === "Tab") { e.preventDefault(); return true; }
+    if (k.length === 1 && !mod) { e.preventDefault(); deleteCross(); document.execCommand("insertText", false, k); return true; }
+    return true;
   }
   function enter(el, ed) {
     const t = el.dataset.t;
@@ -941,7 +1125,30 @@ export function createEditor(host, opts = {}) {
   }
   function onKey(e) {
     if (e.isComposing || e.keyCode === 229) return;
+    if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "f") { e.preventDefault(); e.stopPropagation(); const r0 = range(); E.findRef = r0 ? r0.cloneRange() : null; exitCross(true); findOpen(); return; }
+    if (E.cross && crossKey(e)) return;
     const k = e.key, mod = e.metaKey || e.ctrlKey, t = e.target;
+    { // growing a selection past the edge of a block
+      const ed = edAt(t), el = ed && rbOf(ed);
+      if (ed && el && edOf(el) === ed && !E.slash) {
+        const lk = k.toLowerCase();
+        if (mod && !e.shiftKey && !e.altKey && lk === "a") {
+          const txt = ed.textContent.replace(ZW, ""), st = sel().toString().replace(ZW, "");
+          if (textBlocks().length > 1 && (!txt || st.length >= txt.length)) { e.preventDefault(); selectAllBlocks(); return; }
+        }
+        // where the moving end of the selection is: nothing after it (end) or before it (start), and on the last or first line
+        const fr = () => { const s0 = sel(), c = document.createRange(); c.setStart(s0.focusNode, s0.focusOffset); c.collapse(true); return c; };
+        const edge = (end) => { const s0 = sel(); if (!s0.rangeCount || !ed.contains(s0.focusNode)) return false; const c = document.createRange(); c.selectNodeContents(ed); if (end) c.setStart(s0.focusNode, s0.focusOffset); else c.setEnd(s0.focusNode, s0.focusOffset); return !c.toString().replace(ZW, ""); };
+        const line = (last) => { const rc = fr().getClientRects()[0], b = ed.getBoundingClientRect(), lh = parseFloat(getComputedStyle(ed).lineHeight) || 24; if (!rc) return edge(last); return last ? b.bottom - rc.bottom < lh * 0.9 : rc.top - b.top < lh * 0.9; };
+        if (e.shiftKey && !mod && ((k === "ArrowDown" && nextText(el) && line(true)) || (k === "ArrowUp" && prevText(el) && line(false)) || (k === "ArrowRight" && nextText(el) && edge(true)) || (k === "ArrowLeft" && prevText(el) && edge(false)))) {
+          e.preventDefault();
+          const s0 = sel(), an = s0.anchorNode, ao = s0.anchorOffset, nb = edOf((k === "ArrowDown" || k === "ArrowRight") ? nextText(el) : prevText(el));
+          enterCross(); const c = document.createRange(); c.selectNodeContents(nb); const fwd = k === "ArrowDown" || k === "ArrowRight";
+          if (k === "ArrowDown" || k === "ArrowUp") { /* keep roughly the same column */ const pos = caretAt((fr().getClientRects()[0] || ed.getBoundingClientRect()).left, fwd ? nb.getBoundingClientRect().top + 4 : nb.getBoundingClientRect().bottom - 4); if (pos) { s0.setBaseAndExtent(an, ao, pos.node, pos.offset); return; } }
+          c.collapse(!fwd); s0.setBaseAndExtent(an, ao, c.startContainer, c.startOffset); return;
+        }
+      }
+    }
     if (E.slash) {
       if (k === "ArrowDown" || k === "ArrowUp") { e.preventDefault(); const n = E.slash.items.length; if (n) { E.slash.idx = (E.slash.idx + (k === "ArrowDown" ? 1 : n - 1)) % n; renderSlash(); } return; }
       if ((k === "Enter" || k === "Tab") && E.slash.items.length) { e.preventDefault(); slashPick(E.slash.items[E.slash.idx]); return; }
@@ -978,6 +1185,36 @@ export function createEditor(host, opts = {}) {
     if (t.matches(".rb-e")) keyText(e, t);
   }
   root.addEventListener("keydown", onKey);
+  root.addEventListener("mousedown", (e) => {
+    if (E.cross && !e.shiftKey) exitCross(); // a new click starts over, in the block clicked
+    E.drag = e.button === 0 && !e.shiftKey && edAt(e.target) && !e.target.closest(".rte-ui") ? { ed: edAt(e.target), an: null, ao: 0 } : null;
+  }, true);
+  const onDragMove = (e) => {
+    const d = E.drag; if (!d || E.destroyed) return;
+    if (!(e.buttons & 1)) { E.drag = null; return; }
+    if (!E.cross) {
+      const over = document.elementFromPoint(e.clientX, e.clientY), ed2 = edAt(over), rc = d.ed.getBoundingClientRect();
+      const out = (ed2 && ed2 !== d.ed && rbOf(ed2) && edOf(rbOf(ed2)) === ed2) || (!ed2 && (e.clientY < rc.top - 6 || e.clientY > rc.bottom + 6));
+      if (!out) return;
+      const s0 = sel(); if (!s0.rangeCount || !d.ed.contains(s0.anchorNode)) return;
+      d.an = s0.anchorNode; d.ao = s0.anchorOffset; enterCross();
+    }
+    const pos = caretAt(e.clientX, e.clientY); if (pos && d.an && d.an.isConnected) { try { sel().setBaseAndExtent(d.an, d.ao, pos.node, pos.offset); } catch {} }
+    e.preventDefault();
+  };
+  const onDragUp = () => { if (E.drag) { E.drag = null; if (E.cross) { clampCross(); if (!crossSel()) exitCross(true); } } };
+  document.addEventListener("mousemove", onDragMove, true); document.addEventListener("mouseup", onDragUp, true);
+  root.addEventListener("copy", (e) => { if (!crossSel()) return; e.preventDefault(); e.clipboardData?.setData("text/plain", crossText()); e.clipboardData?.setData("text/html", crossHtml()); });
+  // anything the browser itself would change while the whole page is one editable area is done by the editor instead
+  root.addEventListener("beforeinput", (e) => {
+    if (!E.cross) return;
+    e.preventDefault();
+    if (!crossSel()) return;
+    const ty = e.inputType || "";
+    if (ty.startsWith("delete")) deleteCross();
+    else if (ty === "insertParagraph" || ty === "insertLineBreak") { const a = deleteCross(); if (a) enter(rbOf(a), a); }
+    else if (ty.startsWith("insert") && e.data) { deleteCross(); document.execCommand("insertText", false, e.data); }
+  });
 
   /* ---------- paste, cut, drop ---------- */
   const INLINE_TAGS = new Set(["b", "strong", "i", "em", "u", "s", "strike", "del", "code", "a", "span", "mark", "br", "sub", "sup", "kbd", "font", "small", "big", "abbr", "cite", "q", "label", "time"]);
@@ -1015,6 +1252,10 @@ export function createEditor(host, opts = {}) {
     renumber(); touch(true); focusBlock(ref, "end");
   }
   root.addEventListener("paste", (e) => {
+    if (E.cross) { // pasting over a selection that spans blocks: it is replaced by the pasted text
+      e.preventDefault(); if (!crossSel()) return; const text = (e.clipboardData?.getData("text/plain") || "").replace(/\r\n?/g, "\n");
+      deleteCross(); if (text) document.execCommand("insertText", false, text); return;
+    }
     const t = e.target; if (t.matches("input,textarea")) return;
     const ed = edAt(t); if (!ed && !t.closest(".rb-cell")) return;
     const cd = e.clipboardData; if (!cd) return;
@@ -1036,7 +1277,7 @@ export function createEditor(host, opts = {}) {
     if (list.length === 1 && list[0].t === "p") { document.execCommand("insertHTML", false, list[0].h); touch(); return; }
     insertBlocks(list, el);
   });
-  root.addEventListener("cut", (e) => { if (crossSel()) { const text = sel().toString(); e.clipboardData?.setData("text/plain", text); e.preventDefault(); deleteCross(); } });
+  root.addEventListener("cut", (e) => { if (crossSel()) { e.clipboardData?.setData("text/plain", crossText()); e.clipboardData?.setData("text/html", crossHtml()); e.preventDefault(); deleteCross(); } });
   const overFiles = (e) => [...(e.dataTransfer?.types || [])].includes("Files");
   host.addEventListener("dragover", (e) => { if (overFiles(e)) { e.preventDefault(); host.classList.add("drop-files"); } });
   host.addEventListener("dragleave", (e) => { if (!host.contains(e.relatedTarget)) host.classList.remove("drop-files"); });
@@ -1076,7 +1317,9 @@ export function createEditor(host, opts = {}) {
   });
 
   /* ---------- listeners that live on the document ---------- */
-  const onSel = () => { rafBars(); if (E.slash) { const a = edAt(sel().anchorNode); if (a !== E.slash.ed) closePop(); } };
+  root.addEventListener("input", () => { if (E.find) { clearTimeout(E.findT); E.findT = setTimeout(() => findRun(false), 200); } });
+  window.addEventListener("scroll", () => E.find && findPlace(), true);
+  const onSel = () => { if (E.cross && !E.drag) { clampCross(); if (!crossSel()) exitCross(true); } rafBars(); if (E.slash) { const a = edAt(sel().anchorNode); if (a !== E.slash.ed) closePop(); } };
   document.addEventListener("selectionchange", onSel);
   const onVV = () => rafBars();
   window.visualViewport?.addEventListener("resize", onVV); window.visualViewport?.addEventListener("scroll", onVV);
@@ -1099,8 +1342,8 @@ export function createEditor(host, opts = {}) {
     isEmpty() { const b = blocks(); return !b.length || (b.length === 1 && b[0].t === "p" && !b[0].h); },
     insertImages(files) { const l = flat(); addImages([...files], l[l.length - 1]); },
     destroy() {
-      E.destroyed = true; closePop(); E.fbar?.remove(); E.mbar?.remove();
-      document.removeEventListener("selectionchange", onSel); window.visualViewport?.removeEventListener("resize", onVV); window.visualViewport?.removeEventListener("scroll", onVV);
+      E.destroyed = true; closePop(); findClose(false); E.fbar?.remove(); E.mbar?.remove();
+      document.removeEventListener("selectionchange", onSel); document.removeEventListener("mousemove", onDragMove, true); document.removeEventListener("mouseup", onDragUp, true); window.visualViewport?.removeEventListener("resize", onVV); window.visualViewport?.removeEventListener("scroll", onVV);
       clearTimeout(E.timers.h); clearTimeout(E.timers.c); host.textContent = ""; host.classList.remove("rte");
     },
   };

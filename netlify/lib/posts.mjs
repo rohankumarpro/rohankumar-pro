@@ -36,6 +36,8 @@ export function cleanPosts(list) {
     if (blocks && blocks.length) o.blocks = blocks;
     for (const k of ["source", "url", "updated", "color", "quote", "hero", "cover", "seoTitle", "seoDesc"]) if (p?.[k]) o[k] = str(p[k], k === "seoDesc" ? 200 : k === "seoTitle" ? 70 : 300);
     const img = safeImg(p?.img); if (img) { o.img = img; if (p?.imgAlt) o.imgAlt = str(p.imgAlt, 200); }
+    // the 1200 x 630 picture made from the cover for social shares, and which cover it was made from (so it is remade if that changes)
+    const og = safeImg(p?.ogImg); if (og) { o.ogImg = og; if (p?.ogFor) o.ogFor = str(p.ogFor, 300); }
     if (Array.isArray(p?.tags)) o.tags = p.tags.map((t) => str(t, 30).trim()).filter(Boolean).slice(0, 8);
     if (Array.isArray(p?.more)) o.more = p.more.slice(0, 6).map((m) => ({ label: str(m?.label, 80), url: str(m?.url, 300) }));
     if (p?.draft) o.draft = true;

@@ -263,6 +263,7 @@ window.settingsExtra = function (body) {
       };
       draw(); return [h("h3", {}, title), h("p", { class: "hint" }, hint), row];
     };
+    { const slot = h("div"); sec.append(slot); import("/js/site-settings.mjs").then((m) => slot.replaceWith(m.websiteSection())).catch(() => slot.remove()); } // Website: search and share details
     sec.append(...picRow("Wallpaper picture", "wallpaper", "Shown behind everything for every visitor. Remove it to go back to the coloured shapes."), ...picRow("Your photo", "photo", "Used on About, the lock screen and Messages."));
     const msg = h("p", { class: "hint" }, "Everything you write in Owner mode is stored on the server, so updating the website never resets it. A backup is a copy you can keep.");
     sec.append(h("h3", {}, "Backup"), msg, h("div", { class: "ow-row" },

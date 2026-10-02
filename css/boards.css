@@ -2,7 +2,7 @@
 /* ==========================================================================================================================
    Boards: infinite canvases. Material, same tokens as the rest of the desktop (css/tokens.css + index.html :root).
    ========================================================================================================================== */
-.ba,.bd-menus,.bp-pop{
+.ba,.bd-menus,.bp-pop,.bd-stkpop{
   --bd-bg:#F4F6FA; --bd-dot:rgba(60,64,67,.20); --bd-img:#DDE3EA;
   --bd-card:var(--surface); --bd-ink-st:#1F1F1F;
   --bd-e1:0 1px 2px rgba(15,25,60,.10),0 1px 3px 1px rgba(15,25,60,.06);
@@ -11,8 +11,8 @@
   --bd-tonal:color-mix(in srgb,var(--primary) 14%,var(--surface));
   --bd-state:color-mix(in srgb,var(--ink) 7%,transparent);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ba,:root:not([data-theme="light"]) .bd-menus,:root:not([data-theme="light"]) .bp-pop{--bd-bg:#14161B;--bd-dot:rgba(232,234,237,.13);--bd-img:#2A2E36;--bd-card:#1E2128;--bd-ink-st:#F1F3F4;--bd-e1:0 1px 2px rgba(0,0,0,.5),0 1px 3px 1px rgba(0,0,0,.3);--bd-e2:0 2px 4px rgba(0,0,0,.5),0 4px 12px 3px rgba(0,0,0,.35);--bd-e3:0 6px 16px 4px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.5)}}
-:root[data-theme="dark"] .ba,:root[data-theme="dark"] .bd-menus,:root[data-theme="dark"] .bp-pop{--bd-bg:#14161B;--bd-dot:rgba(232,234,237,.13);--bd-img:#2A2E36;--bd-card:#1E2128;--bd-ink-st:#F1F3F4;--bd-e1:0 1px 2px rgba(0,0,0,.5),0 1px 3px 1px rgba(0,0,0,.3);--bd-e2:0 2px 4px rgba(0,0,0,.5),0 4px 12px 3px rgba(0,0,0,.35);--bd-e3:0 6px 16px 4px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.5)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ba,:root:not([data-theme="light"]) .bd-menus,:root:not([data-theme="light"]) .bp-pop,:root:not([data-theme="light"]) .bd-stkpop{--bd-bg:#14161B;--bd-dot:rgba(232,234,237,.13);--bd-img:#2A2E36;--bd-card:#1E2128;--bd-ink-st:#F1F3F4;--bd-e1:0 1px 2px rgba(0,0,0,.5),0 1px 3px 1px rgba(0,0,0,.3);--bd-e2:0 2px 4px rgba(0,0,0,.5),0 4px 12px 3px rgba(0,0,0,.35);--bd-e3:0 6px 16px 4px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.5)}}
+:root[data-theme="dark"] .ba,:root[data-theme="dark"] .bd-menus,:root[data-theme="dark"] .bp-pop,:root[data-theme="dark"] .bd-stkpop{--bd-bg:#14161B;--bd-dot:rgba(232,234,237,.13);--bd-img:#2A2E36;--bd-card:#1E2128;--bd-ink-st:#F1F3F4;--bd-e1:0 1px 2px rgba(0,0,0,.5),0 1px 3px 1px rgba(0,0,0,.3);--bd-e2:0 2px 4px rgba(0,0,0,.5),0 4px 12px 3px rgba(0,0,0,.35);--bd-e3:0 6px 16px 4px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.5)}
 
 .win[data-app="boards"] .body.ba-body{padding:0;overflow:hidden}
 .ba-body{position:relative}
@@ -364,6 +364,7 @@
 .bd-frt span{display:inline-block;padding:5px 14px;border-radius:99px;background:var(--k);color:#fff;font-size:14px;font-weight:600;letter-spacing:.01em;cursor:move;max-width:420px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .bd-it[data-t="frame"][data-c="yellow"] .bd-frt span{color:#3B2E00}
 .bd-it[data-t="frame"].editing .bd-frt span{overflow:visible;text-overflow:clip;min-width:40px}
+.bd-it[data-t="frame"].drop-into{box-shadow:inset 0 0 0 calc(2.5px * var(--iz,1)) var(--primary),0 0 0 calc(6px * var(--iz,1)) color-mix(in srgb,var(--primary) 18%,transparent);transition:box-shadow .12s}
 
 /* far away: lighter drawing */
 .bd-stage.far .bd-pgs,.bd-stage.far .bd-pgm,.bd-stage.far .bd-lnb p,.bd-stage.far .bd-lnb small{visibility:hidden}
@@ -598,3 +599,22 @@
   .db-gal{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 }
 @media (prefers-reduced-motion:reduce){.bd-menu,.bd-qbar,.bd-anc,.bp-chip,.bd-ec,.bd-ask,.bd-it.bd-new,.bd-keys,.bd-kc,.ba-st .ic{animation:none}.bd-tip{transition:none}.ba-tc,.ba-card,.bd-pg{transition:none}}
+/* stickers: an emoji die-cut with a white edge and a soft shadow, like a real sticker */
+.bd-it[data-t="sticker"]{display:grid;place-items:center;overflow:visible;--o:calc(var(--sw,128px) * .034)}
+.bd-stk{display:block;font-size:calc(var(--sw,128px) * .72);line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol",sans-serif;-webkit-user-select:none;user-select:none;pointer-events:none;filter:drop-shadow(var(--o) 0 0 #fff) drop-shadow(calc(var(--o) * -1) 0 0 #fff) drop-shadow(0 var(--o) 0 #fff) drop-shadow(0 calc(var(--o) * -1) 0 #fff) drop-shadow(0 calc(var(--sw,128px) * .035) calc(var(--sw,128px) * .05) rgba(0,0,0,.26))}
+.bd-stage.far .bd-stk{filter:none}
+/* the turning handle hangs below a sticker (the quick bar sits above it) */
+.bd-hd[data-h="rot"]{left:50%;top:auto;bottom:-30px;width:15px;height:15px;margin:-7.5px;cursor:grab}
+.bd-hd[data-h="rot"]::after{content:"";position:absolute;left:50%;bottom:100%;width:2px;height:15px;margin-left:-1px;background:var(--primary)}
+.bd-stage[data-tool="sticker"]{cursor:crosshair}
+.bd-stkghost{position:fixed;left:0;top:0;z-index:2147483100;pointer-events:none;font-size:calc(var(--gs,128px) * .72);line-height:1;opacity:.8;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+.bd-stkpop{position:fixed;z-index:2147483200;width:min(372px,calc(100vw - 16px));max-height:min(440px,calc(100vh - 140px));display:flex;flex-direction:column;border-radius:22px;background:var(--bd-card);color:var(--ink);box-shadow:var(--bd-e3),0 0 0 1px color-mix(in srgb,var(--line) 40%,transparent);font-family:var(--font);animation:bdStkIn .16s var(--ease)}
+.bd-stkh{display:flex;flex-direction:column;gap:2px;padding:16px 18px 6px}
+.bd-stkh b{font-size:15px;font-weight:600}.bd-stkh span{font-size:12.5px;color:var(--ink2)}
+.bd-stkg{overflow:auto;overscroll-behavior:contain;padding:0 10px 12px}
+.bd-stks small{display:block;padding:12px 8px 4px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.bd-stks>div{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.bd-stks button{aspect-ratio:1;display:grid;place-items:center;border:0;border-radius:12px;background:transparent;font-size:25px;line-height:1;cursor:pointer;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;transition:transform .12s var(--ease),background .12s}
+.bd-stks button:hover{background:color-mix(in srgb,var(--ink) 7%,transparent);transform:scale(1.14)}
+.bd-stks button:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+@keyframes bdStkIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}

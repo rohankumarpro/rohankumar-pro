@@ -45,7 +45,7 @@ const MAX_BOARDS = 200, MAX_ITEMS = 4000, MAX_LINKS = 4000;
 const HIST_EVERY = 10 * 60_000, HIST_KEEP = 24, PHIST_EVERY = 5 * 60_000, PHIST_KEEP = 40;
 export const COVERS = Array.from({ length: 16 }, (_, i) => "m" + (i + 1));
 export const COLORS = ["yellow", "orange", "red", "pink", "purple", "blue", "teal", "green", "grey", "white", "none"];
-const TYPES = ["page", "sticky", "text", "image", "link", "frame"];
+const TYPES = ["page", "sticky", "text", "image", "link", "frame", "sticker"];
 
 const str = (v, n) => String(v ?? "").slice(0, n);
 const num = (v, lo, hi, d = 0) => { const n = +v; return Number.isFinite(n) ? Math.max(lo, Math.min(hi, Math.round(n * 10) / 10)) : d; };
@@ -111,6 +111,10 @@ export function cleanItem(it) {
       break;
     }
     case "frame": o.title = str(it.title, 120); o.color = pick(it.color, COLORS, "grey"); break;
+    case "sticker": { // an emoji stuck on the board, die-cut with a white edge; rot is its tilt in degrees
+      const e = [...String(it.emoji || "")].slice(0, 12).join(""); if (!e || /[<>&"'\\]/.test(e)) return null;
+      o.emoji = e; o.rot = num(it.rot, -180, 180, 0); break;
+    }
   }
   if (o.color === undefined) delete o.color;
   return o;

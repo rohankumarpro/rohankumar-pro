@@ -215,7 +215,7 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 @media print{#desk,#boot,.topbar,.spot-ov,#toast,.rte-ui{display:none!important}body{overflow:visible!important;height:auto!important;background:#fff!important}html{height:auto!important}#seo{position:static!important;width:auto!important;height:auto!important;clip:auto!important;clip-path:none!important;white-space:normal!important;overflow:visible!important;color:#000;font:12pt/1.55 Georgia,serif;max-width:none;padding:0}#seo img{max-width:100%}#seo a{color:#000;text-decoration:underline}#seo nav{display:none}}
 #print-one{display:none}
 @media print{body.print-one>*:not(#print-one){display:none!important}body.print-one #print-one{display:block!important;position:static;color:#000;font:12pt/1.55 Georgia,serif;padding:0}body.print-one #print-one .chip{border:1px solid #999;border-radius:var(--r-pill);padding:2px calc(10 * var(--u));margin:2px;display:inline-block}body.print-one #print-one .row{display:flex;justify-content:space-between;gap:calc(16 * var(--u));border-bottom:1px solid #ccc;padding:calc(8 * var(--u)) 0}}
-/* phones: Mochi and her jar step aside while an app is open, so they never cover what you are reading */
+/* phones: OGGY and his jar step aside while an app is open, so they never cover what you are reading */
 @media (max-width:760px){
   #desk:has(.win:not(.min):not(.closing)) .cat:not(.chatting),#desk:has(.win:not(.min):not(.closing)) .jar{opacity:0;pointer-events:none;transition:opacity var(--d-3)}
   .cat,.jar{transition:opacity var(--d-3)}
@@ -406,3 +406,54 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .yt-add input:focus,.yt-ed input:focus{box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 70%,transparent)}
 .yt-st{background:none!important;padding:0!important}.yt-st:empty{display:none}
 
+/* Settings > Website (owner): search and share previews, and a live check of what the server sends */
+.ws{display:flex;flex-direction:column;gap:calc(10 * var(--u));margin:calc(4 * var(--u)) 0 calc(18 * var(--u))}
+.ws>h3{margin-bottom:0}.ws .hint{margin:0}
+.ws .ae-l{position:relative}
+.ws-n{position:absolute;right:2px;top:0;font-size:12px;font-weight:var(--fw-r,400);color:var(--ink2);font-variant-numeric:tabular-nums}.ws-n.over{color:#D93025}
+.ws-prev{display:grid;gap:calc(10 * var(--u))}
+.ws-g{padding:14px 16px;border-radius:var(--r-5);background:var(--surface2);display:flex;flex-direction:column;gap:3px;min-width:0}
+.ws-g small{font-size:12px;color:var(--ink2)}
+.ws-gt{font-size:17px;font-weight:500;line-height:1.3;color:#1A0DAB;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root[data-theme="dark"] .ws-gt{color:#8AB4F8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ws-gt{color:#8AB4F8}}
+.ws-gd{margin:0;font-size:13px;line-height:1.45;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ws-card{border-radius:var(--r-5);overflow:hidden;background:var(--surface2);display:flex;flex-direction:column}
+.ws-ci{aspect-ratio:1200/630;background:var(--line)}.ws-ci img{width:100%;height:100%;object-fit:cover;display:block}
+.ws-cb{padding:10px 14px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ws-cb small{font-size:11.5px;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em}
+.ws-ct{font-size:14.5px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-cd{margin:0;font-size:12.5px;line-height:1.4;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-imgrow{display:flex;gap:calc(10 * var(--u));align-items:center;flex-wrap:wrap}
+.ws-thumb{flex:none;width:122px;aspect-ratio:1200/630;border-radius:var(--r-4);overflow:hidden;background:var(--surface2)}.ws-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ws-ib{display:flex;gap:calc(6 * var(--u));flex-wrap:wrap}.ws-ib .btn{min-height:38px;padding:0 calc(16 * var(--u));font-size:var(--fs-4)}
+.ws-own{border-radius:var(--r-5);background:var(--surface2);padding:10px 14px}
+.ws-own summary{cursor:pointer;font-weight:var(--fw-m);padding:4px 0}
+.ws-own[open]{display:flex;flex-direction:column;gap:calc(10 * var(--u))}
+.ws-own .ae-l input{background:var(--surface)}
+.ws-chk{display:flex;gap:calc(8 * var(--u));align-items:center}
+.ws-path{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--surface2);border:0;border-radius:var(--r-4);padding:10px 12px}
+.ws-chk .btn{min-height:40px;padding:0 calc(16 * var(--u))}
+.ws-res{display:flex;flex-direction:column;gap:6px}
+.ws-row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-4);background:var(--surface2)}
+.ws-row>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ws-row b{font-size:13px}.ws-row span:not(.ws-ic){font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere}.ws-row small{font-size:12px;color:var(--ink2)}
+.ws-ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+.ws-row.ok .ws-ic{background:color-mix(in srgb,#1E8E3E 18%,transparent);color:#1E8E3E}
+.ws-row.bad .ws-ic{background:color-mix(in srgb,#E37400 20%,transparent);color:#B06000}
+.ws-shot{border-radius:var(--r-4);overflow:hidden;aspect-ratio:1200/630;background:var(--surface2)}.ws-shot img{width:100%;height:100%;object-fit:cover;display:block}
+.ws-tools{display:flex;flex-wrap:wrap;gap:6px 14px}
+.ws-tools a{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:var(--fw-m);color:var(--primary);text-decoration:none}
+.ws-tools a:hover{text-decoration:underline}
+/* OGGY's own life (owner mode): what he leaves on screen, and the friends who visit. Clicking a thing tidies it away. */
+.oggy-layer{position:fixed;inset:0;z-index:904;pointer-events:none;overflow:hidden}
+.oggy-thing{position:absolute;width:38px;height:38px;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 3px 4px rgba(0,0,0,.22));transition:opacity .4s,scale .4s;-webkit-user-select:none;user-select:none}
+.oggy-thing svg{width:100%;height:100%;display:block}
+.oggy-thing.mug{width:44px;height:40px;transform-origin:50% 100%}
+.oggy-thing.puddle{width:120px;height:30px;filter:none;transform-origin:50% 60%}
+.oggy-thing.keys{width:auto;height:auto;font:700 15px/1 var(--font);color:var(--ink2);letter-spacing:.06em;filter:none;white-space:nowrap}
+.oggy-thing:hover{scale:1.08}
+.oggy-thing.bye{opacity:0;scale:.6}
+.oggy-friend{position:absolute;pointer-events:none;z-index:1}
+.oggy-friend .cat-bubble{pointer-events:none}
+@media (prefers-reduced-motion:reduce){.oggy-thing{transition:none}}

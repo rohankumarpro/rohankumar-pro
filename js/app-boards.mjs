@@ -324,7 +324,14 @@ export async function boardsApp(body, key) {
       openPage: (it, o) => A.pw && A.pw.open(it, o),
       editPage: (it, el, o) => (A.pw ? A.pw.inline(it, el, o) : null),
       bodies: Bodies,
-      copyPage: (from, to) => api("/api/boards?a=copypage", { method: "POST", body: { from, to } }),
+      // a copy takes the writing as it is on screen now (even if it is not saved yet), shows it at once, then saves it
+      copyPage: async (from, to) => {
+        const live = A.pw && A.pw.liveBlocks(from), seen = Bodies.get(from), blocks = live || (seen && seen.blocks.length ? seen.blocks : null);
+        if (!blocks) { await api("/api/boards?a=copypage", { method: "POST", body: { from, to } }); Bodies.refresh(to); return; }
+        Bodies.set(to, blocks, 0); // shown at once; the saved time comes from the server
+        const r = await api("/api/boards?page=" + to, { method: "PUT", body: { blocks, base: 0 } });
+        if (r.ok) Bodies.set(to, blocks, r.data.updated || Date.now());
+      },
       seedPage: (pid, text) => { if (text) api("/api/boards?page=" + pid, { method: "PUT", body: { blocks: text.split(/\n+/).filter(Boolean).map((t) => ({ t: "p", h: esc(t) })), base: 0 } }); },
       pageDownload: (it, kind) => download(it, null, kind),
       unfurl: async (url) => { const r = await api("/api/boards?a=link&url=" + encodeURIComponent(url)); return r.ok ? r.data : null; },

@@ -101,6 +101,16 @@ export function cleanSettings(s) {
     }
     if (Object.keys(ed).length) o.appEdits = ed;
   }
+  if (s?.seo && typeof s.seo === "object") { // Website settings: how the site reads in search results and share previews
+    const q = s.seo, seo = {};
+    const t = str(q.title, 70); if (t) seo.title = t;
+    const d = str(q.desc, 200); if (d) seo.desc = d;
+    const im = safeImg(q.img); if (im) { seo.img = im; const a = str(q.imgAlt, 200); if (a) seo.imgAlt = a; }
+    const x = str(q.x, 16).replace(/^@/, ""); if (/^\w{1,15}$/.test(x)) seo.x = x;
+    const g = str(q.google, 100); if (/^[\w-]{10,100}$/.test(g)) seo.google = g;
+    const bg = str(q.bing, 64); if (/^[\w]{10,64}$/.test(bg)) seo.bing = bg;
+    if (Object.keys(seo).length) o.seo = seo;
+  }
   if (["green", "amber", "red", "blue", "grey"].includes(s?.statusDot)) o.statusDot = s.statusDot;
   o.hiddenApps = (Array.isArray(s?.hiddenApps) ? s.hiddenApps : [])
     .map((x) => str(x, 30)).filter((x) => /^[a-z0-9_-]+$/.test(x) && !KEEP.includes(x)).slice(0, 40);

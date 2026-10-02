@@ -1,5 +1,5 @@
 // Journal: a list, a reader, and a Notion-style writing studio for the owner. Every article has its own address, /journal/<slug>.
-import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, renderBlocks, stripTags } from "/js/lib.mjs";
+import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, renderBlocks, stripTags, shareImage } from "/js/lib.mjs";
 import { mdToBlocks, blocksText, readMinutes, slugify, firstImage, headingsOf } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
 import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
@@ -47,9 +47,23 @@ async function persist() {
 function setStatus(t) { J.status = t; $$(".jed-st,.nt-status").forEach((e) => { if (e.closest(".jr, .jed")) e.textContent = t; }); }
 
 /* ---------- entry point ---------- */
+// Articles saved before share pictures existed get theirs once, quietly, when the owner opens the Journal.
+// The article open in the writing studio is left to the studio, which makes its own when it saves.
+let ogFill = false;
+async function fillShareImages() {
+  if (ogFill || !isAdmin() || !J.posts) return; ogFill = true;
+  const editing = () => new Set($$(".jed").map((e) => e.closest(".body")?.__jed?.slug).filter(Boolean));
+  let n = 0;
+  for (const p of J.posts.filter((x) => x.img && x.ogFor !== x.img).slice(0, 25)) {
+    if (editing().has(p.slug)) continue;
+    try { const url = await shareImage(p.img); const cur = J.posts.find((x) => x.slug === p.slug); if (cur && cur.img === p.img) { cur.ogImg = url; cur.ogFor = p.img; n++; } } catch {}
+  }
+  if (n) await persist();
+}
 export async function journalApp(body, slug) {
   R.handlers.journal = (b, s) => route(b, s);
   await load();
+  setTimeout(fillShareImages, 4000);
   return route(body, slug || "");
 }
 async function route(body, slug) {
@@ -144,7 +158,7 @@ async function edit(body, post) {
   const isNew = !post;
   const S = isNew
     ? { title: "", excerpt: "", tags: [], date: today(), draft: true, blocks: [], img: "", imgAlt: "", seoTitle: "", seoDesc: "", noindex: false, publishAt: "", source: "", url: "", more: [], slug: "", extra: {} }
-    : { title: post.title, excerpt: post.excerpt || "", tags: allTags(post), date: post.date || today(), draft: !!post.draft, blocks: blocksOf(post), img: post.img || "", imgAlt: post.imgAlt || "", seoTitle: post.seoTitle || "", seoDesc: post.seoDesc || "", noindex: !!post.noindex, publishAt: post.publishAt || "", source: post.source || "", url: post.url || "", more: (post.more || []).map((m) => ({ ...m })), slug: post.slug, extra: { hero: post.hero, quote: post.quote, color: post.color, cover: post.cover, updated: post.updated, published: post.published, modified: post.modified } };
+    : { title: post.title, excerpt: post.excerpt || "", tags: allTags(post), date: post.date || today(), draft: !!post.draft, blocks: blocksOf(post), img: post.img || "", imgAlt: post.imgAlt || "", seoTitle: post.seoTitle || "", seoDesc: post.seoDesc || "", noindex: !!post.noindex, publishAt: post.publishAt || "", source: post.source || "", url: post.url || "", more: (post.more || []).map((m) => ({ ...m })), slug: post.slug, extra: { hero: post.hero, quote: post.quote, color: post.color, cover: post.cover, updated: post.updated, published: post.published, modified: post.modified, ogImg: post.ogImg, ogFor: post.ogFor } };
   body.__jed = S;
   let slugTouched = !isNew, orig = isNew ? "" : post.slug, saveT = null, ed = null, preview = false;
   if (!mobile()) w.classList.add("max");
@@ -182,6 +196,12 @@ async function edit(body, post) {
     p.slug = uniqueSlug(p.slug); S.slug = p.slug;
     const i = orig ? J.posts.findIndex((x) => x.slug === orig) : -1;
     if (i >= 0) J.posts[i] = p; else J.posts.unshift(p);
+    // a new or changed cover gets its 1200 x 630 copy for social shares (made once, then kept with the article)
+    if (p.img && p.ogFor !== p.img && !S.ogBusy) {
+      S.ogBusy = true; const from = p.img;
+      shareImage(from).then((url) => { S.extra.ogImg = url; S.extra.ogFor = from; const cur = J.posts.find((x) => x.slug === p.slug); if (cur && cur.img === from) { cur.ogImg = url; cur.ogFor = from; persist(); } })
+        .catch(() => {}).finally(() => { S.ogBusy = false; });
+    }
     orig = p.slug; const bk = $(".jed-bar .back", body); if (bk) bk.innerHTML = I("chevron-left") + "Back"; const slugEl = q("[data-f=slug]"); if (slugEl && slugEl !== document.activeElement) slugEl.value = p.slug;
     await persist();
   }

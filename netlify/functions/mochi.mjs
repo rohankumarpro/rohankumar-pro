@@ -1,4 +1,4 @@
-// /api/mochi  What visitors tell Mochi.
+// /api/mochi  What visitors tell OGGY.
 //   POST (anyone): record one answer {vid, name, q, a}. Limited per visitor and per address.
 //   GET  (owner only): read the inbox.   DELETE (owner only): ?vid=<id> removes one visitor.
 // Optional email alerts: set RESEND_API_KEY and OWNER_EMAIL in Netlify (MOCHI_FROM is optional).
@@ -25,13 +25,13 @@ async function tooMany(store, event) {
 async function alertOwner(v, q, a) {
   const key = process.env.RESEND_API_KEY, to = process.env.OWNER_EMAIL;
   if (!key || !to) return;
-  const text = `${v.name || "A visitor"}${v.email ? ` (${v.email})` : ""} told Mochi:\n\n${q}: ${a}\n\nSign in to your site and open Settings > Mochi's inbox to see everything.`;
+  const text = `${v.name || "A visitor"}${v.email ? ` (${v.email})` : ""} told OGGY:\n\n${q}: ${a}\n\nSign in to your site and open Settings > OGGY's inbox to see everything.`;
   try {
     await Promise.race([
       fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify({ from: process.env.MOCHI_FROM || "Mochi <onboarding@resend.dev>", to: [to], subject: "Mochi has a message for you", text }),
+        body: JSON.stringify({ from: process.env.MOCHI_FROM || "OGGY <onboarding@resend.dev>", to: [to], subject: "OGGY has a message for you", text }),
       }),
       new Promise((r) => setTimeout(r, 4000)),
     ]);

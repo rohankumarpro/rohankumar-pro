@@ -94,7 +94,11 @@ export function pageWindows(layer, ctx) {
     w.el.classList.remove("max");
     s.left = w.geo.x + "px"; s.top = w.geo.y + "px"; s.width = w.geo.w + "px"; s.height = w.geo.h + "px";
   }
-  function front(w) { w.el.style.zIndex = String(++zTop); for (const o of W.values()) o.el.classList.toggle("top", o === w); }
+  function front(w) {
+    if (w.el.classList.contains("top") && +w.el.style.zIndex === zTop) return;
+    w.el.style.zIndex = String(++zTop); for (const o of W.values()) if (!o.inline) o.el.classList.toggle("top", o === w);
+    if (zTop > 400) { zTop = 10; [...W.values()].filter((o) => o.el && !o.inline).sort((a, b) => (+a.el.style.zIndex || 0) - (+b.el.style.zIndex || 0)).forEach((o) => { o.el.style.zIndex = String(++zTop); }); }
+  }
   function flip(el, a, b, grow) {
     const sx = a.w / b.w, sy = a.h / b.h, tx = a.x - b.x, ty = a.y - b.y;
     const kf = [{ transform: `translate(${tx}px,${ty}px) scale(${sx},${sy})`, opacity: grow ? 0.4 : 1, borderRadius: "24px" }, { transform: "none", opacity: 1 }];
@@ -237,7 +241,7 @@ export function pageWindows(layer, ctx) {
     w.blocks = blocks;
     const host = w.bodyEl; host.innerHTML = "";
     if (w.owner) {
-      w.ed = await makeEditor(host, { blocks, escLeaves: w.inline, placeholder: w.inline ? "Type '/' for blocks…" : "Type '/' for blocks, or just start writing…", onChange: () => touch(w), onStatus: (s) => { if (s) status(w, s); } });
+      w.ed = await makeEditor(host, { blocks, escLeaves: w.inline, reveal: w.inline ? (r) => ctx.canvas()?.reveal(r) : null, placeholder: w.inline ? "Type '/' for blocks…" : "Type '/' for blocks, or just start writing…", onChange: () => touch(w), onStatus: (s) => { if (s) status(w, s); } });
       if (!W.has(w.id) || W.get(w.id) !== w) { try { w.ed.destroy(); } catch {} return; }
       if (w.focusAt === "body") w.ed.focus("end");
       else if (fresh || !(item(w)?.title)) setTimeout(() => w.titleEl?.focus(), 80);
@@ -364,6 +368,7 @@ export function pageWindows(layer, ctx) {
 
   return {
     open, close, minimize, restore, flushAll, beacon, inline, isOpen: (id) => W.has(id) && !W.get(id).inline,
+    liveBlocks: (id) => { const w = W.get(id); return w && w.ed ? w.ed.getBlocks() : null; }, // what an open page holds right now, saved or not
     refresh(id) { const w = W.get(id); if (w) drawHead(w); },
     closeAll: async () => { for (const id of [...W.keys()]) await close(id); offLive(); },
     finishInline: async () => { for (const w of [...W.values()]) if (w.inline) await w.finish(); },

@@ -2,6 +2,7 @@
 .rte *,.rte-pop *,.rte-fbar *,.rte-mbar *{box-sizing:border-box}
 .rte{position:relative}
 .rte-doc{padding:2px 0 0 calc(34 * var(--u));outline:none;min-height:140px}
+.rte-doc.rte-cross .rte-ui,.rte-doc.rte-cross .rb-side{-webkit-user-select:none;user-select:none}.rte-doc.rte-cross{caret-color:transparent}
 .rte-tail{height:84px;cursor:text}
 .rte.drop-files{outline:2px dashed var(--primary);outline-offset:6px;border-radius:var(--r-4)}
 .is-dragging,.is-dragging *{cursor:grabbing!important;user-select:none!important}
@@ -120,3 +121,16 @@ th.rb-cell{background:var(--surface2);font-weight:var(--fw-b)}tr:last-child .rb-
 .rte-lib{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(6 * var(--u));max-height:260px;overflow:auto;padding:calc(4 * var(--u))}.rte-lt{border:0;padding:0;aspect-ratio:1;border-radius:var(--r-4);overflow:hidden;cursor:pointer;background:var(--surface2)}.rte-lt img{width:100%;height:100%;object-fit:cover}
 .rte-ghost{position:fixed;z-index:3200;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-4);padding:calc(6 * var(--u)) calc(12 * var(--u));font-size:var(--fs-4);box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:260px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ink)}
 .rte-drop{position:fixed;z-index:3200;height:3px;background:var(--primary);border-radius:var(--r-2);pointer-events:none;display:none}
+/* find in page (Ctrl+F) */
+.rte-find{position:fixed;z-index:3060;display:flex;align-items:center;gap:2px;width:min(340px,calc(100vw - 16px));box-sizing:border-box;padding:4px 4px 4px 12px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:var(--r-pill,999px);box-shadow:0 10px 36px rgba(0,0,0,.22);font-family:var(--font);animation:rteFind .14s ease-out}
+.rte-find .rte-fic{display:grid;place-items:center;color:var(--ink2);flex:none}
+.rte-fin{flex:1 1 auto;min-width:0;border:0;outline:0;background:transparent;color:inherit;font:inherit;font-size:14px;padding:8px 8px}
+.rte-fcount{flex:none;font-size:12.5px;color:var(--ink2);padding:0 6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rte-find.none .rte-fcount{color:#D93025}
+.rte-fbtn{flex:none;display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
+.rte-fbtn:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.rte-fbtn:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+::highlight(rte-find){background-color:rgba(251,188,4,.35);color:inherit}
+::highlight(rte-find-cur){background-color:rgba(251,140,0,.75);color:#000}
+@keyframes rteFind{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.rte-find{animation:none}}

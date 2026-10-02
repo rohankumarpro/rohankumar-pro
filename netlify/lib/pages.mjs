@@ -3,7 +3,7 @@
 import { esc, renderBlocks, blocksText, stripTags, slugify, firstImage, readMinutes, wordCount, blocksToMd } from "../../shared/blocks.mjs";
 import { SITE, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate } from "./site-data.mjs";
 import { hrefOf } from "./hub.mjs";
-import { CAROUSELS } from "./media.mjs";
+import { CAROUSELS, COVERS } from "./media.mjs";
 
 export const NAME = "Rohan Kumar";
 const OG_DEFAULT = "/img/og.png";
@@ -26,7 +26,7 @@ const BY_PATH = Object.fromEntries(Object.entries(APP_PAGES).map(([id, v]) => [v
 const tagSlug = (t) => slugify(t);
 const dateLabel = (p) => p.date || "";
 const person = (pr, hub) => ({
-  "@type": "Person", "@id": `${SITE}/#person`, name: pr.name, jobTitle: pr.role, url: `${SITE}/`, image: abs("/img/avatar.jpg"),
+  "@type": "Person", "@id": `${SITE}/#person`, name: pr.name, jobTitle: pr.role, url: `${SITE}/`, image: abs(pr.settings.photo || "/img/avatar.jpg"),
   ...(pr.skills.length ? { knowsAbout: pr.skills } : {}), ...(pr.email ? { email: pr.email } : {}), ...(pr.studio ? { worksFor: { "@type": "Organization", name: pr.studio } } : {}),
   sameAs: [...new Set([...(hub?.socials || []).map((s) => s.url).filter((u) => /^https?:/.test(u)), ...pr.links.map((l) => l.url).filter((u) => /^https?:/.test(u))])],
 });
@@ -44,8 +44,10 @@ export async function resolve(event, store, rawPath) {
   const path = path0 === "/index.md" ? "/" : path0.replace(/\.md$/, "") || "/";
   const pr = await loadProfile(store);
   const hidden = new Set(pr.settings.hiddenApps || []);
+  // Website settings (owner mode): the site's own search and share details. Anything left empty falls back to the defaults.
+  const seo = pr.settings.seo || {}, DEF = seo.img || OG_DEFAULT;
   const hub = await loadHubPublic(store);
-  const P = { person: person(pr, hub), status: 200, path, md: wantMd, app: "", slug: "", noindex: false, type: "website", ld: [], modified: undefined, image: OG_DEFAULT, imageAlt: "" };
+  const P = { person: person(pr, hub), status: 200, path, md: wantMd, app: "", slug: "", noindex: false, type: "website", ld: [], modified: undefined, image: DEF, imageAlt: seo.img ? seo.imgAlt || "" : "", sized: { [DEF]: [1200, 630] }, siteSeo: seo }; // sized: pictures whose size is known (both defaults are 1200 x 630)
   const finish = (o) => Object.assign(P, o);
   const base = (title, desc) => ({ title, desc: trim(desc) });
   const home = { name: "Home", path: "/" };
@@ -53,7 +55,7 @@ export async function resolve(event, store, rawPath) {
   if (path === "/") {
     const posts = (await loadLivePosts(store)).slice(0, 5), projects = (await projectIndex(store)).filter((m) => m.status === "published").slice(0, 6);
     return finish({
-      ...base(`${pr.name} — ${pr.role}`, pr.bio), app: "", title: `${pr.name} — ${pr.role}`,
+      ...base(seo.title || `${pr.name} — ${pr.role}`, seo.desc || pr.bio), app: "", title: seo.title || `${pr.name} — ${pr.role}`,
       ld: [{ "@type": "WebSite", "@id": `${SITE}/#website`, url: `${SITE}/`, name: pr.name, inLanguage: "en", publisher: { "@id": `${SITE}/#person` } }, person(pr, hub)],
       body: `<header><h1>${esc(pr.name)} — ${esc(pr.role)}</h1><p>${esc(pr.bio)}</p>${pr.status ? `<p>${esc(pr.status)}.</p>` : ""}</header>${nav(hidden)}
 <section><h2>Latest from the journal</h2><ul>${posts.map(postLi).join("")}</ul><p><a href="/journal">All articles</a></p></section>
@@ -115,7 +117,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const ph = await loadPhotos(store);
     return finish({ title: `Photos — ${pr.name}`, desc: `A gallery of photos by ${pr.name}.`, app: "photos", noindex: !ph.length || hidden.has("photos"),
       body: `<h1>Photos</h1><ul>${ph.map((p) => `<li><img src="/api/photo?id=${esc(p.id)}&amp;s=t" alt="${esc(p.caption || "Photo by " + pr.name)}" loading="lazy">${p.caption ? `<p>${esc(p.caption)}</p>` : ""}</li>`).join("")}</ul>`,
-      image: ph[0] ? `/api/photo?id=${ph[0].id}&s=f` : OG_DEFAULT, ld: [{ "@type": "ImageGallery", name: `Photos — ${pr.name}`, url: `${SITE}/photos` }, crumbs([home, { name: "Photos", path }])] });
+      image: ph[0] ? `/api/photo?id=${ph[0].id}&s=f` : DEF, ld: [{ "@type": "ImageGallery", name: `Photos — ${pr.name}`, url: `${SITE}/photos` }, crumbs([home, { name: "Photos", path }])] });
   }
 
   if (path === "/guestbook") {
@@ -136,7 +138,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const x = all.find((n) => n.id === path.slice(7));
     if (!x || hidden.has("notes")) return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "notes", noindex: true, notFound: true, body: `<h1>Page not found</h1><p><a href="/notes">Back to Notes</a></p>` });
     const ttl = x.title || trim(textOf(x), 60) || "Note";
-    return finish({ title: `${ttl} — ${pr.name}`, desc: trim(textOf(x), 160), app: "notes", slug: x.id, noindex: pr.placeholder, type: "article", image: x.img || OG_DEFAULT,
+    return finish({ title: `${ttl} — ${pr.name}`, desc: trim(textOf(x), 160), app: "notes", slug: x.id, noindex: pr.placeholder, type: "article", image: x.img || DEF,
       body: `<article><nav aria-label="Breadcrumb"><a href="/notes">Notes</a></nav><h1>${esc(ttl)}</h1>${bodyOf(x)}</article>`, mdText: `# ${ttl}\n\n${textOf(x)}\n`,
       ld: [{ "@type": "Article", headline: ttl.slice(0, 110), description: trim(textOf(x), 160), url: `${SITE}/notes/${x.id}`, author: { "@id": `${SITE}/#person` }, dateModified: new Date(x.ts || Date.now()).toISOString().slice(0, 10) }, crumbs([home, { name: "Notes", path: "/notes" }, { name: ttl, path }])] });
   }
@@ -164,7 +166,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const idx = await projectIndex(store), pub = idx.filter((m) => m.status === "published");
     if (path === "/projects") {
       return finish({ title: `Projects — ${pr.name}`, desc: `Selected work by ${pr.name}: ${[...new Set(pub.map((p) => p.field).filter(Boolean))].slice(0, 4).join(", ") || pr.role}.`, app: "projects", noindex: hidden.has("projects") || (pr.placeholder && pub.every((p) => /^Project /.test(p.title))),
-        image: pub.find((p) => p.cover)?.cover.src || OG_DEFAULT,
+        image: pub.find((p) => p.cover)?.cover.src || DEF,
         body: `<h1>Projects</h1><ul>${pub.map((p) => `<li>${p.cover ? `<img src="${esc(p.cover.src)}" alt="${esc(p.cover.alt || p.title)}" loading="lazy" width="320">` : ""}${projLi(p).replace(/^<li>/, "").replace(/<\/li>$/, "")}</li>`).join("")}</ul>`,
         mdText: `# Projects\n\n${pub.map((p) => `- [${p.title}](${abs("/projects/" + p.slug)}) — ${p.summary}`).join("\n")}\n`,
         ld: [{ "@type": "CollectionPage", name: `Projects — ${pr.name}`, url: `${SITE}/projects`, mainEntity: itemList(pub.map((p) => ({ path: `/projects/${p.slug}`, name: p.title }))) }, crumbs([home, { name: "Projects", path }])] });
@@ -172,7 +174,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const slug = decodeURIComponent(path.slice("/projects/".length));
     const p = await projectBySlug(store, slug);
     if (!p || (p.status === "draft")) return finish({ status: 404, title: "Project not found", desc: "This project could not be found.", app: "projects", noindex: true, body: `<h1>Project not found</h1><p><a href="/projects">See all projects</a></p>` });
-    const img = p.cover?.src || firstImage(p.blocks) || OG_DEFAULT, i = pub.findIndex((m) => m.id === p.id);
+    const img = p.cover?.src || firstImage(p.blocks) || DEF, i = pub.findIndex((m) => m.id === p.id);
     const desc = p.seo?.desc || p.summary || trim(blocksText(p.blocks, " "));
     const credit = p.credits?.length ? `<h2>Credits</h2><ul>${p.credits.map((c) => `<li>${esc(c.name)}${c.role ? ` — ${esc(c.role)}` : ""}</li>`).join("")}</ul>` : "";
     const meta = [p.field && `Field: ${p.field}`, p.year && `Year: ${p.year}`, p.client && `Client: ${p.client}`, p.role && `Role: ${p.role}`, p.tools?.length && `Tools: ${p.tools.join(", ")}`].filter(Boolean);
@@ -206,7 +208,7 @@ ${p.tags?.length ? `<p>${p.tags.map((t) => esc(t)).join(", ")}</p>` : ""}${pub[i
       const title = tag ? `${label} articles — Journal by ${pr.name}` : `Journal — ${pr.name}`;
       const desc = tag ? `Articles by ${pr.name} about ${label}.` : `Notes on branding, design, and working with AI by ${pr.name}. Written as I learn, and updated when I'm wrong.`;
       return finish({ title, desc, app: "journal", slug: tag ? `tag/${tag}` : "", noindex: hidden.has("journal"), modified: undefined,
-        image: posts.find((p) => p.img)?.img || OG_DEFAULT,
+        image: posts.find((p) => p.img)?.img || DEF,
         body: `<h1>${tag ? `Journal: ${esc(label)}` : "Journal"}</h1><p>${esc(desc)}</p><nav aria-label="Tags"><ul>${all.map(([s, t]) => `<li><a href="/journal/tag/${esc(s)}">${esc(t)}</a></li>`).join("")}</ul></nav><ul>${list.map(postLi).join("")}</ul>`,
         mdText: `# Journal${tag ? `: ${label}` : ""}\n\n${list.map((p) => `- [${p.title}](${abs("/journal/" + p.slug)}) — ${p.excerpt}`).join("\n")}\n`,
         ld: [{ "@type": tag ? "CollectionPage" : "Blog", name: title, url: `${SITE}${path}`, description: desc, author: { "@id": `${SITE}/#person` }, blogPost: tag ? undefined : list.slice(0, 20).map((p) => ({ "@type": "BlogPosting", headline: p.title, url: `${SITE}/journal/${p.slug}`, datePublished: isoDate(p) })), mainEntity: itemList(list.map((p) => ({ path: `/journal/${p.slug}`, name: p.title }))) },
@@ -217,20 +219,22 @@ ${p.tags?.length ? `<p>${p.tags.map((t) => esc(t)).join(", ")}</p>` : ""}${pub[i
     if (!p) return finish({ status: 404, title: "Article not found", desc: "This article could not be found.", app: "journal", noindex: true, body: `<h1>Article not found</h1><p><a href="/journal">See all articles</a></p>` });
     const blocks = blocksOf(p), media = { carousels: CAROUSELS };
     const html = renderBlocks(blocks, { hBase: 2, media });
-    const img = p.img || firstImage(blocks), desc = p.seoDesc || p.excerpt || trim(blocksText(blocks, " "));
+    // the picture shared on social sites: the 1200 x 630 copy made from the cover, else the cover, its preset, or the first picture
+    const og = p.ogImg && (!p.ogFor || p.ogFor === p.img) ? p.ogImg : "";
+    const img = og || p.img || (p.hero && COVERS[p.hero]) || firstImage(blocks), desc = p.seoDesc || p.excerpt || trim(blocksText(blocks, " "));
     const rel = posts.filter((x) => x.slug !== p.slug && [x.tag, ...(x.tags || [])].some((t) => t && [p.tag, ...(p.tags || [])].includes(t))).slice(0, 3);
     const i = posts.findIndex((x) => x.slug === p.slug), newer = posts[i - 1], older = posts[i + 1];
     const tags = [p.tag, ...(p.tags || [])].filter(Boolean);
     const iso = isoDate(p), mod = p.modified || iso;
     return finish({
-      title: p.seoTitle || `${p.title} — ${pr.name}`, desc: trim(desc), app: "journal", slug: p.slug, type: "article", image: img || OG_DEFAULT, imageAlt: p.imgAlt || p.title, noindex: !!p.noindex || hidden.has("journal"),
+      title: p.seoTitle || `${p.title} — ${pr.name}`, desc: trim(desc), app: "journal", slug: p.slug, type: "article", image: img || DEF, imageAlt: p.imgAlt || p.title, sized: { ...P.sized, ...(og ? { [og]: [1200, 630] } : {}) }, noindex: !!p.noindex || hidden.has("journal"),
       published: iso, modified: mod, section: p.tag, tags,
       body: `<article><nav aria-label="Breadcrumb"><a href="/journal">Journal</a></nav><header><h1>${esc(p.title)}</h1><p>${iso ? `<time datetime="${iso}">${esc(p.date || iso)}</time>` : esc(p.date)} · ${readMinutes(blocks)} min read · <a href="/about">${esc(pr.name)}</a></p>${p.excerpt ? `<p><em>${esc(p.excerpt)}</em></p>` : ""}${img ? `<img src="${esc(img)}" alt="${esc(p.imgAlt || p.title)}">` : ""}</header>${html}
 ${p.url ? `<p><a href="${esc(p.url)}" rel="noopener">Also on ${esc(p.source || "the original")}</a></p>` : ""}${tags.length ? `<p>${tags.map((t) => `<a href="/journal/tag/${esc(tagSlug(t))}">${esc(t)}</a>`).join(" · ")}</p>` : ""}</article>
 ${rel.length ? `<aside><h2>More to read</h2><ul>${rel.map(postLi).join("")}</ul></aside>` : ""}${newer ? `<p><a href="/journal/${esc(newer.slug)}">Newer: ${esc(newer.title)}</a></p>` : ""}${older ? `<p><a href="/journal/${esc(older.slug)}">Older: ${esc(older.title)}</a></p>` : ""}`,
       mdText: `# ${p.title}\n\n*${p.date || ""}* · ${pr.name}\n\n${blocksToMd(blocks)}\n`,
       ld: [{ "@type": "BlogPosting", "@id": `${SITE}/journal/${p.slug}#post`, headline: p.title.slice(0, 110), description: trim(desc), url: `${SITE}/journal/${p.slug}`, mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE}/journal/${p.slug}` },
-        ...(img ? { image: [abs(img)] } : { image: [abs(OG_DEFAULT)] }), datePublished: iso, dateModified: (mod || "").slice(0, 10) || iso, author: { "@id": `${SITE}/#person` }, publisher: { "@id": `${SITE}/#person` },
+        ...(img ? { image: [abs(img)] } : { image: [abs(DEF)] }), datePublished: iso, dateModified: (mod || "").slice(0, 10) || iso, author: { "@id": `${SITE}/#person` }, publisher: { "@id": `${SITE}/#person` },
         ...(p.tag ? { articleSection: p.tag } : {}), ...(tags.length ? { keywords: tags.join(", ") } : {}), wordCount: wordCount(blocks), inLanguage: "en", isAccessibleForFree: true, timeRequired: `PT${readMinutes(blocks)}M`,
         ...(p.url ? { sameAs: p.url } : {}) }, crumbs([home, { name: "Journal", path: "/journal" }, { name: p.title, path }])],
     });

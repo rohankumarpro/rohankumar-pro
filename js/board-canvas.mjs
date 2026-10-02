@@ -108,7 +108,7 @@ export function shortcuts(ret) {
   const sec = (t, rows) => `<section><h3>${t}</h3>${rows.map(([a, k]) => `<div class="bd-kr"><span>${a}</span><span class="bd-kk">${K(k)}</span></div>`).join("")}</section>`;
   const d = h("div", { class: "bd-keys", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" });
   d.innerHTML = `<div class="bd-kc"><header><b>Keyboard shortcuts</b><button class="bd-kx" aria-label="Close" title="Close (Esc)">${I("x", 20)}</button></header><div class="bd-kg">
-    ${sec("Tools", [["Select", "V"], ["Move around", "H"], ["Page", "P"], ["Sticky note", "S"], ["Text", "T"], ["Picture", "I"], ["Link", "L"], ["Section", "F"], ["Connector", "C"]])}
+    ${sec("Tools", [["Select", "V"], ["Move around", "H"], ["Page", "P"], ["Sticky note", "S"], ["Text", "T"], ["Picture", "I"], ["Link", "L"], ["Sticker", "E"], ["Section", "F"], ["Connector", "C"]])}
     ${sec("Editing", [["Undo", "Ctrl Z"], ["Redo", "Ctrl ⇧ Z"], ["Copy · Cut · Paste", "Ctrl C"], ["Duplicate", "Ctrl D"], ["Delete", "Del"], ["Select all", "Ctrl A"], ["Put in a section", "Ctrl G"], ["Lock or unlock", "Ctrl ⇧ L"], ["Bring to front · back", "Ctrl ]"], ["Nudge the selection", "↑ ↓ ← →"]])}
     ${sec("Notes and view", [["Edit the selection", "Enter"], ["Open a page full size", "⇧ Enter"], ["Next item · previous", "Tab"], ["New sticky beside", "Ctrl Enter"], ["New sticky below", "Ctrl ⇧ Enter"], ["Bullet list in a note", "- space"], ["Finish editing", "Esc"], ["Find on the board", "Ctrl F"], ["Move around", "↑ ↓ ← →"], ["Pan", "Space drag"], ["Zoom", "Ctrl scroll"], ["Zoom in · out", "Ctrl +"], ["Zoom to 100%", "Ctrl 0"], ["Show everything", "⇧ 1"], ["Zoom to selection", "⇧ 2"], ["This sheet", "?"]])}
   </div></div>`;
@@ -197,7 +197,7 @@ export function createCanvas(host, opts = {}) {
     </div>
     ${owner ? `<div class="bd-tools" role="toolbar" aria-label="Tools">
       ${tb("select", "cursor", "Select", "V")}${tb("hand", "hand", "Move around", "H")}<i class="bd-tsep"></i>
-      ${tb("page", "page", "Page", "P")}${tb("sticky", "sticky", "Sticky note", "S")}${tb("text", "type", "Text", "T")}${tb("image", "image", "Picture", "I")}${tb("link", "link", "Link", "L")}${tb("frame", "frame", "Section", "F")}${tb("connector", "connector", "Connector", "C")}
+      ${tb("page", "page", "Page", "P")}${tb("sticky", "sticky", "Sticky note", "S")}${tb("text", "type", "Text", "T")}${tb("image", "image", "Picture", "I")}${tb("link", "link", "Link", "L")}${tb("sticker", "smile", "Sticker", "E")}${tb("frame", "frame", "Section", "F")}${tb("connector", "connector", "Connector", "C")}
     </div>` : ""}
     <div class="bd-zoom" role="group" aria-label="Zoom">
       <button data-z="out" title="Zoom out (Ctrl −)" aria-label="Zoom out">${I("minus", 18)}</button><button data-z="pct" class="bd-pct" title="Zoom options">100%</button><button data-z="in" title="Zoom in (Ctrl +)" aria-label="Zoom in">${I("plus", 18)}</button><i class="bd-tsep"></i><button data-z="fit" title="Show everything (⇧ 1)" aria-label="Show everything">${I("fit", 18)}</button><button data-z="keys" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">${I("keyboard", 19)}</button>
@@ -288,6 +288,7 @@ export function createCanvas(host, opts = {}) {
           <div class="bd-lnb"><b>${esc(it.title || it.url.replace(/^https?:\/\/(www\.)?/, ""))}</b>${it.desc ? `<p>${esc(it.desc)}</p>` : ""}<small>${it.fav ? `<img src="${esc(it.fav)}" alt="" width="14" height="14" referrerpolicy="no-referrer" onerror="this.remove()">` : I("globe", 13)}<span>${esc(it.site || "")}</span>${it._busy ? '<span class="rb-spin sm"></span>' : ""}</small></div></div>`;
       }
       case "frame": return `<div class="bd-frt"><span>${esc(it.title || "Section")}</span></div>`;
+      case "sticker": return `<span class="bd-stk" style="rotate:${+it.rot || 0}deg">${esc(it.emoji || "")}</span>`;
     }
     return "";
   }
@@ -305,6 +306,7 @@ export function createCanvas(host, opts = {}) {
     el.style.width = it.w + "px";
     el.style.height = autoH(it) ? "" : it.h + "px";
     if (it.t === "page") el.style.setProperty("--ph", it.h + "px");
+    if (it.t === "sticker") el.style.setProperty("--sw", Math.min(it.w, it.h) + "px");
     el.style.zIndex = String(Math.round(it.z || 0));
   }
   function paint(it) {
@@ -316,9 +318,11 @@ export function createCanvas(host, opts = {}) {
     if (it.t === "sticky") el.dataset.s = it.size || "m";
     if (it.font) el.dataset.font = it.font; else delete el.dataset.font;
     el.classList.toggle("locked", !!it.locked); el.classList.toggle("bd-sel", S.sel.has(it.id));
-    if (S.editing !== it.id) el.innerHTML = inner(it);
+    // the contents are rebuilt only when they change: moving, resizing or undoing a move keeps pictures and pages as they are
+    let fresh = false;
+    if (S.editing !== it.id) { const html = inner(it); if (el.__h !== html) { el.innerHTML = html; el.__h = html; fresh = true; } }
     place(el, it);
-    if (it.t === "sticky") fitSticky(el, it);
+    if (it.t === "sticky") { const fk = (it.text || "") + "|" + it.w + "|" + it.h + "|" + (it.size || "m") + "|" + (it.font || ""); if (fresh || el.__fk !== fk) { el.__fk = fk; fitSticky(el, it); } }
     if (autoH(it)) measure(it);
     return el;
   }
@@ -435,7 +439,7 @@ export function createCanvas(host, opts = {}) {
     const list = [...S.items.values()].filter((x) => !x._up); if (!list.length) return [];
     const b = bbox(list.map((x) => x.id)), s = 1000 / Math.max(b.w, b.h, 1);
     return list.sort((a, c) => (a.t === "frame" ? -1 : 0) - (c.t === "frame" ? -1 : 0) || c.w * c.h - a.w * a.h).slice(0, 90)
-      .map((it) => [Math.round((it.x - b.x) * s), Math.round((it.y - b.y) * s), Math.max(4, Math.round(it.w * s)), Math.max(4, Math.round(it.h * s)), it.t === "sticky" ? it.color || "yellow" : it.t === "frame" ? "frame" : it.t === "image" ? "image" : it.t === "page" ? "page" : it.t === "link" ? "link" : "text"]);
+      .map((it) => [Math.round((it.x - b.x) * s), Math.round((it.y - b.y) * s), Math.max(4, Math.round(it.w * s)), Math.max(4, Math.round(it.h * s)), it.t === "sticky" ? it.color || "yellow" : it.t === "frame" ? "frame" : it.t === "image" ? "image" : it.t === "page" ? "page" : it.t === "link" ? "link" : it.t === "sticker" ? "sticker" : "text"]);
   }
   async function flush() {
     clearTimeout(Q.t);
@@ -482,7 +486,7 @@ export function createCanvas(host, opts = {}) {
   /* ---------- making things ---------- */
   function make(t, at, extra = {}) {
     const base = { id: rid(), t, z: t === "frame" ? lowZ() - 1 : topZ() + 1 };
-    const size = { page: [300, 200], sticky: [220, 220], text: [320, 40], image: [320, 240], link: [320, 120], frame: [640, 440] }[t];
+    const size = { page: [300, 200], sticky: [220, 220], text: [320, 40], image: [320, 240], link: [320, 120], frame: [640, 440], sticker: [128, 128] }[t];
     const it = Object.assign(base, { w: size[0], h: size[1] }, t === "sticky" ? { color: S.color, text: "" } : {}, t === "text" ? { text: "", size: "m" } : {}, t === "page" ? { title: "", icon: "", cover: null, snip: "", words: 0, edited: Date.now() } : {}, t === "frame" ? { title: "Section", color: "grey" } : {}, extra);
     it.x = Math.round((extra.x ?? at.x - it.w / 2)); it.y = Math.round((extra.y ?? at.y - it.h / 2));
     return it;
@@ -559,7 +563,7 @@ export function createCanvas(host, opts = {}) {
       selbox.style.transform = `translate(${p.x}px,${p.y}px)`; selbox.style.width = b.w * z + "px"; selbox.style.height = b.h * z + "px";
       selbox.classList.toggle("multi", S.sel.size > 1);
       const canResize = owner && single && !single.locked && !busy;
-      const hs = !canResize ? [] : autoH(single) ? ["w", "e"] : ["nw", "ne", "sw", "se"];
+      const hs = !canResize ? [] : autoH(single) ? ["w", "e"] : single.t === "sticker" ? ["nw", "ne", "sw", "se", "rot"] : ["nw", "ne", "sw", "se"];
       const key = hs.join(",") + (single && single.locked ? "L" : "");
       if (selbox.__k !== key) { selbox.__k = key; selbox.innerHTML = hs.map((k) => `<i class="bd-hd" data-h="${k}"></i>`).join("") + (single && single.locked ? `<span class="bd-lock">${I("lock", 13)}</span>` : ""); }
     } else selbox.hidden = true;
@@ -632,6 +636,17 @@ export function createCanvas(host, opts = {}) {
   /* ---------- pointer input ---------- */
   const ptrs = new Map();
   stage.addEventListener("pointerdown", down);
+  // a click on the empty parts of a page being written in (margins, under the text, the top) keeps the caret in the page;
+  // below the last line it goes to the end, like Notion. Without this the board took the focus and the page looked locked.
+  stage.addEventListener("mousedown", (e) => {
+    if (!S.editing || e.button !== 0) return;
+    const it = S.items.get(S.editing), ed = S.els.get(S.editing); if (!it || it.t !== "page" || !ed || !ed.contains(e.target)) return;
+    if (e.target.closest('[contenteditable="true"], textarea, input, button, a, select, .rte-tail, .bd-pgo, img, video, iframe')) return;
+    e.preventDefault();
+    const doc = ed.querySelector(".rte-doc"), last = doc && [...doc.querySelectorAll(":scope > .rb")].pop();
+    if (last && e.clientY > last.getBoundingClientRect().bottom && S.pageEd && S.pageEd.ed) S.pageEd.ed.focus("end");
+    else if (!ed.contains(document.activeElement) || document.activeElement === ed) { const f = S.pageEd && S.pageEd.ed; if (f) f.focus("end"); }
+  });
   stage.addEventListener("pointermove", move);
   stage.addEventListener("pointerup", up);
   stage.addEventListener("pointercancel", up);
@@ -666,12 +681,14 @@ export function createCanvas(host, opts = {}) {
     const id = hi.el && hi.el.dataset.id, it = id && S.items.get(id);
     const panWanted = e.button === 1 || S.space || S.tool === "hand" || !owner || (e.pointerType === "touch" && !it && !hi.lk && S.tool === "select");
     if (panWanted) { if (!owner && it && e.pointerType !== "touch") { S.tapItem = id; } else S.tapItem = e.pointerType === "touch" && it ? id : null; return startPan(e); }
+    if (hi.hd && S.sel.size === 1 && hi.hd.dataset.h === "rot") return startRotate(e);
     if (hi.hd && S.sel.size === 1) return startResize(e, hi.hd.dataset.h);
     if (hi.anc) return startConnect(e, hi.anc.dataset.for, hi.anc.dataset.anc);
     if (["sticky", "text", "page", "frame"].includes(S.tool)) {
       if (S.tool === "frame") return startFrameDraw(e, w);
       const t = S.tool; setTool("select"); create(t, w); e.preventDefault(); return;
     }
+    if (S.tool === "sticker") { const em = S.stk || "👍"; setTool("select"); create("sticker", w, { emoji: em, rot: Math.round((Math.random() * 16 - 8) * 10) / 10 }); e.preventDefault(); return; }
     if (S.tool === "image") { setTool("select"); pickImages(w); return; }
     if (S.tool === "link") { setTool("select"); askLink(w); return; }
     if (S.tool === "connector") { if (it && it.t !== "frame") return startConnect(e, id, "auto"); return startMarquee(e, w); }
@@ -733,6 +750,13 @@ export function createCanvas(host, opts = {}) {
     S.drag = { kind: "resize", pid: e.pointerId, hk, id: it.id, sx: e.clientX, sy: e.clientY, o: { x: it.x, y: it.y, w: it.w, h: it.h }, ratio: it.w / it.h };
     capture(e); stage.classList.add("dragging");
   }
+  function startRotate(e) {
+    const it = S.items.get([...S.sel][0]); if (!it || it.locked) return;
+    begin(); touchI(it.id);
+    const c = toS(it.x + it.w / 2, it.y + it.h / 2);
+    S.drag = { kind: "rotate", pid: e.pointerId, id: it.id, cx: c.x + R.left, cy: c.y + R.top, a0: Math.atan2(e.clientY - (c.y + R.top), e.clientX - (c.x + R.left)), r0: +it.rot || 0 };
+    capture(e); stage.classList.add("dragging");
+  }
   function startConnect(e, from, side) {
     S.drag = { kind: "connect", pid: e.pointerId, from, side, sx: e.clientX, sy: e.clientY, target: null };
     capture(e); stage.classList.add("dragging", "connecting");
@@ -767,17 +791,25 @@ export function createCanvas(host, opts = {}) {
       for (const id of d.ids) { const it = S.items.get(id), st = d.start.get(id); if (!it) continue; it.x = Math.round(st[0] + sx); it.y = Math.round(st[1] + sy); const el = S.els.get(id); if (el) el.style.translate = `${it.x}px ${it.y}px`; }
       for (const lid of d.links) schedule("link", lid);
       drawGuides(lines); schedule("ov");
+      dropTarget(d, w);
       edgePan(e);
+      return;
+    }
+    if (d.kind === "rotate") {
+      const it = S.items.get(d.id); if (!it) return;
+      let r = d.r0 + (Math.atan2(e.clientY - d.cy, e.clientX - d.cx) - d.a0) * 180 / Math.PI;
+      r = ((r + 540) % 360) - 180; if (e.shiftKey) r = Math.round(r / 15) * 15; else if (Math.abs(r) < 3) r = 0;
+      it.rot = Math.round(r * 10) / 10; const sp = S.els.get(it.id)?.querySelector(".bd-stk"); if (sp) sp.style.rotate = it.rot + "deg";
       return;
     }
     if (d.kind === "resize") {
       const it = S.items.get(d.id), o = d.o, z = S.view.z; let dx = dxs / z, dy = dys / z;
       let { x, y, w: ww, h: hh } = o;
-      const min = { page: [200, 120], sticky: [90, 90], text: [60, 20], image: [40, 40], link: [200, 60], frame: [160, 120] }[it.t];
+      const min = { page: [200, 120], sticky: [90, 90], text: [60, 20], image: [40, 40], link: [200, 60], frame: [160, 120], sticker: [36, 36] }[it.t];
       if (d.hk.includes("e")) ww = o.w + dx; if (d.hk.includes("w")) ww = o.w - dx;
       if (d.hk.includes("s")) hh = o.h + dy; if (d.hk.includes("n")) hh = o.h - dy;
       ww = Math.max(min[0], ww); hh = Math.max(min[1], hh);
-      if ((it.t === "image" && !e.shiftKey) || (it.t !== "image" && e.shiftKey && !autoH(it))) { if (ww / hh > d.ratio) hh = ww / d.ratio; else ww = hh * d.ratio; }
+      if (it.t === "sticker") { const m = Math.max(ww, hh); ww = hh = m; } else if ((it.t === "image" && !e.shiftKey) || (it.t !== "image" && e.shiftKey && !autoH(it))) { if (ww / hh > d.ratio) hh = ww / d.ratio; else ww = hh * d.ratio; }
       if (d.hk.includes("w")) x = o.x + o.w - ww; if (d.hk.includes("n")) y = o.y + o.h - hh;
       Object.assign(it, { x: Math.round(x), y: Math.round(y), w: Math.round(ww), ...(autoH(it) ? {} : { h: Math.round(hh) }) });
       const el = S.els.get(it.id); place(el, it); if (it.t === "sticky") fitSticky(el, it); if (autoH(it)) measure(it);
@@ -814,6 +846,33 @@ export function createCanvas(host, opts = {}) {
     if (!vx && !vy) return;
     epT = requestAnimationFrame(() => { if (!S.drag) return; S.view.x += vx * 0.35; S.view.y += vy * 0.35; if (S.drag.sx != null) { S.drag.sx += vx * 0.35; S.drag.sy += vy * 0.35; } if (S.drag.kind === "pan") return; schedule("view"); move(e); });
   }
+  // dragging things onto a section: the section lights up, and on drop it takes them in (growing to fit if they stick out),
+  // so from then on they move with it
+  function dropTarget(d, w) {
+    let best = null;
+    if (!d.ids.some((id) => S.items.get(id)?.t === "frame")) {
+      for (const f of S.items.values()) {
+        if (f.t !== "frame" || d.ids.includes(f.id) || f.locked) continue;
+        if (w.x >= f.x && w.x <= f.x + f.w && w.y >= f.y && w.y <= f.y + f.h && (!best || f.w * f.h < best.w * best.h)) best = f;
+      }
+    }
+    const id = best ? best.id : null;
+    if (d.into !== id) { if (d.into) S.els.get(d.into)?.classList.remove("drop-into"); d.into = id; if (id) S.els.get(id)?.classList.add("drop-into"); }
+  }
+  function dropInto(d) {
+    const fid = d.into; d.into = null; if (!fid) return;
+    S.els.get(fid)?.classList.remove("drop-into");
+    const f = S.items.get(fid), ids = d.ids.filter((id) => S.items.has(id)); if (!f || !ids.length) return;
+    const b = bbox(ids); if (!b) return;
+    begin(); touchI(fid);
+    if (!inside(b, f)) {
+      const pad = 32, x1 = Math.min(f.x, b.x - pad), y1 = Math.min(f.y, b.y - pad), x2 = Math.max(f.x + f.w, b.x + b.w + pad), y2 = Math.max(f.y + f.h, b.y + b.h + pad);
+      Object.assign(f, { x: Math.round(x1), y: Math.round(y1), w: Math.round(x2 - x1), h: Math.round(y2 - y1) });
+    }
+    let z = topZ();
+    for (const id of ids) { const it = S.items.get(id); if (it.z <= f.z) { touchI(id); it.z = ++z; place(S.els.get(id), it); } }
+    paint(f); mark(fid); schedule("ov");
+  }
   function commitDrag() {
     const d = S.drag; if (!d) return;
     if (d.kind === "move" && d.started) { for (const id of d.ids) mark(id); done(); }
@@ -830,10 +889,11 @@ export function createCanvas(host, opts = {}) {
       else if (!d.moved && owner && e.pointerType === "touch") clearSel();
     }
     else if (d.kind === "move") {
-      if (d.started) { for (const id of d.ids) mark(id); done(); }
+      if (d.started) { dropInto(d); for (const id of d.ids) mark(id); done(); }
       else if (!e.shiftKey && d.wasSel > 1 && S.sel.has(d.id)) select([d.id]); // a click on one of several picks just that one
     }
     else if (d.kind === "resize") { mark(d.id); done(); }
+    else if (d.kind === "rotate") { const it = S.items.get(d.id); if (it) paint(it); mark(d.id); done(); }
     else if (d.kind === "connect") {
       ghost.setAttribute("d", ""); S.els.get(d.target)?.classList.remove("target");
       const moved = Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 8;
@@ -913,10 +973,12 @@ export function createCanvas(host, opts = {}) {
   /* ---------- editing text in place ---------- */
   function startEdit(id, fresh, at) {
     const it = S.items.get(id), el = S.els.get(id); if (!it || !el || !owner || it.locked) return;
+    if (it.t === "sticker") { stickerPicker(el, id); return; } // "editing" a sticker means swapping it
+    el.__h = null; // what is typed changes the card directly, so it is redrawn in full afterwards
     if (S.editing && S.editing !== id) finishEdit();
     if (it.t === "page") {
       if (!opts.editPage || S.editing === id) return;
-      S.editing = id; S.freshPage = fresh ? id : null; el.classList.add("editing"); select([id]); schedule("ov");
+      S.editing = id; el.classList.add("editing"); select([id]); schedule("ov");
       const keys = (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(".rte-pop")) { e.preventDefault(); e.stopPropagation(); finishEdit(); stage.focus({ preventScroll: true }); } };
       el.addEventListener("keydown", keys); S.pageKeys = keys;
       Promise.resolve(opts.editPage(it, el, { at: at || (fresh ? "title" : "body") })).then((hd) => { if (S.editing === id) { S.pageEd = hd; if (!hd) finishEdit(); } else if (hd) hd.finish(); });
@@ -958,10 +1020,6 @@ export function createCanvas(host, opts = {}) {
     S.editing = null;
     const el = S.els.get(id), it = S.items.get(id);
     if (it && it.t === "page") {
-      // a page that was just made and left with no title and nothing written goes away by itself, like an empty text box
-      const blank = S.freshPage === id && !(it.title || "").trim() && el && [...el.querySelectorAll(".rte-doc .rb-e")].every((e) => !e.textContent.trim()) && !el.querySelector(".rte-doc img, .rte-doc hr, .rte-doc table, .rte-doc iframe, .rte-doc .rb-cb");
-      S.freshPage = null;
-      if (blank) { const hd = S.pageEd; S.pageEd = null; if (S.pageKeys) el.removeEventListener("keydown", S.pageKeys); S.pageKeys = null; const gone = () => { if (S.items.has(id) && S.editing !== id) { remove([id]); done(); } }; if (hd) hd.finish().then(gone, gone); else gone(); schedule("ov"); return; }
       if (el) {
         const grown = Math.round(el.offsetHeight); // the card grew with the writing: keep that size
         el.classList.remove("editing"); if (S.pageKeys) el.removeEventListener("keydown", S.pageKeys);
@@ -1085,6 +1143,44 @@ export function createCanvas(host, opts = {}) {
     for (const it of items) { if (x > b.x && x + it.w > b.x + maxW) { x = b.x; y += rowH + gap; rowH = 0; } upd(it.id, { x: Math.round(x), y: Math.round(y) }); x += it.w + gap; rowH = Math.max(rowH, it.h); }
     done();
   }
+  /* ---------- stickers ---------- */
+  const STK_SETS = [
+    ["Reactions", "👍 👎 👏 🙌 🙏 💪 👀 🤝 ✌️ 👌 🤞 ☝️ 🫶 👋 🤌 🫵"],
+    ["Faces", "😀 😂 🥹 😍 🤩 😎 🤔 🤯 😴 🥳 😅 😭 😡 🤗 🫡 🙃 😬 🥲 😇 🤓"],
+    ["Marks", "❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💯 ✅ ❌ ⭐ 🌟 ✨ 🔥 💥 ⚡ 💡 ❗ ❓ 📌 📍 🎯 🏆 🥇 🚀"],
+    ["Making", "🎬 🎥 📷 📸 🎙️ 🎧 🎵 🎤 💻 📱 ✍️ 📝 📚 📈 📊 🗓️ ⏰ 💰 🔑 🧠 🎨 🖌️ ✂️ 📦 🔔 💬 💭 🗂️"],
+    ["Nature and food", "🌈 ☀️ 🌙 🌊 🌸 🌻 🍀 🌵 🍁 ❄️ 🍕 🍔 🍩 ☕ 🍿 🎂 🍓 🥑 🍉 🧋"],
+    ["Animals", "🐱 🐶 🦊 🐼 🦄 🐝 🦋 🐢 🐙 🦖 🐧 🦉"],
+    ["Fun", "🎉 🎊 🎁 🎈 🪩 👑 💎 🧿 🪄 🛸 🎲 🧩"],
+  ];
+  let stkPop = null;
+  function closeStickers() { if (stkPop) { stkPop.remove(); stkPop = null; document.removeEventListener("pointerdown", stkOut, true); document.removeEventListener("keydown", stkKey, true); } }
+  const stkOut = (e) => { if (stkPop && !stkPop.contains(e.target) && !e.target.closest('[data-tool="sticker"]')) closeStickers(); };
+  const stkKey = (e) => { if (e.key === "Escape" && stkPop) { e.preventDefault(); e.stopPropagation(); closeStickers(); stage.focus({ preventScroll: true }); } };
+  // pick a sticker, then click the board to stick it there; with replace, the chosen sticker is swapped
+  function stickerPicker(anchor, replace) {
+    closeMenu();
+    if (stkPop) { closeStickers(); return; }
+    let recent = []; try { recent = JSON.parse(localStorage.getItem("bdStk") || "[]").slice(0, 16); } catch {}
+    const sets = recent.length ? [["Recent", recent.join(" ")], ...STK_SETS] : STK_SETS;
+    const pop = h("div", { class: "bd-stkpop bdc", role: "dialog", "aria-label": "Stickers" });
+    pop.innerHTML = `<div class="bd-stkh"><b>Stickers</b><span>${replace ? "Pick one to swap in" : "Pick one, then click the board"}</span></div><div class="bd-stkg">${sets.map(([n, l]) => `<div class="bd-stks"><small>${esc(n)}</small><div>${l.split(" ").filter(Boolean).map((em) => `<button type="button" data-em="${esc(em)}" aria-label="${esc(em)}">${esc(em)}</button>`).join("")}</div></div>`).join("")}</div>`;
+    pop.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-em]"); if (!b) return;
+      const em = b.dataset.em;
+      try { localStorage.setItem("bdStk", JSON.stringify([em, ...recent.filter((x) => x !== em)].slice(0, 16))); } catch {}
+      closeStickers();
+      if (replace) { upd(replace, { emoji: em }); done(); return; }
+      S.stk = em; setTool("sticker"); stage.focus({ preventScroll: true });
+    });
+    document.body.append(pop); stkPop = pop;
+    const r = (anchor || stage).getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+    pop.style.left = Math.max(8, Math.min(r.left + r.width / 2 - pw / 2, innerWidth - pw - 8)) + "px";
+    pop.style.top = Math.max(8, (anchor ? r.top - ph - 12 : r.top + 60)) + "px";
+    setTimeout(() => { document.addEventListener("pointerdown", stkOut, true); document.addEventListener("keydown", stkKey, true); }, 0);
+    pop.querySelector("button")?.focus({ preventScroll: true });
+  }
+  function rotateSel(by) { selItems().filter((x) => x.t === "sticker" && !x.locked).forEach((x) => upd(x.id, { rot: by === 0 ? 0 : Math.round(((((+x.rot || 0) + by) + 540) % 360 - 180) * 10) / 10 })); done(); }
   function wrapSection() {
     const ids = [...S.sel]; const b = bbox(ids); if (!b) return;
     const pad = 48, f = make("frame", { x: 0, y: 0 }, { x: b.x - pad, y: b.y - pad - 12, w: b.w + pad * 2, h: b.h + pad * 2 + 12, z: Math.min(...ids.map((id) => S.items.get(id).z)) - 1 });
@@ -1191,6 +1287,8 @@ export function createCanvas(host, opts = {}) {
   document.addEventListener("keydown", docKey); document.addEventListener("keyup", docKeyUp); document.addEventListener("paste", docPaste);
   function onKey(e) {
     if (S.dead || S.inactive || isEditable(e.target)) return;
+    // keys typed inside a card that is being written in belong to that card, never to the board (Delete must not remove the page)
+    if (S.editing) { const ed = S.els.get(S.editing); if (ed && ed.contains(e.target)) return; }
     const k = e.key, mod = e.ctrlKey || e.metaKey;
     if (k === " " && !S.space) { S.space = true; stage.classList.add("space"); e.preventDefault(); return; }
     if (mod && (k === "z" || k === "Z")) { e.preventDefault(); if (!owner) return; e.shiftKey ? redo() : undo(); return; }
@@ -1222,15 +1320,19 @@ export function createCanvas(host, opts = {}) {
       selItems().filter((x) => !x.locked).forEach((it) => upd(it.id, { x: it.x + dx, y: it.y + dy })); clearTimeout(S.nudgeT); S.nudgeT = setTimeout(done, 400); return;
     }
     if (!mod && !e.altKey) {
-      const map = { v: "select", h: "hand", p: "page", s: "sticky", t: "text", i: "image", l: "link", f: "frame", c: "connector" }, t = map[k.toLowerCase()];
-      if (t) { e.preventDefault(); if (t === "image") { setTool("select"); pickImages(); } else if (t === "link") { setTool("select"); askLink(); } else setTool(t); }
+      const map = { v: "select", h: "hand", p: "page", s: "sticky", t: "text", i: "image", l: "link", f: "frame", c: "connector", e: "sticker" }, t = map[k.toLowerCase()];
+      if (t) { e.preventDefault(); if (t === "image") { setTool("select"); pickImages(); } else if (t === "link") { setTool("select"); askLink(); } else if (t === "sticker") stickerPicker(host.querySelector('[data-tool="sticker"]')); else setTool(t); }
     }
   }
   host.addEventListener("keyup", (e) => { if (e.key === " ") { S.space = false; stage.classList.remove("space"); } });
   window.addEventListener("blur", () => { S.space = false; stage.classList.remove("space"); });
 
   /* ---------- toolbar and zoom ---------- */
+  let stkGhost = null;
+  stage.addEventListener("pointermove", (e) => { if (S.tool !== "sticker" || e.pointerType === "touch") { if (stkGhost) stkGhost.hidden = true; return; } if (!stkGhost) { stkGhost = h("div", { class: "bd-stkghost", "aria-hidden": "true" }); document.body.append(stkGhost); } stkGhost.hidden = false; stkGhost.textContent = S.stk || ""; stkGhost.style.setProperty("--gs", Math.round(128 * S.view.z) + "px"); stkGhost.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-50%)`; });
+  stage.addEventListener("pointerleave", () => { if (stkGhost) stkGhost.hidden = true; });
   function setTool(t) {
+    if (t !== "sticker" && stkGhost) stkGhost.hidden = true;
     S.tool = t; stage.dataset.tool = t;
     host.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === t)));
     if (t !== "select" && t !== "hand") clearSel();
@@ -1240,6 +1342,7 @@ export function createCanvas(host, opts = {}) {
     const t = b.dataset.tool;
     if (t === "image") { setTool("select"); pickImages(); return; }
     if (t === "link") { setTool("select"); askLink(); return; }
+    if (t === "sticker") { if (S.tool === "sticker") { setTool("select"); closeStickers(); } else stickerPicker(b); return; }
     if (t === "sticky" && S.tool === "sticky") { const r = b.getBoundingClientRect(); M(r.left, r.top - 8, [{ head: "Sticky colour" }, { swatches: STICKY.map((c) => ({ c, name: COLORS[c].name, on: S.color === c, run: () => { S.color = c; b.dataset.c = c; setTool("sticky"); } })) }]); return; }
     setTool(S.tool === t && t !== "select" ? "select" : t);
   }));
@@ -1256,6 +1359,7 @@ export function createCanvas(host, opts = {}) {
     const out = [];
     if (one) {
       if (one.t === "page") out.push({ t: "Write here", i: "pencil", k: "Enter", run: () => startEdit(one.id) }, { t: "Open as a full page", i: "fit", k: "⇧ Enter", run: () => opts.openPage && opts.openPage(one) }, { t: "Download as Markdown", i: "download", run: () => opts.pageDownload && opts.pageDownload(one, "md") }, { t: "Save as PDF", i: "print", run: () => opts.pageDownload && opts.pageDownload(one, "pdf") }, "-");
+      if (one.t === "sticker" && !locked) out.push({ t: "Change sticker", i: "smile", k: "Enter", run: () => stickerPicker(S.els.get(one.id), one.id) }, { t: "Rotate left", i: "undo", run: () => rotateSel(-15) }, { t: "Rotate right", i: "redo", run: () => rotateSel(15) }, { t: "Straighten", i: "minus", disabled: !one.rot, run: () => rotateSel(0) }, "-");
       if (one.t === "image") out.push({ t: "View full size", i: "eye", k: "Enter", run: () => viewImage(one) }, { t: "Download picture", i: "download", run: () => download(one) }, { t: "Copy picture address", i: "link", run: () => copyText(new URL(one.src, location.href).href) }, { t: one.cap ? "Edit caption" : "Add caption", i: "pencil", run: () => caption(one) }, "-");
       if (one.t === "link") out.push({ t: "Open link", i: "external", k: "Enter", run: () => window.open(one.url, "_blank", "noopener") }, { t: "Copy link address", i: "link", run: () => copyText(one.url) }, { t: "Refresh preview", i: "refresh", run: () => refreshLink(one) }, "-");
       if (["sticky", "text"].includes(one.t) && !locked) out.push({ t: "Edit text", i: "pencil", k: "Enter", run: () => startEdit(one.id) }, { t: "Copy text", i: "copy", run: () => copyText(one.text || "") });
@@ -1419,6 +1523,6 @@ export function createCanvas(host, opts = {}) {
       return out;
     },
     setActive(on) { S.inactive = !on; if (!on) { finishEdit(); closeMenu(); } else { rect(); schedule("view"); } },
-    destroy() { S.dead = true; ro.disconnect(); if (offBodies) offBodies(); document.removeEventListener("keydown", docKey); document.removeEventListener("keyup", docKeyUp); document.removeEventListener("paste", docPaste); hideTip(); cancelAnimationFrame(raf); closeMenu(); clearTimeout(Q.t); },
+    destroy() { S.dead = true; ro.disconnect(); closeStickers(); stkGhost?.remove(); if (offBodies) offBodies(); document.removeEventListener("keydown", docKey); document.removeEventListener("keyup", docKeyUp); document.removeEventListener("paste", docPaste); hideTip(); cancelAnimationFrame(raf); closeMenu(); clearTimeout(Q.t); },
   };
 }

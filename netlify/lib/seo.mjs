@@ -11,7 +11,8 @@ export function headHtml(P, { preview } = {}) {
   const url = SITE + (P.path === "/" ? "/" : P.path.replace(/\/$/, "")) ;
   const canon = P.notFound ? "" : url;
   const robots = P.noindex || preview || P.status !== 200 ? "noindex,follow" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
-  const img = abs(P.image);
+  // pictures stored on the site are given at their clean address (/u/...), which every share preview accepts
+  const img = abs(String(P.image || "").replace(/^\/api\/u\?f=([\w.-]+)$/, "/u/$1")), dims = P.sized && P.sized[P.image], ss = P.siteSeo || {};
   const t = [
     `<title>${esc(P.title)}</title>`,
     `<meta name="description" content="${esc(P.desc)}">`,
@@ -22,8 +23,11 @@ export function headHtml(P, { preview } = {}) {
     `<meta property="og:type" content="${P.type === "article" ? "article" : P.type === "profile" ? "profile" : "website"}">`,
     `<meta property="og:title" content="${esc(P.title)}"><meta property="og:description" content="${esc(P.desc)}">`,
     canon ? `<meta property="og:url" content="${esc(canon)}">` : "",
-    `<meta property="og:image" content="${esc(img)}">${P.imageAlt ? `<meta property="og:image:alt" content="${esc(P.imageAlt)}">` : ""}`,
-    `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(P.title)}"><meta name="twitter:description" content="${esc(P.desc)}"><meta name="twitter:image" content="${esc(img)}">`,
+    `<meta property="og:image" content="${esc(img)}">${/^https:/.test(img) ? `<meta property="og:image:secure_url" content="${esc(img)}">` : ""}${dims ? `<meta property="og:image:width" content="${dims[0]}"><meta property="og:image:height" content="${dims[1]}">` : ""}${/\.jpe?g$/i.test(img) ? '<meta property="og:image:type" content="image/jpeg">' : /\.png$/i.test(img) ? '<meta property="og:image:type" content="image/png">' : ""}${P.imageAlt ? `<meta property="og:image:alt" content="${esc(P.imageAlt)}">` : ""}`,
+    `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(P.title)}"><meta name="twitter:description" content="${esc(P.desc)}"><meta name="twitter:image" content="${esc(img)}">${P.imageAlt ? `<meta name="twitter:image:alt" content="${esc(P.imageAlt)}">` : ""}${ss.x ? `<meta name="twitter:site" content="@${esc(ss.x)}"><meta name="twitter:creator" content="@${esc(ss.x)}">` : ""}`,
+    // ownership checks for Google Search Console and Bing Webmaster Tools, set in Website settings
+    ss.google ? `<meta name="google-site-verification" content="${esc(ss.google)}">` : "",
+    ss.bing ? `<meta name="msvalidate.01" content="${esc(ss.bing)}">` : "",
     P.published ? `<meta property="article:published_time" content="${esc(P.published)}">` : "",
     P.modified ? `<meta property="article:modified_time" content="${esc(P.modified)}">` : "",
     P.section ? `<meta property="article:section" content="${esc(P.section)}">` : "",

@@ -821,7 +821,7 @@ button.lk:hover .lk-c{transform:translateX(3px)}
   .body h1{font-size:var(--fs-10)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-/* ===== Mochi the cat ===== */
+/* ===== OGGY the cat ===== */
 .cat .b-line,.cat .h-line,.cat .leg-line,.cat .t-o,.cat .whisk,.cat .stripe{display:none}
 .cat .ear-o,.cat .paw,.cat .leg,.cat .eye-w{stroke:none}
 .cat .b-fill,.cat .h-fill,.cat .ear-o,.cat .paw,.cat .leg,.cat .gray,.cat .leg.far{fill:#A9AFB9}.cat .t-b,.cat .t-s{stroke:#A9AFB9}
@@ -831,7 +831,7 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 #desk[data-cat="off"] #catGL{display:none!important}
 .cat.gl .cat-svg,.cat.gl .zzz{visibility:hidden}
 .cat.gl.p-sleep .zzz{visibility:visible}
-.cat{position:absolute;left:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:130px;height:130px;z-index:905;touch-action:none;cursor:pointer;will-change:transform;-webkit-tap-highlight-color:transparent}
+.cat{position:absolute;left:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:158px;height:158px;z-index:905;touch-action:none;cursor:pointer;will-change:transform;-webkit-tap-highlight-color:transparent}
 .cat.up{z-index:905}
 .cat.chatting{z-index:970}
 #desk[data-cat="off"] .cat,#desk[data-cat="off"] .jar{display:none}
@@ -1022,7 +1022,7 @@ html.dock-auto .cat-chat.sheet{bottom:calc(var(--kb,0px) + 40px + env(safe-area-
 @keyframes cat-twitch{40%{transform:rotate(14deg)}}
 @keyframes cat-zz{0%{opacity:0;transform:translate(0,0)}25%{opacity:.8}100%{opacity:0;transform:translate(-18px,-38px)}}
 @keyframes cat-heart{0%{opacity:0;transform:translate(-50%,0) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--hx,0px)),-54px) scale(1.2)}}
-@media (max-width:760px){.cat{width:96px;height:96px;bottom:92px}.jar{right:140px;bottom:96px;width:36px;height:44px}}
+@media (max-width:760px){.cat{width:112px;height:112px;bottom:92px}.jar{right:140px;bottom:96px;width:36px;height:44px}}
 @media (prefers-reduced-motion:reduce){.cat *{animation:none!important}}
 .avwrap.pop{height:auto!important;aspect-ratio:1555/2128}
 .avwrap.pop .avpop{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.10))}
@@ -1090,7 +1090,7 @@ button.dc-qr{position:relative;border:0;padding:0;cursor:zoom-in;box-shadow:0 0 
 .ct-play{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:var(--fs-1);padding-left:2px}
 .ct-card b{font-size:var(--fs-5);line-height:1.3;padding:0 calc(4 * var(--u))}.ct-card small{color:var(--ink2);padding:0 calc(4 * var(--u))}.ct-w{font-size:var(--fs-3);font-weight:var(--fw-b);color:var(--primary);padding:0 calc(4 * var(--u))}
 .ct-ch{margin-top:calc(16 * var(--u))}
-/* phone: auto-hiding dock + touch-friendly Mochi chat */
+/* phone: auto-hiding dock + touch-friendly OGGY chat */
 @media (max-width:760px){
   .launcher{display:flex;flex-direction:column;max-height:calc(100% - 160px);overflow:hidden}
   .launcher .lgrid{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;-webkit-overflow-scrolling:touch}
@@ -1222,29 +1222,39 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 @keyframes bt-up{from{transform:translateY(14px);opacity:0}}
 @keyframes bt-load{to{width:100%}}
 @media (prefers-reduced-motion:reduce){#boot{display:none}}
-/* ===== Mochi: black cat (flat) ===== */
-.cat .bc{--k:#141416;--eye:#F7C21B}
-:root[data-theme="dark"] .cat .bc{--k:#1D1D22}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc{--k:#1D1D22}}
+/* ===== OGGY: black cat (flat) ===== */
+/* OGGY: a round grey tabby (lighter belly and muzzle, darker stripes) */
+.cat .bc{--k:#8B9099;--k2:#E3E5E9;--k3:#6A6F78;--pu:#24272D;--eye:#F7C21B}
+:root[data-theme="dark"] .cat .bc{--k:#9297A0;--k2:#D9DCE1;--k3:#70757E}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc{--k:#9297A0;--k2:#D9DCE1;--k3:#70757E}}
+.cat .bc .k-belly,.cat .bc .k-muz{fill:var(--k2)}
+.cat .bc .k-stripe{fill:none;stroke:var(--k3);stroke-width:4.5;stroke-linecap:round}
+.cat .bc .k-earin{fill:#F2B8C0;opacity:.85}
+.cat .bc .k-paw{fill:none;stroke:var(--k3);stroke-width:2.5;stroke-linecap:round;opacity:.6}
+.cat .bc .k-tailr{fill:none;stroke:var(--k3);stroke-width:4;stroke-linecap:round}
+.cat .bc .k-nose{fill:#E8828F;stroke:#E8828F;stroke-width:2;stroke-linejoin:round}
+.cat .bc .k-whisk{fill:none;stroke:#FFFFFF;stroke-width:1.6;stroke-linecap:round;opacity:.75}
+.cat .bc .k-arm .k-fill{stroke:var(--k3);stroke-width:2.2;stroke-opacity:.45}
+.cat.p-sleep .bc .k-belly{transform:scale(.7,.5);transform-origin:100px 160px;opacity:.7}
 :root[data-theme="dark"] .cat .bc .k-all{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08))}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc .k-all{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08))}}
 .cat .bc *{transform-box:view-box}
 .cat .bc .k-fill{fill:var(--k)}
-.cat .bc .k-tailp{fill:none;stroke:var(--k);stroke-width:13;stroke-linecap:round}
-.cat .bc .k-shadow{fill:rgba(0,0,0,.2);transform-origin:100px 191px;transition:transform var(--d-3),opacity var(--d-3)}
-.cat .bc .k-iris{fill:var(--eye)}.cat .bc .k-pupil{fill:var(--k)}.cat .bc .k-hl{fill:#FFE8A0;opacity:.8}
+.cat .bc .k-tailp{fill:none;stroke:var(--k);stroke-width:16;stroke-linecap:round}
+.cat .bc .k-shadow{fill:rgba(0,0,0,.2);transform-origin:100px 192px;transition:transform var(--d-3),opacity var(--d-3)}
+.cat .bc .k-iris{fill:var(--eye)}.cat .bc .k-pupil{fill:var(--pu)}.cat .bc .k-hl{fill:#FFE8A0;opacity:.8}
 .cat .bc .k-lid{fill:var(--k);transform:translateY(-34px);transition:transform var(--d-2)}
-.cat .bc .k-shut path,.cat .bc .k-joy path{fill:none;stroke:var(--eye);stroke-width:6;stroke-linecap:round}
+.cat .bc .k-shut path,.cat .bc .k-joy path{fill:none;stroke:var(--pu);stroke-width:5;stroke-linecap:round}
 .cat .bc .k-shut,.cat .bc .k-joy,.cat .bc .k-mouth,.cat .bc .k-tongue{display:none}
-.cat .bc .k-mouth{fill:#FF7C8C;transform-origin:101px 103px}.cat .bc .k-tongue{fill:#FFB3BE}
+.cat .bc .k-mouth{fill:#FF7C8C;transform-origin:101px 107px}.cat .bc .k-tongue{fill:#FFB3BE}
 .cat .bc .k-all{transform-origin:100px 190px}
 .cat .bc .k-head{transform-origin:100px 118px;transition:transform var(--d-3) var(--ease-spring)}
 .cat .bc .k-body{transform-origin:100px 170px;transition:transform var(--d-3)}
-.cat .bc .k-arml{transform-origin:72px 112px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .bc .k-armr{transform-origin:128px 112px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .bc .k-legl{transform-origin:86px 150px;transition:transform var(--d-3)}.cat .bc .k-legr{transform-origin:114px 150px;transition:transform var(--d-3)}
-.cat .bc .k-tail{transform-origin:124px 168px;transition:transform var(--d-3)}
-.cat .bc .k-earl{transform-origin:78px 40px;transition:transform var(--d-3)}.cat .bc .k-earr{transform-origin:128px 38px;transition:transform var(--d-3)}
+.cat .bc .k-arml{transform-origin:68px 116px;transition:transform var(--d-3) var(--ease-spring)}
+.cat .bc .k-armr{transform-origin:132px 116px;transition:transform var(--d-3) var(--ease-spring)}
+.cat .bc .k-legl{transform-origin:82px 160px;transition:transform var(--d-3)}.cat .bc .k-legr{transform-origin:118px 160px;transition:transform var(--d-3)}
+.cat .bc .k-tail{transform-origin:140px 170px;transition:transform var(--d-3)}
+.cat .bc .k-earl{transform-origin:76px 42px;transition:transform var(--d-3)}.cat .bc .k-earr{transform-origin:130px 38px;transition:transform var(--d-3)}
 .cat .bc .k-eyes{transform-origin:100px 76px;transition:transform var(--d-1)}
 .cat .bc .k-pupil,.cat .bc .k-hl{transform:translate(var(--px,0px),var(--py,0px));transition:transform var(--d-2) ease-out}
 .cat .bc .k-pupil{transform-box:fill-box;transform-origin:center}
@@ -1371,39 +1381,43 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
     <div class="lgrid" id="lGrid"></div>
   </div>
   <nav class="shelf" id="shelf" aria-label="Shelf"></nav>
-  <div class="cat p-sleep" id="cat" aria-label="Mochi the cat" role="img">
+  <div class="cat p-sleep" id="cat" aria-label="OGGY the cat" role="img">
     <div class="cat-bubble" id="catBub"></div>
     <div class="cat-chat" id="catChat" hidden><button class="cc-x" aria-label="Close chat">×</button><p class="cc-msg"></p><div class="cc-ui"></div></div>
-    <button class="cat-talk" id="catTalk" aria-label="Talk to Mochi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
-    <svg class="cat-svg bc" viewBox="0 0 200 200" aria-hidden="true"><defs><clipPath id="kEyeClip"><ellipse cx="78" cy="74" rx="21" ry="24"/><ellipse cx="123" cy="76" rx="22" ry="25"/></clipPath></defs>
-      <ellipse class="k-shadow" cx="100" cy="191" rx="54" ry="5.5"/>
+    <button class="cat-talk" id="catTalk" aria-label="Talk to OGGY"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+    <svg class="cat-svg bc" viewBox="0 0 200 200" aria-hidden="true"><defs><clipPath id="kEyeClip"><ellipse cx="77" cy="75" rx="20" ry="22"/><ellipse cx="124" cy="76" rx="21" ry="23"/></clipPath></defs>
+      <ellipse class="k-shadow" cx="100" cy="192" rx="64" ry="6"/>
       <g class="k-all">
-        <g class="k-tail"><path class="k-tailp" d="M124 168c24 2 40-8 42-26 1-9-4-16-10-16"/></g>
-        <g class="k-leg k-legl"><path class="k-fill" d="M74 146h24v36a8 8 0 0 1-8 8h-10a6 6 0 0 1-6-6z"/></g>
-        <g class="k-leg k-legr"><path class="k-fill" d="M102 146h24v38a6 6 0 0 1-6 6h-10a8 8 0 0 1-8-8z"/></g>
-        <g class="k-body"><path class="k-fill" d="M70 112c0-8 8-12 30-12s30 4 30 12l4 44c1 12-10 18-34 18s-35-6-34-18z"/></g>
+        <g class="k-tail"><path class="k-tailp" d="M140 170c26 2 42-9 44-27 1-9-4-16-10-16"/><path class="k-tailr" d="M171 136l6 3M176 148l6 1"/></g>
+        <g class="k-leg k-legl"><path class="k-fill" d="M68 158h28v26a7 7 0 0 1-7 7H75a7 7 0 0 1-7-7z"/><path class="k-paw" d="M70 186h24"/></g>
+        <g class="k-leg k-legr"><path class="k-fill" d="M104 158h28v26a7 7 0 0 1-7 7h-14a7 7 0 0 1-7-7z"/><path class="k-paw" d="M106 186h24"/></g>
+        <g class="k-body"><path class="k-fill" d="M54 118c0-13 19-20 46-20s46 7 46 20l6 34c3 22-19 32-52 32s-55-10-52-32z"/><ellipse class="k-belly" cx="100" cy="150" rx="27" ry="23"/><path class="k-stripe" d="M57 136q8 2 13 8M143 136q-8 2-13 8M55 152q8 1 12 6M145 152q-8 1-12 6"/></g>
         <g class="k-head">
-          <g class="k-ear k-earl"><path class="k-fill" d="M58 58c-2-18 4-38 12-48 3-4 8-3 11 1l17 24z"/></g>
-          <g class="k-ear k-earr"><path class="k-fill" d="M112 32l26-20c4-3 9-1 10 4 3 14 2 32-4 46z"/></g>
-          <path class="k-fill" d="M100 26c34 0 54 20 54 50 0 30-22 46-54 46S46 106 46 76c0-30 20-50 54-50z"/>
+          <g class="k-ear k-earl"><path class="k-fill" d="M54 60c-3-18 3-38 11-48 3-4 8-3 11 1l19 25z"/><path class="k-earin" d="M62 46c0-10 3-20 7-26l11 16z"/></g>
+          <g class="k-ear k-earr"><path class="k-fill" d="M110 32l27-20c4-3 9-1 10 4 3 14 3 32-3 47z"/><path class="k-earin" d="M122 33l15-11c2 8 2 17-1 25z"/></g>
+          <path class="k-fill" d="M100 26c38 0 61 21 61 51 0 31-24 47-61 47S39 108 39 77c0-30 23-51 61-51z"/>
+          <path class="k-stripe" d="M88 31l3 12M100 29v13M112 31l-3 12"/>
+          <ellipse class="k-muz" cx="101" cy="103" rx="22" ry="14"/>
           <g class="k-eyes">
-            <g class="k-eye k-eyel"><ellipse class="k-iris" cx="78" cy="74" rx="21" ry="24"/><ellipse class="k-pupil" cx="80" cy="75" rx="6" ry="15"/><ellipse class="k-hl" cx="70" cy="63" rx="4.5" ry="3.5"/></g>
-            <g class="k-eye k-eyer"><ellipse class="k-iris" cx="123" cy="76" rx="22" ry="25"/><ellipse class="k-pupil" cx="125" cy="77" rx="6.2" ry="15.5"/><ellipse class="k-hl" cx="114" cy="64" rx="4.5" ry="3.5"/></g>
-            <g clip-path="url(#kEyeClip)"><path class="k-lid" d="M54 44h94v30c-12-10-30-14-47-8-18-6-35-2-47 8z"/></g>
+            <g class="k-eye k-eyel"><ellipse class="k-iris" cx="77" cy="75" rx="20" ry="22"/><ellipse class="k-pupil" cx="79" cy="76" rx="6" ry="14"/><ellipse class="k-hl" cx="70" cy="65" rx="4.5" ry="3.5"/></g>
+            <g class="k-eye k-eyer"><ellipse class="k-iris" cx="124" cy="76" rx="21" ry="23"/><ellipse class="k-pupil" cx="126" cy="77" rx="6.2" ry="14.5"/><ellipse class="k-hl" cx="116" cy="66" rx="4.5" ry="3.5"/></g>
+            <g clip-path="url(#kEyeClip)"><path class="k-lid" d="M52 44h98v30c-12-10-30-14-48-8-18-6-36-2-50 8z"/></g>
           </g>
-          <g class="k-shut"><path d="M60 78q18 12 36 0M104 80q19 12 38 0"/></g>
-          <g class="k-joy"><path d="M60 84q18-18 36 0M104 86q19-18 38 0"/></g>
-          <ellipse class="k-mouth" cx="101" cy="103" rx="7" ry="6"/>
-          <ellipse class="k-tongue" cx="101" cy="104" rx="4" ry="3"/>
+          <g class="k-shut"><path d="M60 80q17 11 34 0M106 81q18 11 36 0"/></g>
+          <g class="k-joy"><path d="M60 86q17-17 34 0M106 87q18-17 36 0"/></g>
+          <path class="k-nose" d="M96 96h10l-5 5z"/>
+          <path class="k-whisk" d="M76 101l-24-4M76 106l-24 3M126 101l24-4M126 106l24 3"/>
+          <ellipse class="k-mouth" cx="101" cy="107" rx="7" ry="6"/>
+          <ellipse class="k-tongue" cx="101" cy="108" rx="4" ry="3"/>
         </g>
-        <g class="k-arm k-arml"><path class="k-fill" d="M74 110c-8 2-12 10-14 22l-3 22c-1 8 3 12 8 12s8-4 9-11l4-26z"/></g>
-        <g class="k-arm k-armr"><path class="k-fill" d="M126 110c8 2 12 10 14 22l3 22c1 8-3 12-8 12s-8-4-9-11l-4-26z"/></g>
+        <g class="k-arm k-arml"><path class="k-fill" d="M68 116c-9 2-14 10-16 22l-2 18c-1 8 3 12 8 12s9-4 10-11l5-24z"/></g>
+        <g class="k-arm k-armr"><path class="k-fill" d="M132 116c9 2 14 10 16 22l2 18c1 8-3 12-8 12s-9-4-10-11l-5-24z"/></g>
       </g>
     </svg>
     <div class="zzz"><span>z</span><span>z</span><span>Z</span></div>
   </div>
-  <button class="jar" id="catJar" aria-label="Cat treats. Drag a treat out to feed Mochi.">
-    <span class="tip" id="jarTip">Drag a treat to Mochi</span>
+  <button class="jar" id="catJar" aria-label="Cat treats. Drag a treat out to feed OGGY.">
+    <span class="tip" id="jarTip">Drag a treat to OGGY</span>
     <svg viewBox="0 0 46 56" aria-hidden="true">
       <ellipse cx="23" cy="54" rx="17" ry="2.5" fill="rgba(0,0,0,.12)"/>
       <rect x="6" y="14" width="34" height="40" rx="10" fill="#DDEBF2" fill-opacity=".85"/>
@@ -2557,7 +2571,7 @@ function calculator(body){
 /* ============ Timeline: now, next, done ============ */
 /* Edit freely. status: "now" | "next" | "done". progress (0-100) is for "now" items. Journal articles are added to "Done" automatically. */
 const TIMELINE=[
-  {status:"now",title:"Building my portfolio desktop",detail:"This site: an interactive desktop with a journal, messages, and Mochi the cat.",progress:85,tag:"Website",date:"Sep 2026"},
+  {status:"now",title:"Building my portfolio desktop",detail:"This site: an interactive desktop with a journal, messages, and OGGY the cat.",progress:85,tag:"Website",date:"Sep 2026"},
   {status:"now",title:"Brand identity project",detail:"Details coming soon.",progress:40,tag:"Branding",date:"Sep 2026"},
   {status:"next",title:"Next journal article",detail:"More thoughts on branding and design.",tag:"Writing",date:"Oct 2026"},
   {status:"next",title:"Moving this site to my own domain",detail:"So everyone can sign the guestbook and message me directly.",tag:"Website",date:"Soon"},
@@ -2829,7 +2843,7 @@ const ART={
 const MS=(()=>{try{return JSON.parse(localStorage.getItem('rkMessages')||'null')||{}}catch(e){return{}}})();MS.items=MS.items||[];
 const saveMS=()=>{try{localStorage.setItem('rkMessages',JSON.stringify(MS))}catch(e){}};
 const EMAIL_RE=/[^\s@]+@[^\s@]+\.[^\s@]{2,}/;
-/* Visitor messages are sent to the same /api/mochi inbox Mochi uses, so they work for everyone on the live site. */
+/* Visitor messages are sent to the same /api/mochi inbox OGGY uses, so they work for everyone on the live site. */
 async function sendMS(q,a){const v=visitor();if(!v.id)return;
   try{await fetch('/api/mochi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:v.id,name:v.name||'',q,a:String(a).slice(0,500)})})}catch(e){}}
 function msgTime(t){return new Date(t).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
@@ -2897,7 +2911,7 @@ function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
   body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
-  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Mochi's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold Mochi or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
+  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>OGGY the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>OGGY's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold OGGY or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
   if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
   body.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('rkTapMin',b.dataset.tm==='on'?'1':'0')}catch(e){}settings(body)});
@@ -3197,6 +3211,8 @@ async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'}
 async function siteInit(){await Promise.all([liveAuth(),siteLoad()]);applyText();applyHidden();ownerChanged();window.__musicRefresh&&__musicRefresh()}
 /* Runs whenever the owner signs in or out: pill in the top bar, hidden apps shown dimmed or removed. */
 function ownerChanged(){
+  /* OGGY's own life (antics) runs only for the owner; visitors keep the calm cat and never download it */
+  if(LIVE.admin)import('/js/oggy.mjs').then(m=>m.start()).catch(()=>{});else if(window.OGGY_LIFE)OGGY_LIFE.stop();
   window.__ownerEditUI&&__ownerEditUI();
   let p=document.getElementById('ownPill');
   if(LIVE.admin){if(!p){p=document.createElement('button');p.id='ownPill';p.className='pill topbtn ownpill';p.innerHTML='<i></i>Owner mode';p.title='Open System Settings';p.onclick=()=>openApp('settings');const tb=document.querySelector('.topbar');tb.insertBefore(p,tb.lastElementChild)}}
@@ -3226,7 +3242,7 @@ function ownerPanel(body){
   <h3>Where each app lives</h3><p class="hint">Desktop shows the app on the desktop and in the app drawer. Drawer keeps it only in the drawer. Hidden removes it for visitors (you still see it, dimmed).</p>
   <div class="ow-places">${APPS.map(a=>{const hide=hid.has(a.id),can=!NEVER_HIDE.includes(a.id),pl=hide?'hidden':appPlace(a);return `<div class="ow-pl" data-app="${a.id}"><span class="ow-pln">${icon(a)}<b>${esc(a.title)}</b></span><div class="seg" role="group" aria-label="${esc(a.title)} placement">${['desktop','drawer'].concat(can?['hidden']:[]).map(k=>`<button data-pl="${k}" class="${pl===k?'on':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`}).join('')}</div>
   <h3>Guestbook</h3><label class="ow-app"><input type="checkbox" id="gbAuto" ${SITE.s&&SITE.s.gbAuto?'checked':''}><span>Publish notes right away (otherwise each note waits for your approval)</span></label>
-  <h3>Mochi's inbox</h3><p class="hint">What visitors tell Mochi: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
+  <h3>OGGY's inbox</h3><p class="hint">What visitors tell OGGY: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
   <div class="ow-row"><button class="btn tonal ow-out">Sign out</button></div>`;
   body.appendChild(sec);
   const cur=()=>{if(!SITE.s)SITE.s={hiddenApps:[]};return SITE.s};
@@ -3240,11 +3256,11 @@ function ownerPanel(body){
   sec.querySelector('.ow-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';SITE.status='';ownerChanged();refreshNotes()}}
 
 
-/* ===== Mochi's inbox (owner only; the server checks the sign-in on every request) ===== */
+/* ===== OGGY's inbox (owner only; the server checks the sign-in on every request) ===== */
 async function mochiInbox(body){
-  body.innerHTML='<div class="ed"><h1>Mochi\'s inbox</h1><p class="nt-hint">Loading…</p></div>';
+  body.innerHTML='<div class="ed"><h1>OGGY\'s inbox</h1><p class="nt-hint">Loading…</p></div>';
   let d=null;try{const r=await fetch('/api/mochi',{cache:'no-store'});if(r.status===401){LIVE.admin=false;ownerChanged();return}if(r.ok)d=await r.json()}catch(e){}
-  if(!d){body.innerHTML='<div class="ed"><button class="dc-back">'+LI_('chevron-left',16)+'Settings</button><h1>Mochi\'s inbox</h1><p class="hint">Could not load the inbox. Try again shortly.</p></div>';body.querySelector('.dc-back').onclick=()=>settings(body);return}
+  if(!d){body.innerHTML='<div class="ed"><button class="dc-back">'+LI_('chevron-left',16)+'Settings</button><h1>OGGY\'s inbox</h1><p class="hint">Could not load the inbox. Try again shortly.</p></div>';body.querySelector('.dc-back').onclick=()=>settings(body);return}
   let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}
   const KEY=new Set(['message','question-for-rohan']);
   const when=t=>t?new Date(t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'';
@@ -3254,11 +3270,11 @@ async function mochiInbox(body){
       ${imp.map(a=>`<p class="mi-m"><small>${esc(a.q)}</small>${esc(a.a)}</p>`).join('')}
       ${rest.length?`<details><summary>${rest.length} other answer${rest.length===1?'':'s'}</summary>${rest.map(a=>`<p class="mi-o"><small>${esc(a.q)}</small>${esc(a.a)}</p>`).join('')}</details>`:''}
       <div class="ed-ctl"><button type="button" class="ed-del mi-del">Delete</button></div></div>`};
-  body.innerHTML=`<div class="ed"><button class="dc-back">${LI_('chevron-left',16)}Settings</button><h1>Mochi's inbox</h1><p class="ow-top"><small>${d.visitors.length} visitor${d.visitors.length===1?'':'s'}, newest first.</small></p>${d.visitors.length?d.visitors.map(card).join(''):'<p class="hint">Nothing yet. When a visitor chats with Mochi, it shows up here.</p>'}</div>`;
+  body.innerHTML=`<div class="ed"><button class="dc-back">${LI_('chevron-left',16)}Settings</button><h1>OGGY's inbox</h1><p class="ow-top"><small>${d.visitors.length} visitor${d.visitors.length===1?'':'s'}, newest first.</small></p>${d.visitors.length?d.visitors.map(card).join(''):'<p class="hint">Nothing yet. When a visitor chats with OGGY, it shows up here.</p>'}</div>`;
   body.scrollTop=0;
   try{localStorage.setItem('mochiSeen',String(Math.max(0,...d.visitors.map(v=>v.updated||0))||Date.now()))}catch(e){}
   body.querySelector('.dc-back').onclick=()=>settings(body);
-  body.querySelectorAll('.mi-del').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this visitor and everything they told Mochi?'))return;const c=b.closest('.mi-card');
+  body.querySelectorAll('.mi-del').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this visitor and everything they told OGGY?'))return;const c=b.closest('.mi-card');
     try{const r=await fetch('/api/mochi?vid='+encodeURIComponent(c.dataset.v),{method:'DELETE'});if(r.ok)c.remove()}catch(e){}})}
 
 /* ===== Owner mode (stage 2): edit About me, Resume, Contact and Links in place ===== */
@@ -3492,7 +3508,9 @@ function resize(w){
     const end=()=>{st=null;w.classList.remove('resizing')};h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
   });
 }
-function focus(w){document.querySelectorAll('.win').forEach(x=>x.classList.remove('top'));w.style.zIndex=++z;w.classList.add('top')}
+// window stacking: a click on the window already on top changes nothing, and the numbers are packed down again long before
+// they could rise above the dock (900), editor toolbars (3050) or menus, which used to vanish behind windows in long sessions
+function focus(w){if(w.classList.contains('top')&&+w.style.zIndex===z)return;document.querySelectorAll('.win').forEach(x=>x.classList.remove('top'));w.style.zIndex=++z;w.classList.add('top');if(z>600){z=10;[...document.querySelectorAll('.win')].sort((a,b)=>(+a.style.zIndex||0)-(+b.style.zIndex||0)).forEach(x=>{x.style.zIndex=++z})}}
 function drag(w){
   const bar=w.querySelector('.bar');let sx,sy,ox,oy,on=false;
   bar.addEventListener('pointerdown',e=>{if(e.target.closest('button')||w.classList.contains('max')||mobile())return;
@@ -3514,7 +3532,7 @@ function showCtx(x,y,custom){SFX.play('tap');
   const items=custom||[["Open About me",()=>openApp('about')],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
     [isDark()?"Switch to light mode":"Switch to dark mode",()=>{document.documentElement.dataset.theme=isDark()?"light":"dark";save()}],
     ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],
-    ...(desk.dataset.cat==="off"?[["Bring Mochi back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake Mochi gently",()=>MOCHI.wake()]]:[["Talk to Mochi",()=>MOCHI.talk()],["Let Mochi nap",()=>MOCHI.sleep()]]),
+    ...(desk.dataset.cat==="off"?[["Bring OGGY back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake OGGY gently",()=>MOCHI.wake()]]:[["Talk to OGGY",()=>MOCHI.talk()],["Let OGGY nap",()=>MOCHI.sleep()]]),
     ...(desk.dataset.status==="off"?[["Show status widget",()=>{desk.dataset.status="on";save()}]]:[]),
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
     ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),...(window.__tileDesktop?__tileDesktop():[]),
@@ -3578,7 +3596,7 @@ function ctxItemsFor(e){
   if(el.closest('.topbar')){const clickBtn=sel=>()=>{const b=document.querySelector(sel);b&&b.click()};
     return[["Quick settings",()=>stBtn.click()],["Open apps",toggleLauncher],...(document.getElementById('tabsBtn')?[["All open windows",clickBtn('#tabsBtn')]]:[]),["Search",clickBtn('.topbar [aria-label="Search"], .topbar [aria-label^="Search"]')],null,["Lock screen",lock],...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[])]}
   if(el.closest('#shelf,.shelf,.dock-handle'))return dockMenu();
-  if(el.closest('.cat,#cat'))return window.MOCHI?[window.MOCHI.asleep()?["Wake Mochi gently",()=>MOCHI.wake()]:["Talk to Mochi",()=>MOCHI.talk()],...(window.MOCHI.asleep()?[]:[["Let Mochi nap",()=>MOCHI.sleep()]]),["Hide Mochi",()=>{desk.dataset.cat="off";save()}]]:[];
+  if(el.closest('.cat,#cat'))return window.MOCHI?[window.MOCHI.asleep()?["Wake OGGY gently",()=>MOCHI.wake()]:["Talk to OGGY",()=>MOCHI.talk()],...(window.MOCHI.asleep()?[]:[["Let OGGY nap",()=>MOCHI.sleep()]]),...(LIVE.admin&&window.OGGY_LIFE?[[OGGY_LIFE.quiet()?"Let OGGY be himself again":"Shoo OGGY for an hour",()=>OGGY_LIFE.toggleQuiet()]]:[]),["Hide OGGY",()=>{desk.dataset.cat="off";save()}]]:[];
   if(el.closest('.mw,#musicW'))return(window.musicCtx&&window.musicCtx())||[["Hide the music widget",()=>{desk.dataset.music="off";save()}]];
   if(el.closest('#wStatus,.statusw,.wstatus,[data-w=status]'))return[["Hide the status widget",()=>{desk.dataset.status="off";save()}],...(LIVE.admin?[["Edit status in Settings",()=>openApp('settings')]]:[])];
   if(el.closest('.widgets'))return[...(LIVE.admin&&el.closest('.wcard.st')?[["Edit this card…",()=>window.__editStatus&&__editStatus()],null]:[]),["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],["Settings",()=>openApp('settings')]];
@@ -3872,8 +3890,8 @@ const iconDrag={suppress:false};
   g.addEventListener('contextmenu',e=>{if(st&&st.touch)e.preventDefault()});
 })();
 renderIcons();
-/* ============ Mochi the cat ============ */
-/* Edit Mochi's answers about Rohan here. */
+/* ============ OGGY the cat ============ */
+/* Edit OGGY's answers about Rohan here. */
 const MOCHI_TALK={
   who:"That's Rohan Kumar, a brand designer. Also my personal chef. Top human.",
   boss:"Honestly? Great boss. Feeds me on time, never rushes good work, and actually listens. I'd nap on his keyboard again.",
@@ -3882,7 +3900,7 @@ const MOCHI_TALK={
   contact:"Easiest way is to book a call. Or leave your email with me and I'll make sure he sees it.",
   price:"Depends on the project, so he'll give you a straight answer on a call. No bullsh*t, that's his rule.",
   ai:"He uses AI as a tool, not a replacement. His words. I mostly use it to find treats.",
-  cat:"Me? I'm Mochi. I guard the dock, judge fonts, and accept treats.",
+  cat:"Me? I'm OGGY. I guard the dock, judge fonts, and accept treats.",
   unknown:"Hmm, I'm just a cat. But Rohan would know! Want me to pass your question to him?"
 };
 (()=>{
@@ -3964,7 +3982,7 @@ function wake(reason){if(C.pose!=='sleep')return;C.awakeSince=now();pose('sit');
   if(reason==='natural'){pose('stretch');mood('blink',0);say(pick(['*streeetch*','mrrrp…']),1400);later(()=>{if(C.pose==='stretch'){mood('',0);pose('sit')}},1700)}
   else{mood('blink',250);say(pick(['mrrp?','…hm?']),1300)}}
 function goSleep(){closeChat(true);mood('yawn',1400);say('*yawn*',1400);
-  later(()=>{if(C.drag||C.busy)return;mood('',0);const settle=()=>{C.dir=-1;pose('sleep');C.sleepUntil=now()+rand(45000,90000)};
+  later(()=>{if(C.drag||C.busy)return;mood('',0);const settle=()=>{C.dir=-1;pose('sleep');C.sleepUntil=now()+(LIVE.admin?rand(90000,260000):rand(45000,90000))};
     if(C.free){settle();return}
     if(C.y>2)jumpTo(dockR().right+10,0,()=>walkTo(home(),80,'walk',settle));else if(Math.abs(C.x-home())>6)walkTo(home(),80,'walk',settle);else settle()},1500)}
 function poke(){C.lastPoke=now();C.lastAct=now();if(C.busy||C.drag||C.jump)return;
@@ -4017,15 +4035,16 @@ desk.addEventListener('scroll',()=>{if(desk.scrollLeft||desk.scrollTop){desk.scr
 })();
 
 
-/* ---------- cat things she does on her own ---------- */
+/* ---------- cat things he does on his own ---------- */
 function activity(){
   if(desk.dataset.cat==='off'||C.drag||C.busy||C.chat||C.jump||!awake()||!['sit'].includes(C.pose))return;
   const n=now(),r=dockR(),canDock=!small()&&r.width>0,canSit=canDock&&r.width>W()+30;
   if(C.free)return;
   if(C.y>2){C.busy=true;const down=r.right+8<innerWidth-W()?r.right+8:r.left-W()-8;say(pick(['hup!','*thud*']),900);jumpTo(down,0,()=>{C.busy=false},36);return}
   if(n-C.lastAct>30000&&n-C.awakeSince>60000){goSleep();return}
+  if(window.OGGY_LIFE&&OGGY_LIFE.turn())return; /* owner mode: now and then he does something of his own */
   const roll=Math.random();C.busy=true;const done=()=>{C.busy=false;if(!C.jump&&!MOVING.has(C.pose))pose('sit');paint()};
-  if(catPos()!=='roam'&&(roll<.28||roll>.54)){done();return} /* parked in a corner: she only grooms and stretches */
+  if(catPos()!=='roam'&&(roll<.28||roll>.54)){done();return} /* parked in a corner: he only grooms and stretches */
   if(roll<.28){walkTo(rand(innerWidth*.3,home()),rand(70,95),'walk',()=>{pose('sit');done()})}
   else if(roll<.44){pose('groom');if(Math.random()<.5)say('*lick lick*',1200);later(()=>{pose('sit');done()},rand(2600,4200))}
   else if(roll<.54){pose('stretch');mood('blink',0);later(()=>{mood('',0);done()},1700)}
@@ -4040,7 +4059,7 @@ function activity(){
 /* ---------- treats (and getting full) ---------- */
 function groundY(){return innerHeight-baseB()-12}
 function moveTreat(x,y){if(C.treat){C.treat.style.left=x+'px';C.treat.style.top=y+'px'}}
-function updJar(){jar.classList.toggle('full',full());jarTip.textContent=full()?'Mochi is full for now':'Drag a treat to Mochi. Hold to move me.'}
+function updJar(){jar.classList.toggle('full',full());jarTip.textContent=full()?'OGGY is full for now':'Drag a treat to OGGY. Hold to move me.'}
 updJar();setInterval(updJar,5000);
 function jarDown(e){if(C.free){C.free=false;saveFree()}if(C.treat||desk.dataset.cat==='off')return;
   C.drag=true;C.handT=0;C.lastTreat=now();closeChat(true);jar.classList.add('open');
@@ -4144,12 +4163,12 @@ function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
   if(!ui.inputLast)addChips();
 }
 const moreChip={t:'Ask me about Rohan',fn:()=>askMenu()};
-const byeChip={t:'Bye, Mochi',fn:()=>closeChat()};
+const byeChip={t:'Bye, OGGY',fn:()=>closeChat()};
 function book(){window.open(P.booking,'_blank','noopener');record('action','opened booking link')}
 function askEmail(q){openChat(`Leave your email and I’ll make sure Rohan sees it${nm()}. Only he will read it.`,{input:{type:'email',ph:'you@example.com',max:120,done:v=>{record(q||'email',v);V.email=v;saveV();trust(.5);openChat('Got it! I’ll put it right on his keyboard. Where he can’t miss it.',{chips:[moreChip,byeChip]})}},chips:[{t:'Never mind',fn:()=>closeChat()}]})}
 /* scripted questions she asks over time */
 const STAGES=[
-  ()=>openChat("psst… hi! I’m <b>Mochi</b>. What’s your name?",{input:{ph:'Your name',max:40,done:v=>{V.name=v.slice(0,40);V.stage=1;saveV();record('name',V.name);trust(.5);hearts(2);
+  ()=>openChat("psst… hi! I’m <b>OGGY</b>. What’s your name?",{input:{ph:'Your name',max:40,done:v=>{V.name=v.slice(0,40);V.stage=1;saveV();record('name',V.name);trust(.5);hearts(2);
       openChat(`Nice to meet you, <b>${esc(V.name)}</b>! I’ll remember you.`,{chips:[{t:'Nice to meet you too',fn:()=>closeChat()},moreChip]})}},
     chips:[{t:'I’d rather not say',fn:()=>{V.stage=1;V.name='';saveV();record('name','(skipped)');openChat("That’s okay. Mysterious. I respect that.",{chips:[byeChip]})}}]}),
   ()=>openChat(`So${nm()}… what brings you here?`,{chips:[
@@ -4158,7 +4177,7 @@ const STAGES=[
       {t:'Reading the journal',fn:()=>{record('reason','journal');openChat('Good taste. The goodwill one is my favourite. Mostly because I nap on it.',{chips:[byeChip]})}},
       {t:'Something else',fn:()=>openChat('Tell me! I won’t judge. Much.',{input:{ph:'What brings you here?',done:v=>{record('reason',v);openChat('Noted! I’ll tell Rohan.',{chips:[moreChip,byeChip]})}}})}]}),
   ()=>openChat(`Hey${nm()}, where are you visiting from?`,{input:{ph:'City or country',max:60,done:v=>{record('location',v);openChat(`${esc(v)}! Never been. I’ve only been to the bottom of this screen.`,{chips:[byeChip]})}},chips:[{t:'Skip',fn:()=>closeChat()}]}),
-  ()=>openChat('Can I ask… how did you find Rohan?',{chips:['LinkedIn','Reddit','Instagram','A friend'].map(s=>({t:s,fn:()=>{record('source',s);openChat(s==='A friend'?'Tell your friend Mochi says hi.':`${s}! He’s always posting there. I prefer napping.`,{chips:[byeChip]})}})).concat([{t:'Other',fn:()=>openChat('Where from?',{input:{ph:'How did you find him?',done:v=>{record('source',v);openChat('Interesting! Noted.',{chips:[byeChip]})}}})}])}),
+  ()=>openChat('Can I ask… how did you find Rohan?',{chips:['LinkedIn','Reddit','Instagram','A friend'].map(s=>({t:s,fn:()=>{record('source',s);openChat(s==='A friend'?'Tell your friend OGGY says hi.':`${s}! He’s always posting there. I prefer napping.`,{chips:[byeChip]})}})).concat([{t:'Other',fn:()=>openChat('Where from?',{input:{ph:'How did you find him?',done:v=>{record('source',v);openChat('Interesting! Noted.',{chips:[byeChip]})}}})}])}),
   ()=>openChat(`Last one${nm()}: anything you’d like me to tell Rohan? Feedback, ideas, a hello?`,{input:{ph:'Your message',max:400,done:v=>{record('message',v);hearts(3);openChat('Delivered. Well, it will be when he wakes up from his nap.',{chips:[moreChip,byeChip]})}},chips:[{t:'Not now',fn:()=>closeChat()}]})
 ];
 function maybeTalk(){
@@ -4173,7 +4192,7 @@ function maybeTalk(){
   const s=V.stage;V.stage++;saveV();STAGES[s]();
 }
 
-/* ---------- move Mochi and the treat jar: press and hold for half a second, then drag anywhere ---------- */
+/* ---------- move OGGY and the treat jar: press and hold for half a second, then drag anywhere ---------- */
 const HOLD=450;
 const saveFree=()=>{try{if(C.free)localStorage.setItem('catFree',JSON.stringify({fx:C.fx,fy:C.fy}));else localStorage.removeItem('catFree')}catch(e){}};
 const saveJar=p=>{try{p?localStorage.setItem('jarPos',JSON.stringify(p)):localStorage.removeItem('jarPos')}catch(e){}};
@@ -4193,7 +4212,7 @@ function holdToCarry(el,{onStart,onMove,onEnd,onTap,shouldIgnore}){
   el.addEventListener('pointerup',up,true);el.addEventListener('pointercancel',up,true);
   el.addEventListener('contextmenu',e=>{if(st&&st.carry)e.preventDefault()});
   return ()=>st&&st.carry}
-/* Mochi */
+/* OGGY */
 const carryingCat=holdToCarry(cat,{
   shouldIgnore:e=>!!e.target.closest('.cat-chat,.cat-talk'),
   onTap(){poke()},
@@ -4237,7 +4256,7 @@ function classify(q){const s=q.toLowerCase();
   if(/\bai\b|chatgpt|claude|midjourney|artificial/.test(s))return'ai';
   if(/logo|brand|identity|design|name|naming|what does|service|do you do|does he do/.test(s))return'what';
   if(/who|rohan|about him/.test(s))return'who';
-  if(/cat|mochi|you\b|your name/.test(s))return'cat';
+  if(/cat|mochi|oggy|you\b|your name/.test(s))return'cat';
   return'unknown'}
 function askMenu(){if(!awake())wake();
   openChat(`What would you like to know${nm()}?`,{chips:[
@@ -4247,7 +4266,9 @@ function askMenu(){if(!awake())wake();
     inputLast:true,input:{ph:'Or ask anything…',max:200,done:v=>reply(classify(v),v)}})}
 
 /* ---------- hooks ---------- */
-window.MOCHI={setPos:v=>setCatPos(v),reset:()=>resetPlaces(),wake:()=>wake(),sleep:()=>{if(C.pose!=='sleep')goSleep()},asleep:()=>C.pose==='sleep',talk:askMenu};
+window.MOCHI={setPos:v=>setCatPos(v),reset:()=>resetPlaces(),wake:()=>wake(),sleep:()=>{if(C.pose!=='sleep')goSleep()},asleep:()=>C.pose==='sleep',talk:askMenu,
+  /* what OGGY's own life (js/oggy.mjs, owner mode only) uses to move him */
+  rig:{C,pose,mood,say,hearts,walkTo,jumpTo,goSleep,wake,paint,W,home,dockR,clampX,baseB,head,awake,cat,jar}};
 addEventListener('resize',()=>{if(C.free&&C.fx!=null){C.x=clampX(C.fx*innerWidth);C.y=clamp(C.fy*innerHeight,0,innerHeight-160);C.tx=C.x;placeJar();return}C.x=clampX(C.x);C.tx=clampX(C.tx);if(C.y>2){C.y=0;pose('sit')}if(catPos()!=='roam'&&!C.jump&&!MOVING.has(C.pose)){C.x=home();C.tx=C.x}placeJar()});
 })();
 
