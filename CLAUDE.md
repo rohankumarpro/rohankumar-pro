@@ -22,6 +22,6 @@ and the personal vault. A deploy replaces code only. It must never change that d
 ## 2. Process
 
 - Develop on `dev`, merge to `main` with a normal merge or fast-forward. Never force-push.
-- Every UI change must be checked on BOTH interfaces (Material and Minimal), light and dark, desktop and phone.
+- The site has ONE design (Material). Do not add a second interface or an interface picker. Check every UI change in light and dark, on desktop and on a phone.
 - No emoji icons. Pictures are never filtered or greyscaled.
 - Netlify builds cost credits: batch changes, merge to `main` once per batch.

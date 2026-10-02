@@ -55,14 +55,6 @@
   --glyph:#F1F2F7; --shadow:0 18px 50px rgba(0,0,0,.55);
 }
 /* Settings: UI picker cards */
-.uis{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:calc(10 * var(--u))}
-.uis button{display:flex;flex-direction:column;gap:calc(8 * var(--u));padding:calc(8 * var(--u));border:2px solid var(--line);background:var(--surface2);border-radius:var(--r-5);text-align:left}
-.uis button.on{border-color:var(--primary)}
-.uis .uip{background:var(--bg);color:var(--ink);font-family:var(--font);border-radius:calc(var(--r-win) * .5 + 2px);box-shadow:var(--shadow);padding:0;overflow:hidden;height:74px;display:flex;flex-direction:column}
-.uis .uip i{display:block;height:14px;background:var(--surface2);border-bottom:1px solid var(--line)}
-.uis .uip b{display:block;margin:calc(8 * var(--u)) calc(8 * var(--u)) 0;height:6px;width:60%;border-radius:var(--r-2);background:var(--ink2);opacity:.55}
-.uis .uip u{display:block;margin:calc(6 * var(--u)) calc(8 * var(--u)) 0;height:14px;width:42px;border-radius:var(--r-ctl);background:var(--primary)}
-.uis .lb{font-size:var(--fs-2);font-weight:var(--fw-b)}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -1199,7 +1191,8 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 .cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
 .cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
 </style>
-<script>try{var u;try{u=localStorage.getItem('siteUi')}catch(e){}if(u!=='minimal'&&u!=='material')u=window.__UI;if(u==='minimal')document.documentElement.dataset.ui='minimal';else u='material';document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/'+u+'.css"><script src="/shared/icon-set-'+u+'.js"><\/script>'+(u==='minimal'?'<script src="/assets/wallpapers.js"><\/script>':''))}catch(e){document.write('<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"><\/script>')}</script>
+<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"></script>
+<script>try{localStorage.removeItem("siteUi")}catch(e){}</script>
 <noscript><link rel="stylesheet" href="/css/core.css"><link rel="stylesheet" href="/css/material.css"></noscript>
 <script type="module">import { icon } from "/shared/icons.mjs"; window.svgIcon = icon; document.dispatchEvent(new Event("icons-ready"));</script>
 </head>
@@ -2095,11 +2088,8 @@ function shape(kind){
 function glyphSvg(g,size=24){return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`}
 let cpN=0;
 function icon(a){
-  const S=window.__ICONSET,ui=document.documentElement.dataset.ui||'material',g=S&&S.a&&S.a[a.id];
-  if(a.photo&&ui==='minimal')return `<span class="ico photo"><img src="${PHOTO}" alt="" draggable="false"></span>`;
+  const S=window.__ICONSET,g=S&&S.a&&S.a[a.id];
   if(a.photo){a={...a,shape:'circle'};const id='cp'+(++cpN);return `<span class="ico photo"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}"><path d="${shape(a.shape)}"/></clipPath></defs><path d="${shape(a.shape)}" fill="#C2FF73"/><g clip-path="url(#${id})"><image class="g-face" href="${PHOTO}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice"/></g></svg></span>`}
-  /* Minimal: a thin library glyph in a square outline tile (the tile itself is drawn by css/minimal.css) */
-  if(g&&ui==='minimal')return `<span class="ico uitile" data-i="${a.id}"><svg viewBox="${S.vb}" fill="none" stroke="currentColor" stroke-width="${S.sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${g}</svg></span>`;
   if(typeof ART!=='undefined'&&ART[a.id])return `<span class="ico lay" data-i="${a.id}"><svg viewBox="0 0 100 100"><circle class="icbg" cx="50" cy="50" r="48"/><g class="art">${ART[a.id]}</g></svg></span>`;
   const gl=g?`<svg x="27" y="27" width="46" height="46" viewBox="${S.vb}" fill="var(--glyph)">${g}</svg>`:`<svg x="29" y="29" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a.glyph}</svg>`;
   return `<span class="ico" data-i="${a.id}" style="--ic:var(--${a.color})"><svg viewBox="0 0 100 100"><path d="${shape(a.shape)}" fill="var(--${a.color})"/>${gl}</svg></span>`}
@@ -2759,23 +2749,11 @@ function contact(){return `<h1>Let's talk</h1><p>Have a project in mind or just 
 <div class="links"><a class="btn" href="${esc(P.booking)}" target="_blank" rel="noopener">Book a call</a><a class="btn tonal" href="mailto:${esc(P.email)}">Email me</a><button class="btn tonal" id="copyMail">Copy email</button><a class="btn tonal" href="tel:+918076211418">Call +91-8076211418</a></div>
 <div class="links">${P.links.map(l=>`<a class="btn tonal" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>`}
 
-const UIS={material:'Material UI',minimal:'Minimal UI'};
-function setUI(k){if(!UIS[k])k='material';
-  if(!LIVE.admin)return;
-  const s=(SITE.s||(SITE.s={hiddenApps:[]}));if(k==='minimal')s.ui='minimal';else delete s.ui;
-  toast('Saving interface…');
-  fetch('/api/site',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({settings:s})}).then(r=>{
-    if(!r.ok){toast(r.status===401?'Signed out. Interface not saved.':'Could not save the interface ('+r.status+')');return}
-    try{localStorage.setItem('siteUi',k);sessionStorage.setItem('uiSwitch','1')}catch(e){}
-    toast('Switching interface…');setTimeout(()=>location.replace('/'),350)}).catch(()=>toast('Offline. Interface not saved.'))}
-function uiPicker(){const cur=document.documentElement.dataset.ui||'material';
-  return `<h3>Interface</h3><div class="uis">${Object.keys(UIS).map(k=>`<button data-ui="${k}" aria-pressed="${k===cur}" class="${k===cur?'on':''}"><span class="uip" data-sample="${k}"><i></i><b></b><u></u></span><span class="lb">${UIS[k]}</span></button>`).join('')}</div>`}
 function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
-  body.innerHTML=`<h1>Settings</h1>${LIVE.admin?uiPicker():''}<h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
+  body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
   <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Mochi's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold Mochi or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
-  body.querySelectorAll('[data-ui]').forEach(b=>b.onclick=()=>{setUI(b.dataset.ui);SFX.play('pop');settings(body)});
   if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
   body.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{desk.dataset.motion=b.dataset.mo;save();settings(body)});
@@ -2816,23 +2794,7 @@ const WALLS={
     <g class="fl" style="--d:12s;--x:50px;--y:-8px"><path d="M-100 820C380 740 780 900 1180 800S1500 770 1700 810V1000H-100Z" fill="var(--c1)"/></g></svg>`,
   plain:id=>`<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><rect width="1600" height="1000" fill="var(--surface2)"/>${S('cookie',1000,380,8,0,'var(--bg)','','rt|--d:160s')}</svg>`
 };
-/* Minimal: platform marks are drawn in the system's icon language (currentColor) so they sit in a black-and-white UI */
-if(document.documentElement.dataset.ui==='minimal'){
-  const MI={instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".8" fill="currentColor" stroke="none"/></svg>',
-    youtube:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.2v5.6l5-2.8z" fill="currentColor" stroke="none"/></svg>',
-    figma:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8.5 2H12v6.5H8.5a3.25 3.25 0 0 1 0-6.5zM12 2h3.5a3.25 3.25 0 0 1 0 6.5H12zM8.5 8.5H12V15H8.5a3.25 3.25 0 0 1 0-6.5zM8.5 15H12v3.25A3.25 3.25 0 1 1 8.5 15z"/><circle cx="15.25" cy="11.75" r="3.25"/></svg>',
-    behance:'<svg viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-family="Geist,Arial,sans-serif" font-weight="700" font-size="12.5" fill="currentColor">Bē</text></svg>',
-    linkedin:'<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="Geist,Arial,sans-serif" font-weight="700" font-size="14" fill="currentColor">in</text></svg>'};
-  Object.keys(MI).forEach(k=>{if(DOC_BRAND[k]){DOC_BRAND[k].ico=MI[k];DOC_BRAND[k].bg='#0A0A0A'}});
-}
-/* Minimal: generative black-and-white wallpapers drawn on one canvas (assets/wallpapers.js). The picker shows still frames. */
-if(document.documentElement.dataset.ui==='minimal'&&window.Wall){
-  const M={};Wall.list.forEach(w=>{M[w.id]=()=>`<img alt="" src="${Wall.thumb(w.id)}">`});
-  Object.keys(WALLS).forEach(k=>delete WALLS[k]);Object.assign(WALLS,M);
-  Wall.text=P.name;
-}
 function setWall(k){if(!WALLS[k])k=Object.keys(WALLS)[0];desk.dataset.wall=k;
-  if(document.documentElement.dataset.ui==='minimal'&&window.Wall){const el=document.getElementById('wall');if(!el.firstChild||el.firstChild.tagName!=='CANVAS')Wall.mount(el,k);else Wall.set(k);return}
   document.getElementById('wall').innerHTML=WALLS[k]('main')}
 
 function inl(t){return esc(t.replace(/\\\*/g,'\u0001')).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/\u0001/g,'*')}
@@ -3061,11 +3023,7 @@ function applyText(){const s=SITE.s||{};
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
   document.title=window.__STANDALONE?`${P.name} — Links`:`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist)}
 function applyHidden(){HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
-async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings;
-  /* The owner's interface choice is for everyone. If this page was built with an older one (cached copy), reload once into the right one. */
-  const want=(d.settings&&d.settings.ui==='minimal')?'minimal':'material',have=document.documentElement.dataset.ui||'material';
-  try{localStorage.setItem('siteUi',want)}catch(e){}
-  if(want!==have){let tried='';try{tried=sessionStorage.getItem('uiSync')||''}catch(e){}if(tried!==want){try{sessionStorage.setItem('uiSync',want)}catch(e){}location.reload();return}}}}catch(e){}}
+async function siteLoad(){try{const r=await fetch('/api/site',{cache:'no-store'});if(r.ok){const d=await r.json();if(d.settings)SITE.s=d.settings}}catch(e){}}
 async function siteInit(){await Promise.all([liveAuth(),siteLoad()]);applyText();applyHidden();ownerChanged()}
 /* Runs whenever the owner signs in or out: pill in the top bar, hidden apps shown dimmed or removed. */
 function ownerChanged(){
@@ -3260,8 +3218,8 @@ function gbRender(){
 }
 
 /* ============ Sound + haptics ============ */
-/* Each UI has its own voice. Material: soft, round, a little bouncy. Minimal: short, dry, quiet clicks (higher, shorter, lower volume, light haptics). */
-const SFX=(()=>{let ctx=null,on=true;const VOICE={material:{f:1,d:1,v:1,h:1,w:null},minimal:{f:1.6,d:.45,v:.65,h:.55,w:'triangle'}},P=VOICE[document.documentElement.dataset.ui]||VOICE.material;try{on=localStorage.getItem('sfx')!=='off'}catch(e){}
+/* Sounds and haptics: soft, round, a little bouncy. */
+const SFX=(()=>{let ctx=null,on=true;const P={f:1,d:1,v:1,h:1,w:null};try{on=localStorage.getItem('sfx')!=='off'}catch(e){}
   const ac=()=>{if(!ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;try{ctx=new A()}catch(e){return null}}if(ctx.state==='suspended')ctx.resume();return ctx};
   const env=(c,g,t,a,v,d)=>{g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+d)};
   const tone=(f,d,type='sine',v=.05,slide=0,delay=0)=>{f*=P.f;d*=P.d;v*=P.v;if(P.w&&type==='sine')type=P.w;const c=ac();if(!c||c.state!=='running')return;const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
@@ -3656,7 +3614,6 @@ document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!=='IMG')
   if(old&&!i.dataset.fb){i.dataset.fb='1';i.removeAttribute('srcset');i.src='/api/u?f='+old[1];return}
   if(th&&!i.dataset.fb2){i.dataset.fb2='1';i.removeAttribute('srcset');i.src='/api/u?f='+th[1]+th[2];return}
   i.classList.add('img-broken')},true);
-try{if(sessionStorage.getItem('uiSwitch')){sessionStorage.removeItem('uiSwitch');unlock();openApp('settings')}}catch(e){}
 document.title=`${P.name} — Portfolio`;
 document.getElementById('who').textContent=P.name;
 document.getElementById('wStatus').textContent=P.status;
