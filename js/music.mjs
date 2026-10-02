@@ -54,7 +54,7 @@ function stopOthers(kind) {
 async function startYT(t) {
   stopOthers("y");
   const ok = await loadYT(); if (!ok) { fail("YouTube could not load. Check your connection."); return; }
-  const el = $(".mu-yt-in", host); if (!el) return;
+  const el = $(".mu-yt-in", ENG); if (!el) return;
   const vars = { autoplay: 1, controls: 0, rel: 0, playsinline: 1, modestbranding: 1, iv_load_policy: 3, fs: 0 };
   if (!M.yt) {
     M.yt = new window.YT.Player(el, { width: "100%", height: "100%", videoId: t.type === "video" ? t.id : undefined, playerVars: t.type === "playlist" ? { ...vars, listType: "playlist", list: t.id } : vars,
@@ -75,12 +75,12 @@ function onYTError() { toast("That one can't be played here. Trying the next rec
 async function startSP(t) {
   stopOthers("s");
   const api = await loadSP(); if (!api) { fail("Spotify could not load. Check your connection."); return; }
-  const uri = `spotify:${t.type}:${t.id}`, el = $(".mu-sp-in", host); if (!el) return;
+  const uri = `spotify:${t.type}:${t.id}`, el = $(".mu-sp-in", ENG); if (!el) return;
   if (!M.sp) {
     api.createController(el, { uri, width: "100%", height: 80 }, (c) => {
       M.sp = c;
       c.addListener("ready", () => { try { c.play(); } catch {} });
-      c.addListener("playback_update", (e) => { const d = e.data || {}; M.playing = !d.isPaused && !d.isBuffering ? true : (!d.isPaused); M.loading = !!d.isBuffering; paint(); });
+      c.addListener("playback_update", (e) => { const d = e.data || {}; M.playing = !d.isPaused && !d.isBuffering ? true : (!d.isPaused); M.loading = !!d.isBuffering; M.pos = (d.position || 0) / 1000; M.dur = (d.duration || 0) / 1000; paint(); });
     });
   } else { try { M.sp.loadUri(uri); M.sp.play(); } catch {} }
   setTimeout(() => { if (!M.playing && cur() === t) toast("Press play inside the Spotify player to start."); }, 2600);
@@ -92,7 +92,7 @@ function play(i) {
   const t = M.tracks[i]; if (!t) return;
   if (i === M.i && (M.playing || M.loading)) return;
   if (i === M.i && !M.playing && ((t.k === "y" && M.yt) || (t.k === "s" && M.sp))) return resume();
-  M.i = i; M.loading = true; M.playing = false; paint();
+  M.i = i; M.loading = true; M.playing = false; M.pos = 0; M.dur = 0; paint();
   if (t.k === "y") startYT(t); else startSP(t);
 }
 function resume() { const t = cur(); if (!t) return; try { if (t.k === "y") { stopOthers("y"); M.yt.playVideo(); } else { stopOthers("s"); M.sp.resume ? M.sp.resume() : M.sp.play(); } } catch {} }
@@ -102,55 +102,89 @@ function next(auto) { if (!M.tracks.length) return; const i = M.i < 0 ? 0 : (M.i
 function prev() { if (!M.tracks.length) return; const i = M.i <= 0 ? M.tracks.length - 1 : M.i - 1; M.i = -1; play(i); }
 
 /* ---------------- drawing ---------------- */
+/* The players themselves (YouTube's hidden one, Spotify's small strip) live in one place of their own, so the corner and the
+   Music app can both be controls for the same music without either one owning the sound. */
+const ENG = h("div", { id: "muEngine", class: "mu-engine", hidden: true });
+ENG.innerHTML = '<div class="mu-yt"><div class="mu-yt-in"></div></div><div class="mu-sp" hidden><div class="mu-sp-in"></div></div>';
+(document.getElementById("desk") || document.body).append(ENG);
+M.boxes = []; M.pos = 0; M.dur = 0;
+const fmt = (n) => { n = Math.max(0, Math.round(n || 0)); const m = Math.floor(n / 60), s = n % 60; return m + ":" + String(s).padStart(2, "0"); };
+function makeBox(kind) {
+  const box = h("div", { class: "mu mu-" + kind, "data-s": "idle" });
+  box.innerHTML = `<div class="mu-mini" role="group" aria-label="Music corner"><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
+    <div class="mu-full"><div class="mu-head"><b>${kind === "app" ? "Music" : "Music corner"}</b><span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="sp"></span><button class="mu-vid" aria-label="Show the video" title="Show the video" hidden>${ic.video}</button><button class="mu-manage" aria-label="Manage records" title="Manage records" hidden>${ic.gear}</button></div>
+      <div class="mu-scene">${SCENE}</div>
+      <div class="mu-now"><b class="mu-t"></b><small class="mu-a"></small></div>
+      <div class="mu-seek"><span class="mu-tc">0:00</span><input class="mu-sk" type="range" min="0" max="100" step="1" value="0" aria-label="Position in the song" disabled><span class="mu-td">0:00</span></div>
+      <div class="mu-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></div>
+      <div class="mu-shelf" role="list" aria-label="Records"></div>
+      <div class="mu-empty" hidden></div></div>`;
+  $(".mu-mp", box).onclick = (e) => { e.stopPropagation(); toggle(); };
+  $("[data-a=toggle]", box).onclick = toggle; $("[data-a=next]", box).onclick = () => next(false); $("[data-a=prev]", box).onclick = prev;
+  const vol = $(".mu-vol", box); vol.onpointerdown = (e) => e.stopPropagation(); vol.style.setProperty("--p", M.vol + "%");
+  vol.oninput = () => { M.vol = +vol.value; $$(".mu-vol").forEach((v) => { v.value = vol.value; v.style.setProperty("--p", vol.value + "%"); }); try { M.yt && M.yt.setVolume(M.vol); } catch {} };
+  const sk = $(".mu-sk", box), tc = $(".mu-tc", box);
+  sk.onpointerdown = (e) => { e.stopPropagation(); box.__seeking = true; };
+  sk.oninput = () => { box.__seeking = true; tc.textContent = fmt(+sk.value); };
+  sk.onchange = () => { seekTo(+sk.value); box.__seeking = false; };
+  sk.onpointerup = sk.onpointercancel = () => setTimeout(() => (box.__seeking = false), 50);
+  $(".mu-vid", box).onclick = () => { M.video = !M.video; paint(); };
+  $(".mu-manage", box).onclick = manage;
+  M.boxes.push(box); shelf(box); paintBox(box);
+  return box;
+}
 function build() {
   const ctl = $(".mw-ctl", host);
   host.classList.add("mu-host");
   host.innerHTML = ""; if (ctl) host.appendChild(ctl);
-  const box = h("div", { class: "mu", "data-s": "idle" });
-  box.innerHTML = `<div class="mu-mini" role="group" aria-label="Music corner"><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
-    <div class="mu-full"><div class="mu-head"><b>Music corner</b><span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="sp"></span><button class="mu-vid" aria-label="Show the video" title="Show the video" hidden>${ic.video}</button><button class="mu-manage" aria-label="Manage records" title="Manage records" hidden>${ic.gear}</button></div>
-      <div class="mu-scene">${SCENE}</div>
-      <div class="mu-now"><b class="mu-t"></b><small class="mu-a"></small></div>
-      <div class="mu-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></div>
-      <div class="mu-shelf" role="list" aria-label="Records"></div>
-      <div class="mu-empty" hidden></div></div>
-    <div class="mu-yt"><div class="mu-yt-in"></div></div><div class="mu-sp" hidden><div class="mu-sp-in"></div></div>`;
-  host.appendChild(box);
-  $(".mu-mp", box).onclick = (e) => { e.stopPropagation(); toggle(); };
-  $("[data-a=toggle]", box).onclick = toggle; $("[data-a=next]", box).onclick = () => next(false); $("[data-a=prev]", box).onclick = prev;
-  const vol = $(".mu-vol", box); vol.onpointerdown = (e) => e.stopPropagation();
-  vol.oninput = () => { M.vol = +vol.value; try { M.yt && M.yt.setVolume(M.vol); } catch {} };
-  $(".mu-vid", box).onclick = () => { M.video = !M.video; paint(); };
-  $(".mu-manage", box).onclick = manage;
-  M.box = box; paint(true);
+  host.appendChild(makeBox("widget"));
 }
-function shelf() {
-  const sh = $(".mu-shelf", M.box); if (!sh) return;
-  sh.innerHTML = M.tracks.map((t, i) => {
-    const th = thumbOf(t), c = colorOf(t);
-    return `<button class="mu-rec${i === M.i ? " on" : ""}" role="listitem" data-i="${i}" style="--mu-c:${c}" title="${esc(t.title || "Record")}${t.artist ? " — " + esc(t.artist) : ""}" aria-label="Play ${esc(t.title || "record")}"><span class="mu-vinyl"></span><span class="mu-sleeve">${th ? `<img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<b>${esc((t.title || "?").trim().slice(0, 1).toUpperCase())}</b>`}</span></button>`;
-  }).join("");
-  $$(".mu-rec", sh).forEach((b) => (b.onclick = () => { const i = +b.dataset.i; if (i === M.i && (M.playing || M.loading)) pause(); else play(i); }));
+function seekTo(v) {
+  const t = cur(); if (!t) return; M.pos = v;
+  try { if (t.k === "y" && M.yt && M.yt.seekTo) M.yt.seekTo(v, true); else if (t.k === "s" && M.sp && M.sp.seek) M.sp.seek(v); } catch {}
 }
-function paint(full) {
-  const box = M.box; if (!box) return;
+function seekPaint(box) {
+  if (box.__seeking) return; const sk = $(".mu-sk", box); if (!sk) return;
+  const on = M.dur > 0 && cur(); sk.disabled = !on; sk.max = on ? Math.floor(M.dur) : 100; sk.value = on ? Math.min(M.pos, M.dur) : 0;
+  sk.style.setProperty("--p", on ? Math.min(100, (M.pos / M.dur) * 100) + "%" : "0%");
+  $(".mu-tc", box).textContent = fmt(on ? M.pos : 0); $(".mu-td", box).textContent = on ? fmt(M.dur) : "0:00";
+}
+setInterval(() => {
+  if (!M.playing && !M.loading) return;
+  const t = cur(); try { if (t && t.k === "y" && M.yt && M.yt.getCurrentTime) { M.pos = M.yt.getCurrentTime() || 0; M.dur = M.yt.getDuration() || 0; } } catch {}
+  M.boxes.forEach((b) => b.isConnected && seekPaint(b));
+}, 500);
+function shelf(only) {
+  (only ? [only] : M.boxes).forEach((box) => {
+    const sh = $(".mu-shelf", box); if (!sh) return;
+    sh.innerHTML = M.tracks.map((t, i) => {
+      const th = thumbOf(t), c = colorOf(t);
+      return `<button class="mu-rec${i === M.i ? " on" : ""}" role="listitem" data-i="${i}" style="--mu-c:${c}" title="${esc(t.title || "Record")}${t.artist ? " — " + esc(t.artist) : ""}" aria-label="Play ${esc(t.title || "record")}"><span class="mu-vinyl"></span><span class="mu-sleeve">${th ? `<img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<b>${esc((t.title || "?").trim().slice(0, 1).toUpperCase())}</b>`}</span></button>`;
+    }).join("");
+    $$(".mu-rec", sh).forEach((b) => (b.onclick = () => { const i = +b.dataset.i; if (i === M.i && (M.playing || M.loading)) pause(); else play(i); }));
+  });
+}
+function paint(full) { M.boxes = M.boxes.filter((b) => b.isConnected || !b.parentNode); M.boxes.forEach((b) => paintBox(b)); if (full) shelf(); engine(); pill(); session(); }
+function engine() {
+  const t = cur(), isY = t && t.k === "y", isS = t && t.k === "s";
+  ENG.hidden = !(isS || (isY && M.video)); ENG.classList.toggle("showvid", !!(isY && M.video));
+  $(".mu-sp", ENG).hidden = !isS;
+}
+function paintBox(box) {
   const t = cur(), state = M.loading ? "loading" : M.playing ? "playing" : "idle";
-  box.dataset.s = state; host.classList.toggle("mu-on", state === "playing");
+  box.dataset.s = state; const hostEl = box.closest(".mu-host"); if (hostEl) hostEl.classList.toggle("mu-on", state === "playing");
   box.style.setProperty("--mu-c", t ? colorOf(t) : COLORS[0]);
   const title = t ? (t.title || "Untitled") : M.tracks.length ? "Pick a record" : "The shelf is empty", artist = t ? (t.artist || (t.k === "s" ? "Spotify" : "YouTube")) : M.tracks.length ? "Tap one below to play" : (isAdmin() ? "Add records with the settings button" : "Nothing to play yet");
   $(".mu-t", box).textContent = title; $(".mu-a", box).textContent = artist; $(".mu-mt b", box).textContent = title; $(".mu-mt small", box).textContent = artist;
   const pp = state === "idle" ? ic.play : ic.pause; $(".mu-mp", box).innerHTML = pp; $("[data-a=toggle]", box).innerHTML = pp;
   $("[data-a=toggle]", box).setAttribute("aria-label", state === "idle" ? "Play" : "Pause");
   $$(".mu-rec", box).forEach((b) => b.classList.toggle("on", +b.dataset.i === M.i));
-  const isY = t && t.k === "y", isS = t && t.k === "s";
-  $(".mu-vol", box).hidden = !isY; $(".mu-vid", box).hidden = !isY; $(".mu-vid", box).classList.toggle("on", M.video);
-  box.classList.toggle("mu-showvid", !!(isY && M.video));
-  $(".mu-sp", box).hidden = !isS;
+  const isY = t && t.k === "y";
+  $(".mu-vol", box).hidden = !isY; $(".mu-vid", box).hidden = !isY || box.classList.contains("mu-widget"); $(".mu-vid", box).classList.toggle("on", M.video);
   $(".mu-manage", box).hidden = !isAdmin();
+  seekPaint(box);
   const em = $(".mu-empty", box);
   if (!M.tracks.length) { em.hidden = false; const P0 = window.P && P.music; em.innerHTML = `<p>${isAdmin() ? "Pick a few records for your visitors." : "The owner hasn't put any records out yet."}</p>${isAdmin() ? '<button class="btn mu-addfirst">Add records</button>' : (P0 ? `<span class="mu-ext"><a href="${esc(P0.youtubeMusic)}" target="_blank" rel="noopener">YouTube Music</a><a href="${esc(P0.spotify)}" target="_blank" rel="noopener">Spotify</a></span>` : "")}`; $(".mu-addfirst", em)?.addEventListener("click", manage); } else em.hidden = true;
-  pill(); session();
-  if (full) shelf();
 }
 
 /* the small player in the top bar, so the music stays in reach while windows cover the corner */
@@ -218,7 +252,7 @@ function refresh() {
   const at = prevId ? M.tracks.findIndex((t) => t.id === prevId) : -1;
   if (prevId && at < 0) { try { M.yt && M.yt.stopVideo && M.yt.stopVideo(); M.sp && M.sp.pause && M.sp.pause(); } catch {} M.playing = false; M.loading = false; }
   M.i = at;
-  if (M.box) { shelf(); paint(); }
+  if (M.boxes.length) { shelf(); paint(); }
 }
 window.__musicRefresh = refresh;
 window.musicCtx = () => {
@@ -228,9 +262,17 @@ window.musicCtx = () => {
   o.push(["Hide the music corner", () => { pause(); const d = document.getElementById("desk"); d.dataset.music = "off"; window.save && window.save(); }]);
   return o;
 };
-window.Music = { toggle, play, pause, next, prev, state: () => ({ playing: M.playing, track: cur() }) };
+function musicApp(body) {
+  body.innerHTML = ""; const wrap = h("div", { class: "mu-host mu-appwrap" }); wrap.appendChild(makeBox("app")); body.appendChild(wrap);
+  paint(true);
+}
+if (typeof APPS !== "undefined" && !APPS.some((a) => a.id === "music")) {
+  APPS.push({ id: "music", title: "Music", shape: "clover", color: "c2", glyph: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/>', w: 400, h: 680, render: musicApp });
+  try { window.renderIcons && renderIcons(); } catch {}
+}
+window.Music = { toggle, play, pause, next, prev, tracks: () => M.tracks, state: () => ({ playing: M.playing, track: cur() }) };
 
 if (host) {
   build(); refresh();
-  new MutationObserver(() => { if (document.getElementById("desk").dataset.music === "off") pause(); }).observe(document.getElementById("desk"), { attributes: true, attributeFilter: ["data-music"] });
+  new MutationObserver(() => { if (document.getElementById("desk").dataset.music === "off" && !M.boxes.some((b) => b.isConnected && b.closest(".win"))) pause(); }).observe(document.getElementById("desk"), { attributes: true, attributeFilter: ["data-music"] });
 }
