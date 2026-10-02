@@ -353,6 +353,33 @@ export async function docsApp(body, slug) {
     $("[data-empty]", main)?.addEventListener("click", async () => { if (!(await confirmBox("Delete everything in the bin for good?", "Empty bin"))) return; for (const p of t) await api("/api/docs?id=" + p.id, { method: "DELETE" }); await load(true); showTrash(); });
   }
 
+  /* ----- right-click items for this app ----- */
+  const copyUrl = async (pg) => { try { await navigator.clipboard.writeText(location.origin + "/docs/" + keyOf(pg)); toast("Link copied"); } catch { toast("Could not copy"); } };
+  window.registerCtx && window.registerCtx("docs", (el) => {
+    const row = el.closest(".dx-it[data-id], [data-go]"), id = row && (row.dataset.id || row.dataset.go), pg = id && byId(id), items = [];
+    const sideTg = ls.get("dxSide", true) ? ["Hide the sidebar", () => toggleSide()] : ["Show the sidebar", () => toggleSide()];
+    if (pg) {
+      items.push(["Open", () => openId(id)]);
+      if (owner) {
+        items.push(["Add a page inside", () => { open[id] = true; ls.set("dxOpen", open); newPage({ parent: id }); }],
+          [pg.fav ? "Remove from favorites" : "Add to favorites", async () => { pg.fav = !pg.fav; await api("/api/docs?id=" + id, { method: "PUT", body: { fav: pg.fav } }); drawSide(); }],
+          ["Duplicate", async () => { await flush(); const r0 = await api("/api/docs?id=" + id); const r = await api("/api/docs", { method: "POST", body: { title: label(pg) + " (copy)", icon: pg.icon, parent: pg.parent, cover: pg.cover, blocks: r0.ok ? r0.data.blocks : [] } }); if (r.ok) { D.pages.push(r.data.page); drawSide(); openId(r.data.page.id); } }]);
+      }
+      if (pg.pub) items.push(["Copy public link", () => copyUrl(pg)]);
+      if (owner) items.push(null, ["Move to bin", async () => { await flush(); const r = await api("/api/docs?id=" + id, { method: "PUT", body: { trashed: true } }); if (r.ok) { await load(true); toast("Moved to the bin"); if (D.open && D.open.id === id) home(); else drawSide(); } }, "danger"]);
+      return items;
+    }
+    if (el.closest(".dx-side")) { if (owner) items.push(["New page", () => newPage({})]); items.push(["Home", () => home()], sideTg); return items; }
+    if (owner) items.push(["New page", () => newPage({})]);
+    if (D.open) {
+      if (owner && !D.open.trashed) items.push(["Add a page inside", () => { open[D.open.id] = true; ls.set("dxOpen", open); newPage({ parent: D.open.id }); }]);
+      items.push([ls.get("dxWide", false) ? "Use normal width" : "Use full width", () => { const w = !ls.get("dxWide", false); ls.set("dxWide", w); $(".dx-page", main)?.classList.toggle("wide", w); }], ["Save as PDF", () => exportPdf()]);
+      if (D.open.pub) items.push(["Copy public link", () => copyUrl(D.open)]);
+    }
+    items.push(sideTg);
+    return items;
+  });
+
   /* ----- start ----- */
   drawSide();
   if (slug) openKey(slug, "replace"); else home("replace");

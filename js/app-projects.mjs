@@ -24,6 +24,16 @@ async function loadList(force) {
 const listShown = () => (isAdmin() ? PR.list : PR.list.filter((p) => p.status === "published"));
 
 export async function projectsApp(body, slug) {
+  window.registerCtx && window.registerCtx("projects", (el) => {
+    const card = el.closest(".pj-card[data-id]"), own = isAdmin(), items = [];
+    if (card) {
+      const p = (PR.list || []).find((x) => x.id === card.dataset.id); if (!p) return items;
+      const url = location.origin + "/projects/" + p.slug, i = PR.list.findIndex((x) => x.id === p.id);
+      items.push(["Open project", () => card.click()], ["Copy link", async () => { try { await navigator.clipboard.writeText(url); toast("Link copied"); } catch { toast("Could not copy"); } }], ["Share", () => share(url, p.title)]);
+      if (own) items.push(null, ["Edit", () => studio(body, p)], [p.status === "published" ? "Unpublish" : "Publish", () => quick(p, { status: p.status === "published" ? "draft" : "published" }, body)], [p.featured ? "Remove from featured" : "Feature", () => quick(p, { featured: !p.featured }, body)], ["Move earlier", () => move(i, -1, body)], ["Move later", () => move(i, 1, body)], ["Duplicate", () => dup(p, body)], ["Delete", () => del(p, body), "danger"]);
+    } else if (own && body.querySelector(".pj-new")) items.push(["New project", () => body.querySelector(".pj-new").click()]);
+    return items;
+  });
   R.handlers.projects = (b, s) => route(b, s);
   await loadList();
   return route(body, slug || "");

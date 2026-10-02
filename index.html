@@ -641,7 +641,7 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 .ctx[hidden]{display:none}
 .ctx button{display:flex;align-items:center;gap:calc(10 * var(--u));width:100%;border:0;background:none;text-align:left;padding:calc(10 * var(--u)) calc(12 * var(--u));border-radius:var(--r-5);font-weight:var(--fw-m);font-size:var(--fs-4)}
 .ctx button:hover,.ctx button:focus-visible{background:var(--surface2)}
-.ctx hr{border:0;border-top:1px solid var(--line);margin:calc(4 * var(--u)) calc(8 * var(--u))}
+.ctx hr{border:0;border-top:1px solid var(--line);margin:calc(4 * var(--u)) calc(8 * var(--u))}.ctx button.danger{color:var(--danger)}
 /* lock screen */
 .lock{position:absolute;inset:0;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(10 * var(--u));background:color-mix(in srgb,var(--bg) 40%,transparent);backdrop-filter:blur(28px) saturate(1.3);transition:transform .5s var(--ease),opacity .5s;cursor:pointer;text-align:center}
 .lock.off{transform:translateY(-100%)!important;opacity:0!important;pointer-events:none}
@@ -3343,7 +3343,7 @@ function showCtx(x,y,custom){SFX.play('tap');
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
     ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),
     ...(localStorage.getItem('iconOrder')?[["Reset icon layout",()=>{try{localStorage.removeItem('iconOrder')}catch(e){}renderIcons();SFX.play('pop')}]]:[]),null,["Settings",()=>openApp('settings')]];
-  ctx.innerHTML=items.map((it,i)=>it?`<button role="menuitem" data-i="${i}">${it[0]}</button>`:'<hr>').join('');
+  ctx.innerHTML=items.map((it,i)=>it?`<button role="menuitem" data-i="${i}"${it[2]?' class="danger"':''}>${it[0]}</button>`:'<hr>').join('');
   ctx.onmousedown=e=>e.preventDefault();
   ctx.querySelectorAll('button').forEach(b=>b.onclick=()=>{hideCtx();items[b.dataset.i][1]()});
   ctx.hidden=false;
@@ -3354,39 +3354,71 @@ function hideCtx(){ctx.hidden=true}
 desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;if(e.target.closest('.win,#shelf,.icons,.widgets,.cat,.jar,.launcher,.qs,.ctx,.topbar,.mw,.shelfw,.lock,#toast,.cat-chat,#boot,.dock-handle,.qrbig'))return;
   if(!L.hidden||!qs.hidden||!ctx.hidden)return;minimizeAll()},true);
 /* Our own right-click menu, everywhere. The browser's menu never shows. What it offers depends on what was clicked. */
+/* ---- Every app can add its own right-click items:  registerCtx('docs',(target,event)=>[["Label",()=>{...}],null,["Delete",fn,'danger']]) ---- */
+const APP_CTX={};
+window.registerCtx=(id,fn)=>{APP_CTX[id]=fn};
+const copyText=async(t,msg)=>{try{await navigator.clipboard.writeText(t);toast(msg||'Copied')}catch(x){toast('Could not copy')}};
+const dockMenu=()=>[["Open apps",toggleLauncher],...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),null,["Settings",()=>openApp('settings')]];
+function ownerPlaceItems(id){
+  if(!LIVE.admin)return[];const a=APPS.find(x=>x.id===id);if(!a)return[];const s=SITE.s||(SITE.s={hiddenApps:[]});
+  const set=(k)=>{const hid=new Set(s.hiddenApps||[]);s.place=s.place||{};if(k==='hidden')hid.add(id);else{hid.delete(id);s.place[id]=k}s.hiddenApps=[...hid];applyHidden();siteSave();SFX.play('pop')};
+  const here=appPlace(a);
+  return[null,here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(['settings','notes'].includes(id)?[]:[["Hide from visitors",()=>set('hidden')]])]}
 function ctxItemsFor(e){
   const t=e.target,el=t.closest?t:t.parentElement,out=[],sel=String(getSelection()||'').trim();
   const fld=el.closest('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea,[contenteditable="true"],[contenteditable=""]');
   const win=el.closest('.win'),a=el.closest('a[href]'),img=el.closest('img'),ico=el.closest('[data-app]');
+  let mine=[];if(win&&!el.closest('.lock')){try{mine=(APP_CTX[win.dataset.app]&&APP_CTX[win.dataset.app](el,e,win))||[]}catch(x){console.error('ctx',win.dataset.app,x)}}
+  const own=!!mine.replace;
+  /* 1. what you clicked on, character by character */
   if(fld){const ro=fld.readOnly||fld.disabled,txt=()=>fld.value!=null?fld.value.slice(fld.selectionStart,fld.selectionEnd):sel;
     if(!ro)out.push(["Cut",async()=>{const v=txt();if(!v)return;try{await navigator.clipboard.writeText(v)}catch(x){}fld.focus();document.execCommand('delete')}]);
-    out.push(["Copy",async()=>{const v=txt();if(v){try{await navigator.clipboard.writeText(v)}catch(x){document.execCommand('copy')}}}]);
+    out.push(["Copy",async()=>{const v=txt();if(v)await copyText(v,'Copied')}]);
     if(!ro)out.push(["Paste",async()=>{fld.focus();try{const v=await navigator.clipboard.readText();document.execCommand('insertText',false,v)}catch(x){toast('Allow clipboard access to paste, or press Ctrl+V')}}]);
     out.push(["Select all",()=>{fld.focus();if(fld.select&&fld.value!=null)fld.select();else document.execCommand('selectAll')}]);
-  }else if(sel)out.push(["Copy",async()=>{try{await navigator.clipboard.writeText(sel)}catch(x){document.execCommand('copy')}}]);
-  if(a&&!fld){const href=a.href;if(/^https?:|^mailto:|^tel:/.test(href)){out.push(["Open link",()=>{if(/^https?:/.test(href))window.open(href,'_blank','noopener');else location.href=href}]);out.push([href.startsWith('mailto:')?"Copy email address":"Copy link address",async()=>{try{await navigator.clipboard.writeText(href.replace(/^mailto:|^tel:/,''))}catch(x){}toast('Copied')}])}}
-  if(img&&img.src&&!/^data:/.test(img.src)&&!img.closest('.ico')){out.push(["Open picture",()=>window.open(img.src,'_blank','noopener')]);out.push(["Copy picture address",async()=>{try{await navigator.clipboard.writeText(img.src)}catch(x){}toast('Copied')}])}
-  if(win&&!el.closest('.lock')){const id=win.dataset.app,max=win.classList.contains('max');
-    if(out.length)out.push(null);
-    out.push(["Focus mode",()=>Focus.toggle(win)]);
+  }else if(sel)out.push(["Copy",()=>copyText(sel,'Copied')]);
+  if(a&&!fld&&!own){const href=a.href;if(/^https?:|^mailto:|^tel:/.test(href)){if(out.length)out.push(null);out.push(["Open link",()=>{if(/^https?:/.test(href))window.open(href,'_blank','noopener');else location.href=href}]);out.push([href.startsWith('mailto:')?"Copy email address":"Copy link address",()=>copyText(href.replace(/^mailto:|^tel:/,''))])}}
+  if(img&&img.src&&!/^data:/.test(img.src)&&!img.closest('.ico')&&!own){if(out.length)out.push(null);out.push(["Open picture",()=>window.open(img.src,'_blank','noopener')]);out.push(["Copy picture address",()=>copyText(img.src)])}
+  /* 2. the app you are in */
+  if(win&&!el.closest('.lock')){const id=win.dataset.app,max=win.classList.contains('max'),ap=APPS.find(x=>x.id===id);
+    if(mine.length){if(out.length)out.push(null);out.push(...mine)}
+    out.push(null,["Focus mode",()=>Focus.toggle(win)]);
     if(!mobile())out.push([max?"Restore size":"Maximise",()=>win.querySelector('.mx').click()]);
-    out.push(["Minimise",()=>win.querySelector('.mn').click()],["Close "+(win.getAttribute('aria-label')||'app'),()=>win.querySelector('.x').click()]);
-  }else if(ico&&ico.dataset.app&&APPS.find(x=>x.id===ico.dataset.app)){const id=ico.dataset.app,ap=APPS.find(x=>x.id===id);
-    out.push(["Open "+ap.title,()=>openApp(id)]);
-    if(open[id])out.push(["Close "+ap.title,()=>closeWin(open[id],id)]);
+    out.push(["Minimise",()=>win.querySelector('.mn').click()],["Close "+(ap?ap.title:'app'),()=>win.querySelector('.x').click(),'danger']);
+    return trim(out);
   }
+  /* 3. icons: on the desktop, in the dock, in the app drawer */
+  if(ico&&ico.dataset.app&&APPS.find(x=>x.id===ico.dataset.app)){const id=ico.dataset.app,ap=APPS.find(x=>x.id===id);
+    if(out.length)out.push(null);
+    out.push(["Open "+ap.title,()=>openApp(id)]);
+    if(open[id]){const w=open[id];out.push([w.classList.contains('min')?"Show "+ap.title:"Minimise "+ap.title,()=>w.classList.contains('min')?openApp(id):minimizeWin(w,id)],["Close "+ap.title,()=>closeWin(open[id],id),'danger'])}
+    out.push(...ownerPlaceItems(id));
+    return trim(out);
+  }
+  /* 4. the shell */
+  if(el.closest('.lock'))return[["Unlock",unlock],...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}]];
+  if(el.closest('.topbar')){const clickBtn=sel=>()=>{const b=document.querySelector(sel);b&&b.click()};
+    return[["Quick settings",()=>stBtn.click()],["Open apps",toggleLauncher],...(document.getElementById('tabsBtn')?[["All open windows",clickBtn('#tabsBtn')]]:[]),["Search",clickBtn('.topbar [aria-label="Search"], .topbar [aria-label^="Search"]')],null,["Lock screen",lock],...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[])]}
+  if(el.closest('#shelf,.shelf,.dock-handle'))return dockMenu();
+  if(el.closest('.cat,#cat'))return window.MOCHI?[window.MOCHI.asleep()?["Wake Mochi gently",()=>MOCHI.wake()]:["Talk to Mochi",()=>MOCHI.talk()],...(window.MOCHI.asleep()?[]:[["Let Mochi nap",()=>MOCHI.sleep()]]),["Hide Mochi",()=>{desk.dataset.cat="off";save()}]]:[];
+  if(el.closest('.mw,#musicW'))return(window.musicCtx&&window.musicCtx())||[["Hide the music widget",()=>{desk.dataset.music="off";save()}]];
+  if(el.closest('#wStatus,.statusw,.wstatus,[data-w=status]'))return[["Hide the status widget",()=>{desk.dataset.status="off";save()}],...(LIVE.admin?[["Edit status in Settings",()=>openApp('settings')]]:[])];
+  if(el.closest('.widgets'))return[["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],["Settings",()=>openApp('settings')]];
   return out;
 }
+function trim(o){while(o.length&&o[o.length-1]===null)o.pop();return o.filter((x,i)=>x!==null||(i>0&&o[i-1]!==null))}
 document.addEventListener('contextmenu',e=>{
-  if(e.target.closest&&e.target.closest('.lock'))return e.preventDefault();
   e.preventDefault();hideLauncher();
   const own=ctxItemsFor(e);
-  if(!own.length||e.target.closest('.dock-handle')){showCtx(e.clientX,e.clientY);return}
-  /* a short desktop section after the specific items */
-  const base=[["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
-    ...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],["Settings",()=>openApp('settings')]];
-  showCtx(e.clientX,e.clientY,[...own,null,...base]);
+  showCtx(e.clientX,e.clientY,own.length?own:undefined);
 },true);
+/* phones: a long press opens the same menu (iOS never sends one by itself) */
+(()=>{let t=null,sx=0,sy=0;const stop=()=>{clearTimeout(t);t=null};
+  document.addEventListener('touchstart',e=>{if(e.touches.length!==1||e.target.closest('#ctx,.lock,.selmenu'))return;const tt=e.touches[0];sx=tt.clientX;sy=tt.clientY;const target=e.target;stop();
+    t=setTimeout(()=>{t=null;if(target.closest('.dicon')&&document.getElementById('icons').classList.contains('arranging'))return;if(navigator.vibrate)try{navigator.vibrate(10)}catch(x){}
+      target.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:sx,clientY:sy}))},560)},{passive:true});
+  document.addEventListener('touchmove',e=>{const tt=e.touches[0];if(t&&Math.hypot(tt.clientX-sx,tt.clientY-sy)>10)stop()},{passive:true});
+  document.addEventListener('touchend',stop,{passive:true});document.addEventListener('touchcancel',stop,{passive:true})})();
 desk.addEventListener('pointerdown',e=>{if(!ctx.hidden&&!e.target.closest('#ctx'))hideCtx()});
 function lock(){hideLauncher();hideCtx();desk.classList.add('is-locked');lockEl.classList.remove('off');lockEl.setAttribute('aria-hidden','false');lockEl.tabIndex=0;lockEl.focus();keepAwake()}
 function unlock(){if(lockEl.classList.contains('off'))return;desk.classList.remove('is-locked');lockEl.classList.add('off');lockEl.setAttribute('aria-hidden','true');releaseAwake()}

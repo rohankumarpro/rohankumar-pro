@@ -131,3 +131,4 @@ window.addEventListener("offline", () => toast("You're offline. What you've alre
 window.addEventListener("online", () => toast("Back online"));
 window.__extReady = true;
 setTimeout(() => import("/js/os-more.mjs").catch((e) => console.error("os-more", e)), 400);
+import("/js/ctx-apps.mjs").catch((e) => console.error("ctx-apps", e));

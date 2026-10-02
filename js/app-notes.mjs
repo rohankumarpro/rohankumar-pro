@@ -67,6 +67,18 @@ function visibleList() {
 export async function notesApp(body, slug) {
   body.classList.add("kn-body");
   body.__flush = async () => { try { body.__composerFinish && body.__composerFinish(); } catch {} const mh = $(".kn-modal-host", body); if (mh && mh.__close) await mh.__close("replace"); await flushNotes(); };
+  window.registerCtx && window.registerCtx("notes", (el) => {
+    const card = el.closest(".kn-card[data-id]"), own = isAdmin(), items = [];
+    if (card) {
+      const n = N.list.find((x) => x.id === card.dataset.id); if (!n) return items;
+      items.push(["Open note", () => openNote(body, n.id)], ["Copy the text", async () => { try { await navigator.clipboard.writeText((n.title ? n.title + "\n\n" : "") + textOf(n)); toast("Note copied"); } catch { toast("Could not copy"); } }]);
+      if (own && !n.trashed) items.push(null, [n.pin ? "Unpin" : "Pin to the top", () => action(body, n, "pin")], ["Change colour", () => action(body, n, "color", card.querySelector('[data-a="color"]') || card)], [n.archived ? "Unarchive" : "Archive", () => action(body, n, "archive")], ["Move to the bin", () => action(body, n, "trash"), "danger"]);
+      if (own && n.trashed) items.push(null, ["Restore", () => action(body, n, "restore")], ["Delete for good", () => action(body, n, "purge"), "danger"]);
+    } else {
+      const s = body.querySelector(".kn-search input, input[type=search]"); if (s) items.push(["Search notes", () => s.focus()]);
+    }
+    return items;
+  });
   R.handlers.notes = (b, key) => (key ? openNote(body, key, "replace") : closeModal(body, "replace"));
   body.innerHTML = '<div class="app-loading"><span class="rb-spin"></span></div>';
   await load(true);
