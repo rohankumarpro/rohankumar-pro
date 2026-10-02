@@ -1,6 +1,6 @@
 // Focus extras: calm sounds while the timer runs, one of the music corner's records if you like, and a proper alarm at the end.
 // All sound is made in the browser (no files, no network). When the timer is paused, reset or finished, the sound and music stop.
-import { h, esc } from "/js/lib.mjs";
+import { h } from "/js/lib.mjs";
 
 const KEY = "ftSound";
 const AMB = [["off", "Off"], ["rain", "Rain"], ["brown", "Brown noise"], ["waves", "Waves"], ["fire", "Fireplace"], ["cafe", "Café"]];
@@ -59,29 +59,42 @@ function alarm() {
   alarmT = setTimeout(stopAlarm, 7200); setTimeout(() => document.addEventListener("pointerdown", stopAlarm, true), 900);
 }
 
-/* music from the music corner */
-const trackKey = (t) => t.k + ":" + t.id;
-const tracks = () => (window.Music && window.Music.tracks ? window.Music.tracks() : []);
-function startMusic() { if (!cfg.music || !window.Music) return; const i = tracks().findIndex((t) => trackKey(t) === cfg.music); if (i < 0) return; musicOn = true; window.Music.play(i); }
-function stopMusic() { if (musicOn && window.Music) window.Music.pause(); musicOn = false; }
+/* music: it follows "Focus mode" in the music corner. With Focus mode on, the music starts with a Focus session and stops when the
+   timer is paused, reset or ends. With it off the music is never touched by the timer. */
+const FM = "muFocus";
+const fm = () => { try { return localStorage.getItem(FM) === "1"; } catch { return false; } };
+const startMusic = () => { const M = window.Music; if (!M || !fm() || !M.tracks().length) return; const st = M.state(); if (!st.track) M.play(0); else if (!st.playing) M.toggle(); };
+const stopMusic = () => { const M = window.Music; if (M && fm() && M.state().playing) M.pause(); };
+window.__focusMode = {
+  get: fm,
+  set(on) {
+    try { localStorage.setItem(FM, on ? "1" : "0"); } catch {}
+    if (on && typeof FT !== "undefined" && typeof ftToggle === "function") {
+      if (FT.mode !== "focus") ftSet("focus");
+      if (!FT.run) ftToggle(); else startMusic();
+    }
+    window.Music && window.Music.repaint && window.Music.repaint();
+  },
+};
 
 window.__ftHook = (ev, mode) => {
   if (ev === "start") { stopAlarm(); if (!mode || mode === "focus") { startAmbient(); startMusic(); } }
   else if (ev === "pause" || ev === "reset") { stopAmbient(); stopMusic(); }
   else if (ev === "done") { stopAmbient(); stopMusic(); alarm(); }
+  window.Music && window.Music.repaint && window.Music.repaint();
 };
 
 /* the controls in the Focus window */
 window.__ftUI = (body) => {
   const box = body.querySelector(".ft"); if (!box || box.querySelector(".ft-snd")) return;
-  const list = tracks(), el = h("div", { class: "ft-snd" });
+  const el = h("div", { class: "ft-snd" });
   el.innerHTML = `<label class="ft-sl"><span>Sound</span><select class="ft-amb" aria-label="Focus sound">${AMB.map(([k, l]) => `<option value="${k}"${cfg.amb === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
     <label class="ft-sl ft-vl"><span>Volume</span><input class="ft-vol" type="range" min="5" max="100" value="${cfg.vol}" aria-label="Sound volume" style="--p:${cfg.vol}%"></label>
-    ${list.length ? `<label class="ft-sl"><span>Music</span><select class="ft-mus" aria-label="Focus music"><option value="">Off</option>${list.map((t) => `<option value="${esc(trackKey(t))}"${cfg.music === trackKey(t) ? " selected" : ""}>${esc(t.title || "Record")}</option>`).join("")}</select></label>` : ""}
-    <p class="hint">Plays while a Focus session runs. Pausing, resetting or finishing stops it, and an alarm sounds at the end.</p>`;
+    <div class="ft-sl"><span>Music</span><button class="btn tonal ft-mf" type="button">${fm() ? "Focus mode is on" : "Turn on Focus mode in Music"}</button></div>
+    <p class="hint">The sound plays while a Focus session runs. With Focus mode on in the music corner, your music plays with the session and stops when it ends. An alarm sounds at the end.</p>`;
   const stats = box.querySelector(".ft-s"); stats ? stats.before(el) : box.append(el);
   const running = () => typeof FT !== "undefined" && FT.run && FT.mode === "focus";
   el.querySelector(".ft-amb").onchange = (e) => { cfg.amb = e.target.value; save(); if (running()) startAmbient(); };
   const v = el.querySelector(".ft-vol"); v.oninput = () => { cfg.vol = +v.value; v.style.setProperty("--p", v.value + "%"); save(); setAmbVol(); };
-  const m = el.querySelector(".ft-mus"); if (m) m.onchange = () => { cfg.music = m.value; save(); if (running()) { m.value ? startMusic() : stopMusic(); } };
+  el.querySelector(".ft-mf").onclick = () => { if (!fm()) window.__focusMode.set(true); window.openApp && openApp("music"); };
 };

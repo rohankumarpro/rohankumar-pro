@@ -138,7 +138,8 @@ function apply() {
       if (n.tabs.length) {
         n.tabs.forEach((id) => {
           const w = winOf(id); if (!w) return;
-          w.classList.remove("max", "min", "minimizing"); w.classList.add("tiled"); w.classList.toggle("tabhid", id !== n.active);
+          if (w.classList.contains("min") || w.classList.contains("minimizing")) return; // resting in the dock: its slot waits for it
+          w.classList.remove("max"); w.classList.add("tiled"); w.classList.toggle("tabhid", id !== n.active);
           Object.assign(w.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px" });
         });
       }
@@ -252,6 +253,7 @@ function autoGrid() {
   const ids = [...prior.filter((id) => run.includes(id)), ...run.filter((id) => !prior.includes(id))];
   if (ids.length < 2) { say("Open two or more apps to arrange them."); return false; }
   setFull(false); T.locked = false; T.pick = null;
+  prior.filter((id) => !ids.includes(id)).forEach((id) => float(id, { keep: true })); // minimised ones are not part of the new grid
   ids.forEach((id) => { const w = winOf(id); if (w) floatRect(w); });
   T.root = null; seq = 0;
   const L = (id) => leaf([id]), n = ids.length; let root;
@@ -372,7 +374,7 @@ function drag(w) {
 /* ---------------- wiring into the OS ---------------- */
 const _close = window.closeWin, _min = window.minimizeWin;
 window.closeWin = function (w, id, ...r) { if (w.classList.contains("tiled")) { removeApp(id); render(); } return _close.call(this, w, id, ...r); };
-window.minimizeWin = function (w, id, ...r) { if (w.classList.contains("tiled")) float(id); return _min.call(this, w, id, ...r); };
+window.minimizeWin = function (w, id, ...r) { return _min.call(this, w, id, ...r); }; // a minimised tile keeps its place in the layout, and comes back to it
 window.drag = drag;
 /* maximise on a tiled window takes it out of the layout first */
 document.addEventListener("click", (e) => { const b = e.target.closest(".win.tiled .wb.mx"); if (b && !T.locked) float(b.closest(".win").dataset.app); else if (b) { e.stopPropagation(); e.preventDefault(); say("Unlock the group to maximise a window."); } }, true);
@@ -380,7 +382,7 @@ document.addEventListener("click", (e) => { const b = e.target.closest(".win.til
 window.__tileOpen = (w, id) => {
   if (mob()) return;
   if (T.pick && leaves().includes(T.pick) && !T.pick.tabs.includes(id)) { const l = T.pick; T.pick = null; floatRect(w); removeApp(id); if (leaves().includes(l)) { l.tabs = [id]; l.active = id; l.hole = false; } else wrapRoot("left", id); render(); return; }
-  const l = leafOf(id); if (l && l.active !== id) activate(l, id);
+  const l = leafOf(id); if (l) { if (l.active !== id) activate(l, id); else apply(); }
 };
 /* what the right-click menu offers for a window */
 const groupItems = () => !T.root ? [] : [

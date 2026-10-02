@@ -117,6 +117,7 @@ function makeBox(kind) {
       <div class="mu-now"><b class="mu-t"></b><small class="mu-a"></small></div>
       <div class="mu-seek"><span class="mu-tc">0:00</span><input class="mu-sk" type="range" min="0" max="100" step="1" value="0" aria-label="Position in the song" disabled><span class="mu-td">0:00</span></div>
       <div class="mu-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></div>
+      <div class="mu-fm" role="group" aria-label="Focus mode"><button class="mu-fm-b" type="button" aria-pressed="false" title="Focus mode: the music runs with a Focus timer and stops when it ends">Focus mode</button><span class="mu-fm-t"></span><button class="mu-fm-d" data-d="-5" type="button" aria-label="5 minutes shorter">−</button><button class="mu-fm-d" data-d="5" type="button" aria-label="5 minutes longer">+</button></div>
       <div class="mu-shelf" role="list" aria-label="Records"></div>
       <div class="mu-empty" hidden></div></div>`;
   $(".mu-mp", box).onclick = (e) => { e.stopPropagation(); toggle(); };
@@ -128,6 +129,8 @@ function makeBox(kind) {
   sk.oninput = () => { box.__seeking = true; tc.textContent = fmt(+sk.value); };
   sk.onchange = () => { seekTo(+sk.value); box.__seeking = false; };
   sk.onpointerup = sk.onpointercancel = () => setTimeout(() => (box.__seeking = false), 50);
+  $(".mu-fm-b", box).onclick = () => { const f = window.__focusMode; if (f) f.set(!f.get()); paint(); };
+  $$(".mu-fm-d", box).forEach((b) => (b.onclick = () => { if (typeof FT === "undefined" || FT.run || FT.left < FT.dur) return; if (FT.mode !== "focus") ftSet("focus"); ftSetLen(FT_MODES.focus[0] + +b.dataset.d); paint(); }));
   $(".mu-vid", box).onclick = () => { M.video = !M.video; paint(); };
   $(".mu-manage", box).onclick = manage;
   M.boxes.push(box); shelf(box); paintBox(box);
@@ -150,9 +153,9 @@ function seekPaint(box) {
   $(".mu-tc", box).textContent = fmt(on ? M.pos : 0); $(".mu-td", box).textContent = on ? fmt(M.dur) : "0:00";
 }
 setInterval(() => {
-  if (!M.playing && !M.loading) return;
+  const f = window.__focusMode; if (!M.playing && !M.loading && !(f && f.get())) return;
   const t = cur(); try { if (t && t.k === "y" && M.yt && M.yt.getCurrentTime) { M.pos = M.yt.getCurrentTime() || 0; M.dur = M.yt.getDuration() || 0; } } catch {}
-  M.boxes.forEach((b) => b.isConnected && seekPaint(b));
+  M.boxes.forEach((b) => { if (b.isConnected) { seekPaint(b); fmPaint(b); } });
 }, 500);
 function shelf(only) {
   (only ? [only] : M.boxes).forEach((box) => {
@@ -165,6 +168,13 @@ function shelf(only) {
   });
 }
 function paint(full) { M.boxes = M.boxes.filter((b) => b.isConnected || !b.parentNode); M.boxes.forEach((b) => paintBox(b)); if (full) shelf(); engine(); pill(); session(); }
+function fmPaint(box) {
+  const f = window.__focusMode, on = !!(f && f.get()), b = $(".mu-fm-b", box), t = $(".mu-fm-t", box), has = typeof FT !== "undefined";
+  if (!b) return; b.setAttribute("aria-pressed", String(on)); b.classList.toggle("on", on);
+  const started = has && (FT.run || FT.left < FT.dur);
+  t.textContent = !has ? "" : on && FT.mode === "focus" ? ftFmt(FT.left) : FT_MODES.focus[0] + " min";
+  $$(".mu-fm-d", box).forEach((d) => (d.disabled = !has || started));
+}
 function engine() {
   const t = cur(), isY = t && t.k === "y", isS = t && t.k === "s";
   ENG.hidden = !(isS || (isY && M.video)); ENG.classList.toggle("showvid", !!(isY && M.video));
@@ -182,7 +192,7 @@ function paintBox(box) {
   const isY = t && t.k === "y";
   $(".mu-vol", box).hidden = !isY; $(".mu-vid", box).hidden = !isY || box.classList.contains("mu-widget"); $(".mu-vid", box).classList.toggle("on", M.video);
   $(".mu-manage", box).hidden = !isAdmin();
-  seekPaint(box);
+  seekPaint(box); fmPaint(box);
   const em = $(".mu-empty", box);
   if (!M.tracks.length) { em.hidden = false; const P0 = window.P && P.music; em.innerHTML = `<p>${isAdmin() ? "Pick a few records for your visitors." : "The owner hasn't put any records out yet."}</p>${isAdmin() ? '<button class="btn mu-addfirst">Add records</button>' : (P0 ? `<span class="mu-ext"><a href="${esc(P0.youtubeMusic)}" target="_blank" rel="noopener">YouTube Music</a><a href="${esc(P0.spotify)}" target="_blank" rel="noopener">Spotify</a></span>` : "")}`; $(".mu-addfirst", em)?.addEventListener("click", manage); } else em.hidden = true;
 }
@@ -270,7 +280,7 @@ if (typeof APPS !== "undefined" && !APPS.some((a) => a.id === "music")) {
   APPS.push({ id: "music", title: "Music", shape: "clover", color: "c2", glyph: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/>', w: 400, h: 680, render: musicApp });
   try { window.renderIcons && renderIcons(); } catch {}
 }
-window.Music = { toggle, play, pause, next, prev, tracks: () => M.tracks, state: () => ({ playing: M.playing, track: cur() }) };
+window.Music = { toggle, play, pause, next, prev, repaint: () => paint(), tracks: () => M.tracks, state: () => ({ playing: M.playing, track: cur() }) };
 
 if (host) {
   build(); refresh();

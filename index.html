@@ -293,6 +293,10 @@ html.tile-live,html.tile-live *,html.tile-dragging,html.tile-dragging *{user-sel
 .mu-sk::-webkit-slider-thumb,.mu-vol::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--mu-accent);border:3px solid var(--mu-cream);box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .mu-sk::-moz-range-thumb,.mu-vol::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--mu-accent);border:3px solid var(--mu-cream)}
 .mu-sk:disabled{opacity:.45;cursor:default}
+.mu-fm{display:flex;align-items:center;gap:8px}.mu-fm-t{flex:1;text-align:right;font-variant-numeric:tabular-nums;font-size:var(--fs-3);color:var(--mu-ink2);font-weight:var(--fw-b)}
+.mu-fm-b{border:0;border-radius:var(--r-pill);padding:6px 12px;background:color-mix(in srgb,var(--mu-ink) 9%,transparent);color:var(--mu-ink);font:inherit;font-size:var(--fs-3);font-weight:var(--fw-m);cursor:pointer;transition:background var(--d-1)}
+.mu-fm-b.on{background:var(--mu-accent);color:#fff}
+.mu-fm-d{border:0;width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--mu-ink) 9%,transparent);color:var(--mu-ink);font:inherit;font-size:16px;line-height:1;cursor:pointer}.mu-fm-d:disabled{opacity:.35;cursor:default}
 .mu-appwrap{min-height:100%;border-radius:0;overflow:auto}.mu-appwrap .mu-full{padding:calc(16 * var(--u))}.mu-appwrap .mu-t{font-size:var(--fs-8)}
 .mu-appwrap .mu-shelf{flex-wrap:wrap;overflow:visible;gap:calc(14 * var(--u)) calc(12 * var(--u));padding-top:calc(22 * var(--u))}
 .mu-glow{opacity:.14;transition:opacity 1s var(--ease)}.mu[data-s="playing"] .mu-glow{opacity:.85;animation:mu-glow 3.4s ease-in-out infinite}
@@ -3204,7 +3208,12 @@ function ownerChanged(){
 function siteSave(){clearTimeout(SITE.saveT);SITE.status='Saving…';siteStatus();
   SITE.saveT=setTimeout(async()=>{try{const r=await fetch('/api/site',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({settings:SITE.s})});
     if(r.status===401){LIVE.admin=false;SITE.status='Signed out. Changes not saved.';ownerChanged();return}
-    SITE.status=r.ok?'Saved':'Could not save ('+r.status+')'}catch(e){SITE.status='Offline. Could not save'}siteStatus()},600)}
+    SITE.status=r.ok?'Saved':'Could not save ('+r.status+')';
+    if(!r.ok)toast('Not saved for visitors ('+r.status+'). Sign in again and retry.',5000);
+    else{const d=await r.json().catch(()=>null),c=d&&d.settings,n=(x,k)=>((x&&x[k])||[]).length,mt=x=>((x&&x.music&&x.music.tracks)||[]).length;
+      if(c&&(mt(SITE.s)!==mt(c)||n(SITE.s,'videos')!==n(c,'videos')))toast('Some music or videos could not be saved: the server kept '+mt(c)+' records and '+n(c,'videos')+' videos.',6000);
+      if(/--|^localhost|^127\./.test(location.host)&&!SITE.sbw){SITE.sbw=1;toast('You are on a preview address. What you add here is a private sandbox and will not show on rohankumar.pro.',7000)}}
+  }catch(e){SITE.status='Offline. Could not save';toast('Offline. Not saved for visitors yet.',4000)}siteStatus()},600)}
 function siteStatus(){document.querySelectorAll('.ow-st').forEach(el=>el.textContent=SITE.status)}
 function ownerPanel(body){
   const hid=new Set((SITE.s&&SITE.s.hiddenApps)||[]);
