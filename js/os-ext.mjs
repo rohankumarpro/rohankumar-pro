@@ -1,4 +1,5 @@
 // Plugs the newer parts into the desktop: an address for every window, and lazy loading for the bigger apps.
+import "/js/tiling.mjs";
 import { h, $, toast } from "/js/lib.mjs";
 
 const SITE_NAME = () => (typeof P !== "undefined" && P.name) || "Rohan Kumar";

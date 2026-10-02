@@ -243,6 +243,27 @@ html.standalone,html.standalone body{height:100%;overflow:hidden;background:var(
 .tle-two{display:flex;gap:calc(8 * var(--u));align-items:center;flex-wrap:wrap}.tle-two>input{flex:1;min-width:120px}.tle-p{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:var(--fs-3);color:var(--ink2)}.tle-p.off{opacity:.35;pointer-events:none}.tle-p input{width:120px}.tle-p output{min-width:3ch}
 .tle-mv{display:flex;gap:calc(6 * var(--u))}.tle-mv button{border:0;background:var(--surface);color:var(--ink2);font:inherit;font-size:var(--fs-3);border-radius:var(--r-pill);padding:calc(5 * var(--u)) calc(10 * var(--u));cursor:pointer;display:inline-flex;gap:4px;align-items:center}.tle-mv button:hover{color:var(--ink)}
 .tl-edit{margin:0 0 calc(10 * var(--u))}
+/* tiling */
+#tiles{position:absolute;inset:0;pointer-events:none;z-index:4}
+html.focus-mode #tiles{display:none}
+.tile-div{position:absolute;pointer-events:auto;touch-action:none;z-index:6;display:grid;place-items:center;outline:0}
+.tile-div i{display:block;border-radius:99px;background:var(--primary);opacity:0;transition:opacity var(--d-2)}
+.tile-div.row{cursor:col-resize}.tile-div.row i{width:4px;height:44px}
+.tile-div.col{cursor:row-resize}.tile-div.col i{height:4px;width:44px}
+.tile-div:hover i,.tile-div:focus-visible i{opacity:.45}.tile-div.on i{opacity:1}
+.tile-slot{position:absolute;pointer-events:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(8 * var(--u));border-radius:var(--r-win);color:var(--ink2);font-weight:var(--fw-m);font-size:var(--fs-4);background:color-mix(in srgb,var(--surface) 34%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ink) 16%,transparent);transition:background var(--d-2),left var(--d-3) var(--ease),top var(--d-3) var(--ease),width var(--d-3) var(--ease),height var(--d-3) var(--ease)}
+.tile-slot:hover{background:color-mix(in srgb,var(--surface) 55%,transparent)}
+.tile-slot .add{width:52px;height:52px;border:0;border-radius:50%;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);transition:transform var(--d-2) var(--ease-spring)}.tile-slot .add:hover{transform:scale(1.08)}.tile-slot .add svg{width:22px;height:22px}
+.tile-slot .x{position:absolute;top:10px;right:10px;width:30px;height:30px;border:0;border-radius:50%;background:color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink);display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity var(--d-2)}.tile-slot:hover .x,.tile-slot .x:focus-visible{opacity:1}.tile-slot .x svg{width:14px;height:14px}
+.tile-ghost{position:absolute;z-index:3000;pointer-events:none;display:grid;place-items:center;border-radius:var(--r-win);background:color-mix(in srgb,var(--primary) 16%,transparent);box-shadow:inset 0 0 0 3px var(--primary);transition:left var(--d-2) var(--ease),top var(--d-2) var(--ease),width var(--d-2) var(--ease),height var(--d-2) var(--ease)}
+.tile-ghost[hidden]{display:none}.tile-ghost b{background:var(--primary);color:var(--on-primary);font-size:var(--fs-3);padding:calc(5 * var(--u)) calc(12 * var(--u));border-radius:var(--r-pill)}
+.win.tiled{min-width:0;min-height:0;border-radius:var(--r-6);transition:left var(--d-3) var(--ease),top var(--d-3) var(--ease),width var(--d-3) var(--ease),height var(--d-3) var(--ease)}
+.win.tiled .rz{display:none}.win.tabhid{display:none!important}
+html.tile-live .win.tiled,html.tile-live .tile-slot,html.tile-dragging .win{transition:none!important}
+html.tile-live,html.tile-live *,html.tile-dragging,html.tile-dragging *{user-select:none!important;-webkit-user-select:none!important}
+.bar .ttl.tabs{display:flex;gap:2px;min-width:0;flex:1;overflow:hidden}
+.bar .tab{border:0;background:none;color:var(--ink2);font:inherit;font-size:var(--fs-4);padding:calc(4 * var(--u)) calc(11 * var(--u));border-radius:var(--r-pill);cursor:pointer;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.bar .tab:hover{background:var(--tint)}.bar .tab.on{background:var(--surface2);color:var(--ink);font-weight:var(--fw-m)}
 .sel{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--u));width:100%;min-height:calc(40 * var(--u));padding:0 calc(12 * var(--u)) 0 calc(14 * var(--u));border:0;border-radius:var(--r-5);background:var(--surface2);color:var(--ink);font:inherit;font-size:var(--fs-4);font-weight:var(--fw-m);cursor:pointer;text-align:left;transition:background var(--d-1)}
 .sel:hover{background:var(--surface3)}.sel>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sel svg{flex:none;width:16px;height:16px;color:var(--ink2);transition:transform var(--d-2) var(--ease)}.sel[aria-expanded=true] svg{transform:rotate(180deg)}
 select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;margin:0!important;padding:0!important}
@@ -3267,7 +3288,7 @@ const mobile=()=>innerWidth<=760;
 function openApp(id,opt){
   hideLauncher();
   const a=APPS.find(x=>x.id===id); if(!a||!appVisible(id))return;
-  if(open[id]){const ow=open[id];if(opt&&opt.toggle&&!ow.classList.contains('min')&&!ow.classList.contains('minimizing')&&ow.classList.contains('top')){const to=lastOrigin&&Date.now()-lastOrigin.t<1500?lastOrigin:null;lastOrigin=null;minimizeWin(ow,id,false,to);return}if(ow.classList.contains('min')){ow.classList.remove('min');if(lastOrigin&&Date.now()-lastOrigin.t<1500){const r0=ow.getBoundingClientRect();ow.style.transformOrigin=`${lastOrigin.x-r0.left}px ${lastOrigin.y-r0.top}px`}ow.classList.add('restoring');lastOrigin=null;SFX.play('open')}else SFX.play('tap');focus(ow);shelf();return}
+  if(open[id]){const ow=open[id];if(opt&&opt.toggle&&!ow.classList.contains('min')&&!ow.classList.contains('minimizing')&&ow.classList.contains('top')){const to=lastOrigin&&Date.now()-lastOrigin.t<1500?lastOrigin:null;lastOrigin=null;minimizeWin(ow,id,false,to);return}if(ow.classList.contains('min')){ow.classList.remove('min');if(lastOrigin&&Date.now()-lastOrigin.t<1500){const r0=ow.getBoundingClientRect();ow.style.transformOrigin=`${lastOrigin.x-r0.left}px ${lastOrigin.y-r0.top}px`}ow.classList.add('restoring');lastOrigin=null;SFX.play('open')}else SFX.play('tap');focus(ow);shelf();window.__tileOpen&&__tileOpen(ow,id);return}
   const w=document.createElement('section');w.className='win';w.dataset.app=id;w.setAttribute('aria-label',a.title);
   const W=Math.min(a.w,innerWidth-40),H=Math.min(a.h,innerHeight-160);
   w.style.width=W+'px';w.style.height=H+'px';
@@ -3287,7 +3308,7 @@ function openApp(id,opt){
   w.querySelector('.mn').onclick=()=>minimizeWin(w,id);
   w.querySelector('.mx').onclick=()=>{w.classList.add('resizing-anim');w.classList.toggle('max');SFX.play('tap');setTimeout(()=>w.classList.remove('resizing-anim'),380)};
   w.addEventListener('pointerdown',()=>focus(w));
-  drag(w);resize(w);focus(w);shelf();
+  drag(w);resize(w);focus(w);shelf();window.__tileOpen&&__tileOpen(w,id);
 }
 function closeWin(w,id,quiet){if(w.classList.contains('closing'))return;w.classList.remove('min','minimizing');w.classList.add('closing');if(!quiet)SFX.play('close');delete open[id];const ri=RUN.indexOf(id);if(ri>-1)RUN.splice(ri,1);shelf();const rm=()=>w.isConnected&&w.remove();w.addEventListener('animationend',rm,{once:true});setTimeout(rm,400)}
 function closeAll(){const ws=Object.entries(open);if(!ws.length)return;SFX.play('close');ws.forEach(([id,w],i)=>setTimeout(()=>closeWin(w,id,true),i*45));if(ws.length>1)toast(`Closed ${ws.length} apps`)}
@@ -3341,7 +3362,7 @@ function showCtx(x,y,custom){SFX.play('tap');
     ...(desk.dataset.cat==="off"?[["Bring Mochi back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake Mochi gently",()=>MOCHI.wake()]]:[["Talk to Mochi",()=>MOCHI.talk()],["Let Mochi nap",()=>MOCHI.sleep()]]),
     ...(desk.dataset.status==="off"?[["Show status widget",()=>{desk.dataset.status="on";save()}]]:[]),
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
-    ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),
+    ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),...(window.__tileDesktop?__tileDesktop():[]),
     ...(localStorage.getItem('iconOrder')?[["Reset icon layout",()=>{try{localStorage.removeItem('iconOrder')}catch(e){}renderIcons();SFX.play('pop')}]]:[]),null,["Settings",()=>openApp('settings')]];
   ctx.innerHTML=items.map((it,i)=>it?`<button role="menuitem" data-i="${i}"${it[2]?' class="danger"':''}>${it[0]}</button>`:'<hr>').join('');
   ctx.onmousedown=e=>e.preventDefault();
@@ -3351,7 +3372,7 @@ function showCtx(x,y,custom){SFX.play('tap');
   ctx.querySelector('button').focus({focusVisible:false,preventScroll:true});
 }
 function hideCtx(){ctx.hidden=true}
-desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;if(e.target.closest('.win,#shelf,.icons,.widgets,.cat,.jar,.launcher,.qs,.ctx,.topbar,.mw,.shelfw,.lock,#toast,.cat-chat,#boot,.dock-handle,.qrbig'))return;
+desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;if(e.target.closest('.win,#shelf,.icons,.widgets,.cat,.jar,.launcher,.qs,.ctx,.topbar,.mw,.shelfw,.lock,#toast,.cat-chat,#boot,.dock-handle,.qrbig,#tiles,.tile-ghost'))return;
   if(!L.hidden||!qs.hidden||!ctx.hidden)return;minimizeAll()},true);
 /* Our own right-click menu, everywhere. The browser's menu never shows. What it offers depends on what was clicked. */
 /* ---- Every app can add its own right-click items:  registerCtx('docs',(target,event)=>[["Label",()=>{...}],null,["Delete",fn,'danger']]) ---- */
@@ -3382,6 +3403,7 @@ function ctxItemsFor(e){
   /* 2. the app you are in */
   if(win&&!el.closest('.lock')){const id=win.dataset.app,max=win.classList.contains('max'),ap=APPS.find(x=>x.id===id);
     if(mine.length){if(out.length)out.push(null);out.push(...mine)}
+    {const tm=window.__tileMenu?__tileMenu(win):[];if(tm.length)out.push(null,...tm)}
     out.push(null,["Focus mode",()=>Focus.toggle(win)]);
     if(!mobile())out.push([max?"Restore size":"Maximise",()=>win.querySelector('.mx').click()]);
     out.push(["Minimise",()=>win.querySelector('.mn').click()],["Close "+(ap?ap.title:'app'),()=>win.querySelector('.x').click(),'danger']);
