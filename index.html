@@ -330,6 +330,18 @@ html.tile-live,html.tile-live *,html.tile-dragging,html.tile-dragging *{user-sel
 .ae-grid button{height:44px;border:0;border-radius:var(--r-4);background:var(--surface2);color:var(--ink);display:grid;place-items:center;cursor:pointer}.ae-grid button:hover{background:var(--surface3)}.ae-grid button.on{outline:2px solid var(--primary)}
 .ae-up{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .wcard.st .wedit{opacity:1;top:auto;bottom:8px;right:8px}
+/* tiling groups: locked, and full screen */
+.win.lifting{z-index:970;box-shadow:0 24px 60px rgba(0,0,0,.28);transition:none!important}
+html.grp-full .topbar,html.grp-full #shelf,html.grp-full .widgets,html.grp-full #icons,html.grp-full .cat,html.grp-full .jar,html.grp-full .dock-handle,html.grp-full #musicPill{display:none!important}
+html.grp-full .win:not(.tiled){visibility:hidden;pointer-events:none}
+.grp-exit{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:3500;border:0;opacity:.0;transition:opacity var(--d-3);font-weight:var(--fw-m);cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.grp-exit:hover,.grp-exit:focus-visible,html.grp-full #desk:hover .grp-exit{opacity:.92}
+@media (hover:none){.grp-exit{opacity:.92}}
+/* app drawer: window bar */
+.lwin{display:flex;align-items:center;gap:calc(8 * var(--u));flex-wrap:wrap;margin:calc(10 * var(--u)) 0 calc(4 * var(--u))}
+.lwin[hidden]{display:none}.lw-n{font-size:var(--fs-2);color:var(--ink2);font-weight:var(--fw-b);letter-spacing:.04em;text-transform:uppercase;margin-right:auto}
+.lw-b{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:var(--r-pill);padding:calc(7 * var(--u)) calc(12 * var(--u));background:var(--surface2);color:var(--ink);font:inherit;font-size:var(--fs-3);font-weight:var(--fw-m);cursor:pointer;transition:background var(--d-1)}
+.lw-b:hover{background:var(--surface3)}.lw-b.danger{color:var(--danger)}.lw-b svg{width:16px;height:16px}
 .sel{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--u));width:100%;min-height:calc(40 * var(--u));padding:0 calc(12 * var(--u)) 0 calc(14 * var(--u));border:0;border-radius:var(--r-5);background:var(--surface2);color:var(--ink);font:inherit;font-size:var(--fs-4);font-weight:var(--fw-m);cursor:pointer;text-align:left;transition:background var(--d-1)}
 .sel:hover{background:var(--surface3)}.sel>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sel svg{flex:none;width:16px;height:16px;color:var(--ink2);transition:transform var(--d-2) var(--ease)}.sel[aria-expanded=true] svg{transform:rotate(180deg)}
 select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;margin:0!important;padding:0!important}
@@ -349,6 +361,8 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 .wall .rt{transform-box:fill-box;transform-origin:center;animation:spin var(--d,120s) linear infinite}
 @keyframes float{to{transform:translate(var(--x,0),var(--y,0)) rotate(var(--r,0deg)) scale(var(--s,1))}}
 #desk[data-motion="off"] .wall *,.walls button svg *{animation:none!important}
+#desk[data-motion="off"] .ico,#desk[data-motion="off"] .ico *:not([transform]){transition:none!important;animation:none!important;transform:none!important}
+#desk[data-motion="off"] .dicon:hover .g-pen,#desk[data-motion="off"] .dicon:hover .g-draw{animation:none!important}
 .wall .tw circle{animation:twinkle var(--t,4s) ease-in-out infinite;opacity:.15}
 @keyframes twinkle{50%{opacity:.75}}
 @media (prefers-reduced-motion:reduce){.wall *{animation:none!important}}
@@ -1334,6 +1348,7 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
   <div class="launcher" id="launcher" hidden>
     <div class="lhead"><img id="lImg" alt=""><div><h2 id="lHi"></h2><p class="sub" id="lSub"></p></div><button class="wb" id="lLock" aria-label="Lock screen" title="Lock screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></div>
     <input class="search" id="lSearch" placeholder="Search apps" aria-label="Search apps">
+    <div class="lwin" id="lWin" hidden></div>
     <div class="lgrid" id="lGrid"></div>
   </div>
   <nav class="shelf" id="shelf" aria-label="Shelf"></nav>
@@ -2863,9 +2878,10 @@ function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
   body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
-  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Mochi's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold Mochi or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
+  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Mochi the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>Mochi's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold Mochi or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
   if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
+  body.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('rkTapMin',b.dataset.tm==='on'?'1':'0')}catch(e){}settings(body)});
   body.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{desk.dataset.motion=b.dataset.mo;save();settings(body)});
   body.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{desk.dataset.status=b.dataset.sw;save();settings(body)});
   body.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{desk.dataset.cat=b.dataset.ct;save();settings(body)});
@@ -3488,7 +3504,7 @@ function showCtx(x,y,custom){SFX.play('tap');
 }
 function hideCtx(){ctx.hidden=true}
 desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;if(e.target.closest('.win,#shelf,.icons,.widgets,.cat,.jar,.launcher,.qs,.ctx,.topbar,.mw,.shelfw,.lock,#toast,.cat-chat,#boot,.dock-handle,.qrbig,#tiles,.tile-ghost'))return;
-  if(!L.hidden||!qs.hidden||!ctx.hidden)return;minimizeAll()},true);
+  if(!L.hidden||!qs.hidden||!ctx.hidden)return;if(window.__tapMin&&__tapMin())minimizeAll()},true);
 /* Our own right-click menu, everywhere. The browser's menu never shows. What it offers depends on what was clicked. */
 /* ---- Every app can add its own right-click items:  registerCtx('docs',(target,event)=>[["Label",()=>{...}],null,["Delete",fn,'danger']]) ---- */
 const APP_CTX={};
@@ -3746,6 +3762,7 @@ function magnify(s){
 }
 const L=document.getElementById('launcher'),LS=document.getElementById('lSearch');
 function drawLauncher(q=""){
+  window.__winBar&&__winBar();
   document.getElementById('lGrid').innerHTML=APPS.filter(a=>appVisible(a.id)&&a.title.toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="dicon" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('')||'<p class="sub">No apps match that. Try "projects".</p>';
   L.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app,{toggle:true}));
 }

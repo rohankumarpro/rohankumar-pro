@@ -13,7 +13,8 @@ const GAP = 10, MINW = 200, MINH = 130, EDGE = 26;
 const html = document.documentElement;
 const mob = () => innerWidth <= 760;
 let seq = 0;
-const T = { root: null, layer: null, ghost: null, pick: null, raf: 0 };
+const T = { root: null, layer: null, ghost: null, pick: null, raf: 0, locked: false, full: false };
+const say = (m) => window.toast && window.toast(m);
 
 const leaf = (tabs = [], hole = false) => ({ t: "leaf", id: ++seq, tabs: tabs.slice(), active: tabs[0] || null, hole: hole || !tabs.length });
 const split = (dir, kids, sizes) => ({ t: "split", dir, kids, sizes: sizes || kids.map(() => 1 / kids.length) });
@@ -67,6 +68,7 @@ function removeApp(id) {
 /* ---------------- geometry ---------------- */
 function work() {
   const d = desk(), H = d.clientHeight, sh = document.getElementById("shelf");
+  if (T.full) return { x: 12, y: 12, w: d.clientWidth - 24, h: H - 24 };
   let bottom = 34;
   if (sh && !/dock-(auto|peek)/.test(html.className)) { const r = sh.getBoundingClientRect(), top = r.top - d.getBoundingClientRect().top; if (r.height && top < H - 20) bottom = Math.max(34, H - top + 10); else bottom = 92; }
   return { x: 12, y: 48, w: d.clientWidth - 24, h: H - 48 - bottom };
@@ -154,7 +156,7 @@ function render() {
   leaves().forEach((l) => { l.tabs = l.tabs.filter((id) => winOf(id)); if (l.active && !l.tabs.includes(l.active)) l.active = l.tabs[0] || null; });
   normalize();
   html.classList.toggle("has-tiles", !!T.root);
-  if (!T.root) { if (T.layer) T.layer.innerHTML = ""; return; }
+  if (!T.root) { T.locked = false; if (T.full) setFull(false); html.classList.remove("grp-locked"); if (T.layer) T.layer.innerHTML = ""; return; }
   build(); leaves().forEach(paintTabs);
 }
 const later = () => { cancelAnimationFrame(T.raf); T.raf = requestAnimationFrame(() => T.root && apply()); };
@@ -211,7 +213,9 @@ function edgeLeaf(side) {
   return on.find((l) => cy >= l.rect.y && cy <= l.rect.y + l.rect.h) || on[0] || null;
 }
 function tile(id, target) {
-  const w = winOf(id); if (!w) return; floatRect(w);
+  const w = winOf(id); if (!w) return;
+  if (T.locked && !leafOf(id)) { say("This group is locked. Release it to start a new layout."); return; }
+  floatRect(w);
   removeApp(id);
   const eh = target.kind === "edge" ? edgeLeaf(target.side) : null;
   if (eh && !eh.tabs.length) { eh.tabs = [id]; eh.active = id; eh.hole = false; }
@@ -235,10 +239,49 @@ function float(id, opt = {}) {
   }
   render();
 }
-function releaseAll() { apps().forEach((id) => float(id)); T.root = null; render(); }
+function releaseAll() { setFull(false); T.locked = false; apps().forEach((id) => float(id)); T.root = null; render(); }
 function equalise(n) { walk(n, (x) => { if (x.t === "split") x.sizes = x.kids.map(() => 1 / x.kids.length); }); apply(); }
+function swapLeaves(a, b) {
+  if (!a || !b || a === b) return;
+  [a.tabs, b.tabs] = [b.tabs, a.tabs]; [a.active, b.active] = [b.active, a.active]; a.hole = !a.tabs.length; b.hole = false; render();
+}
+/* every open window into one tidy bento layout, in one go */
+function autoGrid() {
+  if (mob()) { say("Grids need a bigger screen."); return false; }
+  const prior = apps(), run = Object.keys(open).filter((id) => { const w = open[id]; return w && !w.classList.contains("min") && !w.classList.contains("minimizing"); });
+  const ids = [...prior.filter((id) => run.includes(id)), ...run.filter((id) => !prior.includes(id))];
+  if (ids.length < 2) { say("Open two or more apps to arrange them."); return false; }
+  setFull(false); T.locked = false; T.pick = null;
+  ids.forEach((id) => { const w = winOf(id); if (w) floatRect(w); });
+  T.root = null; seq = 0;
+  const L = (id) => leaf([id]), n = ids.length; let root;
+  if (n === 2) root = split("row", ids.map(L));
+  else if (n === 3) root = split("row", [L(ids[0]), split("col", [L(ids[1]), L(ids[2])])], [0.55, 0.45]);
+  else {
+    const rows = Math.max(2, Math.round(Math.sqrt(n / 1.6))), per = []; for (let i = 0; i < rows; i++) per.push(Math.floor(n / rows) + (i < n % rows ? 1 : 0));
+    let k = 0; const rs = per.map((c) => { const cells = ids.slice(k, k + c).map(L); k += c; return cells.length === 1 ? cells[0] : split("row", cells); });
+    root = split("col", rs);
+  }
+  T.root = root; render(); const f = winOf(ids[0]); f && window.focus && window.focus(f); return true;
+}
+function setLocked(on) { if (!T.root) return; T.locked = !!on; html.classList.toggle("grp-locked", T.locked); say(T.locked ? "Group locked. Drag to swap places, drag the gaps to resize." : "Group unlocked."); }
+function setFull(on) {
+  on = !!on && !!T.root; if (T.full === on) return; T.full = on; html.classList.toggle("grp-full", on);
+  let b = document.getElementById("grpExit");
+  if (on) {
+    if (!b) { b = document.createElement("button"); b.id = "grpExit"; b.type = "button"; b.className = "grp-exit pill"; b.textContent = "Exit full screen"; b.onclick = () => setFull(false); document.getElementById("desk").appendChild(b); }
+    b.hidden = false; try { const r = document.documentElement; if (!document.fullscreenElement && r.requestFullscreen) { T.fsOwn = true; r.requestFullscreen().catch(() => { T.fsOwn = false; }); } } catch { T.fsOwn = false; }
+  } else {
+    if (b) b.hidden = true;
+    try { if (T.fsOwn && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch {} T.fsOwn = false;
+  }
+  later();
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && T.full) setFull(false); });
+document.addEventListener("fullscreenchange", () => { if (T.full && T.fsOwn && !document.fullscreenElement) setFull(false); });
 function activate(l, id) { l.active = id; render(); const w = winOf(id); w && window.focus && window.focus(w); }
 function pickFor(l) {
+  if (T.locked) { say("This group is locked. Release it to start a new layout."); return; }
   T.pick = l; clearTimeout(T.pickT); T.pickT = setTimeout(() => (T.pick = null), 30000);
   window.toast && window.toast("Pick an app for this slot"); window.toggleLauncher && (document.getElementById("launcher").hidden ? window.toggleLauncher() : 0);
 }
@@ -270,7 +313,7 @@ function ghostRect(t) {
   }
   const r = t.leaf.rect, z = t.zone; let g;
   if (z === "center") g = r; else if (z === "left") g = { x: r.x, y: r.y, w: r.w / 2, h: r.h }; else if (z === "right") g = { x: r.x + r.w / 2, y: r.y, w: r.w / 2, h: r.h }; else if (z === "top") g = { x: r.x, y: r.y, w: r.w, h: r.h / 2 }; else g = { x: r.x, y: r.y + r.h / 2, w: r.w, h: r.h / 2 };
-  return { ...g, label: !t.leaf.tabs.length ? "Fill this slot" : z === "center" ? "Add as a tab" : "Split " + z };
+  return { ...g, label: t.swap ? "Swap places" : !t.leaf.tabs.length ? "Fill this slot" : z === "center" ? "Add as a tab" : "Split " + z };
 }
 function showGhost(t) {
   if (!t) { if (T.ghost) T.ghost.hidden = true; return; }
@@ -287,7 +330,7 @@ function drag(w) {
     if (e.button !== 0 || e.target.closest("button:not(.tab)") || mob() || w.classList.contains("max")) return;
     if (e.target.closest(".tab")) return;
     const tiled = w.classList.contains("tiled"), r0 = w.getBoundingClientRect();
-    st = { sx: e.clientX, sy: e.clientY, id: e.pointerId, moved: false, tiled, r0, ox: w.offsetLeft, oy: w.offsetTop, t: null };
+    st = { sx: e.clientX, sy: e.clientY, id: e.pointerId, moved: false, tiled, r0, ox: w.offsetLeft, oy: w.offsetTop, t: null, lock: tiled && T.locked };
     bar.setPointerCapture(e.pointerId); bar.style.cursor = "grabbing";
   });
   bar.addEventListener("pointermove", (e) => {
@@ -295,7 +338,8 @@ function drag(w) {
     let dx = e.clientX - st.sx, dy = e.clientY - st.sy;
     if (!st.moved) {
       if (Math.hypot(dx, dy) < 5) return; st.moved = true;
-      if (st.tiled) { // lift the window out of the layout, back to the size it had before
+      if (st.lock) w.classList.add("lifting");
+      else if (st.tiled) { // lift the window out of the layout, back to the size it had before
         const id = w.dataset.app, f = w.__float || { width: Math.min(760, innerWidth - 100), height: Math.min(540, innerHeight - 160) };
         const rel = Math.max(0.1, Math.min(0.9, (st.sx - st.r0.left) / st.r0.width));
         float(id, { keep: true });
@@ -307,17 +351,20 @@ function drag(w) {
     }
     w.style.left = Math.min(innerWidth - 80, Math.max(-w.offsetWidth + 80, st.ox + dx)) + "px";
     w.style.top = Math.min(innerHeight - 120, Math.max(44, st.oy + dy)) + "px";
-    st.t = targetAt(e.clientX, e.clientY); showGhost(st.t);
+    if (st.lock) { const t = targetAt(e.clientX, e.clientY); st.t = t && t.kind === "leaf" && t.leaf !== leafOf(w.dataset.app) ? { kind: "leaf", leaf: t.leaf, zone: "center", swap: true } : null; }
+    else st.t = T.locked ? null : targetAt(e.clientX, e.clientY);
+    showGhost(st.t);
   });
   const end = (e) => {
     if (!st || (e && e.pointerId !== st.id)) return;
     const s = st; st = null; bar.style.cursor = ""; html.classList.remove("tile-dragging"); showGhost(null);
-    if (s.moved && s.t && e && e.type === "pointerup") tile(w.dataset.app, s.t); else if (s.moved) { const f = { left: w.offsetLeft, top: w.offsetTop, width: w.offsetWidth, height: w.offsetHeight }; w.__float = f; }
+    if (s.lock) { w.classList.remove("lifting"); if (s.moved && s.t && e && e.type === "pointerup") swapLeaves(leafOf(w.dataset.app), s.t.leaf); else apply(); }
+    else if (s.moved && s.t && e && e.type === "pointerup") tile(w.dataset.app, s.t); else if (s.moved) { const f = { left: w.offsetLeft, top: w.offsetTop, width: w.offsetWidth, height: w.offsetHeight }; w.__float = f; }
   };
   bar.addEventListener("pointerup", end); bar.addEventListener("pointercancel", end);
   bar.addEventListener("dblclick", (e) => {
     if (e.target.closest("button") || mob()) return;
-    if (w.classList.contains("tiled")) { float(w.dataset.app); return; }
+    if (w.classList.contains("tiled")) { if (!T.locked) float(w.dataset.app); return; }
     w.classList.add("resizing-anim"); w.classList.toggle("max"); setTimeout(() => w.classList.remove("resizing-anim"), 380);
   });
 }
@@ -328,7 +375,7 @@ window.closeWin = function (w, id, ...r) { if (w.classList.contains("tiled")) { 
 window.minimizeWin = function (w, id, ...r) { if (w.classList.contains("tiled")) float(id); return _min.call(this, w, id, ...r); };
 window.drag = drag;
 /* maximise on a tiled window takes it out of the layout first */
-document.addEventListener("click", (e) => { const b = e.target.closest(".win.tiled .wb.mx"); if (b) float(b.closest(".win").dataset.app); }, true);
+document.addEventListener("click", (e) => { const b = e.target.closest(".win.tiled .wb.mx"); if (b && !T.locked) float(b.closest(".win").dataset.app); else if (b) { e.stopPropagation(); e.preventDefault(); say("Unlock the group to maximise a window."); } }, true);
 /* opening an app from an empty slot's + puts it in that slot; opening a hidden tab shows it */
 window.__tileOpen = (w, id) => {
   if (mob()) return;
@@ -336,22 +383,33 @@ window.__tileOpen = (w, id) => {
   const l = leafOf(id); if (l && l.active !== id) activate(l, id);
 };
 /* what the right-click menu offers for a window */
+const groupItems = () => !T.root ? [] : [
+  [T.locked ? "Unlock this group" : "Lock this group (no new apps)", () => setLocked(!T.locked)],
+  [T.full ? "Exit full screen group" : "Full screen this group", () => setFull(!T.full)],
+];
 window.__tileMenu = (w) => {
   if (mob()) return [];
   const id = w.dataset.app, l = leafOf(id), o = [];
   if (l) {
-    o.push(["Split right (new slot)", () => splitHole(l, "right")], ["Split below (new slot)", () => splitHole(l, "bottom")]);
-    if (l.tabs.length > 1) o.push(["Move out of the tabs", () => float(id)]);
-    o.push(["Float this window", () => float(id)]);
+    if (!T.locked) {
+      o.push(["Split right (new slot)", () => splitHole(l, "right")], ["Split below (new slot)", () => splitHole(l, "bottom")]);
+      if (l.tabs.length > 1) o.push(["Move out of the tabs", () => float(id)]);
+      o.push(["Float this window", () => float(id)]);
+    }
     const p = parentOf(l); if (p) o.push(["Make these tiles equal", () => equalise(p)]);
-    o.push(["Release all tiles", releaseAll]);
-  } else {
+    o.push(...groupItems(), ["Release all tiles", releaseAll]);
+  } else if (!T.locked) {
     o.push(["Tile to the left", () => { tile(id, { kind: "edge", side: "left" }); }], ["Tile to the right", () => { tile(id, { kind: "edge", side: "right" }); }]);
-    if (T.root) o.push(["Release all tiles", releaseAll]);
+    if (T.root) o.push(...groupItems(), ["Release all tiles", releaseAll]);
   }
   return o;
 };
-window.__tileDesktop = () => (T.root ? [["Release all tiles", releaseAll]] : []);
+window.__tileDesktop = () => {
+  const n = Object.keys(open).filter((id) => !open[id].classList.contains("min")).length, o = [];
+  if (!mob() && n > 1) o.push(["Arrange open apps in a grid", autoGrid]);
+  if (T.root) o.push(...groupItems(), ["Release all tiles", releaseAll]);
+  return o;
+};
 addEventListener("resize", later);
 new MutationObserver(later).observe(html, { attributes: true, attributeFilter: ["class"] });
-window.Tiles = { tile, float, releaseAll, state: () => T.root };
+window.Tiles = { tile, float, releaseAll, autoGrid, lock: setLocked, full: setFull, locked: () => T.locked, isFull: () => T.full, active: () => !!T.root, state: () => T.root };
