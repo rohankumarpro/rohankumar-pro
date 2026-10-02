@@ -6,7 +6,7 @@ import { ICONS } from "../../shared/icons.mjs";
 
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
 export const GRADS = ["g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8"];
-const MAX_PAGES = 600, HIST_EVERY = 10 * 60_000, HIST_KEEP = 8;
+const MAX_PAGES = 600, HIST_EVERY = 5 * 60_000, HIST_KEEP = 40;
 export const idxKey = "docs-index";
 export const pageKey = (id) => `doc-${id}`;
 export const histKey = (id) => `doc-hist-${id}`;
@@ -66,10 +66,14 @@ export async function updatePage(store, id, b) {
   if (Array.isArray(b.blocks)) {
     blocks = cleanBlocks(b.blocks); meta.words = wordCount(blocks);
     const cur = await store.get(pageKey(id), { type: "json" });
-    // a rolling history: at most one snapshot every ten minutes, the last eight kept
+    // two tabs or two devices: the newer saved text wins, so refuse a save made from an older copy and let the editor keep both
+    if (cur && b.base && (cur.updated || 0) > +b.base && !b.force) return { conflict: true, current: { meta: all[i], blocks: cur.blocks || [] } };
+    // a rolling history: a snapshot at most every five minutes, the last forty kept. A save that removes most of the
+    // text always keeps the version it replaces, whatever the timer says.
     if (cur && cur.blocks?.length) {
       const hist = (await store.get(histKey(id), { type: "json" })) ?? [];
-      if (!hist.length || Date.now() - hist[0].ts > HIST_EVERY) await store.setJSON(histKey(id), [{ ts: Date.now(), title: all[i].title, blocks: cur.blocks }, ...hist].slice(0, HIST_KEEP));
+      const was = wordCount(cur.blocks), shrunk = was >= 20 && meta.words < was * 0.4;
+      if (!hist.length || shrunk || Date.now() - hist[0].ts > HIST_EVERY) await store.setJSON(histKey(id), [{ ts: Date.now(), title: all[i].title, blocks: cur.blocks }, ...hist].slice(0, HIST_KEEP));
     }
   }
   if ("trashed" in b) { // moving to the bin takes the whole branch with it; restoring brings the whole branch back
@@ -86,10 +90,16 @@ export async function updatePage(store, id, b) {
   return { meta, blocks, index: all };
 }
 
-export async function purge(store, id) {
+export async function purge(store, id, bk) {
   const all = await loadIndex(store), kids = new Set([id]); let grew = true;
   while (grew) { grew = false; for (const x of all) if (x.parent && kids.has(x.parent) && !kids.has(x.id)) { kids.add(x.id); grew = true; } }
   if (!all.some((x) => kids.has(x.id))) return false;
+  if (bk) { // a last safety copy of what is being deleted for good, kept in the separate backup store
+    try {
+      const pages = {}; for (const k of kids) pages[k] = { meta: all.find((x) => x.id === k), page: await store.get(pageKey(k), { type: "json" }) };
+      await bk.setJSON(`purged-${Date.now()}-${id}`, { kind: "docs-purged", ts: Date.now(), pages });
+    } catch {}
+  }
   await saveJSON(store, idxKey, all.filter((x) => !kids.has(x.id)));
   for (const k of kids) { await store.delete(pageKey(k)); await store.delete(histKey(k)); }
   return true;

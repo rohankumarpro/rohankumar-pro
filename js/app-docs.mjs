@@ -155,6 +155,11 @@ export async function docsApp(body, slug) {
     if (CACHE[id]) blocks = CACHE[id].blocks;
     else { const r = await api("/api/docs?id=" + id); if (!r.ok) { toast(r.status === 404 ? "That page isn't available." : "Could not open the page"); return home(mode); } blocks = r.data.blocks; }
     delete CACHE[id];
+    let recovered = false; { const dr = owner && !meta.trashed ? draftRead(id) : null;
+      if (dr && Array.isArray(dr.blocks) && JSON.stringify(dr.blocks) !== JSON.stringify(blocks)) {
+        if ((meta.updated || 0) <= (dr.base || 0)) { blocks = dr.blocks; if (dr.title != null) meta.title = dr.title; recovered = true; } // nothing newer was saved since: carry on from the draft
+        else { await api("/api/docs", { method: "POST", body: { title: (dr.title || "Untitled") + " (my edit)", parent: meta.parent || null, blocks: dr.blocks } }); draftClear(); await load(true); drawSide(); toast("Text that was not saved is kept as a separate page."); } // the page changed meanwhile: keep both
+      } else if (dr) draftClear(); }
     D.open = { ...meta }; D.blocks = blocks; D.status = "";
     root.dataset.view = "page"; drawSide();
     const editable = owner && !meta.trashed;
@@ -175,6 +180,7 @@ export async function docsApp(body, slug) {
     if (editable) {
       D.ed = await makeEditor(host, { blocks: D.blocks, placeholder: "Type '/' for blocks, or just start writing…", onChange: () => { touch(); drawFoot(); }, onStatus: (s) => { if (s) setStatus(s); } });
       if (fresh || !meta.title) setTimeout(() => title.focus(), 50);
+      if (recovered) { toast("Recovered text that was not saved yet."); touch(true); }
     } else { showBlocks(host, D.blocks); wireBlocks(host); }
     R.item(body, keyOf(meta), `${label(meta)} — Docs`, mode);
     wireTop(editable);
@@ -270,15 +276,29 @@ export async function docsApp(body, slug) {
   }
 
   /* ----- saving ----- */
-  function touch(now) { if (!owner || !D.open) return; clearTimeout(D.saveT); setStatus("Unsaved…"); D.saveT = setTimeout(save, now ? 0 : 1100); }
+  /* a local copy of what is being typed, so a closed tab, a dead connection or a crash can never cost text */
+  const DRAFT = "dxDraft";
+  const draftClear = () => { try { localStorage.removeItem(DRAFT); } catch {} };
+  const draftWrite = () => { const cur = D.open; if (!cur || !D.ed || !owner) return; try { const t = $(".dx-title", main); localStorage.setItem(DRAFT, JSON.stringify({ id: cur.id, ts: Date.now(), base: cur.updated || 0, title: t ? t.value : cur.title, blocks: D.ed.getBlocks() })); } catch {} };
+  const draftRead = (id) => { try { const d = JSON.parse(localStorage.getItem(DRAFT) || "null"); return d && d.id === id ? d : null; } catch { return null; } };
+  addEventListener("pagehide", () => { const d = draftRead(D.open && D.open.id); if (d && D.saveT) api("/api/docs?id=" + d.id, { method: "PUT", body: { title: d.title, blocks: d.blocks, base: d.base }, keepalive: true }); });
+  function touch(now) { if (!owner || !D.open) return; clearTimeout(D.saveT); setStatus("Unsaved…"); draftWrite(); D.saveT = setTimeout(save, now ? 0 : 1100); }
   async function save() {
-    clearTimeout(D.saveT); const cur = D.open; if (!cur || !owner) return true;
+    clearTimeout(D.saveT); D.saveT = null; const cur = D.open; if (!cur || !owner) return true;
     const title = $(".dx-title", main); const patch = { title: title ? title.value : cur.title, icon: cur.icon || "", cover: cur.cover || null };
-    if (D.ed) patch.blocks = D.ed.getBlocks();
+    if (D.ed) { patch.blocks = D.ed.getBlocks(); patch.base = cur.updated || 0; }
     setStatus("Saving…");
     const r = await api("/api/docs?id=" + cur.id, { method: "PUT", body: patch });
+    if (r.status === 409 && r.data.conflict) { // changed on another tab or device: keep your text as its own page, then show the newer version
+      const id = cur.id;
+      await api("/api/docs", { method: "POST", body: { title: (patch.title || "Untitled") + " (my edit)", parent: cur.parent || null, blocks: patch.blocks || [] } });
+      toast("This page was changed somewhere else. Your edit is kept as a separate page.");
+      draftClear();
+      D.open = null; CACHE[id] = { blocks: r.data.blocks }; await load(true); if (byId(id)) Object.assign(byId(id), r.data.page); await openId(id, { mode: "replace" }); return false;
+    }
     if (!r.ok) { setStatus("Not saved. Retrying…"); D.saveT = setTimeout(save, 4000); return false; }
     Object.assign(cur, r.data.page); const m = byId(cur.id); if (m) Object.assign(m, r.data.page);
+    if (!D.saveT) { clearTimeout(D.draftT); draftClear(); }
     setStatus("Saved"); drawFoot(); return true;
   }
   async function flush() { if (D.ed) { try { D.ed.flush && D.ed.flush(); } catch {} } if (D.saveT) { clearTimeout(D.saveT); D.saveT = null; await save(); } if (D.ed) { try { D.ed.destroy(); } catch {} D.ed = null; } }

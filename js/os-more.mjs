@@ -274,6 +274,20 @@ window.settingsExtra = function (body) {
           const r = await api("/api/backup", { method: "POST", body: data }); toast(r.ok ? `Restored ${r.data.restored} items. Reloading…` : r.data.error || "Restore failed"); if (r.ok) setTimeout(() => location.reload(), 1200); };
         i.click();
       } }, "Restore from file")));
+    {
+      const list = h("div", { class: "ow-snaps" }), st = h("p", { class: "hint" }, "Safety copies are kept on the server automatically (about once a day while you work, and every week), the latest ten. Restoring one first saves what is there now.");
+      const when = (k) => { const m = k.match(/^snap-(\d{4})-(\d\d)-(\d\d)T(\d\d)-(\d\d)/); if (!m) return k; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])); return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); };
+      const drawSnaps = async () => {
+        const r = await api("/api/backup?a=snaps"); list.innerHTML = "";
+        const keys = r.ok ? r.data.snaps.filter((k) => k !== "snap-latest") : [];
+        if (!keys.length) { list.append(h("p", { class: "hint" }, r.ok ? "No safety copy yet. Press Back up now." : "Could not load the list.")); return; }
+        keys.forEach((k) => list.append(h("div", { class: "ow-row" }, h("span", { style: "flex:1" }, when(k)),
+          h("a", { class: "btn tonal", href: "/api/backup?snap=" + encodeURIComponent(k), download: "" }, "Download"),
+          h("button", { class: "btn tonal", onclick: async () => { if (!confirm("Put this copy back? Items with the same name are replaced with this copy's version. What is there now is saved first.")) return; const x = await api("/api/backup?snap=" + encodeURIComponent(k), { method: "POST", body: {} }); toast(x.ok ? `Restored ${x.data.restored} items. Reloading…` : x.data.error || "Restore failed"); if (x.ok) setTimeout(() => location.reload(), 1200); } }, "Restore"))));
+      };
+      sec.append(h("h3", {}, "Automatic safety copies"), st, h("div", { class: "ow-row" }, h("button", { class: "btn tonal", onclick: async (e) => { e.target.disabled = true; const r = await api("/api/backup?a=now", { method: "POST", body: {} }); toast(r.ok ? "Safety copy saved" : r.data.error || "Could not save a copy"); e.target.disabled = false; drawSnaps(); } }, "Back up now")), list);
+      drawSnaps();
+    }
   }
   const own = $(".own-sec", body); own ? own.before(sec) : body.append(sec);
 };

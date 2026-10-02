@@ -5,9 +5,11 @@
 //   POST {data}   -> puts a backup back. Existing items with the same name are replaced; nothing else is deleted.
 import { connectLambda } from "@netlify/blobs";
 import { isAdmin, body, json } from "../lib/session.mjs";
-import { contentStore } from "../lib/store.mjs";
+import { contentStore, backupStore } from "../lib/store.mjs";
+import { collect, listSnaps, takeSnapshot } from "../lib/snapshots.mjs";
 
 const BINARY = /^(photo-|up-|vault-file-)/;
+const SNAP_KEY = /^snap-[\w-]{1,60}$/;
 const SAFE_KEY = /^[\w\-./]{1,160}$/;
 
 export const handler = async (event) => {
@@ -15,19 +17,23 @@ export const handler = async (event) => {
     if (!isAdmin(event)) return json({ error: "Not signed in" }, 401);
     connectLambda(event);
     const store = contentStore(event);
+    const q = event.queryStringParameters || {}, bk = backupStore(event);
     if (event.httpMethod === "GET") {
-      const { blobs } = await store.list();
-      const data = {}, files = [];
-      await Promise.all(blobs.map(async ({ key }) => {
-        if (BINARY.test(key)) { files.push(key); return; }
-        try { const v = await store.get(key, { type: "json" }); if (v != null) data[key] = v; } catch {}
-      }));
-      return json({ kind: "rohankumar-pro-backup", v: 1, ts: Date.now(), count: Object.keys(data).length, data, files: files.sort() },
-        200, { "content-disposition": `attachment; filename="backup-${new Date().toISOString().slice(0, 10)}.json"` });
+      if (q.a === "snaps") { const last = await bk.get("snap-latest", { type: "json" }).catch(() => null); return json({ snaps: await listSnaps(bk), last }); }
+      if (q.snap) {
+        if (!SNAP_KEY.test(q.snap)) return json({ error: "Bad name" }, 400);
+        const v = await bk.get(q.snap, { type: "json" }); if (!v) return json({ error: "Not found" }, 404);
+        return json(v, 200, { "content-disposition": `attachment; filename="${q.snap}.json"` });
+      }
+      const snap = await collect(store);
+      return json(snap, 200, { "content-disposition": `attachment; filename="backup-${new Date().toISOString().slice(0, 10)}.json"` });
     }
     if (event.httpMethod === "POST") {
-      const b = body(event);
+      if (q.a === "now") { const r = await takeSnapshot(store, bk); return json(r ? { ok: true, ...r } : { error: "Nothing to back up yet" }, r ? 200 : 400); }
+      const b0 = body(event);
+      const b = q.snap ? (SNAP_KEY.test(q.snap) ? await bk.get(q.snap, { type: "json" }) : null) : b0;
       if (b?.kind !== "rohankumar-pro-backup" || typeof b.data !== "object" || !b.data) return json({ error: "That isn't a backup file from this site" }, 400);
+      try { await takeSnapshot(store, bk); } catch {} // keep what is there now before anything is put back
       let n = 0;
       for (const [key, value] of Object.entries(b.data)) {
         if (!SAFE_KEY.test(key) || BINARY.test(key) || value == null) continue;

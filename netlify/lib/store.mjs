@@ -10,3 +10,7 @@ export function isPreviewHost(event) {
 }
 
 export const contentStore = (event) => getStore(isPreviewHost(event) ? "site-content-dev" : "site-content");
+
+// A second store, only for safety copies (automatic backups and pages deleted for good). Nothing else reads or writes it.
+export const backupStore = (event) => getStore(isPreviewHost(event) ? "site-backups-dev" : "site-backups");
+export const backupStoreLive = () => getStore("site-backups");
