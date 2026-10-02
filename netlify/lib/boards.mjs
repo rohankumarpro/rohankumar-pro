@@ -90,6 +90,8 @@ export function cleanItem(it) {
   if (it.locked) o.locked = true;
   if (it.color) o.color = pick(it.color, COLORS, undefined);
   if (it.parent && okId(it.parent)) o.parent = it.parent; // the section it sits in
+  if (it.font === "hand") o.font = "hand"; // handwriting, for notes and text
+  if (+it.ts > 0) o.ts = num(it.ts, 0, 9e15, 0); // when it was last changed (the database view sorts by it)
   switch (it.t) {
     case "page":
       o.title = str(it.title, 160); o.icon = ICONS[it.icon] ? it.icon : ""; o.cover = cleanCover(it.cover);
@@ -143,6 +145,15 @@ export async function createBoard(store, b) {
 
 export async function loadBoard(store, id) {
   return (await store.get(boardKey(id), { type: "json" })) ?? { id, items: {}, links: {}, updated: 0, rev: 0 };
+}
+
+// the order boards are listed in (the owner drags them in the sidebar)
+export async function reorder(store, ids) {
+  const all = await loadIndex(store), pos = new Map((Array.isArray(ids) ? ids : []).filter(okId).map((id, i) => [id, i]));
+  if (!pos.size) return all;
+  for (const m of all) if (pos.has(m.id)) m.order = pos.get(m.id);
+  await saveJSON(store, idxKey, all);
+  return all;
 }
 
 export async function updateMeta(store, id, b) {

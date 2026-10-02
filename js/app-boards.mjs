@@ -4,7 +4,8 @@ import { h, $, $$, esc, api, isAdmin, toast, mobile, confirmBox } from "/js/lib.
 import { R } from "/js/os-ext.mjs";
 import { ICONS } from "/shared/icons.mjs";
 import { createCanvas, menu, closeMenu, I, shortcuts } from "/js/board-canvas.mjs";
-import { pageWindows, download } from "/js/board-page.mjs";
+import { pageWindows, download, Bodies } from "/js/board-page.mjs";
+import { mountDb } from "/js/board-db.mjs";
 import { COVERS, coverCss, COLORS } from "/js/board-covers.mjs";
 
 if (!document.querySelector('link[href="/css/boards.css"]')) document.head.append(h("link", { rel: "stylesheet", href: "/css/boards.css" }));
@@ -72,22 +73,33 @@ export async function boardsApp(body, key) {
   }
   body.innerHTML = `<div class="ba bdc" data-side="${ls.get("baSide", !mobile()) ? "on" : "off"}"><aside class="ba-side" aria-label="Boards"></aside><section class="ba-main"></section><div class="ba-scrim"></div></div>`;
   const root = $(".ba", body), side = $(".ba-side", root), main = $(".ba-main", root);
-  const A = { boards: [], cur: null, cv: null, pw: null, view: "home", status: "saved", q: "" };
+  const A = { boards: [], cur: null, cv: null, pw: null, view: "home", status: "saved", q: "", openB: new Set(ls.get("baOpenB", [])), fetching: new Set() };
+  let sideT = 0; const sideSoon = () => { clearTimeout(sideT); sideT = setTimeout(() => { if (!side.contains(document.activeElement) || !document.activeElement.matches("input")) drawSide(); }, 250); };
+  // the pages on a board, for the sidebar: from the open board, the copy kept on this device, or the server
+  function pagesOf(bid) {
+    let items = null;
+    if (A.cur && A.cur.id === bid && A.cv) return A.cv.order().filter((x) => x.t === "page");
+    const doc = ls.get("bdDoc:" + bid, null); if (doc) items = Object.values(doc.items || {});
+    if (!items && !A.fetching.has(bid)) { A.fetching.add(bid); api("/api/boards?id=" + bid).then((r) => { A.fetching.delete(bid); if (r.ok) { try { ls.set("bdDoc:" + bid, r.data.doc); } catch {} drawSide(); } }); }
+    return (items || []).filter((x) => x.t === "page").sort((a, b) => a.y - b.y || a.x - b.x);
+  }
   R.handlers.boards = (b, k) => (k ? openBoard(k, "replace") : home("replace"));
 
   async function load() { const r = await api("/api/boards"); if (r.ok) A.boards = r.data.boards; else if (!A.boards.length) A.boards = ls.get("baList", []); if (r.ok) ls.set("baList", A.boards.map((b) => ({ ...b, preview: b.preview }))); return r.ok; }
   const live = () => A.boards.filter((b) => !b.trashed).sort((a, b) => (b.fav - a.fav) || (b.updated - a.updated));
   const found = () => { const q = A.q.trim().toLowerCase(); return q ? live().filter((b) => name(b).toLowerCase().includes(q)) : live(); };
+  // the sidebar keeps the owner's own order (drag to arrange); new boards arrive at the top
+  const arranged = (list) => list.slice().sort((a, b) => (a.order || 0) - (b.order || 0) || (b.created || 0) - (a.created || 0));
   const byId = (id) => A.boards.find((b) => b.id === id);
 
   /* ----- sidebar ----- */
   function drawSide() {
-    const list = found(), bin = A.boards.filter((b) => b.trashed).length;
+    const list = arranged(found()), bin = A.boards.filter((b) => b.trashed).length;
     side.innerHTML = `<div class="ba-sh"><button class="ba-new" data-new>${I("plus", 20)}<span>New board</span></button><button class="ba-ib" data-tg title="Hide the sidebar" aria-label="Hide the sidebar">${I("panel-left", 18)}</button></div>
       <label class="ba-search">${I("search", 18)}<input type="search" placeholder="Search boards" aria-label="Search boards" autocomplete="off" value="${esc(A.q)}"></label>
       <nav class="ba-nav"><button class="ba-nv${A.view === "home" ? " on" : ""}" data-home>${I("home", 18)}<span>Home</span></button></nav>
       <div class="ba-sec"><span>Your boards</span>${live().length ? `<em>${live().length}</em>` : ""}</div>
-      <div class="ba-list" role="list">${list.map((b) => `<button class="ba-row${A.cur && A.cur.id === b.id ? " on" : ""}" role="listitem" data-open="${b.id}"><span class="ba-th" style="${b.cover ? `background:${coverCss(b.cover) || `url('${esc(b.cover.src || "")}') center/cover`}` : ""}">${b.icon && ICONS[b.icon] ? I(b.icon, 14) : ""}</span><span class="ba-rt">${esc(name(b))}</span>${b.fav ? `<span class="ba-fav">${I("star", 13)}</span>` : ""}</button>`).join("") || `<p class="ba-none">${A.q ? "No board matches." : "No boards yet."}</p>`}</div>
+      <div class="ba-list" role="list">${list.map((b) => `<button class="ba-row${A.cur && A.cur.id === b.id ? " on" : ""}" role="listitem" data-open="${b.id}" draggable="${A.q ? "false" : "true"}"><span class="ba-th" style="${b.cover ? `background:${coverCss(b.cover) || `url('${esc(b.cover.src || "")}') center/cover`}` : ""}">${b.icon && ICONS[b.icon] ? I(b.icon, 14) : ""}</span><span class="ba-rt">${esc(name(b))}</span>${b.fav ? `<span class="ba-fav">${I("star", 13)}</span>` : ""}<span class="ba-tw${A.openB.has(b.id) ? " open" : ""}" role="button" data-tw="${b.id}" aria-label="${A.openB.has(b.id) ? "Hide pages" : "Show pages"}" title="${A.openB.has(b.id) ? "Hide pages" : "Show pages"}">${I("chevron-right", 15)}</span></button>${A.openB.has(b.id) ? subPages(b) : ""}`).join("") || `<p class="ba-none">${A.q ? "No board matches." : "No boards yet."}</p>`}</div>
       <nav class="ba-nav ba-nav2"><button class="ba-nv${A.view === "bin" ? " on" : ""}" data-bin>${I("trash", 18)}<span>Bin</span>${bin ? `<em>${bin}</em>` : ""}</button></nav>`;
     $("[data-tg]", side).onclick = () => toggleSide();
     const sq = $(".ba-search input", side);
@@ -96,7 +108,35 @@ export async function boardsApp(body, key) {
     $("[data-new]", side).onclick = (e) => newBoardMenu(e.currentTarget);
     $("[data-home]", side).onclick = () => home();
     $("[data-bin]", side).onclick = () => showBin();
-    $$("[data-open]", side).forEach((b) => (b.onclick = () => { openBoard(b.dataset.open); if (mobile()) setSide(false); }));
+    $$("[data-open]", side).forEach((b) => (b.onclick = (e) => {
+      const tw = e.target.closest("[data-tw]");
+      if (tw) { e.stopPropagation(); const id = tw.dataset.tw; A.openB.has(id) ? A.openB.delete(id) : A.openB.add(id); ls.set("baOpenB", [...A.openB]); drawSide(); return; }
+      openBoard(b.dataset.open); if (mobile()) setSide(false);
+    }));
+    $$("[data-sub]", side).forEach((x) => (x.onclick = () => { openBoard(x.dataset.board, "push", { page: x.dataset.sub }); if (mobile()) setSide(false); }));
+    wireArrange();
+  }
+  function subPages(b) {
+    const ps = pagesOf(b.id);
+    return `<div class="ba-subs" role="group">${ps.map((p) => `<button class="ba-sub" data-sub="${p.id}" data-board="${b.id}">${I(p.icon && ICONS[p.icon] ? p.icon : "file-text", 15)}<span>${esc((p.title || "").trim() || "Untitled")}</span></button>`).join("") || `<p class="ba-none sm">${A.fetching.has(b.id) ? "Loading…" : "No pages yet"}</p>`}</div>`;
+  }
+  /* drag boards in the sidebar to put them in any order */
+  function wireArrange() {
+    const listEl = $(".ba-list", side); if (!listEl || A.q) return;
+    let dragId = null;
+    listEl.querySelectorAll("[data-open]").forEach((row) => {
+      row.addEventListener("dragstart", (e) => { dragId = row.dataset.open; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", dragId); requestAnimationFrame(() => row.classList.add("dragging")); });
+      row.addEventListener("dragend", () => { dragId = null; listEl.querySelectorAll(".dragging,.drop-b,.drop-a").forEach((x) => x.classList.remove("dragging", "drop-b", "drop-a")); });
+      row.addEventListener("dragover", (e) => { if (!dragId || dragId === row.dataset.open) return; e.preventDefault(); const r = row.getBoundingClientRect(), before = e.clientY < r.top + r.height / 2; row.classList.toggle("drop-b", before); row.classList.toggle("drop-a", !before); });
+      row.addEventListener("dragleave", () => row.classList.remove("drop-b", "drop-a"));
+      row.addEventListener("drop", (e) => {
+        e.preventDefault(); const before = row.classList.contains("drop-b"); row.classList.remove("drop-b", "drop-a"); if (!dragId || dragId === row.dataset.open) return;
+        const ids = arranged(live()).map((b) => b.id).filter((id) => id !== dragId), at = ids.indexOf(row.dataset.open);
+        ids.splice(before ? at : at + 1, 0, dragId);
+        ids.forEach((id, i) => { const b = byId(id); if (b) b.order = i; });
+        drawSide(); api("/api/boards?a=order", { method: "PUT", body: { ids } }).then((r) => { if (!r.ok) toast("Could not save the new order"); });
+      });
+    });
   }
   function setSide(on) { ls.set("baSide", on); root.dataset.side = on ? "on" : "off"; }
   function toggleSide() { setSide(root.dataset.side !== "on"); }
@@ -225,18 +265,21 @@ export async function boardsApp(body, key) {
     if (!A.cv) return;
     await flushBoard();
     if (A.pw) await A.pw.closeAll();
+    if (A.db) { A.db.destroy(); A.db = null; }
     A.cv.destroy(); A.cv = null; A.pw = null;
   }
   async function flushBoard() { if (A.pw) await A.pw.flushAll(); if (A.cv) await A.cv.flush(); }
-  async function openBoard(id, mode = "push", { doc, fresh } = {}) {
-    if (A.cur && A.cur.id === id && A.cv) return;
+  async function openBoard(id, mode = "push", { doc, fresh, page } = {}) {
+    if (A.cur && A.cur.id === id && A.cv) { if (page) openInDb(page); return; }
     await leaveBoard();
     let b = byId(id);
     if (!b) { await load(); b = byId(id); }
     if (!b) { toast("That board isn't here any more."); return home("replace"); }
     A.view = "board"; A.cur = b; drawSide();
-    main.innerHTML = `<div class="ba-board"><div class="ba-canvas"></div><div class="ba-pages"></div>
-      <div class="ba-top"><button class="ba-ib" data-tg title="Show the sidebar" aria-label="Show the sidebar">${I("panel-left", 18)}</button><button class="ba-bi" data-bi title="Cover and icon" aria-label="Cover and icon"></button><input class="ba-title" maxlength="120" aria-label="Board name" placeholder="Untitled board"><span class="ba-st" role="status" tabindex="-1"></span><button class="ba-ib" data-bm title="Board options" aria-label="Board options">${I("more", 18)}</button></div></div>`;
+    main.innerHTML = `<div class="ba-board"><div class="ba-canvas"></div><div class="ba-dbv"></div><div class="ba-pages"></div>
+      <div class="ba-top"><button class="ba-ib" data-tg title="Show the sidebar" aria-label="Show the sidebar">${I("panel-left", 18)}</button><button class="ba-bi" data-bi title="Cover and icon" aria-label="Cover and icon"></button><input class="ba-title" maxlength="120" aria-label="Board name" placeholder="Untitled board"><span class="ba-st" role="status" tabindex="-1"></span>
+        <div class="ba-seg" role="tablist" aria-label="View"><button role="tab" data-v="board" title="Board view (B)">${I("frame", 17)}<span>Board</span></button><button role="tab" data-v="db" title="Database view (D)">${I("table", 17)}<span>Database</span></button></div>
+        <button class="ba-ib" data-bm title="Board options" aria-label="Board options">${I("more", 18)}</button></div></div>`;
     const cvHost = $(".ba-canvas", main), pages = $(".ba-pages", main);
     $("[data-tg]", main).onclick = () => toggleSide();
     $("[data-bm]", main).onclick = (e) => { const r = e.currentTarget.getBoundingClientRect(); menu(r.left, r.bottom + 6, boardMenu(b, true), { ret: $(".bd-stage", main) }); };
@@ -259,14 +302,38 @@ export async function boardsApp(body, key) {
       onStatus: (s) => setStatus(s),
       onView: (v) => { clearTimeout(A.vT); A.vT = setTimeout(() => ls.set("bdView:" + id, v), 400); },
       openPage: (it, o) => A.pw && A.pw.open(it, o),
+      editPage: (it, el, o) => (A.pw ? A.pw.inline(it, el, o) : null),
+      bodies: Bodies,
       copyPage: (from, to) => api("/api/boards?a=copypage", { method: "POST", body: { from, to } }),
       seedPage: (pid, text) => { if (text) api("/api/boards?page=" + pid, { method: "PUT", body: { blocks: text.split(/\n+/).filter(Boolean).map((t) => ({ t: "p", h: esc(t) })), base: 0 } }); },
       pageDownload: (it, kind) => download(it, null, kind),
       unfurl: async (url) => { const r = await api("/api/boards?a=link&url=" + encodeURIComponent(url)); return r.ok ? r.data : null; },
-      boardMenu: () => [{ t: "Board options", i: "settings", sub: boardMenu(b, true) }],
+      boardMenu: () => [{ t: "Board options", i: "settings", sub: boardMenu(b, true) }, { t: "Database view", i: "table", k: "D", run: () => setView("db") }],
+      onItems: () => { if (A.db && A.bview === "db") A.db.refresh(); if (A.openB.has(id)) sideSoon(); },
     });
     A.cv = cv;
-    A.pw = pageWindows(pages, { canvas: () => A.cv, owner: true, removeItem: (pid) => A.cv && A.cv.removeItem(pid), boardName: () => name(A.cur), onClosed: () => A.cv && A.cv.focus() });
+    A.pw = pageWindows(pages, { canvas: () => A.cv, owner: true, removeItem: (pid) => A.cv && A.cv.removeItem(pid), boardName: () => name(A.cur), showOnBoard: (pid) => { setView("board"); A.cv && A.cv.focusItem(pid); },
+      onClosed: (w) => { if (A.bview === "db") { A.db && A.db.refresh(); } else A.cv && A.cv.focus(); } });
+    /* ----- two views of the same items: the board, and the database ----- */
+    const dbHost = $(".ba-dbv", main);
+    A.db = null; A.bview = null;
+    function setView(v, { quiet } = {}) {
+      if (v === A.bview) return; A.bview = v; ls.set("bdMode:" + id, v);
+      $(".ba-board", main).dataset.v = v;
+      $$(".ba-seg [data-v]", main).forEach((x) => x.setAttribute("aria-selected", String(x.dataset.v === v)));
+      if (v === "db") {
+        cv.setActive(false);
+        if (!A.db) A.db = mountDb(dbHost, { cv: () => A.cv, board: () => A.cur, owner: true, boardId: id, bodies: Bodies, openPage: (it, o) => A.pw && A.pw.open(it, { ...(o || {}), docked: true }), showOnBoard: (pid) => { setView("board"); A.cv && A.cv.focusItem(pid); }, setTitle: (val) => { const t = $(".ba-title", main); if (t) { t.value = val; t.oninput(); } } });
+        else A.db.refresh();
+      } else {
+        $$(".bp-win.docked", main).forEach((w) => w.querySelector('[data-a="close"]')?.click());
+        cv.setActive(true); if (!quiet) setTimeout(() => cv.focus(), 30);
+      }
+    }
+    A.setView = setView;
+    function openInDb(pid) { setView("db"); const it = A.cv && A.cv.item(pid); if (it) A.pw.open(it, { docked: true }); }
+    A.openInDb = openInDb;
+    $$(".ba-seg [data-v]", main).forEach((x) => (x.onclick = () => setView(x.dataset.v)));
     // show the last copy straight away, then the server's
     const cached = ls.get("bdDoc:" + id, null), view = ls.get("bdView:" + id, null);
     if (doc) cv.load(doc, view);
@@ -285,8 +352,10 @@ export async function boardsApp(body, key) {
       else if (!cached) { main.querySelector(".ba-canvas").innerHTML = `<div class="ba-empty">${r.status === 0 ? "You're offline and this board hasn't been opened on this device yet." : "Could not open this board."}</div>`; return; }
     } else ls.set("bdDoc:" + id, doc);
     cv.applyPending(ls.get("bdPend:" + id, null));
+    setView(page ? "db" : ls.get("bdMode:" + id, mobile() ? "db" : "board"), { quiet: true });
+    if (page) openInDb(page);
     if (fresh) setTimeout(() => { title.focus(); }, 60);
-    else setTimeout(() => $(".bd-stage", main)?.focus({ preventScroll: true }), 30);
+    else if (A.bview === "board") setTimeout(() => $(".bd-stage", main)?.focus({ preventScroll: true }), 30);
   }
   function setStatus(s) {
     A.status = s; const e = $(".ba-st", main); if (!e || e.dataset.s === s) return;
@@ -305,12 +374,22 @@ export async function boardsApp(body, key) {
   window.registerCtx && window.registerCtx("boards", (el, e) => {
     const out = []; out.handled = true;
     if (el.closest(".bd-stage") && A.cv) { if (A.cv.menuAt(e) === false) { out.handled = false; return []; } return out; }
+    if (el.closest(".db") && A.db) { if (A.db.menuAt(e)) return out; out.handled = false; return []; }
+    const sub = el.closest("[data-sub]"); if (sub) { menu(e.clientX, e.clientY, [{ t: "Open as a page", i: "open", run: () => openBoard(sub.dataset.board, "push", { page: sub.dataset.sub }) }]); return out; }
     const c = el.closest("[data-card],[data-open]");
     if (c) { const b = byId(c.dataset.card || c.dataset.open); if (b) { menu(e.clientX, e.clientY, boardMenu(b)); return out; } }
     if (el.closest(".bp-win,.ba-top input,input,textarea,[contenteditable]")) { out.handled = false; return []; }
     if (el.closest(".ba-home")) { menu(e.clientX, e.clientY, [{ head: "New board" }, ...Object.entries(T).map(([k, t]) => ({ t: t.name, i: k === "blank" ? "plus" : t.icon, run: () => newBoard(k) }))]); return out; }
     out.handled = false; return [];
   });
+
+  document.addEventListener("keydown", (e) => {
+    if (!A.cv || !A.setView || e.ctrlKey || e.metaKey || e.altKey || !body.isConnected) return;
+    const a = document.activeElement; if (a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) return;
+    if (!(a && (a.closest(".bd-stage") || a.closest(".db"))) && !(a === document.body && body.closest(".win.top"))) return;
+    if (e.key === "d" || e.key === "D") { if (A.bview !== "db") { e.preventDefault(); e.stopPropagation(); A.setView("db"); } }
+    else if (e.key === "b" || e.key === "B") { if (A.bview !== "board") { e.preventDefault(); e.stopPropagation(); A.setView("board"); } }
+  }, true);
 
   /* ----- leaving: never lose a change ----- */
   const onHide = () => { if (A.pw) A.pw.beacon(); if (A.cv && A.cv.hasPending()) { const p = A.cv.pending(); if (A.cur && (p.up.length || p.del.length || p.lup.length || p.ldel.length)) api("/api/boards?id=" + A.cur.id + "&a=patch", { method: "POST", body: p, keepalive: true }); } };

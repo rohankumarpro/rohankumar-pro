@@ -8,7 +8,28 @@ import { COVERS, coverCss } from "/js/board-covers.mjs";
 
 const PAGE_ICONS = ["file-text", "bulb", "sparkles", "target", "rocket", "star", "heart", "flame", "video", "camera", "mic", "music", "pencil", "book", "bookmark", "palette", "image", "brain", "chat", "calendar", "clock", "checkbox", "list", "chart", "trend", "globe", "map", "compass", "home", "folder", "tag", "link", "code", "laptop", "coffee", "plane", "leaf", "gift", "trophy", "flask", "wrench", "settings", "user", "mail", "phone", "lock", "shield", "cat", "graduation", "wallet"].filter((n) => ICONS[n]);
 const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
-const SAVED = new Map(); // page id -> {blocks, updated}: what this tab last saved, so a stale server copy never wins when a page is reopened
+/* ---------- the writing of every page card, shared by the cards on the board, in-place editing and page windows ---------- */
+const BODY = new Map(); // page id -> {blocks, updated}: the newest copy this tab has seen, so a stale server copy never wins
+const listeners = new Set();
+const setBody = (id, blocks, updated) => { const cur = BODY.get(id); if (cur && cur.updated > updated) return; BODY.set(id, { blocks, updated }); listeners.forEach((f) => f(id)); };
+let wantQ = new Set(), wantT = 0;
+export const Bodies = {
+  get: (id) => BODY.get(id) || null,
+  onChange(f) { listeners.add(f); return () => listeners.delete(f); },
+  // ask for the writing of some cards; they arrive in one request and each card is redrawn
+  want(id) {
+    if (BODY.has(id) || wantQ.has(id)) return; wantQ.add(id); clearTimeout(wantT);
+    wantT = setTimeout(async () => {
+      const ids = [...wantQ]; wantQ = new Set();
+      for (let i = 0; i < ids.length; i += 60) {
+        const part = ids.slice(i, i + 60), r = await api("/api/boards?pages=" + part.join(","));
+        if (r.ok) for (const [id, v] of Object.entries(r.data.pages || {})) setBody(id, v.blocks || [], v.updated || 0);
+      }
+    }, 60);
+  },
+  set: setBody,
+};
+const SAVED = { get: (id) => BODY.get(id), set: (id, v) => setBody(id, v.blocks, v.updated) };
 const label = (it) => (it && it.title && it.title.trim()) || "Untitled";
 const slug = (s) => String(s || "page").toLowerCase().replace(/[^\w]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "page";
 
@@ -31,27 +52,30 @@ export function pageWindows(layer, ctx) {
     tray.classList.toggle("on", !!tray.childElementCount);
   }
 
-  async function open(it, { fresh } = {}) {
-    const ex = W.get(it.id);
+  async function open(it, { fresh, docked } = {}) {
+    let ex = W.get(it.id);
+    if (ex && ex.inline) { await ex.finish(); ex = null; }
     if (ex) { if (ex.min) restore(it.id); else front(ex); return; }
+    if (docked) for (const o of [...W.values()]) if (o.docked) await close(o.id); // one document at a time in the database view
     const owner = ctx.owner && !mobile();
     const b = bounds(), phone = mobile();
     const saved = ls.get("bpGeo", null);
     const ww = phone ? b.width : Math.min(saved?.w || 780, b.width - 40), hh = phone ? b.height : Math.min(saved?.h || Math.round(b.height * 0.86), b.height - 32);
     const off = (cascade++ % 6) * 28;
     const geo = { x: phone ? 0 : Math.max(12, Math.round((b.width - ww) / 2) + off - 40), y: phone ? 0 : Math.max(12, Math.round((b.height - hh) / 2) + off - 20), w: ww, h: hh };
-    const el = h("section", { class: "bp-win" + (phone ? " phone" : ""), role: "dialog", "aria-label": label(it) });
-    el.innerHTML = `<header class="bp-bar"><span class="bp-bi"></span><span class="bp-crumb"></span><b class="bp-bt"></b><span class="bp-st" aria-live="polite"></span>
-        <button class="bp-wb" data-a="more" title="More" aria-label="More">${I("more", 18)}</button>${phone ? "" : `<button class="bp-wb" data-a="min" title="Minimise" aria-label="Minimise">${I("minus", 18)}</button><button class="bp-wb" data-a="max" title="Maximise (double-click the bar)" aria-label="Maximise">${I("fit", 17)}</button>`}<button class="bp-wb" data-a="close" title="Close" aria-label="Close">${I("x", 18)}</button></header>
+    const el = h("section", { class: "bp-win" + (phone ? " phone" : "") + (docked ? " docked max" : ""), role: docked ? "region" : "dialog", "aria-label": label(it) });
+    el.innerHTML = `<header class="bp-bar">${docked ? `<button class="bp-wb bp-back" data-a="close" title="Back to the database (Esc)" aria-label="Back">${I("arrow-left", 19)}</button>` : ""}<span class="bp-bi"></span><span class="bp-crumb"></span><b class="bp-bt"></b><span class="bp-st" aria-live="polite"></span>
+        <button class="bp-wb" data-a="more" title="More" aria-label="More">${I("more", 18)}</button>${phone || docked ? "" : `<button class="bp-wb" data-a="min" title="Minimise" aria-label="Minimise">${I("minus", 18)}</button><button class="bp-wb" data-a="max" title="Maximise (double-click the bar)" aria-label="Maximise">${I("fit", 17)}</button>`}${docked ? "" : `<button class="bp-wb" data-a="close" title="Close" aria-label="Close">${I("x", 18)}</button>`}</header>
       <div class="bp-scroll"><div class="bp-page"><div class="bp-cover"></div><div class="bp-head"><button class="bp-icon" aria-label="Page icon"></button>${owner ? '<div class="bp-adds"></div>' : ""}<textarea class="bp-title" rows="1" placeholder="Untitled" maxlength="160" aria-label="Page title" ${owner ? "" : "readonly"}></textarea></div><div class="bp-body"><div class="bp-load"><span class="rb-spin"></span></div></div><footer class="bp-foot"></footer></div></div>
-      ${phone ? "" : '<i class="bp-rz" data-rz="se"></i><i class="bp-rz e" data-rz="e"></i><i class="bp-rz s" data-rz="s"></i><i class="bp-rz w" data-rz="w"></i>'}`;
+      ${phone || docked ? "" : '<i class="bp-rz" data-rz="se"></i><i class="bp-rz e" data-rz="e"></i><i class="bp-rz s" data-rz="s"></i><i class="bp-rz w" data-rz="w"></i>'}`;
     layer.append(el);
-    const w = { id: it.id, el, geo, min: false, max: false, ed: null, blocks: [], updated: 0, saveT: 0, dirty: false, owner, saving: false };
+    const w = { id: it.id, el, geo, min: false, max: !!docked, docked: !!docked, ed: null, blocks: [], updated: 0, saveT: 0, dirty: false, owner, saving: false,
+      bodyEl: el.querySelector(".bp-body"), titleEl: el.querySelector(".bp-title"), stEl: el.querySelector(".bp-st"), footEl: el.querySelector(".bp-foot") };
     W.set(it.id, w); front(w); applyGeo(w);
     // grow out of the card
-    const from = ctx.canvas()?.rectOf(it.id);
+    const from = docked ? null : ctx.canvas()?.rectOf(it.id);
     if (from && !phone) { const lb = bounds(); flip(el, { x: from.left - lb.left, y: from.top - lb.top, w: from.width, h: from.height }, geo, true); }
-    else el.animate([{ opacity: 0, transform: "translateY(12px) scale(.98)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "cubic-bezier(.2,0,0,1)" });
+    else el.animate(docked ? [{ opacity: 0, transform: "translateX(24px)" }, { opacity: 1, transform: "none" }] : [{ opacity: 0, transform: "translateY(12px) scale(.98)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "cubic-bezier(.2,0,0,1)" });
     wire(w); drawHead(w);
     await loadBody(w, fresh);
   }
@@ -77,10 +101,10 @@ export function pageWindows(layer, ctx) {
       if (a === "close") close(w.id); else if (a === "min") minimize(w.id); else if (a === "max") { w.max = !w.max; applyGeo(w); }
       else if (a === "more") { const r = b.getBoundingClientRect(); menu(r.right - 240, r.bottom + 6, moreMenu(w)); }
     }));
-    bar.addEventListener("dblclick", (e) => { if (e.target.closest("button") || el.classList.contains("phone")) return; w.max = !w.max; applyGeo(w); });
+    bar.addEventListener("dblclick", (e) => { if (e.target.closest("button") || el.classList.contains("phone") || w.docked) return; w.max = !w.max; applyGeo(w); });
     // drag by the bar
     bar.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0 || e.target.closest("button") || w.max || el.classList.contains("phone")) return;
+      if (e.button !== 0 || e.target.closest("button") || w.max || w.docked || el.classList.contains("phone")) return;
       const sx = e.clientX, sy = e.clientY, g = { ...w.geo }, lb = bounds(); bar.setPointerCapture(e.pointerId); el.classList.add("moving");
       const mv = (ev) => { w.geo.x = Math.round(Math.max(-g.w + 120, Math.min(lb.width - 120, g.x + ev.clientX - sx))); w.geo.y = Math.round(Math.max(0, Math.min(lb.height - 48, g.y + ev.clientY - sy))); applyGeo(w); };
       const upf = () => { bar.removeEventListener("pointermove", mv); bar.removeEventListener("pointerup", upf); bar.removeEventListener("pointercancel", upf); el.classList.remove("moving"); };
@@ -103,7 +127,7 @@ export function pageWindows(layer, ctx) {
     title.addEventListener("input", () => { fit(); setItem(w, { title: title.value.slice(0, 160) }); drawBar(w); });
     title.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); w.ed && w.ed.focus("start"); } });
     w.fitTitle = fit;
-    el.addEventListener("keydown", (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(".rte-pop,.rte-menu,.bd-menu")) { e.preventDefault(); minimize(w.id); } });
+    el.addEventListener("keydown", (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(".rte-pop,.rte-menu,.bd-menu")) { e.preventDefault(); if (w.docked) close(w.id); else minimize(w.id); } });
   }
 
   const item = (w) => ctx.canvas()?.item(w.id);
@@ -180,9 +204,9 @@ export function pageWindows(layer, ctx) {
     cov.addEventListener("pointerdown", down); cov.addEventListener("pointermove", mv); cov.addEventListener("pointerup", upf);
     bar.querySelector("[data-done]").onclick = () => { cov.removeEventListener("pointerdown", down); cov.removeEventListener("pointermove", mv); cov.removeEventListener("pointerup", upf); cov.classList.remove("repos"); setItem(w, { cover: { src: it.cover.src, fy: Math.round(fy) } }); drawHead(w); };
   }
-  function status(w, s) { const e = w.el.querySelector(".bp-st"); if (e) e.textContent = s; }
+  function status(w, s) { if (w.stEl) w.stEl.textContent = s; }
   function foot(w) {
-    const e = w.el.querySelector(".bp-foot"); if (!e) return;
+    const e = w.footEl; if (!e) return;
     const bl = w.ed ? w.ed.getBlocks() : w.blocks, n = (blocksText(bl, " ").match(/\S+/g) || []).length;
     e.textContent = `${n} word${n === 1 ? "" : "s"} · ${Math.max(1, Math.round(n / 220))} min read`;
   }
@@ -190,9 +214,10 @@ export function pageWindows(layer, ctx) {
   /* ---------- the writing ---------- */
   const DK = (id) => "bpDraft:" + id;
   async function loadBody(w, fresh) {
-    const r = await api("/api/boards?page=" + w.id);
+    const cached = BODY.get(w.id);
+    const r = cached && w.inline ? { ok: true, data: cached } : await api("/api/boards?page=" + w.id); // in place: start at once from what the card shows
     if (!W.has(w.id) || W.get(w.id) !== w) return;
-    if (!r.ok) { w.el.querySelector(".bp-body").innerHTML = `<p class="hint">${r.status === 0 ? "You're offline. This page will open when you're back online." : "Could not open this page."}</p>`; return; }
+    if (!r.ok) { w.bodyEl.innerHTML = `<p class="hint">${r.status === 0 ? "You're offline. This page will open when you're back online." : "Could not open this page."}</p>`; return; }
     let blocks = r.data.blocks || []; w.updated = r.data.updated || 0;
     const mine = SAVED.get(w.id); if (mine && mine.updated > w.updated) { blocks = mine.blocks; w.updated = mine.updated; }
     const dr = ls.get(DK(w.id), null);
@@ -202,10 +227,12 @@ export function pageWindows(layer, ctx) {
     } else if (dr) ls.del(DK(w.id));
     if (!blocks.length && ctx.seed && ctx.seed[w.id]) { blocks = ctx.seed[w.id]; delete ctx.seed[w.id]; w.dirty = true; }
     w.blocks = blocks;
-    const host = w.el.querySelector(".bp-body"); host.innerHTML = "";
+    const host = w.bodyEl; host.innerHTML = "";
     if (w.owner) {
-      w.ed = await makeEditor(host, { blocks, placeholder: "Type '/' for blocks, or just start writing…", onChange: () => touch(w), onStatus: (s) => { if (s) status(w, s); } });
-      if (fresh || !(item(w)?.title)) setTimeout(() => w.el.querySelector(".bp-title")?.focus(), 80);
+      w.ed = await makeEditor(host, { blocks, placeholder: w.inline ? "Type '/' for blocks…" : "Type '/' for blocks, or just start writing…", onChange: () => touch(w), onStatus: (s) => { if (s) status(w, s); } });
+      if (!W.has(w.id) || W.get(w.id) !== w) { try { w.ed.destroy(); } catch {} return; }
+      if (w.focusAt === "body") w.ed.focus("end");
+      else if (fresh || !(item(w)?.title)) setTimeout(() => w.titleEl?.focus(), 80);
       if (w.dirty) touch(w, true);
     } else showBlocks(host, blocks);
     foot(w);
@@ -260,18 +287,20 @@ export function pageWindows(layer, ctx) {
   }
   async function close(id) {
     const w = W.get(id); if (!w) return;
+    if (w.inline) return w.finish();
     if (w.ed) { try { w.ed.flush(); } catch {} }
     if (w.saveT || w.dirty) await save(w);
     W.delete(id);
-    if (!w.el.hidden && !w.el.classList.contains("phone")) { const to = ctx.canvas()?.rectOf(id), lb = bounds(); if (to && to.width > 8 && !w.max) await flip(w.el, { x: to.left - lb.left, y: to.top - lb.top, w: to.width, h: to.height }, w.geo, false).finished.catch(() => {}); }
+    if (w.docked) await w.el.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(24px)" }], { duration: 160, easing: "cubic-bezier(.2,0,0,1)" }).finished.catch(() => {});
+    else if (!w.el.hidden && !w.el.classList.contains("phone")) { const to = ctx.canvas()?.rectOf(id), lb = bounds(); if (to && to.width > 8 && !w.max) await flip(w.el, { x: to.left - lb.left, y: to.top - lb.top, w: to.width, h: to.height }, w.geo, false).finished.catch(() => {}); }
     if (w.ed) { try { w.ed.destroy(); } catch {} }
-    w.el.remove(); drawTray(); ctx.onClosed && ctx.onClosed();
+    w.el.remove(); drawTray(); ctx.onClosed && ctx.onClosed(w);
   }
   function moreMenu(w) {
     const it = item(w);
     return [
-      { t: "Show on the board", i: "fit", run: () => { minimize(w.id); ctx.canvas()?.focusItem(w.id); } },
-      { t: w.max ? "Restore size" : "Maximise", i: "fit", run: () => { w.max = !w.max; applyGeo(w); } },
+      { t: "Show on the board", i: "fit", run: () => { if (w.docked) { close(w.id); ctx.showOnBoard && ctx.showOnBoard(w.id); } else { minimize(w.id); ctx.canvas()?.focusItem(w.id); } } },
+      ...(w.docked ? [] : [{ t: w.max ? "Restore size" : "Maximise", i: "fit", run: () => { w.max = !w.max; applyGeo(w); } }]),
       "-",
       { t: "Download as Markdown", i: "download", run: () => download(it, w.ed ? w.ed.getBlocks() : w.blocks, "md") },
       { t: "Save as PDF", i: "print", run: () => download(it, w.ed ? w.ed.getBlocks() : w.blocks, "pdf") },
@@ -290,10 +319,36 @@ export function pageWindows(layer, ctx) {
     d.append(card); document.body.append(d); d.addEventListener("pointerdown", (e) => { if (e.target === d) d.remove(); });
   }
 
+  /* ---------- editing right on the board: the card itself becomes the page ---------- */
+  async function inline(it, card, { at } = {}) {
+    if (W.has(it.id)) { const ex = W.get(it.id); if (!ex.inline) { if (ex.min) restore(it.id); else front(ex); return null; } return ex; }
+    const titleEl = card.querySelector(".bd-pgt"), bodyEl = card.querySelector(".bd-pgx"), stEl = card.querySelector(".bd-pgm");
+    if (!titleEl || !bodyEl) return null;
+    const ta = h("textarea", { class: "bd-pgti", rows: "1", maxlength: "160", placeholder: "Untitled", "aria-label": "Page title" }); ta.value = it.title || "";
+    titleEl.replaceWith(ta);
+    const fit = () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; }; fit();
+    ta.addEventListener("input", () => { fit(); const cv = ctx.canvas(), cur = cv && cv.item(it.id); if (cur) { cur.title = ta.value.slice(0, 160); cv.patchItem(it.id, { title: cur.title }); } });
+    ta.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); w.ed && w.ed.focus("start"); } });
+    const w = { id: it.id, el: card, inline: true, ed: null, blocks: [], updated: 0, saveT: 0, dirty: false, owner: true, saving: false, bodyEl, titleEl: ta, stEl, footEl: null, focusAt: at === "title" ? "title" : "body" };
+    w.finish = async () => {
+      if (W.get(it.id) !== w) return;
+      if (w.ed) { try { w.ed.flush(); } catch {} }
+      if (w.saveT || w.dirty) await save(w);
+      W.delete(it.id);
+      if (w.ed) { try { w.ed.destroy(); } catch {} }
+      listeners.forEach((f) => f(it.id));
+    };
+    W.set(it.id, w);
+    if (at === "title") setTimeout(() => { ta.focus(); ta.select(); }, 30);
+    await loadBody(w, false);
+    return w;
+  }
+
   return {
-    open, close, minimize, restore, flushAll, beacon, isOpen: (id) => W.has(id),
+    open, close, minimize, restore, flushAll, beacon, inline, isOpen: (id) => W.has(id) && !W.get(id).inline,
     refresh(id) { const w = W.get(id); if (w) drawHead(w); },
     closeAll: async () => { for (const id of [...W.keys()]) await close(id); },
+    finishInline: async () => { for (const w of [...W.values()]) if (w.inline) await w.finish(); },
     dirty: () => [...W.values()].some((w) => w.dirty || w.saveT),
   };
 }

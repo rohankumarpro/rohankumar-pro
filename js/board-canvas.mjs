@@ -4,6 +4,7 @@
 import { h, esc, toast, mobile, Up, lightbox } from "/js/lib.mjs";
 import { icon, ICONS } from "/shared/icons.mjs";
 import { coverCss, COLORS, STICKY, LINE } from "/js/board-covers.mjs";
+import { renderBlocks } from "/shared/blocks.mjs";
 
 /* ---------- icons this app needs beyond the shared set (same 24px grid, same stroke) ---------- */
 const EXTRA = {
@@ -108,8 +109,8 @@ export function shortcuts(ret) {
   const d = h("div", { class: "bd-keys", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" });
   d.innerHTML = `<div class="bd-kc"><header><b>Keyboard shortcuts</b><button class="bd-kx" aria-label="Close" title="Close (Esc)">${I("x", 20)}</button></header><div class="bd-kg">
     ${sec("Tools", [["Select", "V"], ["Move around", "H"], ["Page", "P"], ["Sticky note", "S"], ["Text", "T"], ["Picture", "I"], ["Link", "L"], ["Section", "F"], ["Connector", "C"]])}
-    ${sec("Editing", [["Undo", "Ctrl Z"], ["Redo", "Ctrl ⇧ Z"], ["Copy · Cut · Paste", "Ctrl C"], ["Duplicate", "Ctrl D"], ["Delete", "Del"], ["Select all", "Ctrl A"], ["Put in a section", "Ctrl G"], ["Lock or unlock", "Ctrl ⇧ L"], ["Bring to front · back", "Ctrl ]"], ["Nudge", "↑ ↓ ← →"]])}
-    ${sec("Notes and view", [["Edit the selection", "Enter"], ["Next sticky beside", "Tab"], ["Next sticky below", "⇧ Tab"], ["Finish editing", "Esc"], ["Pan", "Space drag"], ["Zoom", "Ctrl scroll"], ["Zoom in · out", "Ctrl +"], ["Zoom to 100%", "Ctrl 0"], ["Show everything", "⇧ 1"], ["Zoom to selection", "⇧ 2"], ["This sheet", "?"]])}
+    ${sec("Editing", [["Undo", "Ctrl Z"], ["Redo", "Ctrl ⇧ Z"], ["Copy · Cut · Paste", "Ctrl C"], ["Duplicate", "Ctrl D"], ["Delete", "Del"], ["Select all", "Ctrl A"], ["Put in a section", "Ctrl G"], ["Lock or unlock", "Ctrl ⇧ L"], ["Bring to front · back", "Ctrl ]"], ["Nudge the selection", "↑ ↓ ← →"]])}
+    ${sec("Notes and view", [["Edit the selection", "Enter"], ["Open a page full size", "⇧ Enter"], ["Next item · previous", "Tab"], ["New sticky beside", "Ctrl Enter"], ["New sticky below", "Ctrl ⇧ Enter"], ["Bullet list in a note", "- space"], ["Finish editing", "Esc"], ["Find on the board", "Ctrl F"], ["Move around", "↑ ↓ ← →"], ["Pan", "Space drag"], ["Zoom", "Ctrl scroll"], ["Zoom in · out", "Ctrl +"], ["Zoom to 100%", "Ctrl 0"], ["Show everything", "⇧ 1"], ["Zoom to selection", "⇧ 2"], ["This sheet", "?"]])}
   </div></div>`;
   const close = () => { d.remove(); document.removeEventListener("keydown", key, true); ret && ret.focus({ preventScroll: true }); };
   const key = (e) => { if (e.key === "Escape" || e.key === "?") { e.preventDefault(); e.stopPropagation(); close(); } };
@@ -148,7 +149,7 @@ export function menu(x, y, items, { minW, ret } = {}) {
         h("span", { class: "ic", html: it.i ? I(it.i, 18) : "" }), h("span", { class: "t" }, it.t), it.k ? h("kbd", {}, it.k) : "", it.sub ? h("span", { class: "chev", html: I("chevron-right", 15) }) : "");
       if (it.sub) {
         let sm = null;
-        const show = () => { $$sub(m); sm = build(it.sub, true); document.body.append(sm); const r = b.getBoundingClientRect(); place(sm, r.right - 4, r.top - 6, r.left + 4); m.__sub = sm; };
+        const show = () => { $$sub(m); sm = build(it.sub, true); (m.closest(".bd-menus") || document.body).append(sm); const r = b.getBoundingClientRect(); place(sm, r.right - 4, r.top - 6, r.left + 4); m.__sub = sm; };
         b.addEventListener("pointerenter", show); b.addEventListener("click", (e) => { e.stopPropagation(); show(); });
       } else {
         b.addEventListener("pointerenter", () => $$sub(m));
@@ -252,7 +253,7 @@ export function createCanvas(host, opts = {}) {
   function cull() {
     const m = 0.6, v = S.view, w = R.width / v.z, hh = R.height / v.z;
     const vis = { x: -v.x / v.z - w * m, y: -v.y / v.z - hh * m, w: w * (1 + 2 * m), h: hh * (1 + 2 * m) };
-    for (const [id, el] of S.els) { const it = S.items.get(id); if (!it) continue; const off = !hits(it, vis) && !S.sel.has(id); if (el.__off !== off) { el.__off = off; el.classList.toggle("off", off); } }
+    for (const [id, el] of S.els) { const it = S.items.get(id); if (!it) continue; const off = !hits(it, vis) && !S.sel.has(id) && S.editing !== id; if (el.__off !== off) { el.__off = off; el.classList.toggle("off", off); } }
   }
   // after a zoom settles: pictures get the copy that matches their size on screen
   function sharpen() {
@@ -272,11 +273,12 @@ export function createCanvas(host, opts = {}) {
         const cv = coverCss(it.cover), img = it.cover && it.cover.src;
         const ic = it.icon && ICONS[it.icon] ? it.icon : "file-text";
         return `<div class="bd-pg${cv || img ? " has-cv" : ""}">${cv ? `<div class="bd-pgc" style="background:${cv}"></div>` : img ? `<div class="bd-pgc"><img src="${esc(img)}" alt="" draggable="false" style="object-position:50% ${it.cover.fy ?? 50}%" loading="lazy" decoding="async"></div>` : ""}
-          <div class="bd-pgb"><span class="bd-pgi">${I(ic, 20)}</span><b class="bd-pgt">${esc(it.title || "Untitled")}</b>${it.snip ? `<p class="bd-pgs">${esc(it.snip)}</p>` : `<p class="bd-pgs muted">${owner ? "Double-click to write" : "Empty page"}</p>`}
-          <small class="bd-pgm">${it.words ? `${it.words} word${it.words === 1 ? "" : "s"}` : "Page"}${it.edited ? " · " + ago(it.edited) : ""}</small></div></div>`;
+          <div class="bd-pgb"><span class="bd-pgi">${I(ic, 20)}</span><b class="bd-pgt">${esc(it.title || "Untitled")}</b>${pageBody(it)}
+          <small class="bd-pgm">${it.words ? `${it.words} word${it.words === 1 ? "" : "s"}` : "Page"}${it.edited ? " · " + ago(it.edited) : ""}</small></div>
+          <button class="bd-pgo" title="Open as a full page" aria-label="Open as a full page">${I("fit", 16)}</button></div>`;
       }
       case "sticky": return `<div class="bd-tx" data-ph="Type something">${esc(it.text || "")}</div>`;
-      case "text": return `<div class="bd-tx" data-ph="Type something" style="font-size:${TXT[it.size || "m"]}px;${it.bold || it.size === "l" || it.size === "xl" ? "font-weight:700;" : ""}text-align:${it.align || "left"}">${esc(it.text || "")}</div>`;
+      case "text": return `<div class="bd-tx" data-ph="Type something" style="font-size:${Math.round(TXT[it.size || "m"] * (it.font === "hand" ? 1.3 : 1))}px;${it.bold || it.size === "l" || it.size === "xl" ? "font-weight:700;" : ""}text-align:${it.align || "left"}">${esc(it.text || "")}</div>`;
       case "image": return `<img src="${esc(it.thumb || it.src)}" alt="${esc(it.name || "")}" draggable="false" decoding="async">${it._up ? '<span class="bd-upl"><span class="rb-spin"></span></span>' : ""}${it.cap ? `<span class="bd-cap">${esc(it.cap)}</span>` : ""}`;
       case "link": {
         const img = it.yt ? ytThumb(it.yt) : it.img;
@@ -287,6 +289,15 @@ export function createCanvas(host, opts = {}) {
     }
     return "";
   }
+  // the page's own writing, drawn inside the card (the short preview until it has loaded)
+  function pageBody(it) {
+    const bd = opts.bodies && opts.bodies.get(it.id);
+    if (!bd && opts.bodies) opts.bodies.want(it.id);
+    if (bd && bd.blocks && bd.blocks.length) { try { return `<div class="bd-pgx bk-doc">${renderBlocks(bd.blocks, { hBase: 3 })}</div>`; } catch {} }
+    if (bd && !(bd.blocks || []).length) return `<div class="bd-pgx"><p class="bd-pgs muted">${owner ? "Double-click to write" : "Empty page"}</p></div>`;
+    return `<div class="bd-pgx">${it.snip ? `<p class="bd-pgs">${esc(it.snip)}</p>` : `<p class="bd-pgs muted">${owner ? "Double-click to write" : "Empty page"}</p>`}</div>`;
+  }
+  const offBodies = opts.bodies && opts.bodies.onChange((id) => { const it = S.items.get(id); if (it && it.t === "page" && S.editing !== id) paint(it); });
   function place(el, it) {
     el.style.translate = `${it.x}px ${it.y}px`;
     el.style.width = it.w + "px";
@@ -300,6 +311,7 @@ export function createCanvas(host, opts = {}) {
     el.dataset.t = it.t;
     if (it.color) el.dataset.c = it.color; else delete el.dataset.c;
     if (it.t === "sticky") el.dataset.s = it.size || "m";
+    if (it.font) el.dataset.font = it.font; else delete el.dataset.font;
     el.classList.toggle("locked", !!it.locked); el.classList.toggle("bd-sel", S.sel.has(it.id));
     if (S.editing !== it.id) el.innerHTML = inner(it);
     place(el, it);
@@ -311,7 +323,7 @@ export function createCanvas(host, opts = {}) {
   // sticky notes shrink their text to fit, like paper notes
   function fitSticky(el, it) {
     const tx = el.querySelector(".bd-tx"); if (!tx) return;
-    let fs = STK[it.size || "m"];
+    let fs = Math.round(STK[it.size || "m"] * (it.font === "hand" ? 1.3 : 1));
     const len = (it.text || "").length, room = (it.w - 32) * (it.h - 32);
     tx.style.fontSize = fs + "px";
     if (len * fs * fs * 0.62 < room * 0.55 && (it.text || "").split("\n").length * fs * 1.4 < it.h - 40) return;
@@ -407,8 +419,9 @@ export function createCanvas(host, opts = {}) {
   function redo() { finishEdit(); const e = hist.redo.pop(); if (!e) return; replay(e, false); hist.undo.push(e); }
 
   const Q = { up: new Set(), del: new Set(), lup: new Set(), ldel: new Set(), t: 0, busy: false, again: false, fails: 0, prevT: 0, rev: 0 };
-  function mark(id, gone) { if (gone) { Q.up.delete(id); Q.del.add(id); } else { Q.del.delete(id); Q.up.add(id); } queue(); }
-  function markL(id, gone) { if (gone) { Q.lup.delete(id); Q.ldel.add(id); } else { Q.ldel.delete(id); Q.lup.add(id); } queue(); }
+  let chT = 0; const changed = () => { if (!opts.onItems) return; clearTimeout(chT); chT = setTimeout(() => !S.dead && opts.onItems(), 120); };
+  function mark(id, gone) { if (gone) { Q.up.delete(id); Q.del.add(id); } else { Q.del.delete(id); Q.up.add(id); } queue(); changed(); }
+  function markL(id, gone) { if (gone) { Q.lup.delete(id); Q.ldel.add(id); } else { Q.ldel.delete(id); Q.lup.add(id); } queue(); changed(); }
   function queue() { if (!owner) return; status("unsaved"); clearTimeout(Q.t); Q.t = setTimeout(flush, 650); persistSoon(); }
   let pT = 0; function persistSoon() { clearTimeout(pT); pT = setTimeout(persist, 250); }
   function pending() {
@@ -447,8 +460,8 @@ export function createCanvas(host, opts = {}) {
   function status(s) { opts.onStatus && opts.onStatus(s); }
 
   /* ---------- changing things (always through these, so undo and saving just work) ---------- */
-  function put(it) { const fresh = !S.items.has(it.id); begin(); touchI(it.id); S.items.set(it.id, it); const el = paint(it); if (fresh) { el.classList.add("bd-new"); setTimeout(() => el.classList.remove("bd-new"), 360); } mark(it.id); linksOf(it.id).forEach((l) => schedule("link", l.id)); refreshEmpty(); return it; }
-  function upd(id, patch) { const it = S.items.get(id); if (!it) return; begin(); touchI(id); Object.assign(it, patch); for (const k in patch) if (patch[k] === undefined) delete it[k]; paint(it); mark(id); linksOf(id).forEach((l) => schedule("link", l.id)); schedule("ov"); }
+  function put(it) { const fresh = !S.items.has(it.id); begin(); touchI(it.id); it.ts = Date.now(); S.items.set(it.id, it); const el = paint(it); if (fresh) { el.classList.add("bd-new"); setTimeout(() => el.classList.remove("bd-new"), 360); } mark(it.id); linksOf(it.id).forEach((l) => schedule("link", l.id)); refreshEmpty(); return it; }
+  function upd(id, patch) { const it = S.items.get(id); if (!it) return; begin(); touchI(id); Object.assign(it, patch); if (!("x" in patch || "y" in patch || "z" in patch)) it.ts = Date.now(); for (const k in patch) if (patch[k] === undefined) delete it[k]; paint(it); mark(id); linksOf(id).forEach((l) => schedule("link", l.id)); schedule("ov"); }
   function remove(ids) {
     begin();
     for (const id of ids) {
@@ -476,7 +489,7 @@ export function createCanvas(host, opts = {}) {
     put(it); if (!edit) done(); // made and then named in one go is one step to undo
     select([it.id]);
     if (edit) startEdit(it.id, true);
-    if (t === "page" && opts.openPage) setTimeout(() => opts.openPage(it, { fresh: true }), 60);
+    if (t === "page") setTimeout(() => (opts.editPage ? startEdit(it.id, true, "title") : opts.openPage && opts.openPage(it, { fresh: true })), 30);
     return it;
   }
   async function addImages(files, at) {
@@ -547,12 +560,6 @@ export function createCanvas(host, opts = {}) {
       const key = hs.join(",") + (single && single.locked ? "L" : "");
       if (selbox.__k !== key) { selbox.__k = key; selbox.innerHTML = hs.map((k) => `<i class="bd-hd" data-h="${k}"></i>`).join("") + (single && single.locked ? `<span class="bd-lock">${I("lock", 13)}</span>` : ""); }
     } else selbox.hidden = true;
-    // connector dots on the item under the pointer
-    const hv = owner && !busy && !S.editing && (S.tool === "select" || S.tool === "connector") && S.hover && S.items.get(S.hover);
-    if (hv && !hv.locked && hv.t !== "frame") {
-      const pts = ["t", "r", "b", "l"].map((s) => { const [x, y] = sidePt(hv, s), q = toS(x, y), n = N[s]; return `<i class="bd-anc" data-anc="${s}" data-for="${hv.id}" style="transform:translate(${q.x + n[0] * 16}px,${q.y + n[1] * 16}px)"></i>`; }).join("");
-      if (anchors.__k !== pts) { anchors.__k = pts; anchors.innerHTML = pts; }
-    } else if (anchors.__k) { anchors.__k = ""; anchors.innerHTML = ""; }
     // quick bar above the selection
     const showQ = owner && !busy && !S.editing && !S.drag && (b || S.lsel);
     if (showQ) {
@@ -593,6 +600,11 @@ export function createCanvas(host, opts = {}) {
       STICKY.slice(0, 8).forEach((c) => qbar.append(qdot(c, items.every((x) => x.color === c), () => { items.forEach((x) => upd(x.id, { color: c })); if (types.has("sticky")) S.color = c; done(); })));
       sep();
     }
+    if ([...types].every((t) => t === "sticky" || t === "text")) {
+      const hand = items.every((x) => x.font === "hand");
+      const fb = h("button", { class: "bd-qt bd-qf" + (hand ? " on" : ""), title: hand ? "Handwriting (click for the normal font)" : "Handwriting" }, "Aa"); fb.onclick = (e) => { e.stopPropagation(); items.forEach((x) => upd(x.id, { font: hand ? undefined : "hand" })); done(); };
+      qbar.append(fb); sep();
+    }
     if (types.size === 1 && types.has("sticky")) {
       [["s", "S"], ["m", "M"], ["l", "L"]].forEach(([s, t]) => { const b = h("button", { class: "bd-qt" + (items.every((x) => (x.size || "m") === s) ? " on" : ""), title: { s: "Small text", m: "Medium text", l: "Large text" }[s] }, t); b.onclick = () => { items.forEach((x) => upd(x.id, { size: s })); done(); }; qbar.append(b); });
       sep();
@@ -603,7 +615,7 @@ export function createCanvas(host, opts = {}) {
       qbar.append(qb(one && one.align === "center" ? "al-center" : one && one.align === "right" ? "al-right" : "al-left", "Alignment", () => { const nx = { left: "center", center: "right", right: "left" }[(one || items[0]).align || "left"]; items.forEach((x) => upd(x.id, { align: nx === "left" ? undefined : nx })); done(); }));
       sep();
     }
-    if (one && one.t === "page") { qbar.append(qb("open", "Open page", () => opts.openPage && opts.openPage(one))); sep(); }
+    if (one && one.t === "page") { qbar.append(qb("pencil", "Write here (Enter)", () => startEdit(one.id))); qbar.append(qb("fit", "Open as a full page (Shift Enter)", () => opts.openPage && opts.openPage(one))); sep(); }
     if (one && one.t === "link") { qbar.append(qb("external", "Open link", () => window.open(one.url, "_blank", "noopener"))); sep(); }
     if (one && one.t === "image") { qbar.append(qb("eye", "View", () => viewImage(one))); qbar.append(qb("download", "Download", () => download(one))); sep(); }
     if (items.length > 1) {
@@ -621,7 +633,6 @@ export function createCanvas(host, opts = {}) {
   stage.addEventListener("pointerup", up);
   stage.addEventListener("pointercancel", up);
   stage.addEventListener("lostpointercapture", (e) => { if (S.drag && S.drag.pid === e.pointerId) up(e); });
-  stage.addEventListener("pointerleave", () => { if (!S.drag && S.hover) { S.hover = null; schedule("ov"); } });
   stage.addEventListener("dblclick", dbl);
   stage.addEventListener("wheel", wheel, { passive: false });
 
@@ -643,7 +654,9 @@ export function createCanvas(host, opts = {}) {
       S.drag = { kind: "pinch", d0: Math.hypot(a.x - b.x, a.y - b.y), z0: S.view.z, m0: toW((a.x + b.x) / 2, (a.y + b.y) / 2) };
       return;
     }
-    if (S.editing) { const ed = S.els.get(S.editing); if (ed && ed.contains(e.target)) return; finishEdit(); }
+    if (S.editing) { const ed = S.els.get(S.editing); if (ed && ed.contains(e.target) && !e.target.closest(".bd-pgo")) return; finishEdit(); }
+    const pgo = e.target.closest && e.target.closest(".bd-pgo");
+    if (pgo) { const pit = S.items.get(pgo.closest(".bd-it").dataset.id); ptrs.delete(e.pointerId); e.preventDefault(); if (pit && opts.openPage) opts.openPage(pit); return; }
     if (S.editingLink) { if (e.target.closest(".bd-lb.editing")) return; finishLinkEdit(); }
     if (!isEditable(document.activeElement) || !host.contains(document.activeElement)) stage.focus({ preventScroll: true });
     const w = toW(e.clientX, e.clientY); S.last = w;
@@ -728,13 +741,7 @@ export function createCanvas(host, opts = {}) {
     if (S.dead) return;
     if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const d = S.drag;
-    if (!d) { // hover: which item would get connector dots
-      if (!owner || e.pointerType === "touch") return;
-      const el = e.target.closest && e.target.closest(".bd-it"), anc = e.target.closest && e.target.closest("[data-anc]");
-      const id = anc ? anc.dataset.for : el ? el.dataset.id : null;
-      if (id !== S.hover) { S.hover = id; schedule("ov"); }
-      return;
-    }
+    if (!d) return;
     if (d.kind === "pinch") {
       if (ptrs.size < 2) return;
       const [a, b] = [...ptrs.values()], dist = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2 - R.left, my = (a.y + b.y) / 2 - R.top;
@@ -849,12 +856,14 @@ export function createCanvas(host, opts = {}) {
     if (S.dead) return;
     // the first click captured the pointer, so the event's target is the stage: look at what is really under the pointer
     const under = document.elementFromPoint(e.clientX, e.clientY);
+    if (S.editing) { const ed = S.els.get(S.editing); if (ed && under && ed.contains(under)) return; }
+    if (under && under.closest && under.closest(".bd-pgo")) return;
     const hi = hitInfo(under && stage.contains(under) ? { target: under } : e);
     if (hi.qbar || hi.anc || hi.hd) return;
     const id = hi.el && hi.el.dataset.id, it = id && S.items.get(id);
     if (hi.lk && owner) { editLinkLabel(hi.lk.dataset.lid); return; }
     if (it) {
-      if (it.t === "page") return opts.openPage && opts.openPage(it);
+      if (it.t === "page") return owner && !it.locked && opts.editPage ? startEdit(id, false, hi.el.querySelector(".bd-pgt")?.contains(under) ? "title" : "body") : opts.openPage && opts.openPage(it);
       if (it.t === "image") return viewImage(it);
       if (it.t === "link") return window.open(it.url, "_blank", "noopener");
       if (!owner || it.locked) return;
@@ -871,9 +880,10 @@ export function createCanvas(host, opts = {}) {
   function wheel(e) {
     if (S.dead) return;
     if (e.target.closest(".bd-qbar")) return;
+    if (!e.ctrlKey && !e.metaKey && S.editing && e.target.closest(".bd-it.editing .bd-pgx")) return; // scroll the page being written
     e.preventDefault(); closeMenu(); rect();
     const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? R.height : 1;
-    if (e.ctrlKey || e.metaKey) { const dy = clamp(e.deltaY * k, -120, 120), f = Math.exp(-dy * (Math.abs(dy) < 40 ? 0.011 : 0.0016)); zoomAt(e.clientX, e.clientY, f); }
+    if (e.ctrlKey || e.metaKey) { const dy = clamp(e.deltaY * k, -120, 120), f = Math.exp(-dy * (Math.abs(dy) < 40 ? 0.0055 : 0.0011)); zoomAt(e.clientX, e.clientY, f); }
     else { let dx = e.deltaX * k, dy = e.deltaY * k; if (e.shiftKey && !dx) { dx = dy; dy = 0; } S.view.x -= dx; S.view.y -= dy; }
     moving(); schedule("view");
   }
@@ -898,9 +908,17 @@ export function createCanvas(host, opts = {}) {
   const fitAll = (o) => fitTo(bbox(S.items.keys()), o);
 
   /* ---------- editing text in place ---------- */
-  function startEdit(id, fresh) {
+  function startEdit(id, fresh, at) {
     const it = S.items.get(id), el = S.els.get(id); if (!it || !el || !owner || it.locked) return;
     if (S.editing && S.editing !== id) finishEdit();
+    if (it.t === "page") {
+      if (!opts.editPage || S.editing === id) return;
+      S.editing = id; el.classList.add("editing"); select([id]); schedule("ov");
+      const keys = (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(".rte-pop")) { e.preventDefault(); e.stopPropagation(); finishEdit(); stage.focus({ preventScroll: true }); } };
+      el.addEventListener("keydown", keys); S.pageKeys = keys;
+      Promise.resolve(opts.editPage(it, el, { at: at || (fresh ? "title" : "body") })).then((hd) => { if (S.editing === id) { S.pageEd = hd; if (!hd) finishEdit(); } else if (hd) hd.finish(); });
+      return;
+    }
     const tx = it.t === "frame" ? el.querySelector(".bd-frt span") : el.querySelector(".bd-tx"); if (!tx) return;
     begin(); touchI(id);
     S.editing = id; el.classList.add("editing");
@@ -914,10 +932,14 @@ export function createCanvas(host, opts = {}) {
       if (it.t === "sticky") fitSticky(el, it); if (autoH(it)) measure(it);
     };
     tx.onpaste = (e) => { if (plainOnly) return; e.preventDefault(); document.execCommand("insertText", false, e.clipboardData.getData("text/plain")); };
+    tx.onblur = () => setTimeout(() => { if (S.editing === id && !el.contains(document.activeElement)) finishEdit(); }, 0);
     tx.onkeydown = (e) => {
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finishEdit(); stage.focus({ preventScroll: true }); }
-      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey || (it.t === "frame" && !e.shiftKey))) { e.preventDefault(); finishEdit(); stage.focus({ preventScroll: true }); }
-      else if (e.key === "Tab" && it.t === "sticky") { // brainstorm fast: Tab makes the next note beside this one, Shift+Tab below
+      else if (e.key === "Enter" && it.t === "frame" && !e.shiftKey) { e.preventDefault(); finishEdit(); stage.focus({ preventScroll: true }); }
+      else if (e.key === "Tab") { e.preventDefault(); finishEdit(); goNext(e.shiftKey ? -1 : 1, true); }
+      else if (e.key === " " && it.t !== "frame" && bulletAt(tx)) e.preventDefault();
+      else if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey && it.t !== "frame" && continueBullet(tx)) e.preventDefault();
+      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && it.t === "sticky") { // brainstorm fast: Ctrl+Enter makes the next note beside this one, Ctrl+Shift+Enter below
         e.preventDefault(); finishEdit();
         const nx = e.shiftKey ? { x: it.x, y: it.y + it.h + 24 } : { x: it.x + it.w + 24, y: it.y };
         const n = make("sticky", nx, { x: nx.x, y: nx.y, w: it.w, h: it.h, color: it.color, size: it.size }); put(n);
@@ -932,13 +954,66 @@ export function createCanvas(host, opts = {}) {
     const id = S.editing; if (!id) return;
     S.editing = null;
     const el = S.els.get(id), it = S.items.get(id);
-    if (el) { el.classList.remove("editing"); const tx = el.querySelector("[contenteditable]"); if (tx) { tx.contentEditable = "false"; tx.removeAttribute("contenteditable"); tx.oninput = tx.onkeydown = tx.onpaste = null; } }
+    if (it && it.t === "page") {
+      if (el) { el.classList.remove("editing"); if (S.pageKeys) el.removeEventListener("keydown", S.pageKeys); }
+      const hd = S.pageEd; S.pageEd = null; S.pageKeys = null;
+      const redraw = () => { const cur = S.items.get(id); if (cur && S.editing !== id) paint(cur); };
+      if (hd) hd.finish().then(redraw, redraw); else redraw();
+      schedule("ov"); return;
+    }
+    if (el) { el.classList.remove("editing"); const tx = el.querySelector("[contenteditable]"); if (tx) { tx.contentEditable = "false"; tx.removeAttribute("contenteditable"); tx.oninput = tx.onkeydown = tx.onpaste = tx.onblur = null; } }
     if (it) {
       if (it.t === "text" && !(it.text || "").trim()) { remove([id]); done(); return; } // an empty text box goes away by itself
-      paint(it); mark(id);
+      it.ts = Date.now(); paint(it); mark(id);
     }
     done(); try { getSelection().removeAllRanges(); } catch {}
     schedule("ov");
+  }
+  /* lists in notes: "- " or "* " at the start of a line becomes a bullet, and Enter carries it on */
+  function lineBefore(tx) {
+    const sl = getSelection(); if (!sl.rangeCount || !sl.isCollapsed) return null;
+    const r = sl.getRangeAt(0).cloneRange(); r.setStart(tx, 0); const t = r.toString(); return t.slice(t.lastIndexOf("\n") + 1);
+  }
+  function bulletAt(tx) { const ln = lineBefore(tx); if (ln !== "-" && ln !== "*") return false; document.execCommand("delete"); document.execCommand("insertText", false, "• "); return true; }
+  function continueBullet(tx) {
+    const ln = lineBefore(tx); if (ln == null || !ln.startsWith("• ")) return false;
+    if (ln.trim() === "•") { document.execCommand("delete"); document.execCommand("delete"); return true; } // an empty bullet ends the list
+    document.execCommand("insertText", false, "\n• "); return true;
+  }
+  /* Tab: the next item in reading order (rows from the top, left to right inside a row) */
+  function readingOrder() {
+    const list = [...S.items.values()].filter((x) => x.t !== "frame").sort((a, b) => (a.y + a.h / 2) - (b.y + b.h / 2));
+    const rows = [];
+    for (const it of list) { const cy = it.y + it.h / 2, row = rows.find((r) => cy >= r.top && cy <= r.bottom); if (row) { row.items.push(it); row.top = Math.min(row.top, it.y); row.bottom = Math.max(row.bottom, it.y + it.h); } else rows.push({ top: it.y, bottom: it.y + it.h, items: [it] }); }
+    return rows.flatMap((r) => r.items.sort((a, b) => a.x - b.x));
+  }
+  function goNext(dir, edit) {
+    const order = readingOrder(); if (!order.length) return;
+    const cur = [...S.sel].pop(); let i = order.findIndex((x) => x.id === cur);
+    if (i < 0) { const c = center(); i = order.reduce((best, x, j) => (Math.hypot(x.x + x.w / 2 - c.x, x.y + x.h / 2 - c.y) < Math.hypot(order[best].x + order[best].w / 2 - c.x, order[best].y + order[best].h / 2 - c.y) ? j : best), 0); }
+    else i = (i + dir + order.length) % order.length;
+    const it = order[i]; select([it.id]); ensureVisible(it);
+    if (edit && (it.t === "sticky" || it.t === "text") && !it.locked) startEdit(it.id);
+    else stage.focus({ preventScroll: true });
+  }
+  /* Ctrl+F: find words anywhere on the board */
+  function findBox() {
+    let box = stage.querySelector(".bd-find");
+    if (box) { box.querySelector("input").select(); return; }
+    box = h("div", { class: "bd-find", role: "search" }, h("span", { html: I("search", 18) }), h("input", { type: "search", placeholder: "Find on this board", "aria-label": "Find on this board", autocomplete: "off" }), h("small", { class: "bd-fc" }), h("button", { class: "bd-qb", title: "Previous (Shift Enter)", "aria-label": "Previous", html: I("chevron-up", 18) }), h("button", { class: "bd-qb", title: "Next (Enter)", "aria-label": "Next", html: I("chevron-down", 18) }), h("button", { class: "bd-qb", title: "Close (Esc)", "aria-label": "Close", html: I("x", 18) }));
+    stage.append(box);
+    const inp = box.querySelector("input"), cnt = box.querySelector(".bd-fc"), [prev, next, close] = box.querySelectorAll("button");
+    let hits = [], at = -1;
+    const textOf = (it) => [it.text, it.title, it.snip, it.desc, it.url, it.name, it.cap].filter(Boolean).join(" ").toLowerCase();
+    const show = () => { cnt.textContent = inp.value ? (hits.length ? `${at + 1} of ${hits.length}` : "No match") : ""; if (at >= 0 && hits[at]) { const it = S.items.get(hits[at]); if (it) { select([it.id]); fitTo(it, { max: Math.max(1, S.view.z), pad: 160 }); } } };
+    const run = () => { const q = inp.value.trim().toLowerCase(); hits = q ? readingOrder().concat([...S.items.values()].filter((x) => x.t === "frame")).filter((it) => textOf(it).includes(q)).map((x) => x.id) : []; at = hits.length ? 0 : -1; show(); };
+    const step = (d) => { if (!hits.length) return; at = (at + d + hits.length) % hits.length; show(); };
+    const shut = () => { box.remove(); stage.focus({ preventScroll: true }); };
+    inp.oninput = run;
+    inp.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") { e.preventDefault(); step(e.shiftKey ? -1 : 1); } if (e.key === "Escape") { e.preventDefault(); shut(); } };
+    prev.onclick = () => step(-1); next.onclick = () => step(1); close.onclick = shut;
+    box.addEventListener("pointerdown", (e) => e.stopPropagation());
+    inp.focus();
   }
   function editLinkLabel(lid) {
     const l = S.links.get(lid); if (!l || !owner) return;
@@ -1058,6 +1133,13 @@ export function createCanvas(host, opts = {}) {
     if (url) return addLink(url, at);
     if (!txt) return;
     const lines = txt.split(/\n/);
+    const items = lines.map((l) => l.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "").trim()).filter(Boolean);
+    if (items.length >= 3 && items.length <= 60 && items.every((l) => l.length <= 160)) { // a list: one note per line, in a neat grid
+      const cols = Math.ceil(Math.sqrt(items.length)), sz = 200, gap = 20, w0 = cols * (sz + gap) - gap, rows = Math.ceil(items.length / cols);
+      begin(); const ids = [];
+      items.forEach((t, i) => { const it = make("sticky", at, { x: Math.round(at.x - w0 / 2 + (i % cols) * (sz + gap)), y: Math.round(at.y - (rows * (sz + gap)) / 2 + Math.floor(i / cols) * (sz + gap)), w: sz, h: sz, text: t }); put(it); ids.push(it.id); });
+      done(); select(ids); return;
+    }
     if (txt.length <= 300 && lines.length <= 8) return create("sticky", at, { text: txt });
     create("text", at, { text: txt.slice(0, 20000), w: 480 });
   }
@@ -1086,25 +1168,31 @@ export function createCanvas(host, opts = {}) {
   /* ---------- keyboard ---------- */
   host.addEventListener("keydown", onKey);
   // when nothing has focus (a window just closed), keys still reach the board if its window is on top
-  const isTop = () => { const w = host.closest(".win"); return !!(host.offsetParent && w && !w.classList.contains("min") && (w.classList.contains("top") || document.querySelectorAll(".win:not(.min)").length === 1)) && !document.querySelector(".bd-keys,.own-dlg,.bd-menus,.lb-ov"); };
+  const isTop = () => { const w = host.closest(".win"); return !S.inactive && !!(host.offsetParent && w && !w.classList.contains("min") && (w.classList.contains("top") || document.querySelectorAll(".win:not(.min)").length === 1)) && !document.querySelector(".bd-keys,.own-dlg,.bd-menus,.lb-ov"); };
   const loose = () => { const a = document.activeElement; return !a || a === document.body || a === document.documentElement; };
   const docKey = (e) => { if (!e.defaultPrevented && loose() && isTop()) { onKey(e); if (e.defaultPrevented) stage.focus({ preventScroll: true }); } };
   const docKeyUp = (e) => { if (e.key === " " && S.space) { S.space = false; stage.classList.remove("space"); } };
-  const docPaste = (e) => { if (loose() && isTop() && owner) { e.preventDefault(); handleData(e.clipboardData, pasteAt()); } };
+  const docPaste = (e) => { if (!e.defaultPrevented && loose() && isTop() && owner) { e.preventDefault(); handleData(e.clipboardData, pasteAt()); } };
   document.addEventListener("keydown", docKey); document.addEventListener("keyup", docKeyUp); document.addEventListener("paste", docPaste);
   function onKey(e) {
-    if (S.dead || isEditable(e.target)) return;
+    if (S.dead || S.inactive || isEditable(e.target)) return;
     const k = e.key, mod = e.ctrlKey || e.metaKey;
     if (k === " " && !S.space) { S.space = true; stage.classList.add("space"); e.preventDefault(); return; }
     if (mod && (k === "z" || k === "Z")) { e.preventDefault(); if (!owner) return; e.shiftKey ? redo() : undo(); return; }
     if (mod && (k === "y" || k === "Y")) { e.preventDefault(); if (owner) redo(); return; }
-    if (mod && (k === "=" || k === "+")) { e.preventDefault(); zoomBy(1.25); return; }
-    if (mod && k === "-") { e.preventDefault(); zoomBy(0.8); return; }
+    if (mod && (k === "=" || k === "+")) { e.preventDefault(); zoomBy(1.2); return; }
+    if (mod && k === "-") { e.preventDefault(); zoomBy(1 / 1.2); return; }
     if (mod && k === "0") { e.preventDefault(); zoomTo(1); return; }
     if (e.shiftKey && (k === "!" || e.code === "Digit1")) { e.preventDefault(); fitAll(); return; }
     if (e.shiftKey && (k === "@" || e.code === "Digit2")) { e.preventDefault(); fitTo(bbox(S.sel.size ? S.sel : S.items.keys()), { max: 2 }); return; }
     if (k === "Escape") { if (S.tool !== "select") setTool("select"); else clearSel(); closeMenu(); return; }
     if (k === "?" || (mod && k === "/")) { e.preventDefault(); shortcuts(stage); return; }
+    if (mod && (k === "f" || k === "F")) { e.preventDefault(); findBox(); return; }
+    if (k === "Tab") { e.preventDefault(); goNext(e.shiftKey ? -1 : 1, false); return; }
+    if (k.startsWith("Arrow") && !S.sel.size && !mod) { // nothing selected: the arrows move around the board
+      e.preventDefault(); const st = e.shiftKey ? 320 : 80;
+      S.view.x += k === "ArrowLeft" ? st : k === "ArrowRight" ? -st : 0; S.view.y += k === "ArrowUp" ? st : k === "ArrowDown" ? -st : 0; moving(); schedule("view"); return;
+    }
     if (!owner) return;
     if (mod && (k === "a" || k === "A")) { e.preventDefault(); selectAll(); return; }
     if (mod && (k === "d" || k === "D")) { e.preventDefault(); duplicate([...S.sel]); return; }
@@ -1113,7 +1201,7 @@ export function createCanvas(host, opts = {}) {
     if (k === "]" && mod) { e.preventDefault(); order(true); return; }
     if (k === "[" && mod) { e.preventDefault(); order(false); return; }
     if (k === "Delete" || k === "Backspace") { e.preventDefault(); delSel(); return; }
-    if (k === "Enter" && S.sel.size === 1) { const it = selItems()[0]; e.preventDefault(); if (it.t === "page") opts.openPage && opts.openPage(it); else if (it.t === "link") window.open(it.url, "_blank", "noopener"); else if (it.t === "image") viewImage(it); else startEdit(it.id); return; }
+    if (k === "Enter" && S.sel.size === 1) { const it = selItems()[0]; e.preventDefault(); if (it.t === "page") { if (e.shiftKey || !opts.editPage) opts.openPage && opts.openPage(it); else startEdit(it.id); } else if (it.t === "link") window.open(it.url, "_blank", "noopener"); else if (it.t === "image") viewImage(it); else startEdit(it.id); return; }
     if (k.startsWith("Arrow") && S.sel.size) {
       e.preventDefault(); const st = e.shiftKey ? 10 : 1, dx = k === "ArrowLeft" ? -st : k === "ArrowRight" ? st : 0, dy = k === "ArrowUp" ? -st : k === "ArrowDown" ? st : 0;
       selItems().filter((x) => !x.locked).forEach((it) => upd(it.id, { x: it.x + dx, y: it.y + dy })); clearTimeout(S.nudgeT); S.nudgeT = setTimeout(done, 400); return;
@@ -1142,7 +1230,7 @@ export function createCanvas(host, opts = {}) {
   }));
   host.querySelectorAll("[data-z]").forEach((b) => b.addEventListener("click", () => {
     const k = b.dataset.z;
-    if (k === "in") zoomBy(1.25); else if (k === "out") zoomBy(0.8); else if (k === "fit") fitAll(); else if (k === "keys") shortcuts(stage);
+    if (k === "in") zoomBy(1.2); else if (k === "out") zoomBy(1 / 1.2); else if (k === "fit") fitAll(); else if (k === "keys") shortcuts(stage);
     else { const r = b.getBoundingClientRect(); M(r.left, r.top - 8, [{ t: "Zoom in", i: "zoom-in", k: "Ctrl +", run: () => zoomBy(1.25) }, { t: "Zoom out", i: "zoom-out", k: "Ctrl −", run: () => zoomBy(0.8) }, "-", { t: "Zoom to 50%", run: () => zoomTo(0.5) }, { t: "Zoom to 100%", k: "Ctrl 0", run: () => zoomTo(1) }, { t: "Zoom to 200%", run: () => zoomTo(2) }, "-", { t: "Show everything", i: "fit", k: "Shift 1", run: () => fitAll() }, { t: "Zoom to selection", k: "Shift 2", disabled: !S.sel.size, run: () => fitTo(bbox(S.sel), { max: 2 }) }]); }
   }));
   function zoomTo(z) { rect(); const cx = R.width / 2, cy = R.height / 2; animateTo({ z, x: cx - (cx - S.view.x) * (z / S.view.z), y: cy - (cy - S.view.y) * (z / S.view.z) }, 200); }
@@ -1152,7 +1240,7 @@ export function createCanvas(host, opts = {}) {
     const items = selItems(), one = items.length === 1 ? items[0] : null, locked = items.length && items.every((x) => x.locked), types = new Set(items.map((x) => x.t));
     const out = [];
     if (one) {
-      if (one.t === "page") out.push({ t: "Open page", i: "open", k: "Enter", run: () => opts.openPage && opts.openPage(one) }, { t: "Download as Markdown", i: "download", run: () => opts.pageDownload && opts.pageDownload(one, "md") }, { t: "Save as PDF", i: "print", run: () => opts.pageDownload && opts.pageDownload(one, "pdf") }, "-");
+      if (one.t === "page") out.push({ t: "Write here", i: "pencil", k: "Enter", run: () => startEdit(one.id) }, { t: "Open as a full page", i: "fit", k: "⇧ Enter", run: () => opts.openPage && opts.openPage(one) }, { t: "Download as Markdown", i: "download", run: () => opts.pageDownload && opts.pageDownload(one, "md") }, { t: "Save as PDF", i: "print", run: () => opts.pageDownload && opts.pageDownload(one, "pdf") }, "-");
       if (one.t === "image") out.push({ t: "View full size", i: "eye", k: "Enter", run: () => viewImage(one) }, { t: "Download picture", i: "download", run: () => download(one) }, { t: "Copy picture address", i: "link", run: () => copyText(new URL(one.src, location.href).href) }, { t: one.cap ? "Edit caption" : "Add caption", i: "pencil", run: () => caption(one) }, "-");
       if (one.t === "link") out.push({ t: "Open link", i: "external", k: "Enter", run: () => window.open(one.url, "_blank", "noopener") }, { t: "Copy link address", i: "link", run: () => copyText(one.url) }, { t: "Refresh preview", i: "refresh", run: () => refreshLink(one) }, "-");
       if (["sticky", "text"].includes(one.t) && !locked) out.push({ t: "Edit text", i: "pencil", k: "Enter", run: () => startEdit(one.id) }, { t: "Copy text", i: "copy", run: () => copyText(one.text || "") });
@@ -1161,6 +1249,7 @@ export function createCanvas(host, opts = {}) {
       if (out.length && out[out.length - 1] !== "-") out.push("-");
     }
     if (!locked && (types.size === 1 && (types.has("sticky") || types.has("frame")))) out.push({ head: "Colour" }, { swatches: STICKY.map((c) => ({ c, name: COLORS[c].name, on: items.every((x) => x.color === c), run: () => { items.forEach((x) => upd(x.id, { color: c })); done(); } })) }, "-");
+    if (!locked && [...types].every((t) => t === "sticky" || t === "text")) out.push({ head: "Font" }, { chips: [["", "Normal"], ["hand", "Handwriting"]].map(([f, t]) => ({ t, on: items.every((x) => (x.font || "") === f), run: () => { items.forEach((x) => upd(x.id, { font: f || undefined })); done(); } })) });
     if (!locked && types.size === 1 && types.has("text")) out.push({ head: "Text size" }, { chips: [["s", "S"], ["m", "M"], ["l", "L"], ["xl", "XL"]].map(([s, t]) => ({ t, on: items.every((x) => (x.size || "m") === s), run: () => { items.forEach((x) => upd(x.id, { size: s })); done(); } })) }, "-");
     if (items.length > 1 && !locked) out.push({ t: "Align", i: "al-left", sub: [{ t: "Left", i: "al-left", run: () => align("l") }, { t: "Centre", i: "al-center", run: () => align("c") }, { t: "Right", i: "al-right", run: () => align("r") }, "-", { t: "Top", i: "al-top", run: () => align("t") }, { t: "Middle", i: "al-middle", run: () => align("m") }, { t: "Bottom", i: "al-bottom", run: () => align("b") }, "-", { t: "Space out across", i: "dist-h", disabled: items.length < 3, run: () => distribute("h") }, { t: "Space out down", i: "dist-v", disabled: items.length < 3, run: () => distribute("v") }] }, { t: "Tidy up", i: "tidy", run: () => tidy() });
     out.push({ t: "Put in a section", i: "section", k: "Ctrl G", run: () => wrapSection() });
@@ -1269,7 +1358,17 @@ export function createCanvas(host, opts = {}) {
     hasPending: () => !!(Q.up.size || Q.del.size || Q.lup.size || Q.ldel.size || Q.busy),
     item: (id) => S.items.get(id),
     // changes from outside (the page window): title, icon, cover, preview text. Not part of undo.
-    patchItem(id, patch, { history = false } = {}) { const it = S.items.get(id); if (!it) return; if (history) begin(), touchI(id); Object.assign(it, patch); paint(it); mark(id); if (history) done(); },
+    patchItem(id, patch, { history = false } = {}) { const it = S.items.get(id); if (!it) return; if (history) begin(), touchI(id); Object.assign(it, patch); for (const k in patch) if (patch[k] === undefined) delete it[k]; it.ts = Date.now(); paint(it); mark(id); linksOf(id).forEach((l) => schedule("link", l.id)); if (history) done(); },
+    // for the database view: the same items, the same saving and undo
+    all: () => [...S.items.values()],
+    order: () => readingOrder(),
+    frameOf(it) { let best = null; for (const f of S.items.values()) if (f.t === "frame" && f.id !== it.id && inside(it, f) && (!best || f.w * f.h < best.w * best.h)) best = f; return best; },
+    addFree(t, extra = {}) { // a new item in a free spot at the right of what is there
+      const b = bbox([...S.items.keys()].filter((k) => S.items.get(k).t !== "frame")) || { x: 0, y: 0, w: 0, h: 0 };
+      const it = make(t, { x: 0, y: 0 }, { ...extra, x: S.items.size ? b.x + b.w + 80 : 0, y: S.items.size ? b.y : 0 }); put(it); done(); return it;
+    },
+    removeItems(ids) { remove(ids); done(); },
+    duplicateItems: (ids) => duplicate(ids),
     addPageCard(extra = {}) { const o = { ...extra }; delete o.noOpen; const it = make("page", center(), o); put(it); done(); return it; },
     removeItem(id) { remove([id]); done(); },
     snapshot: () => ({ items: Object.fromEntries([...S.items].filter(([, v]) => !v._up).map(([k, v]) => [k, v])), links: Object.fromEntries(S.links), updated: Date.now(), rev: Q.rev }),
@@ -1277,7 +1376,8 @@ export function createCanvas(host, opts = {}) {
     focusItem(id) { const it = S.items.get(id); if (!it) return; select([id]); fitTo(it, { max: Math.max(1, S.view.z) }); },
     select, elOf: (id) => S.els.get(id), rectOf(id) { const it = S.items.get(id); if (!it) return null; rect(); const p = toS(it.x, it.y); return { left: R.left + p.x, top: R.top + p.y, width: it.w * S.view.z, height: it.h * S.view.z }; },
     stageRect: () => rect(),
-    focus() { stage.focus({ preventScroll: true }); },
-    destroy() { S.dead = true; ro.disconnect(); document.removeEventListener("keydown", docKey); document.removeEventListener("keyup", docKeyUp); document.removeEventListener("paste", docPaste); hideTip(); cancelAnimationFrame(raf); closeMenu(); clearTimeout(Q.t); },
+    focus() { if (!S.inactive) stage.focus({ preventScroll: true }); },
+    setActive(on) { S.inactive = !on; if (!on) { finishEdit(); closeMenu(); } else { rect(); schedule("view"); } },
+    destroy() { S.dead = true; ro.disconnect(); if (offBodies) offBodies(); document.removeEventListener("keydown", docKey); document.removeEventListener("keyup", docKeyUp); document.removeEventListener("paste", docPaste); hideTip(); cancelAnimationFrame(raf); closeMenu(); clearTimeout(Q.t); },
   };
 }
