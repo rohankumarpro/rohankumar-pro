@@ -3,19 +3,43 @@
 //
 // Storage (new keys only, nothing else is read or written):
 //   boards-index          [meta]                         the list of boards
-//   board-<id>            {id, items:{}, links:{}, updated}   everything on one board
+//   board-<id>            {id, items:{}, links:{}, updated, rev, preview}   everything on one board
+//   board-stat-<id>       {count, updated, preview, rev}   what the board list shows, kept apart so frequent saves never rewrite the list
 //   board-hist-<id>       [{ts, items, links}]           safety copies of a board (every 10 minutes, and before big removals)
 //   bpage-<itemId>        {id, blocks, updated}          the writing inside a page card
 //   bpage-hist-<itemId>   [{ts, title, blocks}]          earlier versions of that writing
 import { cleanBlocks, safeImg, safeUrl, blocksText, wordCount } from "../../shared/blocks.mjs";
 import { saveJSON } from "./safe.mjs";
 import { ICONS } from "../../shared/icons.mjs";
+import { getStore } from "@netlify/blobs";
+
+/* ---------- reading what was really saved last ----------
+   Netlify Blobs normally answers reads from an edge cache that can be up to a minute old. A board is read, changed and
+   written back on every save, so a stale read would silently undo the save before it. Boards therefore read with strong
+   consistency (always the latest). If the platform ever refuses that, reads fall back to normal ones, and the revision
+   check in patchBoard still refuses to build on an old copy. */
+let strongOk = true;
+export function boardsStore(name) {
+  const strong = getStore({ name, consistency: "strong" }), plain = getStore(name);
+  return {
+    async get(key, opts) {
+      if (strongOk) {
+        try { return await strong.get(key, opts); }
+        catch (e) { if (e && e.name === "BlobsConsistencyError") { strongOk = false; console.warn("boards: strong reads unavailable, using revision checks only"); } else throw e; }
+      }
+      return plain.get(key, opts);
+    },
+    set: (k, v, o) => plain.set(k, v, o), setJSON: (k, v, o) => plain.setJSON(k, v, o), delete: (k) => plain.delete(k), list: (o) => plain.list(o),
+    get strong() { return strongOk; },
+  };
+}
 
 export const idxKey = "boards-index";
 export const boardKey = (id) => `board-${id}`;
 export const histKey = (id) => `board-hist-${id}`;
 export const pageKey = (id) => `bpage-${id}`;
 export const pageHistKey = (id) => `bpage-hist-${id}`;
+export const statKey = (id) => `board-stat-${id}`;
 
 const MAX_BOARDS = 200, MAX_ITEMS = 4000, MAX_LINKS = 4000;
 const HIST_EVERY = 10 * 60_000, HIST_KEEP = 24, PHIST_EVERY = 5 * 60_000, PHIST_KEEP = 40;
@@ -37,8 +61,16 @@ export function cleanCover(c) {
 
 /* ---------- board list ---------- */
 export const loadIndex = async (store) => (await store.get(idxKey, { type: "json" })) ?? [];
+// the list with each board's latest count, preview and edit time (kept in its own small record)
+export async function listBoards(store) {
+  const all = await loadIndex(store);
+  const stats = await Promise.all(all.map((m) => store.get(statKey(m.id), { type: "json" }).catch(() => null)));
+  return all.map((m, i) => (stats[i] ? { ...m, count: stats[i].count, preview: stats[i].preview || m.preview || [], updated: Math.max(m.updated || 0, stats[i].updated || 0) } : m));
+}
+const statOf = (doc) => ({ count: Object.keys(doc.items || {}).length, updated: doc.updated, preview: doc.preview || [], rev: doc.rev || 0 });
 export const metaOf = (m) => ({ id: m.id, title: m.title || "", icon: m.icon || "", cover: m.cover || null, order: m.order || 0, created: m.created, updated: m.updated, trashed: m.trashed || 0, count: m.count || 0, preview: m.preview || [], fav: !!m.fav });
 
+const cleanPreview = (p) => (Array.isArray(p) ? p : []).slice(0, 90).map((r) => (Array.isArray(r) ? [num(r[0], 0, 1000), num(r[1], 0, 1000), num(r[2], 0, 1000), num(r[3], 0, 1000), pick(r[4], [...COLORS, "page", "image", "frame", "link", "text"], "grey")] : null)).filter(Boolean);
 export function cleanMeta(b, prev) {
   const o = { ...prev };
   if ("title" in b) o.title = str(b.title, 120).trim();
@@ -47,7 +79,7 @@ export function cleanMeta(b, prev) {
   if ("order" in b) o.order = num(b.order, -1e9, 1e9, 0);
   if ("fav" in b) o.fav = !!b.fav;
   if ("trashed" in b) o.trashed = b.trashed ? Date.now() : 0;
-  if ("preview" in b) o.preview = (Array.isArray(b.preview) ? b.preview : []).slice(0, 90).map((r) => (Array.isArray(r) ? [num(r[0], 0, 1000), num(r[1], 0, 1000), num(r[2], 0, 1000), num(r[3], 0, 1000), pick(r[4], [...COLORS, "page", "image", "frame", "link", "text"], "grey")] : null)).filter(Boolean);
+  if ("preview" in b) o.preview = cleanPreview(b.preview);
   return o;
 }
 
@@ -99,17 +131,18 @@ export async function createBoard(store, b) {
   const id = okId(b.id) && !all.some((x) => x.id === b.id) ? b.id : Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
   const now = Date.now();
   const meta = cleanMeta({ title: b.title ?? "", icon: b.icon ?? "", cover: b.cover ?? null }, { id, title: "", icon: "", cover: null, order: Math.min(0, ...all.map((x) => x.order || 0)) - 1, created: now, updated: now, trashed: 0, count: 0, preview: [] });
-  const doc = { id, items: {}, links: {}, updated: now };
+  const doc = { id, items: {}, links: {}, updated: now, rev: 1, preview: [] };
   for (const it of Array.isArray(b.items) ? b.items.slice(0, MAX_ITEMS) : []) { const c = cleanItem(it); if (c) doc.items[c.id] = c; }
   for (const l of Array.isArray(b.links) ? b.links.slice(0, MAX_LINKS) : []) { const c = cleanLink(l); if (c && doc.items[c.a] && doc.items[c.b]) doc.links[c.id] = c; }
   meta.count = Object.keys(doc.items).length;
+  await store.setJSON(boardKey(id), doc); // the board first, so a save that arrives right away always finds it
+  await store.setJSON(statKey(id), statOf(doc));
   await saveJSON(store, idxKey, [...all, meta]);
-  await store.setJSON(boardKey(id), doc);
   return { meta, doc };
 }
 
 export async function loadBoard(store, id) {
-  return (await store.get(boardKey(id), { type: "json" })) ?? { id, items: {}, links: {}, updated: 0 };
+  return (await store.get(boardKey(id), { type: "json" })) ?? { id, items: {}, links: {}, updated: 0, rev: 0 };
 }
 
 export async function updateMeta(store, id, b) {
@@ -121,18 +154,28 @@ export async function updateMeta(store, id, b) {
   return all[i];
 }
 
-// A change sent by the editor: items and connectors to add or replace, and ids to remove. Applied to the latest saved board,
-// so changes made in two tabs both survive (the last change to the same item wins).
+// A change sent by the editor: items and connectors to add or replace, and ids to remove, applied to the latest saved
+// board (so edits from two tabs both survive; the last change to the same item wins).
+// Every save carries `base`, the revision the editor last saw saved. If the copy read here is older than that, it is a
+// stale read: nothing is written and the editor is told to send its whole board instead ({stale}).
+// A `full` save carries the whole board and replaces what is stored.
 export async function patchBoard(store, id, p) {
-  const all = await loadIndex(store), i = all.findIndex((x) => x.id === id);
-  if (i < 0) return null;
-  const doc = await loadBoard(store, id), before = Object.keys(doc.items).length;
-  const prevItems = doc.items, prevLinks = doc.links;
-  doc.items = { ...doc.items }; doc.links = { ...doc.links };
-  for (const it of Array.isArray(p.up) ? p.up : []) { const c = cleanItem(it); if (c) doc.items[c.id] = c; }
-  for (const k of Array.isArray(p.del) ? p.del : []) if (okId(k)) delete doc.items[k];
-  for (const l of Array.isArray(p.lup) ? p.lup : []) { const c = cleanLink(l); if (c) doc.links[c.id] = c; }
-  for (const k of Array.isArray(p.ldel) ? p.ldel : []) if (okId(k)) delete doc.links[k];
+  let doc = await store.get(boardKey(id), { type: "json" });
+  const base = p.base != null && Number.isFinite(+p.base) ? +p.base : null;
+  if (!doc) {
+    // not found: either it never existed, or this read is older than the board itself (the editor saw it saved)
+    if (base > 0 && !p.full) return { stale: true, rev: 0 };
+    if (!(base > 0) && !(await loadIndex(store)).some((x) => x.id === id)) return null;
+    doc = { id, items: {}, links: {}, updated: 0, rev: 0 };
+  }
+  const rev = doc.rev || 0;
+  if (base != null && base > rev && !p.full) return { stale: true, rev };
+  const before = Object.keys(doc.items || {}).length, prevItems = doc.items || {}, prevLinks = doc.links || {};
+  if (p.full) { doc.items = {}; doc.links = {}; } else { doc.items = { ...prevItems }; doc.links = { ...prevLinks }; }
+  for (const it of Array.isArray(p.full ? p.items : p.up) ? (p.full ? p.items : p.up) : []) { const c = cleanItem(it); if (c) doc.items[c.id] = c; }
+  if (!p.full) for (const k of Array.isArray(p.del) ? p.del : []) if (okId(k)) delete doc.items[k];
+  for (const l of Array.isArray(p.full ? p.links : p.lup) ? (p.full ? p.links : p.lup) : []) { const c = cleanLink(l); if (c) doc.links[c.id] = c; }
+  if (!p.full) for (const k of Array.isArray(p.ldel) ? p.ldel : []) if (okId(k)) delete doc.links[k];
   for (const [k, l] of Object.entries(doc.links)) if (!doc.items[l.a] || !doc.items[l.b]) delete doc.links[k]; // a connector never points at nothing
   if (Object.keys(doc.items).length > MAX_ITEMS) throw Object.assign(new Error("full"), { code: 400, msg: `A board holds at most ${MAX_ITEMS} items` });
   // safety copy: every ten minutes, and always before a change that removes most of the board
@@ -141,12 +184,12 @@ export async function patchBoard(store, id, p) {
     const hist = (await store.get(histKey(id), { type: "json" })) ?? [];
     if (before && (shrunk || !hist.length || Date.now() - hist[0].ts > HIST_EVERY)) await store.setJSON(histKey(id), [{ ts: Date.now(), items: prevItems, links: prevLinks }, ...hist].slice(0, HIST_KEEP));
   } catch {}
-  doc.updated = Date.now();
+  if (p.meta && typeof p.meta === "object" && "preview" in p.meta) doc.preview = cleanPreview(p.meta.preview);
+  doc.updated = Date.now(); doc.rev = Math.max(rev, base || 0) + 1;
   await store.setJSON(boardKey(id), doc);
-  all[i] = cleanMeta(p.meta && typeof p.meta === "object" ? p.meta : {}, all[i]);
-  all[i].count = after; all[i].updated = doc.updated;
-  await store.setJSON(idxKey, all);
-  return { meta: all[i], updated: doc.updated };
+  const stat = statOf(doc);
+  await store.setJSON(statKey(id), stat);
+  return { stat, rev: doc.rev, updated: doc.updated };
 }
 
 export async function purgeBoard(store, id, bk) {
@@ -161,7 +204,7 @@ export async function purgeBoard(store, id, bk) {
     } catch {}
   }
   await saveJSON(store, idxKey, all.filter((x) => x.id !== id));
-  await store.delete(boardKey(id)); await store.delete(histKey(id));
+  await store.delete(boardKey(id)); await store.delete(histKey(id)); await store.delete(statKey(id));
   for (const pid of pageIds) { await store.delete(pageKey(pid)); await store.delete(pageHistKey(pid)); }
   return true;
 }

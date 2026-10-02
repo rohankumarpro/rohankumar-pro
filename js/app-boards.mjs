@@ -247,7 +247,14 @@ export async function boardsApp(body, key) {
     drawTop(); setStatus("saved");
     const cv = createCanvas(cvHost, {
       owner: true, boardId: id,
-      send: async (patch) => { const r = await api("/api/boards?id=" + id + "&a=patch", { method: "POST", body: patch }); if (r.ok) { Object.assign(b, r.data.board); clearTimeout(A.cT); A.cT = setTimeout(() => { if (A.cv === cv) { try { const snap = cv.snapshot(); if (JSON.stringify(snap).length < 1_500_000) ls.set("bdDoc:" + id, snap); } catch {} } }, 1500); } else if (r.status >= 400 && r.status < 500 && r.status !== 401 && r.status !== 408 && r.status !== 429) { toast(r.data.error || "A change could not be saved"); return true; } return r.ok; },
+      send: async (patch) => {
+        const r = await api("/api/boards?id=" + id + "&a=patch", { method: "POST", body: patch });
+        if (r.ok) { Object.assign(b, r.data.stat || {}); clearTimeout(A.cT); A.cT = setTimeout(() => { if (A.cv === cv) { try { const snap = cv.snapshot(); if (JSON.stringify(snap).length < 1_500_000) ls.set("bdDoc:" + id, snap); } catch {} } }, 1500); return { ok: true, rev: r.data.rev }; }
+        if (r.status === 409 && r.data.stale) return { stale: true };
+        if (r.status === 404) { toast("This board no longer exists on the server. Your copy is kept on this device."); return { ok: false }; }
+        if (r.status === 400) { toast(r.data.error || "A change could not be saved"); return { ok: true }; } // refused for good (too big): keep going
+        return { ok: false }; // offline, signed out or a server hiccup: kept on this device and retried
+      },
       persist: (p) => { if (p) ls.set("bdPend:" + id, p); else ls.del("bdPend:" + id); },
       onStatus: (s) => setStatus(s),
       onView: (v) => { clearTimeout(A.vT); A.vT = setTimeout(() => ls.set("bdView:" + id, v), 400); },
@@ -268,7 +275,13 @@ export async function boardsApp(body, key) {
     if (!doc) {
       const r = await api("/api/boards?id=" + id);
       if (A.cv !== cv) return;
-      if (r.ok) { Object.assign(b, r.data.board); if (!cached || JSON.stringify(cached.items) !== JSON.stringify(r.data.doc.items) || JSON.stringify(cached.links) !== JSON.stringify(r.data.doc.links)) cv.load(r.data.doc, cv.view.z ? cv.view : view); try { if (JSON.stringify(r.data.doc).length < 1_500_000) ls.set("bdDoc:" + id, r.data.doc); } catch {} drawTop(); }
+      if (r.ok) {
+        Object.assign(b, r.data.board);
+        const sdoc = r.data.doc, newer = !cached || (sdoc.rev || 0) >= (cached.rev || 0); // never let an older copy replace a newer one this device already saw saved
+        if (newer && (!cached || JSON.stringify(cached.items) !== JSON.stringify(sdoc.items) || JSON.stringify(cached.links) !== JSON.stringify(sdoc.links))) cv.load(sdoc, cv.view.z ? cv.view : view);
+        if (newer) { try { if (JSON.stringify(sdoc).length < 1_500_000) ls.set("bdDoc:" + id, sdoc); } catch {} }
+        drawTop();
+      }
       else if (!cached) { main.querySelector(".ba-canvas").innerHTML = `<div class="ba-empty">${r.status === 0 ? "You're offline and this board hasn't been opened on this device yet." : "Could not open this board."}</div>`; return; }
     } else ls.set("bdDoc:" + id, doc);
     cv.applyPending(ls.get("bdPend:" + id, null));

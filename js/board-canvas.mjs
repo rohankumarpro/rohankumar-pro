@@ -406,7 +406,7 @@ export function createCanvas(host, opts = {}) {
   function undo() { finishEdit(); const e = hist.undo.pop(); if (!e) return; replay(e, true); hist.redo.push(e); }
   function redo() { finishEdit(); const e = hist.redo.pop(); if (!e) return; replay(e, false); hist.undo.push(e); }
 
-  const Q = { up: new Set(), del: new Set(), lup: new Set(), ldel: new Set(), t: 0, busy: false, again: false, fails: 0, prevT: 0 };
+  const Q = { up: new Set(), del: new Set(), lup: new Set(), ldel: new Set(), t: 0, busy: false, again: false, fails: 0, prevT: 0, rev: 0 };
   function mark(id, gone) { if (gone) { Q.up.delete(id); Q.del.add(id); } else { Q.del.delete(id); Q.up.add(id); } queue(); }
   function markL(id, gone) { if (gone) { Q.lup.delete(id); Q.ldel.add(id); } else { Q.ldel.delete(id); Q.lup.add(id); } queue(); }
   function queue() { if (!owner) return; status("unsaved"); clearTimeout(Q.t); Q.t = setTimeout(flush, 650); persistSoon(); }
@@ -430,7 +430,10 @@ export function createCanvas(host, opts = {}) {
     sent.up.forEach((id) => Q.up.delete(id)); sent.del.forEach((id) => Q.del.delete(id)); sent.lup.forEach((id) => Q.lup.delete(id)); sent.ldel.forEach((id) => Q.ldel.delete(id));
     if (Date.now() - Q.prevT > 8000) { p.meta = { preview: preview() }; Q.prevT = Date.now(); }
     Q.busy = true; status("saving");
-    let ok = false; try { ok = await opts.send(clone(p)); } catch { ok = false; }
+    // every save says which saved version it builds on; if the server only has an older copy, it refuses and the whole board goes instead
+    let res = null; try { res = await opts.send({ ...clone(p), base: Q.rev }); if (res && res.stale) res = await opts.send({ full: true, items: [...S.items.values()].filter((x) => !x._up).map(clone), links: [...S.links.values()].map(clone), base: Q.rev, meta: { preview: preview() } }); } catch { res = null; }
+    const ok = !!(res && res.ok);
+    if (ok && res.rev) Q.rev = res.rev;
     Q.busy = false;
     if (!ok) { // put them back (newer edits to the same items stay newer) and try again soon
       sent.up.forEach((id) => { if (!Q.del.has(id)) Q.up.add(id); }); sent.del.forEach((id) => { if (!S.items.has(id)) Q.del.add(id); });
@@ -1238,6 +1241,7 @@ export function createCanvas(host, opts = {}) {
 
   /* ---------- loading ---------- */
   function load(doc, view) {
+    Q.rev = doc.rev || 0;
     S.items.clear(); S.links.clear(); S.sel.clear(); S.lsel = null;
     itemsL.textContent = ""; framesL.textContent = ""; linkG.textContent = ""; labelsL.textContent = ""; S.els.clear(); S.lels.clear();
     for (const it of Object.values(doc.items || {})) S.items.set(it.id, it);
@@ -1268,7 +1272,8 @@ export function createCanvas(host, opts = {}) {
     patchItem(id, patch, { history = false } = {}) { const it = S.items.get(id); if (!it) return; if (history) begin(), touchI(id); Object.assign(it, patch); paint(it); mark(id); if (history) done(); },
     addPageCard(extra = {}) { const o = { ...extra }; delete o.noOpen; const it = make("page", center(), o); put(it); done(); return it; },
     removeItem(id) { remove([id]); done(); },
-    snapshot: () => ({ items: Object.fromEntries([...S.items].filter(([, v]) => !v._up).map(([k, v]) => [k, v])), links: Object.fromEntries(S.links), updated: Date.now() }),
+    snapshot: () => ({ items: Object.fromEntries([...S.items].filter(([, v]) => !v._up).map(([k, v]) => [k, v])), links: Object.fromEntries(S.links), updated: Date.now(), rev: Q.rev }),
+    get rev() { return Q.rev; },
     focusItem(id) { const it = S.items.get(id); if (!it) return; select([id]); fitTo(it, { max: Math.max(1, S.view.z) }); },
     select, elOf: (id) => S.els.get(id), rectOf(id) { const it = S.items.get(id); if (!it) return null; rect(); const p = toS(it.x, it.y); return { left: R.left + p.x, top: R.top + p.y, width: it.w * S.view.z, height: it.h * S.view.z }; },
     stageRect: () => rect(),

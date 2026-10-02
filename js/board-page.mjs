@@ -8,6 +8,7 @@ import { COVERS, coverCss } from "/js/board-covers.mjs";
 
 const PAGE_ICONS = ["file-text", "bulb", "sparkles", "target", "rocket", "star", "heart", "flame", "video", "camera", "mic", "music", "pencil", "book", "bookmark", "palette", "image", "brain", "chat", "calendar", "clock", "checkbox", "list", "chart", "trend", "globe", "map", "compass", "home", "folder", "tag", "link", "code", "laptop", "coffee", "plane", "leaf", "gift", "trophy", "flask", "wrench", "settings", "user", "mail", "phone", "lock", "shield", "cat", "graduation", "wallet"].filter((n) => ICONS[n]);
 const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
+const SAVED = new Map(); // page id -> {blocks, updated}: what this tab last saved, so a stale server copy never wins when a page is reopened
 const label = (it) => (it && it.title && it.title.trim()) || "Untitled";
 const slug = (s) => String(s || "page").toLowerCase().replace(/[^\w]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "page";
 
@@ -193,6 +194,7 @@ export function pageWindows(layer, ctx) {
     if (!W.has(w.id) || W.get(w.id) !== w) return;
     if (!r.ok) { w.el.querySelector(".bp-body").innerHTML = `<p class="hint">${r.status === 0 ? "You're offline. This page will open when you're back online." : "Could not open this page."}</p>`; return; }
     let blocks = r.data.blocks || []; w.updated = r.data.updated || 0;
+    const mine = SAVED.get(w.id); if (mine && mine.updated > w.updated) { blocks = mine.blocks; w.updated = mine.updated; }
     const dr = ls.get(DK(w.id), null);
     if (w.owner && dr && JSON.stringify(dr.blocks) !== JSON.stringify(blocks)) {
       if ((dr.base || 0) >= w.updated) { blocks = dr.blocks; w.dirty = true; toast("Recovered writing that was not saved yet."); }
@@ -227,7 +229,7 @@ export function pageWindows(layer, ctx) {
       w.updated = r.data.updated; w.blocks = r.data.blocks || []; if (w.ed) w.ed.setBlocks(w.blocks); ls.del(DK(w.id)); status(w, "Saved"); return false;
     }
     if (!r.ok) { w.dirty = true; status(w, r.status === 0 ? "Offline · kept on this device" : "Not saved · retrying"); w.saveT = setTimeout(() => save(w), 4000); return false; }
-    w.updated = r.data.updated;
+    w.updated = r.data.updated; SAVED.set(w.id, { blocks, updated: w.updated });
     if (!w.dirty) ls.del(DK(w.id));
     ctx.canvas()?.patchItem(w.id, { snip: r.data.snip || "", words: r.data.words || 0, edited: Date.now() });
     status(w, w.dirty ? "Unsaved" : "Saved"); return true;
