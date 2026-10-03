@@ -68,8 +68,7 @@ function removeApp(id) {
 /* ---------------- geometry ---------------- */
 function work() {
   const d = desk(), H = d.clientHeight, sh = document.getElementById("shelf");
-  // in the installed app the window buttons float over the top of the page, so start below them
-  if (T.full) { const o = navigator.windowControlsOverlay, y = o && o.visible ? Math.round(o.getTitlebarAreaRect().height) + 6 : 12; return { x: 12, y, w: d.clientWidth - 24, h: H - y - 12 }; }
+  if (T.full) return { x: 12, y: 12, w: d.clientWidth - 24, h: H - 24 };
   let bottom = 34;
   if (sh && !/dock-(auto|peek)/.test(html.className)) { const r = sh.getBoundingClientRect(), top = r.top - d.getBoundingClientRect().top; if (r.height && top < H - 20) bottom = Math.max(34, H - top + 10); else bottom = 92; }
   return { x: 12, y: 48, w: d.clientWidth - 24, h: H - 48 - bottom };
