@@ -605,6 +605,7 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 .pcard.hid,.dc-card.hid{opacity:.55}
 .mi-card{border:1px solid rgba(127,127,127,.35);border-radius:var(--r-6);padding:calc(12 * var(--u)) calc(14 * var(--u));margin:calc(10 * var(--u)) 0}.mi-card.new{border-color:#2ecc71}.mi-h{display:flex;align-items:baseline;gap:calc(8 * var(--u))}.mi-h small{margin-left:auto;opacity:.65}.mi-new{background:#2ecc71;color:#06361a;border-radius:var(--r-pill);font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(8 * var(--u))}
 .mi-m,.mi-o{margin:calc(6 * var(--u)) 0}.mi-m small,.mi-o small{display:block;opacity:.6;font-size:var(--fs-2)}.mi-o{opacity:.85;font-size:var(--fs-4)}.mi-e{margin:calc(4 * var(--u)) 0}.mi-card summary{cursor:pointer;opacity:.75;font-size:var(--fs-4);margin-top:calc(6 * var(--u))}
+.ow-fix{margin:0 0 14px;padding:14px 16px;border-radius:var(--r-6);background:color-mix(in srgb,var(--primary) 12%,var(--surface));display:flex;flex-direction:column;gap:6px}.ow-fix ul{margin:0;padding-left:18px;color:var(--ink2);font-size:var(--fs-3)}.ow-fix .btn{align-self:flex-start}
 .own-dlg{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(0,0,0,.35)}
 .own-card{background:var(--surface,#fff);color:inherit;border-radius:var(--r-7);padding:calc(22 * var(--u));width:min(320px,90vw);display:flex;flex-direction:column;gap:calc(10 * var(--u));box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .own-card input{font:inherit;padding:calc(10 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
@@ -1514,13 +1515,13 @@ const P = {
   status: "Open to new projects",
   now: "Taking on new brand identity and packaging projects, and building this portfolio desktop.",
   skills: ["Logo design","Visual identity","Brand strategy","Brand naming","Typography","AI-assisted workflows"],
-  email: "hello@yourname.com",
+  email: "hey@rohankumar.pro",
   links: [{label:"Behance",url:"https://www.behance.net/rohankumarpro"},{label:"Dribbble",url:"https://dribbble.com/rohankumarpro"},{label:"LinkedIn",url:"https://www.linkedin.com/in/rohankumarpro/"},{label:"Instagram",url:"https://www.instagram.com/rohankumarpro/"},{label:"YouTube",url:"https://www.youtube.com/@rohankumarpro"}],
   booking: "https://cal.com/rohankumarpro",
   // Links page: edit, add, or reorder freely. "app" opens a window on this site instead of a URL.
   linkpage: [
     {group:"Work with me", label:"Book a call", sub:"Free intro call on cal.com", url:"https://cal.com/rohankumarpro", icon:"cal", color:"c1", primary:true},
-    {group:"Work with me", label:"Email", sub:"hello@yourname.com", url:"mailto:hello@yourname.com", icon:"mail", color:"c4"},
+    {group:"Work with me", label:"Email", sub:"hey@rohankumar.pro", url:"mailto:hey@rohankumar.pro", icon:"mail", color:"c4"},
     {group:"Find me online", label:"LinkedIn", sub:"Articles and updates", url:"https://www.linkedin.com/in/rohankumarpro/", icon:"work", color:"c5"},
     {group:"Find me online", label:"Instagram", sub:"@rohankumarpro", url:"https://www.instagram.com/rohankumarpro/", icon:"cam", color:"c6"},
     {group:"Find me online", label:"Reddit", sub:"Design discussions", url:"https://www.reddit.com/user/rohankumarpro/", icon:"chat", color:"c2"},
@@ -2654,11 +2655,14 @@ function calculator(body){
 /* ============ Timeline: now, next, done ============ */
 /* Edit freely. status: "now" | "next" | "done". progress (0-100) is for "now" items. Journal articles are added to "Done" automatically. */
 const TIMELINE=[
-  {status:"now",title:"Building my portfolio desktop",detail:"This site: an interactive desktop with a journal, messages, and OGGY the cat.",progress:85,tag:"Website",date:"Sep 2026"},
-  {status:"now",title:"Brand identity project",detail:"Details coming soon.",progress:40,tag:"Branding",date:"Sep 2026"},
-  {status:"next",title:"Next journal article",detail:"More thoughts on branding and design.",tag:"Writing",date:"Oct 2026"},
-  {status:"next",title:"Moving this site to my own domain",detail:"So everyone can sign the guestbook and message me directly.",tag:"Website",date:"Soon"},
-  {status:"done",title:"Designed this portfolio's look",detail:"Google-style desktop, custom icons, animated wallpapers.",tag:"Design",date:"Sep 2026"}
+  {status:"now",title:"Taking on new brand projects",detail:"Brand identity, logo design, packaging and brand strategy. Book a free intro call to start.",tag:"Branding",date:"Oct 2026"},
+  {status:"next",title:"More case studies on this site",detail:"Bringing more of my Dribbble and Behance work into Projects.",tag:"Portfolio",date:"Soon"},
+  {status:"next",title:"Next journal article",detail:"More thoughts on branding, design and working with AI.",tag:"Writing",date:"Oct 2026"},
+  {status:"done",title:"Launched rohankumar.pro",detail:"My portfolio as an interactive desktop: projects, journal, music, photos and OGGY the cat.",tag:"Website",date:"Oct 2026"},
+  {status:"done",title:"Periodic®: naming, identity and packaging",detail:"A single-ingredient supplement brand built around the element tile.",tag:"Packaging",date:"2026"},
+  {status:"done",title:"Apex Adaptogen Complex packaging",detail:"Packaging design for Gruite.",tag:"Packaging",date:"2026"},
+  {status:"done",title:"Wuttaday brand identity",detail:"Make every day a good day.",tag:"Branding",date:"2026"},
+  {status:"done",title:"STEVEN SOTO® personal branding",detail:"A geometric avatar logo and a vibrant, halftone identity system.",tag:"Branding",date:"2026"}
 ];
 const TLI=()=>P.timeline||TIMELINE;
 function timeline(body,filter){
@@ -3414,12 +3418,28 @@ function siteSave(){clearTimeout(SITE.saveT);SITE.status='Saving…';siteStatus(
       if(/--|^localhost|^127\./.test(location.host)&&!SITE.sbw){SITE.sbw=1;toast('You are on a preview address. What you add here is a private sandbox and will not show on rohankumar.pro.',7000)}}
   }catch(e){SITE.status='Offline. Could not save';toast('Offline. Not saved for visitors yet.',4000)}siteStatus()},600)}
 function siteStatus(){document.querySelectorAll('.ow-st').forEach(el=>el.textContent=SITE.status)}
+/* Leftovers saved from the starter template (the sample timeline, the Links email's "hello@yourname.com"). One button replaces them. */
+const TL_SAMPLE=/^(Brand identity project|Next journal article|Moving this site to my own domain|Designed this portfolio's look|Building my portfolio desktop|Talking to claude)$/;
+async function leftovers(){const out=[];const s=SITE.s||{};
+  if(Array.isArray(s.timeline)&&s.timeline.some(t=>TL_SAMPLE.test(t.title||''))&&s.timeline.every(t=>TL_SAMPLE.test(t.title||'')))out.push('tl');
+  let hub=null;try{const r=await fetch('/api/hub',{cache:'no-store'});if(r.ok)hub=(await r.json()).hub}catch(e){}
+  if(hub&&JSON.stringify(hub.items||[]).includes('yourname.com'))out.push('hub');
+  return {out,hub}}
+async function fixLeftovers(card,hub,what){card.querySelector('button').disabled=true;card.querySelector('button').textContent='Applying…';let ok=true;
+  if(what.includes('tl')){SITE.s=SITE.s||{hiddenApps:[]};SITE.s.timeline=JSON.parse(JSON.stringify(TIMELINE));P.timeline=SITE.s.timeline;siteSave()}
+  if(what.includes('hub')&&hub){const fix=v=>typeof v==='string'?v.replace(/hello@yourname\.com/g,'hey@rohankumar.pro'):v;
+    hub.items=(hub.items||[]).map(i=>Object.fromEntries(Object.entries(i).map(([k,v])=>[k,fix(v)])));
+    try{const r=await fetch('/api/hub',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({hub})});ok=r.ok}catch(e){ok=false}}
+  card.innerHTML=ok?'<b>Done.</b> The timeline and links now show your real work and email.':'<b>Could not save the links.</b> Try again in a moment.';rerenderApp&&['timeline','links'].forEach(a=>{try{rerenderApp(a)}catch(e){}})}
 function ownerPanel(body){
   const hid=new Set((SITE.s&&SITE.s.hiddenApps)||[]);
   const f=(k,label,val,max)=>`<label class="ow-f">${label}<input data-k="${k}" maxlength="${max}" value="${esc(val)}"></label>`;
   const apps=APPS.filter(a=>!NEVER_HIDE.includes(a.id));
   const sec=document.createElement('div');sec.className='own-sec';
-  sec.innerHTML=`<h2>System settings</h2><p class="ow-top"><small>Owner only. Changes save automatically and show for every visitor.</small><span class="ow-st">${esc(SITE.status)}</span></p>
+  leftovers().then(({out,hub})=>{const c=sec.querySelector('.ow-fix');if(!c||!out.length)return;c.hidden=false;
+    c.innerHTML=`<b>Finish setting up</b><ul>${out.includes('tl')?'<li>The timeline still has the starter samples (and “Talking to claude”). Replace them with your real projects and launch.</li>':''}${out.includes('hub')?'<li>Links → Email still says hello@yourname.com. Show hey@rohankumar.pro.</li>':''}</ul><button class="btn">Apply</button>`;
+    c.querySelector('button').onclick=()=>fixLeftovers(c,hub,out)});
+  sec.innerHTML=`<h2>System settings</h2><p class="ow-top"><small>Owner only. Changes save automatically and show for every visitor.</small><span class="ow-st">${esc(SITE.status)}</span></p><div class="ow-fix" hidden></div>
   <h3>About you</h3>${f('name','Name',P.name,60)}${f('role','Role',P.role,80)}${f('status','Status (desktop widget and Links)',P.status,80)}${f('now','What you are up to now',P.now,300)}
   <h3>On repeat</h3>${f('song','Song',P.music.song,80)}${f('artist','Artist',P.music.artist,80)}
   <h3>Where each app lives</h3><p class="hint">Desktop shows the app on the desktop and in the app drawer. Drawer keeps it only in the drawer. Hidden removes it for visitors (you still see it, dimmed).</p>
