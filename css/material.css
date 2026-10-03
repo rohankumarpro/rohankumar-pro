@@ -113,46 +113,79 @@ input[type=checkbox],input[type=radio]{accent-color:var(--primary)}
 .win.scrolled:has(>.body .hub) .bar{background:color-mix(in srgb,var(--surface) 84%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 1px 0 color-mix(in srgb,var(--line) 60%,transparent)}
 @media (max-width:760px){.win{--barh:60px}}
 
-/* ---------- Music app: a proper player (js/music.mjs, appMarkup) ---------- */
-.win .mu-appwrap{--mu-ink:var(--ink);--mu-ink2:var(--ink2);--mu-cream:var(--surface);--mu-accent:var(--mu-c,var(--primary));container-type:inline-size;min-height:100%;border-radius:0;box-shadow:none;overflow:visible;
-  background:radial-gradient(120% 60% at 50% 0%,color-mix(in srgb,var(--mu-c,var(--primary)) 22%,transparent),transparent 70%),var(--surface);transition:background .6s ease}
-.win[data-app=music]>.body{padding:0}
-.mu-appwrap .mu.mu-app{--mu-accent:var(--mu-c,var(--primary))}
-.mu-appwrap .mu-app .mpa{display:flex;flex-direction:column;gap:22px;padding:8px 20px 28px}
-.mu-app .mpa-now{display:flex;flex-direction:column;gap:14px;align-items:stretch}
-.mu-app .mpa-art{position:relative;width:min(100%,300px);aspect-ratio:1;margin:6px auto 4px;border-radius:22px;display:grid;place-items:center;
-  background:linear-gradient(150deg,color-mix(in srgb,var(--mu-c,var(--primary)) 55%,#fff),var(--mu-c,var(--primary)));box-shadow:0 22px 50px -18px color-mix(in srgb,var(--mu-c,var(--primary)) 70%,transparent),0 2px 6px rgba(0,0,0,.08);overflow:hidden}
-.mu-app .mpa-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.mu-app .mpa-vinyl{width:78%;height:78%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35));transition:transform .5s ease}
-.mu-app.has-art .mpa-vinyl{display:none}
+/* ---------- Music app: full-bleed cover art (or the video) with the controls on top (js/music.mjs, appMarkup) ---------- */
+.win[data-app=music]>.body{padding:0;overflow:hidden;border-top-width:0}
+.win[data-app=music] .bar{color:#fff}.win[data-app=music] .bar .wb{background:rgba(255,255,255,.16);color:#fff}.win[data-app=music] .bar .wb:hover{background:rgba(255,255,255,.28)}
+.win .mu-appwrap{position:relative;height:100%;min-height:100%;overflow:hidden;border-radius:0;box-shadow:none;container-type:size;color:#fff;
+  --mu-ink:#fff;--mu-ink2:rgba(255,255,255,.78);--mu-cream:#fff;--mu-accent:#fff;background:#111}
+.mu-appwrap .mu.mu-app{position:absolute;inset:0;--mu-accent:#fff}
+.mu-app .mpa{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:0}
+/* the stage: art, or the record on a Material colour field, or the video, always covering the whole window */
+.mu-app .mpa-stage{position:absolute;inset:0;overflow:hidden;
+  background:radial-gradient(70% 55% at 18% 12%,color-mix(in srgb,var(--mu-c,#4285F4) 85%,#fff) 0,transparent 70%),radial-gradient(60% 50% at 88% 30%,color-mix(in srgb,var(--mu-c,#9B72CB) 60%,#8AB4F8) 0,transparent 72%),radial-gradient(80% 60% at 50% 100%,color-mix(in srgb,var(--mu-c,#D96570) 70%,#1a1033) 0,transparent 75%),#14102a;transition:background .8s ease}
+.mu-app .mpa-fb{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:22cqh}
+.mu-app .mpa-vinyl{width:min(64cqw,46cqh);height:auto;filter:drop-shadow(0 24px 40px rgba(0,0,0,.45))}
 .mu-app[data-s=playing] .mpa-vinyl{animation:mu-spin 4s linear infinite}
-.mu-app[data-s=idle] .mpa-art{transform:scale(.96)}.mu-app .mpa-art{transition:transform .5s cubic-bezier(.2,.9,.25,1)}
-.mu-app .mpa-meta{display:flex;align-items:center;gap:12px}
-.mu-app .mpa-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.mu-app .mpa-tt .mu-t{font-size:var(--fs-8);font-weight:var(--fw-x);line-height:1.15;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mu-app .mpa-tt .mu-a{font-size:var(--fs-4);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mu-app .mu-eq{height:16px}.mu-app .mu-eq i{width:4px}
-.mu-app .mu-seek{gap:10px;font-size:var(--fs-2)}
-.mu-app .mpa-ctl{display:flex;justify-content:center;align-items:center;gap:22px}
-.mu-app .mpa-ctl .mu-b{width:48px;height:48px}.mu-app .mpa-ctl .mu-b svg{width:24px;height:24px}
-.mu-app .mpa-ctl .mu-big{width:68px;height:68px}.mu-app .mpa-ctl .mu-big svg{width:28px;height:28px}
-.mu-app .mpa-vol{display:flex;align-items:center;gap:10px;color:var(--ink2)}.mu-app .mpa-vol svg{width:18px;height:18px;display:block}.mu-app .mpa-vol .mu-vol{margin:0}
+.mu-app .mpa-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.mu-app[data-s=playing] .mpa-img{transform:scale(1.0)}
+.mu-app.has-art .mpa-fb{display:none}
+.mu-app .mpa-video{position:absolute;inset:0;overflow:hidden;display:none;background:#000}
+.mu-app.vid .mpa-video{display:block}.mu-app.vid .mpa-img,.mu-app.vid .mpa-fb{display:none}
+/* the video covers the window; it is drawn a little taller than the window so YouTube's own title strip and corner buttons fall outside */
+.mu-app .mpa-video iframe{position:absolute;top:50%;left:50%;width:max(100cqw,calc((100cqh + 140px) * 16 / 9));height:max(calc(100cqh + 140px),56.25cqw);transform:translate(-50%,-50%);border:0;pointer-events:none}
+.mu-app .mpa-video{transition:opacity .35s ease}
+/* paused or loading: the cover sits over the video, so YouTube's pause screen never shows */
+.mu-app.vid:not([data-s=playing]) .mpa-video{opacity:0}
+.mu-app.vid:not([data-s=playing]) .mpa-img:not([hidden]),.mu-app.vid:not([data-s=playing]):not(.has-art) .mpa-fb{display:block}
+.mu-app.vid:not([data-s=playing]):not(.has-art) .mpa-fb{display:grid}
+.mu-app .mpa-scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 20%,rgba(0,0,0,0) 42%,rgba(0,0,0,.35) 62%,rgba(0,0,0,.82) 100%)}
+/* buttons along the top, under the window's own controls */
+.mu-app .mpa-top{position:absolute;top:calc(var(--barh,56px) + 14px);right:14px;z-index:3;display:flex;gap:8px;transition:opacity .4s ease}
+.mu-app .mpa-ib{border:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:rgba(255,255,255,.16);color:#fff;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.mu-app .mpa-ib:hover{background:rgba(255,255,255,.28)}.mu-app .mpa-ib svg{width:19px;height:19px}.mu-app .mpa-ib.on{background:#fff;color:#1f1f1f}
+/* now playing, over the bottom of the art */
+.mu-app .mpa-now{position:relative;z-index:2;display:flex;flex-direction:column;gap:12px;padding:0 22px 20px;transition:opacity .4s ease,transform .4s ease}
+.mu-app .mpa-meta{display:flex;align-items:flex-end;gap:12px}
+.mu-app .mpa-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.mu-app .mpa-tt .mu-t{font-size:clamp(20px,6.2cqw,34px);font-weight:var(--fw-x);line-height:1.1;letter-spacing:-.015em;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.mu-app .mpa-tt .mu-a{font-size:var(--fs-4);color:rgba(255,255,255,.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mu-app .mu-eq{height:18px}.mu-app .mu-eq i{width:4px;background:#fff}
+.mu-app .mu-seek{gap:10px;color:rgba(255,255,255,.78)}
+.mu-app .mu-sk,.mu-app .mu-vol{background:linear-gradient(90deg,#fff var(--p,50%),rgba(255,255,255,.28) var(--p,50%))}
+.mu-app .mu-sk::-webkit-slider-thumb,.mu-app .mu-vol::-webkit-slider-thumb{background:#fff;border-color:#fff}
+.mu-app .mpa-row2{display:flex;align-items:center;gap:16px}
+.mu-app .mpa-ctl{display:flex;align-items:center;gap:14px;margin:0 auto 0 -8px}
+.mu-app .mpa-ctl .mu-b{width:48px;height:48px;color:#fff}.mu-app .mpa-ctl .mu-b:hover{background:rgba(255,255,255,.14)}.mu-app .mpa-ctl .mu-b svg{width:24px;height:24px}
+.mu-app .mpa-ctl .mu-big{width:64px;height:64px;background:#fff;color:#1f1f1f;box-shadow:0 10px 30px rgba(0,0,0,.35)}.mu-app .mpa-ctl .mu-big:hover{background:#fff}.mu-app .mpa-ctl .mu-big svg{width:28px;height:28px}
+.mu-app .mpa-vol{flex:0 1 160px;display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8)}.mu-app .mpa-vol svg{width:18px;height:18px;display:block}.mu-app .mpa-vol .mu-vol{margin:0}
 .mu-app .mpa-vol:has(.mu-vol[hidden]){display:none}
-.mu-app .mpa-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mu-app .mpa-tools .sp{flex:1}
-.mu-app .mpa-tools .mu-fm{gap:6px}.mu-app .mpa-tools .mu-fm-t{flex:none;min-width:44px;text-align:center}
-.mu-app .mpa-ib{border:0;width:36px;height:36px;border-radius:50%;background:var(--surface2);color:var(--ink);display:grid;place-items:center;cursor:pointer}.mu-app .mpa-ib svg{width:17px;height:17px}.mu-app .mpa-ib.on{background:var(--mu-accent);color:#fff}
-.mu-app .mpa-lib{display:flex;flex-direction:column;gap:8px;min-width:0}
-.mu-app .mpa-lh{display:flex;align-items:baseline;justify-content:space-between}.mu-app .mpa-lh b{font-size:var(--fs-6)}.mu-app .mpa-lh small{color:var(--ink2)}
-.mu-appwrap .mu-app .mpa-list{display:flex;flex-direction:column;gap:2px;padding:0;overflow:visible;flex-wrap:nowrap}
-.mu-app .mpa-row{display:flex;align-items:center;gap:12px;width:100%;padding:8px;border:0;border-radius:14px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
-.mu-app .mpa-row:hover{background:var(--surface2)}.mu-app .mpa-row.on{background:color-mix(in srgb,var(--mu-c) 16%,var(--surface))}
-.mu-app .mpa-th{position:relative;flex:none;width:48px;height:48px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:var(--mu-c);color:#fff;font-weight:var(--fw-x)}.mu-app .mpa-th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mu-app .mpa-tools{display:flex;align-items:center;gap:8px}
+.mu-app .mu-fm-b,.mu-app .mu-fm-d{background:rgba(255,255,255,.16);color:#fff;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}.mu-app .mu-fm-b.on{background:#fff;color:#1f1f1f}
+.mu-app .mu-fm{gap:6px}.mu-app .mu-fm-t{flex:none;min-width:48px;text-align:center;color:rgba(255,255,255,.85)}
+/* the records: a sheet that rises over the art (a side panel in wide windows) */
+.mu-app .mpa-lib{position:absolute;z-index:4;left:10px;right:10px;bottom:10px;top:max(calc(var(--barh,56px) + 56px),32cqh);display:flex;flex-direction:column;gap:6px;padding:14px 10px 10px 14px;border-radius:28px;
+  background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--ink);-webkit-backdrop-filter:blur(26px) saturate(1.3);backdrop-filter:blur(26px) saturate(1.3);box-shadow:0 20px 60px rgba(0,0,0,.35);
+  transform:translateY(calc(100% + 20px));transition:transform .45s cubic-bezier(.2,.9,.25,1);visibility:hidden}
+.mu-app.lib-open .mpa-lib{transform:none;visibility:visible}
+.mu-app .mpa-lh{display:flex;align-items:center;gap:8px;padding-right:2px}.mu-app .mpa-lh b{font-size:var(--fs-6);flex:none}.mu-app .mpa-lh small{flex:1;color:var(--ink2)}
+.mu-app .mpa-lh .mpa-ib{width:34px;height:34px;background:var(--surface2);color:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none}
+.mu-appwrap .mu-app .mpa-list{display:flex;flex-direction:column;gap:2px;padding:0 4px 4px 0;overflow:auto;flex-wrap:nowrap;scrollbar-width:none}
+.mu-app .mpa-row{display:flex;align-items:center;gap:12px;width:100%;padding:8px;border:0;border-radius:16px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.mu-app .mpa-row:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}.mu-app .mpa-row.on{background:color-mix(in srgb,var(--mu-c) 18%,transparent)}
+.mu-app .mpa-th{position:relative;flex:none;width:48px;height:48px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:var(--mu-c);color:#fff;font-weight:var(--fw-x)}.mu-app .mpa-th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .mu-app .mpa-rt{flex:1;min-width:0;display:flex;flex-direction:column}.mu-app .mpa-rt b{font-weight:var(--fw-b);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mu-app .mpa-rt small{color:var(--ink2);font-size:var(--fs-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mu-app .mpa-row.on .mpa-rt b{color:color-mix(in srgb,var(--mu-c) 70%,var(--ink))}
 .mu-app .mpa-ix{flex:none;width:28px;display:grid;place-items:center;color:var(--ink2);font-variant-numeric:tabular-nums;font-size:var(--fs-3)}
-.mu-app .mpa-ix .mu-eq{display:none;opacity:1}.mu-app .mpa-row.on .mpa-ix .mu-eq{display:inline-flex}.mu-app .mpa-row.on .mpa-no{display:none}
-.mu-app .mpa-ix .mu-eq i{background:var(--mu-c);animation:none}.mu-app[data-s=playing] .mpa-row.on .mu-eq i{animation:mu-eq .9s ease-in-out infinite}
-.mu-app .mu-empty{padding:18px 0}
-/* wide window: now playing beside the list */
-@container (min-width:640px){.mu-appwrap .mu-app .mpa{display:grid;grid-template-columns:minmax(280px,1fr) minmax(260px,1.1fr);align-items:start;gap:28px;padding:12px 28px 32px}
-  .mu-app .mpa-now{position:sticky;top:0}.mu-app .mpa-lib{padding-top:8px}}
+.mu-app .mpa-ix .mu-eq{display:none;opacity:1;height:14px}.mu-app .mpa-ix .mu-eq i{background:var(--mu-c);animation:none}.mu-app .mpa-row.on .mpa-ix .mu-eq{display:inline-flex}.mu-app .mpa-row.on .mpa-no{display:none}
+.mu-app[data-s=playing] .mpa-row.on .mu-eq i{animation:mu-eq .9s ease-in-out infinite}
+.mu-app .mu-empty{padding:18px 0}.mu-app .mu-empty p{color:var(--ink2)}
+/* while a video plays here, the controls step aside until the pointer moves */
+.mu-app.vid.idle .mpa-now,.mu-app.vid.idle .mpa-top{opacity:0;transform:translateY(6px);pointer-events:none}.mu-app.vid.idle .mpa-scrim{opacity:.25}.mu-app .mpa-scrim{transition:opacity .4s ease}
+.mu-app.vid.idle{cursor:none}
+/* wide windows: the records sit in a glass panel at the right */
+@container (min-width:760px){
+  .mu-app .mpa-lib{left:auto;right:14px;top:calc(var(--barh,56px) + 56px);bottom:14px;width:320px;transform:translateX(calc(100% + 24px))}
+  .mu-app.lib-open .mpa-now{padding-right:356px}
+}
+@container (max-height:420px){.mu-app .mpa-tools{display:none}.mu-app .mpa-now{gap:8px;padding-bottom:12px}}
+/* the floating (popped-out) video: a way back into the app */
+.mu-engine .mu-pip-x{position:absolute;top:8px;right:8px;width:34px;height:34px;border:0;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;z-index:2}.mu-engine .mu-pip-x[hidden]{display:none}.mu-engine .mu-pip-x svg{width:18px;height:18px}
