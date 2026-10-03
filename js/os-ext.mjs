@@ -175,3 +175,50 @@ window.addEventListener("online", () => toast("Back online"));
 window.__extReady = true;
 setTimeout(() => import("/js/os-more.mjs").catch((e) => console.error("os-more", e)), 400);
 import("/js/ctx-apps.mjs").catch((e) => console.error("ctx-apps", e));
+
+/* ---------- visitor analytics: Microsoft Clarity (recordings and heatmaps) ---------- */
+// Visitors on the live site only. Never the owner (signed in now, or ever before on this browser), the desktop app,
+// previews or localhost, so Owner mode, the vault and editing are never recorded. Typed text is masked by Clarity.
+// Each app a visitor opens is tagged ("app"), and sent messages, guestbook entries, sign-ups and outbound clicks are events.
+(function analytics() {
+  const CLARITY = "yrz7r3hbnx";
+  if (!/^(www\.)?rohankumar\.pro$/.test(location.hostname) || window.__TAURI__) return;
+  const isOwner = () => { try { return localStorage.getItem("noTrack") === "1"; } catch { return false; } };
+  const markOwner = () => { try { localStorage.setItem("noTrack", "1"); } catch {} };
+  if (isOwner()) return;
+  fetch("/api/auth", { cache: "no-store" }).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((d) => {
+    if (d && d.admin) return markOwner();
+    start();
+  });
+  function start() {
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", CLARITY);
+    const cl = (...a) => { try { window.clarity(...a); } catch {} };
+    // which apps visitors open
+    const open = window.openApp;
+    if (typeof open === "function") window.openApp = function (id, opt) { if (typeof id === "string") { cl("set", "app", id); cl("event", "open-" + id); } return open.call(this, id, opt); };
+    // things visitors send
+    const EV = [[/^\/api\/mochi/, "message"], [/^\/api\/guestbook/, "guestbook"], [/^\/api\/hub\?a=subscribe/, "subscribe"]];
+    const f = window.fetch;
+    window.fetch = function (input, init) {
+      const p = f.apply(this, arguments);
+      try {
+        const url = typeof input === "string" ? input : input && input.url || "", m = (init && init.method || "GET").toUpperCase();
+        const path = url.startsWith(location.origin) ? url.slice(location.origin.length) : url;
+        const hit = m === "POST" && EV.find(([re]) => re.test(path));
+        if (hit) p.then((r) => { if (r.ok) cl("event", hit[1]); }).catch(() => {});
+        // the owner signing in partway through a visit: never load Clarity on this browser again, and mask the rest of this one
+        if (path.startsWith("/api/auth") && m === "POST") p.then((r) => { if (r.ok) { markOwner(); document.documentElement.setAttribute("data-clarity-mask", "true"); cl("consentv2", { ad_Storage: "denied", analytics_Storage: "denied" }); } }).catch(() => {});
+      } catch {}
+      return p;
+    };
+    // clicks that leave the site (Behance, Dribbble, LinkedIn, mail…)
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
+      try { const u = new URL(a.href, location.href); if (u.protocol === "mailto:") cl("event", "out-mail"); else if (u.hostname !== location.hostname) cl("event", "out-" + u.hostname.replace(/^www\./, "")); } catch {}
+    }, true);
+  }
+})();
