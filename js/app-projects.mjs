@@ -68,7 +68,7 @@ function grid(body, quiet) {
     if (sort === "new") shown = shown.slice().sort((a, b) => (b.publishedAt || b.ts || 0) - (a.publishedAt || a.ts || 0));
     if (sort === "popular") shown = shown.slice().sort((a, b) => (b.likes || 0) + (b.views || 0) / 10 - ((a.likes || 0) + (a.views || 0) / 10));
     if (sort === "order") shown = [...shown.filter((p) => p.featured), ...shown.filter((p) => !p.featured)];
-    root.innerHTML = `<div class="nt-head"><h1>Projects</h1>${isAdmin() ? `<div class="nt-tools"><span class="nt-status">${esc(PR.status)}</span><button class="pj-new">+ New project</button></div>` : ""}</div>
+    root.innerHTML = `<div class="nt-head"><h1>Projects</h1>${isAdmin() ? `<div class="nt-tools"><span class="nt-status">${esc(PR.status)}</span>${(PR.list.some((p) => /^dr\d+$/.test(p.id)) && !importLeft()) || PR.importing ? "" : '<button class="pj-imp">Import from Dribbble</button>'}<button class="pj-new">+ New project</button></div>` : ""}</div>
       ${isAdmin() && PR.seeded ? '<p class="hint">These are sample projects. Edit one, or add your own.</p>' : ""}
       <div class="pj-tools"><input type="search" class="jr-search" placeholder="Search projects" aria-label="Search projects" value="${esc(q)}"><div class="seg pj-sort" role="group" aria-label="Sort">${[["order","Featured"],["new","Newest"],["popular","Popular"]].map(([k, l]) => `<button data-s="${k}" class="${sort === k ? "on" : ""}">${l}</button>`).join("")}</div></div>
       ${fields.length > 1 ? `<div class="jtags"><button class="${!field ? "on" : ""}" data-f="">All <span>${all.length}</span></button>${fields.map((f) => `<button class="${field === f ? "on" : ""}" data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>` : ""}
@@ -79,6 +79,7 @@ function grid(body, quiet) {
     const se = $(".jr-search", root); se.oninput = () => { q = se.value.trim().toLowerCase(); const pos = se.selectionStart; draw(); const n = $(".jr-search", root); n.focus(); n.setSelectionRange(pos, pos); };
     $$(".pj-sort [data-s]", root).forEach((b) => (b.onclick = () => { sort = b.dataset.s; draw(); }));
     const nb = $(".pj-new", root); if (nb) nb.onclick = () => studio(body, null);
+    const ib = $(".pj-imp", root); if (ib) ib.onclick = () => importPicks(body);
   };
   draw();
   if (!quiet) R.item(body, "", "", "push");
@@ -111,6 +112,59 @@ async function dup(meta, body) {
 async function del(meta, body) {
   if (!(await confirmBox(`Delete “${meta.title}” for good?`))) return;
   const r = await api("/api/projects?id=" + encodeURIComponent(meta.id), { method: "DELETE" }); if (r.ok) { PR.list = r.data.projects; PR.seeded = false; grid(body, true); } else toast("Could not delete");
+}
+/* ---------- one-time import of the handpicked Dribbble shots ---------- */
+const importLeft = () => { try { return !!localStorage.getItem("pjImport"); } catch { return false; } };
+// Copies every picture to this site (shrunk, with a small copy, like any upload), saves each shot as a published project,
+// and only then deletes the projects that are not part of the picks. Pictures already copied are remembered, so a retry resumes.
+async function importPicks(body) {
+  const { PICKS } = await import("/js/dribbble-picks.mjs");
+  const ids = new Set(PICKS.map((k) => k.id)), old = PR.list.filter((p) => !ids.has(p.id));
+  const pics = PICKS.reduce((n, k) => n + 1 + k.body.filter((x) => typeof x === "string").length, 0);
+  const msg = `Import ${PICKS.length} projects from Dribbble (${pics} pictures)?` + (old.length ? ` Afterwards ${old.length === 1 ? "this project is" : "these projects are"} deleted: ${old.map((p) => `“${p.title}”`).join(", ")}.` : "") + " It takes a few minutes. Keep this window open.";
+  if (!(await confirmBox(msg, "Import", false))) return;
+  let done = {}; try { done = JSON.parse(localStorage.getItem("pjImport") || "{}"); } catch {}
+  const remember = () => { try { localStorage.setItem("pjImport", JSON.stringify(done)); } catch {} };
+  const copy = async (src, label) => {
+    if (done[src]) return done[src];
+    setStatus(label);
+    const res = await fetch(src + (src.includes("?") ? "&" : "?") + "format=webp");
+    if (!res.ok) throw new Error(`Dribbble did not send a picture (${res.status}).`);
+    const blob = await res.blob();
+    const r = await Up.image(new File([blob], src.split("/").pop().split("?")[0].replace(/\.\w+$/, ".webp"), { type: blob.type || "image/webp" }));
+    done[src] = { url: r.url, w: r.w, h: r.h }; remember();
+    return done[src];
+  };
+  PR.importing = true; grid(body, true);
+  let n = 0;
+  try {
+    for (const k of PICKS) {
+      const total = k.body.filter((x) => typeof x === "string").length;
+      const cover = await copy(k.cover, `${k.title}: cover (${++n} of ${pics})`);
+      const blocks = []; let i = 0;
+      for (const x of k.body) {
+        if (typeof x === "string") { const im = await copy(x, `${k.title}: picture ${++i} of ${total} (${++n} of ${pics})`); blocks.push({ t: "image", src: im.url, alt: `${k.title}, picture ${i} of ${total}`, w: "w", rw: im.w, rh: im.h }); }
+        else if (x.h) blocks.push({ t: "h2", h: esc(x.h) });
+        else blocks.push({ t: "p", h: esc(x.p) });
+      }
+      const project = { id: k.id, title: k.title, summary: k.summary, field: k.field, tags: k.tags, tools: [], year: k.year, client: "", role: "", color: "c2", status: "published", featured: false, license: "all-rights",
+        cover: { src: cover.url, fx: 50, fy: 50, alt: k.title }, links: [{ label: "View on Dribbble", url: k.link }], credits: [], blocks, slug: slugify(k.title) };
+      setStatus(`Saving ${k.title}…`);
+      const r = await api("/api/projects", { method: "PUT", body: { project } });
+      if (!r.ok) throw new Error(r.status === 401 ? "You are signed out. Sign in again, then press Import again." : `Could not save ${k.title} (${r.status}).`);
+      PR.list = r.data.projects; PR.seeded = false;
+    }
+    for (const p of old) {
+      setStatus(`Removing ${p.title}…`);
+      const r = await api("/api/projects?id=" + encodeURIComponent(p.id), { method: "DELETE" });
+      if (r.ok) PR.list = r.data.projects;
+    }
+    const r = await api("/api/projects", { method: "PUT", body: { order: PICKS.map((k) => k.id) } }); if (r.ok) PR.list = r.data.projects;
+    try { localStorage.removeItem("pjImport"); } catch {}
+    setStatus(""); toast(`Imported ${PICKS.length} projects from Dribbble`);
+  } catch (e) {
+    setStatus("Import stopped"); toast(e.message + " Press Import again to carry on where it stopped.");
+  } finally { PR.importing = false; PR.cache = {}; await loadList(true); grid(body, true); }
 }
 async function fetchFull(id) {
   if (PR.cache[id]) return PR.cache[id];
