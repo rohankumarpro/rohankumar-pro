@@ -6,12 +6,14 @@ import { contentStore, isPreviewHost } from "../lib/store.mjs";
 import { resolve } from "../lib/pages.mjs";
 import { renderShell } from "../lib/seo.mjs";
 import { rawIndex } from "../lib/defaults.mjs";
+import { reqPath } from "../lib/reqpath.mjs";
 
 export const handler = async (event) => {
   try {
     connectLambda(event);
     const q = event.queryStringParameters || {};
     const store = contentStore(event);
+    if (!q.p) q.p = reqPath(event); // the rule's ?p= does not always arrive: use the address that was asked for
     const P = await resolve(event, store, q.p || "/");
     const preview = isPreviewHost(event);
     const common = { "cache-control": "public, max-age=0, must-revalidate", "netlify-cdn-cache-control": "public, s-maxage=120, stale-while-revalidate=86400", ...(preview ? { "x-robots-tag": "noindex" } : {}) };

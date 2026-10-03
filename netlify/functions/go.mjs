@@ -3,12 +3,13 @@ import { connectLambda } from "@netlify/blobs";
 import { contentStore } from "../lib/store.mjs";
 import { loadHub } from "./hub.mjs";
 import { visibleItems, hrefOf } from "../lib/hub.mjs";
+import { afterPrefix } from "../lib/reqpath.mjs";
 
 export const handler = async (event) => {
   try {
     connectLambda(event);
     const store = contentStore(event);
-    const key = String((event.queryStringParameters || {}).k || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const key = String((event.queryStringParameters || {}).k || afterPrefix(event, "/go/") || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
     const hub = await loadHub(store);
     const it = visibleItems(hub).find((i) => (i.slug && i.slug === key) || i.id.toLowerCase() === key);
     const to = it && hrefOf(it);
