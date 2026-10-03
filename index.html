@@ -84,6 +84,17 @@ a{color:var(--primary)}
 
 /* desktop icons */
 .icons{position:absolute;top:56px;left:18px;bottom:130px;display:grid;grid-auto-flow:column;grid-template-rows:repeat(auto-fill,100px);grid-auto-columns:92px;gap:calc(12 * var(--u)) calc(8 * var(--u));z-index:2;align-content:start}
+.icons{--tw:92px;--th:100px;--gx:8px;--gy:12px}
+#desk[data-isize=small] .icons{--tw:78px;--th:86px}#desk[data-isize=large] .icons{--tw:114px;--th:126px}
+#desk[data-isize=small] .icons .dicon .ico{width:46px;height:46px}#desk[data-isize=large] .icons .dicon .ico{width:78px;height:78px}
+#desk[data-isize=small] .icons .dicon{font-size:var(--fs-2)}#desk[data-isize=large] .icons .dicon{font-size:var(--fs-4)}
+@media (min-width:761px){.icons{grid-template-rows:repeat(auto-fill,var(--th));grid-auto-columns:var(--tw);gap:var(--gy) var(--gx)}
+  /* placed: icons sit wherever they were put (Snap to grid or Free) */
+  .icons.placed{display:block;right:18px;pointer-events:none}
+  .icons.placed .dicon{position:absolute;width:var(--tw);pointer-events:auto;transition:left .22s cubic-bezier(.2,.9,.25,1),top .22s cubic-bezier(.2,.9,.25,1)}
+  .icons.placed .dicon.dragging{transition:none;z-index:5}
+  .icons.placed .snap-ghost{position:absolute;width:var(--tw);height:var(--th);border-radius:var(--r-6);background:color-mix(in srgb,var(--primary) 14%,transparent);outline:2px dashed color-mix(in srgb,var(--primary) 45%,transparent);outline-offset:-4px;pointer-events:none}}
+@media (max-width:760px){#desk[data-isize=small] .icons{grid-template-columns:repeat(5,1fr)}#desk[data-isize=large] .icons{grid-template-columns:repeat(3,1fr)}}
 .dicon{background:none;border:0;padding:calc(8 * var(--u)) calc(4 * var(--u));border-radius:var(--r-6);display:flex;flex-direction:column;align-items:center;gap:calc(6 * var(--u));font-size:var(--fs-3);font-weight:var(--fw-m)}
 .dicon:hover{background:color-mix(in srgb,var(--surface) 55%,transparent)}
 .ico{display:block;width:60px;height:60px;transition:transform var(--d-3) var(--ease-spring)}
@@ -393,6 +404,8 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 .wall .rt{transform-box:fill-box;transform-origin:center;animation:spin var(--d,120s) linear infinite}
 @keyframes float{to{transform:translate(var(--x,0),var(--y,0)) rotate(var(--r,0deg)) scale(var(--s,1))}}
 #desk[data-motion="off"] .wall *,.walls button svg *{animation:none!important}
+/* on the vivid wallpapers the icon names are white with a soft shadow, so they read on any colour */
+#desk[data-vivid] .icons .dicon .lb{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.25)}
 #desk[data-motion="off"] .ico,#desk[data-motion="off"] .ico *:not([transform]){transition:none!important;animation:none!important;transform:none!important}
 #desk[data-motion="off"] .dicon:hover .g-pen,#desk[data-motion="off"] .dicon:hover .g-draw{animation:none!important}
 .wall .tw circle{animation:twinkle var(--t,4s) ease-in-out infinite;opacity:.15}
@@ -808,7 +821,43 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 .lock .lav img{margin:0;width:80px;height:80px;border:4px solid var(--bg);animation:spin 14s linear infinite reverse;box-sizing:border-box}
 .lock button.lh{margin-top:calc(14 * var(--u));padding:calc(10 * var(--u)) calc(22 * var(--u));border-radius:var(--r-pill);background:color-mix(in srgb,var(--surface) 60%,transparent);backdrop-filter:blur(12px);box-shadow:0 4px 18px rgba(0,0,0,.08);color:var(--ink);font-weight:var(--fw-m)}
 .lock::after{content:"";position:absolute;left:50%;bottom:14px;width:120px;height:5px;margin-left:-60px;border-radius:3px;background:var(--ink);opacity:.28}
+/* the clock is painted with a gradient: give the glyphs room so nothing is clipped */
+.lock .lt{line-height:1!important;padding:.06em .09em .04em;margin:-.06em -.09em -.04em;white-space:nowrap}
+.lock .lk-card,.lock .lk-who{display:contents}
+/* lock screen styles (Settings > Lock screen): classic, stack, glass, outline, neon, minimal */
+.lock[data-ls=stack]{align-items:flex-start;justify-content:flex-end;text-align:left;padding:0 7vw 11vh}
+.lock[data-ls=stack] .lk-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.lock[data-ls=stack] .lt{display:flex;flex-direction:column;font-size:clamp(120px,24vh,280px)!important;line-height:.88!important;letter-spacing:-.04em}
+.lock[data-ls=stack] .lkc{display:none}.lock[data-ls=stack] .lkm{-webkit-text-fill-color:color-mix(in srgb,var(--primary) 75%,var(--ink));color:color-mix(in srgb,var(--primary) 75%,var(--ink))}
+.lock[data-ls=stack] .lk-who{display:flex;align-items:center;gap:12px;margin-top:18px}.lock[data-ls=stack] .lav{margin:0;width:56px;height:56px}.lock[data-ls=stack] .lav img{width:50px;height:50px;border-width:3px}
+.lock[data-ls=stack] button.lh{margin-top:4px;padding-left:0}.lock[data-ls=stack] .lmsg{padding:0}
+.lock[data-ls=glass] .lk-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:34px 46px 26px;border-radius:40px;background:color-mix(in srgb,var(--surface) 34%,transparent);border:1px solid color-mix(in srgb,#fff 38%,transparent);-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);box-shadow:0 30px 80px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.4)}
+.lock[data-ls=glass] .lt{font-size:clamp(76px,13vw,140px)!important}.lock[data-ls=glass] .lk-who{display:flex;flex-direction:column;align-items:center;gap:6px}.lock[data-ls=glass] .lav{margin-top:14px}
+.lock[data-ls=outline] .lt{background:none;-webkit-text-fill-color:transparent;-webkit-text-stroke:2.5px var(--ink);filter:none;font-size:clamp(100px,22vw,230px)!important;letter-spacing:-.02em}
+.lock[data-ls=outline] .lkc{animation:lkBlink 1s steps(1) infinite}
+@keyframes lkBlink{50%{opacity:0}}
+.lock[data-ls=neon]{background:linear-gradient(180deg,rgba(8,6,24,.72),rgba(8,6,24,.86))}
+.lock[data-ls=neon] .lk-art i{opacity:.5}
+.lock[data-ls=neon] .lt{background:none;-webkit-text-fill-color:#fff;color:#fff;filter:none;text-shadow:0 0 6px #fff,0 0 22px #ff3ea5,0 0 52px #ff3ea5,0 0 90px #7b2fff;font-weight:600;letter-spacing:-.02em}
+.lock[data-ls=neon] .lg,.lock[data-ls=neon] .ld,.lock[data-ls=neon] .ln,.lock[data-ls=neon] .lh,.lock[data-ls=neon] .lmsg{color:#e9e4ff}.lock[data-ls=neon] .lg{text-shadow:0 0 12px #00f0ff;color:#bff9ff}
+.lock[data-ls=neon]::after{background:#fff}
+.lock[data-ls=minimal]{background:color-mix(in srgb,var(--bg) 88%,transparent)}.lock[data-ls=minimal] .lk-art{display:none}
+.lock[data-ls=minimal] .lt{font-weight:300!important;letter-spacing:-.03em;font-size:clamp(84px,15vw,160px)!important;background:none;-webkit-text-fill-color:var(--ink);filter:none}
+.lock[data-ls=minimal] .lg{letter-spacing:.32em;font-weight:500}.lock[data-ls=minimal] .lav{background:none;animation:none}.lock[data-ls=minimal] .lav img{animation:none;border-color:transparent}
+@media (max-width:760px){.lock[data-ls=stack]{padding:0 7vw 16vh}.lock[data-ls=glass] .lk-card{padding:28px 26px 22px;margin:0 16px}}
 #desk[data-motion="off"] .lock *{animation:none!important}
+/* lock screen picker in Settings: a small sample of each style */
+.ls-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;margin-bottom:10px}
+.lsp{border:0;padding:0;background:none;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:center}
+.lsp .lsp-v{position:relative;height:84px;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(140deg,var(--w1),var(--w3) 55%,var(--w2));outline:2px solid transparent;outline-offset:2px}
+.lsp.on .lsp-v{outline-color:var(--primary)}.lsp .lb{font-size:var(--fs-3);font-weight:var(--fw-m)}
+.lsp i{font-style:normal;font-size:7px;color:var(--ink2);letter-spacing:.06em}.lsp i.g{text-transform:uppercase;letter-spacing:.2em;font-weight:700}
+.lsp b{font-size:30px;line-height:1;font-weight:800;letter-spacing:-.04em;color:var(--ink);display:flex}.lsp em{font-style:normal}
+.lsp-stack .lsp-v{align-items:flex-start;justify-content:flex-end;padding:0 0 8px 12px}.lsp-stack b{flex-direction:column;font-size:24px;line-height:.85}.lsp-stack em,.lsp-stack i{display:none}.lsp-stack b span:last-child{color:var(--primary)}
+.lsp-glass b{font-size:24px}.lsp-glass .lsp-v::before{content:"";position:absolute;inset:12px 20px;border-radius:12px;background:color-mix(in srgb,var(--surface) 40%,transparent);border:1px solid rgba(255,255,255,.5);z-index:0}.lsp-glass .lsp-v>*{position:relative}
+.lsp-outline b{color:transparent;-webkit-text-stroke:1.2px var(--ink)}
+.lsp-neon .lsp-v{background:#120c2c}.lsp-neon b{color:#fff;font-weight:600;text-shadow:0 0 4px #fff,0 0 12px #ff3ea5,0 0 22px #7b2fff}.lsp-neon i{color:#cfc8ff}.lsp-neon i.g{color:#bff9ff}
+.lsp-minimal .lsp-v{background:var(--surface2)}.lsp-minimal b{font-weight:300}
 @media (prefers-reduced-motion:reduce){.lock *{animation:none!important}}
 
 @keyframes lkNudge{0%,100%{transform:none}40%{transform:translateY(-26px)}}
@@ -1452,7 +1501,7 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
   </button>
   <div class="qs" id="qs" hidden></div>
   <div class="ctx" id="ctx" role="menu" hidden></div>
-  <div class="lock" id="lock" aria-hidden="false" tabindex="0"><div class="lk-art" aria-hidden="true"><i></i><i></i><i></i></div><button type="button" class="lfs" id="lkFs" aria-label="Enter full screen"></button><div class="lg" id="lkG"></div><div class="lt" id="lkT"></div><div class="ld" id="lkD"></div><span class="lav"><img id="lkImg" alt=""></span><div class="ln" id="lkN"></div><button type="button" class="lh" id="lkGo">Tap to unlock</button><div class="lmsg" id="lkMsg" role="status"></div></div>
+  <div class="lock" id="lock" aria-hidden="false" tabindex="0"><div class="lk-art" aria-hidden="true"><i></i><i></i><i></i></div><button type="button" class="lfs" id="lkFs" aria-label="Enter full screen"></button><div class="lk-card"><div class="lg" id="lkG"></div><div class="lt" id="lkT"></div><div class="ld" id="lkD"></div><div class="lk-who"><span class="lav"><img id="lkImg" alt=""></span><div class="ln" id="lkN"></div></div><button type="button" class="lh" id="lkGo">Tap to unlock</button><div class="lmsg" id="lkMsg" role="status"></div></div></div>
 </div>
 
 <script>
@@ -2945,6 +2994,10 @@ function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
   body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
+  <h3>Lock screen</h3><div class="ls-pick">${LOCKS.map(([k,n])=>`<button data-ls="${k}" class="lsp lsp-${k}${(desk.dataset.lock||'classic')===k?' on':''}" aria-label="${n} lock screen"><span class="lsp-v"><i class="g">Good morning</i><b><span>09</span><em>:</em><span>41</span></b><i>Saturday 3 October</i></span><span class="lb">${n}</span></button>`).join('')}</div><button class="btn tonal" id="lsTry">Preview the lock screen</button>
+  <h3>Desktop icons</h3><p class="hint">Drag icons to move them. Auto keeps a tidy grid, Snap to grid lets an icon sit in any cell, Free lets it sit anywhere.${innerWidth<=760?' On a phone icons always stay in a tidy grid.':''}</p>
+  <div class="seg">${[['auto','Auto'],['snap','Snap to grid'],['free','Free']].map(([k,n])=>`<button data-il="${k}" class="${(desk.dataset.ilayout||'auto')===k?'on':''}">${n}</button>`).join('')}</div>
+  <h3>Icon size</h3>${segs('is',desk.dataset.isize||'medium',["small","medium","large"])}<p><button class="btn tonal" id="icTidy">Tidy up icons</button></p>
   <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>OGGY the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>OGGY's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold OGGY or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
   if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
@@ -2958,6 +3011,11 @@ function settings(body){
   body.querySelector('#mwReset').onclick=()=>{desk.dataset.music='on';save();window.resetMusicW&&resetMusicW();settings(body)};
   body.querySelectorAll('[data-gr]').forEach(b=>b.onclick=()=>{desk.dataset.grain=b.dataset.gr;save();settings(body)});
   body.querySelectorAll('[data-wl]').forEach(b=>b.onclick=()=>{setWall(b.dataset.wl);save();settings(body)});
+  body.querySelectorAll('.ls-pick [data-ls]').forEach(b=>b.onclick=()=>{desk.dataset.lock=b.dataset.ls;lockEl.dataset.ls=b.dataset.ls;save();settings(body)});
+  body.querySelector('#lsTry').onclick=()=>lock();
+  body.querySelectorAll('[data-il]').forEach(b=>b.onclick=()=>{ICL.set(b.dataset.il);settings(body)});
+  body.querySelectorAll('[data-is]').forEach(b=>b.onclick=()=>{ICL.size(b.dataset.is);settings(body)});
+  body.querySelector('#icTidy').onclick=()=>{ICL.tidy();toast('Icons tidied up')};
   if(window.settingsExtra)settingsExtra(body);
   if(LIVE.admin)ownerPanel(body);
 }
@@ -3010,9 +3068,30 @@ const WALLS={
     <g class="fl" style="--d:60s;--x:-70px;--y:40px"><circle cx="1180" cy="260" r="260" fill="url(#mo${id})"/><circle cx="1180" cy="260" r="70" fill="var(--surface)" opacity=".9"/></g>
     <g class="tw">${Array.from({length:34},(_,i)=>{const x=(i*263+97)%1600,y=(i*181+41)%620;return `<circle cx="${x}" cy="${y}" r="${1.2+i%4*.6}" fill="var(--ink)" style="--t:${2.5+i%5}s;animation-delay:-${(i*.37).toFixed(2)}s"/>`}).join('')}</g>
     <path d="M-100 800C240 700 520 820 840 760S1360 700 1700 790V1000H-100Z" fill="var(--w1)" opacity=".7"/><path d="M-100 900C300 830 640 930 980 880S1420 840 1700 900V1000H-100Z" fill="var(--bg)" opacity=".9"/></svg>`,
-  plain:id=>`<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><rect width="1600" height="1000" fill="var(--surface2)"/>${S('cookie',1000,380,8,0,'var(--bg)','','rt|--d:160s')}</svg>`
+  plain:id=>`<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><rect width="1600" height="1000" fill="var(--surface2)"/>${S('cookie',1000,380,8,0,'var(--bg)','','rt|--d:160s')}</svg>`,
+  /* vivid: fixed, saturated colours that look the same in light and dark */
+  candy:id=>VMESH(id,'#FF4F9A',[['#FFB23F',1300,160,640,'--d:26s;--x:-200px;--y:150px;--s:1.15'],['#8B5CF6',160,900,660,'--d:32s;--x:240px;--y:-140px'],['#FF2D6F',900,700,520,'--d:24s;--x:-160px;--y:-120px;--s:1.2'],['#4DD6FF',520,80,420,'--d:30s;--x:200px;--y:120px']]),
+  lagoon:id=>VMESH(id,'#0096C7',[['#00F5D4',1260,220,620,'--d:28s;--x:-220px;--y:120px;--s:1.1'],['#023E8A',220,880,700,'--d:34s;--x:200px;--y:-120px'],['#48CAE4',860,640,520,'--d:22s;--x:-140px;--y:-100px;--s:1.2'],['#90F1EF',480,60,420,'--d:30s;--x:180px;--y:110px']]),
+  sunset:id=>`<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="ss${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A0CA3"/><stop offset=".45" stop-color="#F72585"/><stop offset=".8" stop-color="#FF7B39"/></linearGradient></defs>
+    <rect width="1600" height="1000" fill="url(#ss${id})"/>
+    <g class="fl" style="--d:24s;--y:-60px"><circle cx="800" cy="610" r="210" fill="#FFD166"/><circle cx="800" cy="610" r="290" fill="#FFD166" opacity=".22"/></g>
+    <g class="fl" style="--d:18s;--x:-60px"><path d="M-100 720C260 640 560 760 860 700S1400 620 1700 700V1000H-100Z" fill="#7209B7"/></g>
+    <g class="fl" style="--d:14s;--x:50px"><path d="M-100 830C340 760 720 900 1120 820S1500 790 1700 830V1000H-100Z" fill="#3A0CA3"/></g></svg>`,
+  neon:id=>VMESH(id,'#0B0820',[['#FF2E97',1250,240,560,'--d:26s;--x:-220px;--y:140px;--s:1.15'],['#00E5FF',260,820,600,'--d:32s;--x:220px;--y:-160px'],['#7B2FFF',800,520,460,'--d:22s;--x:-120px;--y:-80px;--s:1.25']],'.8'),
+  citrus:id=>VMESH(id,'#FFD23F',[['#FF7F11',1280,180,620,'--d:28s;--x:-220px;--y:140px;--s:1.1'],['#2EC4B6',180,860,640,'--d:34s;--x:220px;--y:-140px'],['#FF3F6C',860,700,480,'--d:24s;--x:-160px;--y:-100px;--s:1.2'],['#C1F65A',500,60,420,'--d:30s;--x:200px;--y:120px']]),
+  prism:id=>`<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><rect width="1600" height="1000" fill="#3A3FD9"/>
+    ${S('flower',-200,420,8.5,12,'#F72585','','fl|--d:38s;--x:60px;--y:-40px;--r:14deg')}
+    ${S('clover',1080,-240,7.2,30,'#FFBE0B','','fl|--d:46s;--x:-50px;--y:50px;--r:-18deg')}
+    ${S('cookie',700,560,6,0,'#06D6A0','','rt|--d:140s')}
+    ${S('sun',420,-160,4,0,'#FF6B35','','rt|--d:90s')}
+    ${S('squircle',1360,640,3,10,'#4CC9F0','','fl|--d:22s;--x:-40px;--y:-60px;--r:40deg')}</svg>`
 };
-function setWall(k){if(!WALLS[k])k=Object.keys(WALLS)[0];desk.dataset.wall=k;
+const LOCKS=[['classic','Classic'],['stack','Stack'],['glass','Glass'],['outline','Outline'],['neon','Neon'],['minimal','Minimal']];
+const VIVID=['candy','lagoon','sunset','neon','citrus','prism'];
+/* a vivid mesh: soft blurred colour fields drifting over a solid base */
+function VMESH(id,base,spots,op='.95'){return `<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs><filter id="vb${id}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="90"/></filter></defs>
+    <rect width="1600" height="1000" fill="${base}"/><g filter="url(#vb${id})" opacity="${op}">${spots.map(([c,x,y,r,st])=>`<g class="fl" style="${st}"><circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/></g>`).join('')}</g></svg>`}
+function setWall(k){if(!WALLS[k])k=Object.keys(WALLS)[0];desk.dataset.wall=k;desk.toggleAttribute('data-vivid',VIVID.includes(k));
   document.getElementById('wall').innerHTML=WALLS[k]('main')}
 
 function inl(t){return esc(t.replace(/\\\*/g,'\u0001')).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/\u0001/g,'*')}
@@ -3616,7 +3695,8 @@ function isDark(){const t=document.documentElement.dataset.theme;return t?t==="d
 const canFull=()=>!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen)&&!/iPhone|iPad|iPod/.test(navigator.userAgent);
 function osFullToggle(){const d=document,r=d.documentElement;try{if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);else(r.requestFullscreen||r.webkitRequestFullscreen).call(r)}catch(e){toast('Full screen is not available here')}}
 function showCtx(x,y,custom){SFX.play('tap');
-  const items=custom||[["Open About me",()=>openApp('about')],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
+  const items=custom||[["Open About me",()=>openApp('about')],...(innerWidth>760?[["Icons: "+({auto:'Auto',snap:'Snap to grid',free:'Free'})[ICL.mode()]+" (change)",()=>ICL.set({auto:'snap',snap:'free',free:'auto'}[ICL.mode()])]]:[]),
+    [desk.dataset.isize==='large'?"Smaller icons":"Bigger icons",()=>ICL.size(desk.dataset.isize==='large'||desk.dataset.isize==='small'?'medium':'large')],["Tidy up icons",()=>ICL.tidy()],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
     [isDark()?"Switch to light mode":"Switch to dark mode",()=>{document.documentElement.dataset.theme=isDark()?"light":"dark";save()}],
     ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],
     ...(desk.dataset.cat==="off"?[["Bring OGGY back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake OGGY gently",()=>MOCHI.wake()]]:[["Talk to OGGY",()=>MOCHI.talk()],["Let OGGY nap",()=>MOCHI.sleep()]]),
@@ -3905,8 +3985,9 @@ LS.onkeydown=e=>{if(e.key==="Enter"){const b=L.querySelector('[data-app]');if(b)
 document.addEventListener('keydown',e=>{if(e.key==="Escape")hideLauncher()});
 desk.addEventListener('pointerdown',e=>{if(!L.hidden&&!e.target.closest('#launcher,#lBtn'))hideLauncher()});
 
-function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music}))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;}}catch(e){}}
+function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music,ilayout:desk.dataset.ilayout||'auto',isize:desk.dataset.isize||'medium',lock:desk.dataset.lock||'classic'}))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;if(s.ilayout)desk.dataset.ilayout=s.ilayout;if(s.isize)desk.dataset.isize=s.isize;if(s.lock)desk.dataset.lock=s.lock;}}catch(e){}
+  {const l=document.getElementById('lock');if(l)l.dataset.ls=desk.dataset.lock||'classic'}}
 
 function tick(){
   const d=new Date();
@@ -3914,7 +3995,7 @@ function tick(){
   document.getElementById('tTime').textContent=t;
   document.getElementById('tDate').textContent=d.toLocaleDateString([], {weekday:'short',day:'numeric',month:'short'});
   document.getElementById('wTime').textContent=t.replace(/\s?[AP]M/i,'');
-  document.getElementById('lkT').textContent=t.replace(/\s?[AP]M/i,'');
+  {const [hh,mm]=t.replace(/\s?[AP]M/i,'').split(':'),lt=document.getElementById('lkT'),k=hh+':'+mm;if(lt.dataset.t!==k){lt.dataset.t=k;lt.innerHTML=`<span class="lkh">${hh}</span><span class="lkc">:</span><span class="lkm">${mm}</span>`}}
   {const hr=d.getHours();document.getElementById('lkG').textContent=hr<5?'Still up?':hr<12?'Good morning':hr<17?'Good afternoon':hr<21?'Good evening':'Good night'}
   document.getElementById('lkD').textContent=d.toLocaleDateString([], {weekday:'long',day:'numeric',month:'long'});
   document.getElementById('wDate').textContent=d.toLocaleDateString([], {weekday:'long',day:'numeric',month:'long'});
@@ -3949,8 +4030,42 @@ function appPlace(a){const o=SITE.s&&SITE.s.place&&SITE.s.place[a.id];return o==
 function renderIcons(){let ord=[];try{ord=JSON.parse(localStorage.getItem('iconOrder')||'[]')}catch(e){}
   const list=APPS.filter(a=>appPlace(a)==='desktop'&&appVisible(a.id)).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});
   const g=document.getElementById('icons');g.innerHTML=list.map(a=>`<button class="dicon${HIDDEN.has(a.id)?' hid':''}" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('');
-  g.querySelectorAll('.dicon').forEach(b=>b.onclick=e=>{if(iconDrag.suppress){iconDrag.suppress=false;return}openApp(b.dataset.app,{toggle:true})})}
+  g.querySelectorAll('.dicon').forEach(b=>b.onclick=e=>{if(iconDrag.suppress){iconDrag.suppress=false;return}openApp(b.dataset.app,{toggle:true})});
+  if(ICL)ICL.apply()}
 const iconDrag={suppress:false};
+/* Desktop icon layout: "auto" (the tidy grid; dragging reorders), "snap" (put an icon in any grid cell) or "free" (anywhere).
+   Positions are kept per visitor as fractions of the icon area, so they survive window and screen size changes. */
+var ICL={
+  mode(){return innerWidth>760?(desk.dataset.ilayout||'auto'):'auto'},
+  cell(){const g=document.getElementById('icons'),cs=getComputedStyle(g),n=v=>parseFloat(cs.getPropertyValue(v))||0;return{w:n('--tw')+n('--gx'),h:n('--th')+n('--gy'),tw:n('--tw'),th:n('--th')}},
+  get(){try{return JSON.parse(localStorage.getItem('iconPos')||'{}')}catch(e){return{}}},
+  put(p){try{localStorage.setItem('iconPos',JSON.stringify(p))}catch(e){}},
+  apply(){const g=document.getElementById('icons'),placed=ICL.mode()!=='auto';g.classList.toggle('placed',placed);
+    const els=[...g.querySelectorAll('.dicon')];if(!placed){els.forEach(e=>{e.style.left=e.style.top=''});return}
+    const W=g.clientWidth,H=g.clientHeight,c=ICL.cell(),pos=ICL.get(),taken=new Set(),snap=ICL.mode()==='snap';
+    const rows=Math.max(1,Math.floor((H+ (c.h-c.th))/c.h)),cols=Math.max(1,Math.floor((W+(c.w-c.tw))/c.w));
+    const key=(cx,cy)=>cx+','+cy,clampXY=(x,y)=>[Math.max(0,Math.min(W-c.tw,x)),Math.max(0,Math.min(H-c.th,y))];
+    const out={};
+    els.forEach(e=>{const p=pos[e.dataset.app];if(!p)return;let [x,y]=clampXY(p[0]*W,p[1]*H);
+      if(snap){let cx=Math.round(x/c.w),cy=Math.round(y/c.h);cx=Math.min(cols-1,cx);cy=Math.min(rows-1,cy);while(taken.has(key(cx,cy))){cy++;if(cy>=rows){cy=0;cx++}}taken.add(key(cx,cy));x=cx*c.w;y=cy*c.h}
+      out[e.dataset.app]=[x,y]});
+    // icons without a spot yet take the first free cell, column by column, like the tidy grid
+    els.forEach(e=>{if(out[e.dataset.app])return;let cx=0,cy=0;
+      const busy=(cx,cy)=>taken.has(key(cx,cy))||Object.values(out).some(([x,y])=>Math.abs(x-cx*c.w)<c.tw*.6&&Math.abs(y-cy*c.h)<c.th*.6);
+      while(busy(cx,cy)){cy++;if(cy>=rows){cy=0;cx++}if(cx>cols+4)break}taken.add(key(cx,cy));out[e.dataset.app]=[cx*c.w,cy*c.h]});
+    els.forEach(e=>{const [x,y]=out[e.dataset.app];e.style.left=x+'px';e.style.top=y+'px'})},
+  save(){const g=document.getElementById('icons'),W=g.clientWidth||1,H=g.clientHeight||1,p=ICL.get();
+    g.querySelectorAll('.dicon').forEach(e=>{const x=parseFloat(e.style.left),y=parseFloat(e.style.top);p[e.dataset.app]=[(isNaN(x)?e.offsetLeft:x)/W,(isNaN(y)?e.offsetTop:y)/H]});ICL.put(p)},
+  set(mode){const g=document.getElementById('icons');
+    if(mode!=='auto'&&ICL.mode()==='auto'&&innerWidth>760){ // start from where the icons are right now
+      const r0=g.getBoundingClientRect(),rs=[...g.querySelectorAll('.dicon')].map(e=>[e.dataset.app,e.getBoundingClientRect()]);
+      g.classList.add('placed');const W=g.clientWidth||1,H=g.clientHeight||1,p={}; // measure the area the icons will be placed in
+      rs.forEach(([id,r])=>{p[id]=[(r.left-r0.left)/W,(r.top-r0.top)/H]});ICL.put(p)}
+    desk.dataset.ilayout=mode;save();renderIcons()},
+  size(sz){desk.dataset.isize=sz;save();renderIcons()},
+  tidy(){try{localStorage.removeItem('iconPos');localStorage.removeItem('iconOrder')}catch(e){}renderIcons()}
+};
+addEventListener('resize',()=>{clearTimeout(ICL.rt);ICL.rt=setTimeout(()=>ICL.apply(),120)});
 (()=>{const g=document.getElementById('icons');let st=null;
   const kids=()=>[...g.querySelectorAll('.dicon')];
   const flip=(move)=>{const els=kids().filter(e=>e!==st.el),before=new Map(els.map(e=>[e,e.getBoundingClientRect()]));move();
@@ -3958,18 +4073,34 @@ const iconDrag={suppress:false};
       e.style.transition='none';e.style.transform=`translate(${dx}px,${dy}px)`;e.getBoundingClientRect();e.style.transition='transform .2s cubic-bezier(.2,.9,.25,1)';e.style.transform=''})};
   const follow=(x,y)=>{const r=st.el.getBoundingClientRect(),cur=new DOMMatrix(getComputedStyle(st.el).transform);const baseX=r.left-cur.m41,baseY=r.top-cur.m42;
     st.el.style.transform=`translate(${x-st.ox-baseX}px,${y-st.oy-baseY}px) scale(1.08)`};
-  const begin=e=>{st.drag=true;const r=st.el.getBoundingClientRect();st.ox=st.sx-r.left;st.oy=st.sy-r.top;st.slots=kids().map(k=>{const q=k.getBoundingClientRect();return{x:q.left+q.width/2,y:q.top+q.height/2}});
+  const placed=()=>g.classList.contains('placed');
+  const begin=e=>{st.drag=true;const r=st.el.getBoundingClientRect();st.ox=st.sx-r.left;st.oy=st.sy-r.top;
+    if(placed()){st.placed=true;st.from=[st.el.offsetLeft,st.el.offsetTop];st.el.classList.add('dragging');g.classList.add('arranging');SFX.play('tap');
+      if(ICL.mode()==='snap'){st.ghost=document.createElement('div');st.ghost.className='snap-ghost';g.append(st.ghost)}movePlaced(e);return}st.slots=kids().map(k=>{const q=k.getBoundingClientRect();return{x:q.left+q.width/2,y:q.top+q.height/2}});
     st.idx=kids().indexOf(st.el);st.el.classList.add('dragging');g.classList.add('arranging');SFX.play('tap');follow(e.clientX,e.clientY)};
   g.addEventListener('pointerdown',e=>{const el=e.target.closest('.dicon');if(!el||e.button!==0)return;
     st={el,sx:e.clientX,sy:e.clientY,id:e.pointerId,drag:false,touch:e.pointerType!=='mouse'};
     if(st.touch)st.lt=setTimeout(()=>{if(st&&!st.drag){try{el.setPointerCapture(st.id)}catch(x){}begin({clientX:st.sx,clientY:st.sy})}},320)});
+  const snapXY=(x,y)=>{const c=ICL.cell(),W=g.clientWidth,H=g.clientHeight;let cx=Math.round(x/c.w),cy=Math.round(y/c.h);
+    cx=Math.max(0,Math.min(Math.floor((W-c.tw)/c.w),cx));cy=Math.max(0,Math.min(Math.floor((H-c.th)/c.h),cy));return[cx*c.w,cy*c.h]};
+  function movePlaced(e){const r0=g.getBoundingClientRect(),W=g.clientWidth,H=g.clientHeight,c=ICL.cell();
+    const x=Math.max(0,Math.min(W-c.tw,e.clientX-r0.left-st.ox)),y=Math.max(0,Math.min(H-c.th,e.clientY-r0.top-st.oy));
+    st.el.style.left=x+'px';st.el.style.top=y+'px';st.el.style.transform='scale(1.08)';
+    if(st.ghost){const [gx,gy]=snapXY(x,y);st.ghost.style.left=gx+'px';st.ghost.style.top=gy+'px'}}
   addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
     if(!st.drag){const d=Math.hypot(e.clientX-st.sx,e.clientY-st.sy);if(st.touch){if(d>10){clearTimeout(st.lt);st=null}return}if(d<6)return;try{st.el.setPointerCapture(st.id)}catch(x){}begin(e)}
-    e.preventDefault();let best=st.idx,bd=Infinity;st.slots.forEach((p,i)=>{const d=Math.hypot(e.clientX-p.x,e.clientY-p.y);if(d<bd){bd=d;best=i}});
+    e.preventDefault();if(st.placed){movePlaced(e);return}let best=st.idx,bd=Infinity;st.slots.forEach((p,i)=>{const d=Math.hypot(e.clientX-p.x,e.clientY-p.y);if(d<bd){bd=d;best=i}});
     if(best!==st.idx&&bd<70){flip(()=>{const ks=kids().filter(k=>k!==st.el);g.insertBefore(st.el,ks[best]||null)});st.idx=best;SFX.play('key')}
     follow(e.clientX,e.clientY)},{passive:false});
   const end=e=>{if(!st||(e&&e.pointerId!==st.id))return;clearTimeout(st.lt);const s2=st;st=null;if(!s2.drag)return;
     iconDrag.suppress=true;setTimeout(()=>iconDrag.suppress=false,60);
+    if(s2.placed){const el=s2.el;el.classList.remove('dragging');el.style.transform='';g.classList.remove('arranging');if(s2.ghost)s2.ghost.remove();
+      if(ICL.mode()==='snap'){const [x,y]=snapXY(parseFloat(el.style.left)||0,parseFloat(el.style.top)||0);
+        // a cell holds one icon: whoever was there moves to where the dragged icon came from
+        const other=[...g.querySelectorAll('.dicon')].find(o=>o!==el&&Math.abs(parseFloat(o.style.left)-x)<4&&Math.abs(parseFloat(o.style.top)-y)<4);
+        if(other){other.style.left=s2.from[0]+'px';other.style.top=s2.from[1]+'px'}
+        el.style.left=x+'px';el.style.top=y+'px'}
+      SFX.play('pop');setTimeout(()=>ICL.save(),0);return}
     const el=s2.el;el.classList.remove('dragging');el.classList.add('dropping');el.style.transition='transform .28s cubic-bezier(.2,1.3,.35,1)';el.style.transform='';
     setTimeout(()=>{el.classList.remove('dropping');el.style.transition=''},300);g.classList.remove('arranging');SFX.play('pop');
     try{localStorage.setItem('iconOrder',JSON.stringify(kids().map(k=>k.dataset.app)))}catch(x){}};
