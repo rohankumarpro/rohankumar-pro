@@ -151,6 +151,21 @@ window.Install = Install;
   });
   const mount = () => document.body.append(box);
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+  // once a day, a copy of the owner's backup goes to Documents\Rohan Kumar backups on this PC (the app keeps 14 days).
+  // Read only: it downloads /api/backup, the same file Settings offers, and never changes anything on the site.
+  const backup = async () => {
+    const day = new Date().toLocaleDateString("en-CA"); let last = "";
+    try { last = localStorage.getItem("deskBackup") || ""; } catch {}
+    if (last === day || !T.core) return;
+    try {
+      const r = await fetch("/api/backup", { credentials: "same-origin", cache: "no-store" });
+      if (!r.ok) return; // not signed in as the owner: nothing to save
+      const where = await T.core.invoke("save_backup", { day, json: await r.text() });
+      try { localStorage.setItem("deskBackup", day); } catch {}
+      console.info("Backup saved to", where);
+    } catch (e) { console.warn("Daily backup failed", e); }
+  };
+  setTimeout(backup, 15000); setInterval(backup, 3 * 60 * 60 * 1000);
 })();
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && !/--/.test(location.hostname)) {
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));

@@ -8,6 +8,8 @@ rohankumar.pro in its own window with no browser or Windows title bar. For the o
   the window; double-click it to maximise. Size and position are remembered.
 - Links to other sites open in your normal browser.
 - Sign in to Owner mode once inside the app (it keeps its own cookies, separate from Chrome).
+- Daily backup: while you're signed in, the app saves the same backup Settings offers to `Documents\Rohan Kumar backups`,
+  one file per day, the newest 14 kept. Pictures are not inside it (same as the Settings backup). It only reads from the site.
 
 ## Get the installer
 
