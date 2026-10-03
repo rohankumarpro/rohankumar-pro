@@ -3232,19 +3232,31 @@ function jEdit(body,i){
   if(document.readyState==='complete')setTimeout(go,600);else addEventListener('load',()=>setTimeout(go,600))}catch(e){}})();
 const picHTML=(p,big)=>p.src?`<img src="${esc(big?p.src:(p.thumb||p.src))}" alt="${esc(p.caption)}" ${big?'':'loading="lazy" decoding="async"'}>`:`<svg viewBox="0 0 100 100"><path d="${shape(p.shape)}" fill="var(--surface)" opacity=".6"/></svg>`;
 /* ===== Photos: a scrapbook. Visitors browse; the owner adds, captions, arranges (drag) and deletes ===== */
-var PH={list:null,loaded:false,status:'',missing:null,arranging:false};
+var PH={list:null,loaded:false,status:'',missing:null,arranging:false,dupes:null};
+/* Photos this owner deleted lately, and the order they last saved. Storage can briefly hand back an older copy of the list
+   right after a change; these keep a deleted photo from coming back and the newest order from flipping back. */
+const phLS={get(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const phGone=()=>new Set(phLS.get('phGone',[]));
+function phMarkGone(ids){const g=[...phGone(),...ids].slice(-300);phLS.set('phGone',g)}
+function phRemember(){if(PH.list)phLS.set('phLast',{t:Date.now(),list:phKnown()})}
 const PL=()=>PH.list||PHOTOS;
 const phMap=ps=>ps.map((p,i)=>({id:p.id,caption:p.caption||'',w:p.w,h:p.h,color:'c'+(i%6+1),thumb:p.turl||`/api/photo?id=${p.id}&s=t`,src:p.url||`/api/photo?id=${p.id}&s=f`}));
 const phKnown=()=>(PH.list||[]).filter(p=>p.id).map(({id,caption,w,h})=>({id,caption,w,h}));
-async function phLoad(){try{const r=await fetch('/api/photos',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.photos))PH.list=phMap(d.photos)}}catch(e){}PH.loaded=true}
+async function phLoad(){try{if(!LIVE.admin&&!LIVE.phAuth){LIVE.phAuth=1;await liveAuth()}const r=await fetch('/api/photos',{cache:'no-store'});if(r.ok){const d=await r.json();if(Array.isArray(d.photos)){
+    const gone=LIVE.admin?phGone():new Set();let list=d.photos.filter(p=>!gone.has(p.id));
+    const last=LIVE.admin&&phLS.get('phLast',null); // within a few minutes of the owner's own change, their copy wins over a lagging one
+    if(last&&Array.isArray(last.list)&&Date.now()-last.t<5*60*1000){const mine=last.list.filter(p=>!gone.has(p.id)),have=new Set(mine.map(p=>p.id));list=[...mine,...list.filter(p=>!have.has(p.id))]}
+    PH.list=phMap(list)}}}catch(e){}PH.loaded=true}
 // Owner only: photos that were uploaded but fell off the list (several uploads at once could drop some)
-async function phMissing(){if(!LIVE.admin||PH.missing)return;PH.missing=[];try{const r=await fetch('/api/photos?missing=1',{cache:'no-store'});if(r.ok)PH.missing=(await r.json()).missing||[]}catch(e){}}
+async function phMissing(){if(!LIVE.admin||PH.missing)return;PH.missing=[];PH.dupes=[];
+  try{const r=await fetch('/api/photos?missing=1&gone='+[...phGone()].slice(-120).join(','),{cache:'no-store'});if(r.ok)PH.missing=(await r.json()).missing||[]}catch(e){}
+  try{const r=await fetch('/api/photos?dupes=1',{cache:'no-store'});if(r.ok){const have=new Set((PH.list||[]).map(p=>p.id));PH.dupes=((await r.json()).dupes||[]).map(g=>g.filter(id=>have.has(id))).filter(g=>g.length>1)}}catch(e){}}
 function phRefresh(){const w=open.photos;if(w)photos(w.querySelector('.body'))}
-async function phSave(remove,restore){PH.status='Saving…';
-  try{const r=await fetch('/api/photos',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({photos:phKnown(),remove:remove||[],restore:restore||[]})});
+async function phSave(remove,restore){PH.status='Saving…';if(remove&&remove.length)phMarkGone(remove);
+  try{const r=await fetch('/api/photos',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({photos:phKnown(),remove:remove||[],restore:restore||[],gone:[...phGone()].slice(-200)})});
     if(r.status===401){LIVE.admin=false;PH.status='Signed out. Not saved.';ownerChanged();return false}
     if(!r.ok){PH.status='Could not save ('+r.status+')';return false}
-    PH.list=phMap((await r.json()).photos);PH.status='Saved';return true}
+    PH.list=phMap((await r.json()).photos);phRemember();PH.status='Saved';return true}
   catch(e){PH.status='Offline. Could not save';return false}}
 function phResize(file,max,q){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),im=new Image();
   im.onload=()=>{let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,max/Math.max(w,h));w=Math.max(1,Math.round(w*k));h=Math.max(1,Math.round(h*k));
@@ -3257,10 +3269,10 @@ async function phUpload(files){const list=[...files].filter(f=>/^image\//.test(f
   for(let i=0;i<list.length;i++){PH.status=`Uploading ${i+1} of ${list.length}…`;const st=document.querySelector('.ph-st');if(st)st.textContent=PH.status;
     try{let f=await phResize(list[i],1600,.82);if(f.blob.size>1800000)f=await phResize(list[i],1280,.7);
       const t=await phResize(list[i],480,.78);
-      const r=await fetch('/api/photos',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({full:await phB64(f.blob),thumb:await phB64(t.blob),caption:'',w:f.w,h:f.h,known:phKnown()})});
+      const r=await fetch('/api/photos',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({full:await phB64(f.blob),thumb:await phB64(t.blob),caption:'',w:f.w,h:f.h,known:phKnown(),gone:[...phGone()].slice(-200)})});
       if(r.status===401){LIVE.admin=false;PH.status='Signed out. Not uploaded.';ownerChanged();return}
       if(!r.ok){let m='';try{m=(await r.json()).error||''}catch(e){}PH.status=`Could not upload "${list[i].name}" (${r.status}${m?': '+m:''})`;phRefresh();return}
-      PH.list=phMap((await r.json()).photos);done++}
+      PH.list=phMap((await r.json()).photos);phRemember();done++}
     catch(e){PH.status=e.message==='read'?`Could not read "${list[i].name}". Try a JPEG or PNG.`:`Could not upload "${list[i].name}".`;phRefresh();return}}
   PH.status=`Added ${done} photo${done===1?'':'s'}`;phRefresh()}
 // Each print leans a little, always the same way for the same photo, so the board looks pinned up by hand but never jumps around.
@@ -3274,6 +3286,7 @@ function photos(body){
   const L=PL(),real=!!PH.list,arr=ed&&real&&PH.arranging&&L.length>1,miss=ed?(PH.missing||[]):[];
   body.innerHTML=`<div class="nt-head"><h1>Photos</h1>${ed?`<div class="nt-tools sb-bar"><span class="ph-st">${esc(PH.status)}</span>${real&&L.length>1?`<button class="sb-arr${arr?' on':''}" aria-pressed="${arr}">${arr?'Done':'Arrange'}</button>`:''}<label class="btn ph-add">+ Add photos<input type="file" accept="image/*" multiple hidden></label></div>`:''}</div>
   ${ed&&!real?'<p class="hint">These are sample placeholders. Your first upload replaces them.</p>':''}
+  ${ed&&real&&(PH.dupes||[]).length?`<div class="sb-note"><span>${PH.dupes.reduce((n,g)=>n+g.length-1,0)} duplicate photo${PH.dupes.reduce((n,g)=>n+g.length-1,0)===1?'':'s'} found (the same picture uploaded more than once).</span><button class="btn sb-dup">Remove duplicates</button></div>`:''}
   ${miss.length?`<div class="sb-note"><span>${miss.length} photo${miss.length===1?' you uploaded is':'s you uploaded are'} not on the board.</span><button class="btn sb-back">Put ${miss.length===1?'it':'them'} back</button></div>`:''}
   ${arr?'<p class="hint">Drag photos to change the order. It saves as you go. Use × to delete one.</p>':''}
   <div class="sb${arr?' arranging':''}">${L.length?`<div class="sb-board">${L.map((p,i)=>{const k=phTilt(p,i);return `<button class="pic sb-print" data-i="${i}" aria-label="${esc(p.caption||'Photo '+(i+1))}" style="--t:${k.t}deg;--tt:${k.tt}deg"><span class="sb-ph" style="${p.w&&p.h?`--ar:${p.w}/${p.h}`:''}${p.src?'':`;background:var(--${p.color})`}">${picHTML(p)}</span><span class="sb-cap">${esc(p.caption)}</span>${arr?`<span class="sb-del" role="button" tabindex="0" aria-label="Delete this photo" data-del="${i}">${LI_('x',16)}</span>`:''}</button>`}).join('')}</div>`:'<p class="nt-hint">No photos yet.</p>'}</div>`;
@@ -3282,6 +3295,8 @@ function photos(body){
   if(board)board.querySelectorAll('.sb-print img').forEach(im=>{const fix=()=>{const ph=im.closest('.sb-ph');if(ph&&!ph.style.getPropertyValue('--ar')&&im.naturalWidth)ph.style.setProperty('--ar',im.naturalWidth+'/'+im.naturalHeight)};im.complete?fix():im.addEventListener('load',fix,{once:true})});
   const fi=body.querySelector('.ph-add input');if(fi)fi.onchange=()=>{const fs=[...fi.files];fi.value='';phUpload(fs)};
   const ab=body.querySelector('.sb-arr');if(ab)ab.onclick=()=>{PH.arranging=!PH.arranging;photos(body)};
+  const du=body.querySelector('.sb-dup');if(du)du.onclick=async()=>{const extra=PH.dupes.flatMap(g=>g.slice(1));if(!confirm(`Delete ${extra.length} duplicate photo${extra.length===1?'':'s'}? One copy of each picture stays.`))return;
+    du.disabled=true;PH.list=PH.list.filter(p=>!extra.includes(p.id));if(await phSave(extra))PH.dupes=[];photos(body)};
   const bk=body.querySelector('.sb-back');if(bk)bk.onclick=async()=>{bk.disabled=true;const ids=PH.missing.slice();if(await phSave([],ids))PH.missing=[];photos(body)};
   if(ed&&real&&sb){sb.ondragover=e=>{if([...e.dataTransfer.types].includes('Files')){e.preventDefault();sb.classList.add('sb-drop')}};sb.ondragleave=()=>sb.classList.remove('sb-drop');
     sb.ondrop=e=>{e.preventDefault();sb.classList.remove('sb-drop');if(e.dataTransfer.files.length)phUpload(e.dataTransfer.files)}}
@@ -3297,7 +3312,8 @@ function photos(body){
     if(!d.moved){d.moved=true;d.it.classList.add('lift')}
     d.it.style.translate=`${e.clientX-d.x0}px ${e.clientY-d.y0}px`;
     d.it.style.pointerEvents='none';const over=document.elementFromPoint(e.clientX,e.clientY)?.closest('.sb-print');d.it.style.pointerEvents='';
-    if(over&&over!==d.it&&over.parentNode===board){const items=[...board.children],a=items.indexOf(d.it),b=items.indexOf(over),r0=d.it.getBoundingClientRect();
+    if(d.skip&&over!==d.skip)d.skip=null;
+    if(over&&over!==d.it&&over!==d.skip&&over.parentNode===board&&performance.now()-(d.tSwap||0)>160){d.skip=over;d.tSwap=performance.now();const items=[...board.children],a=items.indexOf(d.it),b=items.indexOf(over),r0=d.it.getBoundingClientRect();
       flip(()=>board.insertBefore(d.it,a<b?over.nextSibling:over));const r1=d.it.getBoundingClientRect();
       d.x0+=r1.left-r0.left;d.y0+=r1.top-r0.top;d.it.style.translate=`${e.clientX-d.x0}px ${e.clientY-d.y0}px`}
     // keep dragging near the window's edge scrolling it
