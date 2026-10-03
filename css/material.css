@@ -195,4 +195,10 @@ input[type=checkbox],input[type=radio]{accent-color:var(--primary)}
   .topbar{padding-left:calc(env(titlebar-area-x,0px) + 12px);padding-right:calc(100vw - env(titlebar-area-x,0px) - env(titlebar-area-width,100vw) + 12px);app-region:drag;-webkit-app-region:drag}
   .topbar>*,.award,#desk>*:not(.topbar):not(.wall):not(.grain),#wins>*,body>*:not(#desk){app-region:no-drag;-webkit-app-region:no-drag}
   #standalone{top:env(titlebar-area-height,0px)}
+  /* a full-screen app or tile group keeps its own buttons out from under the window buttons, and its top strip drags the window */
+  .win.focus .body{padding-top:env(titlebar-area-height,0px)}
+  .focus-exit{top:calc(env(titlebar-area-height,0px) + 8px)}
+  .grp-exit{top:calc(env(titlebar-area-height,0px) + 6px)}
+  .lock .lfs{top:calc(env(titlebar-area-height,0px) + 8px)}
+  html.focus-mode body::after,html.grp-full body::after,html:has(#desk.is-locked) body::after{content:"";position:fixed;top:0;left:env(titlebar-area-x,0px);width:env(titlebar-area-width,100vw);height:env(titlebar-area-height,0px);z-index:5050;app-region:drag;-webkit-app-region:drag}
 }
