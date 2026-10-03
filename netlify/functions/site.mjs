@@ -8,7 +8,7 @@ import { ICONS as ICON_SET } from "../../shared/icons.mjs";
 import { BRANDS as BRAND_LOGOS } from "../../shared/brands.mjs";
 
 // Apps that can never be hidden, so the owner can't lock themselves out.
-const KEEP = ["settings", "notes"];
+const KEEP = ["settings"];
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
 
 export function cleanSettings(s) {

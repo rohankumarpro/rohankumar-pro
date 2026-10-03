@@ -3211,7 +3211,7 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(
 var HIDDEN=new Set();
 var SITE={s:null,saveT:null,status:''};
 const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),timeline:JSON.parse(JSON.stringify(TIMELINE)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
-const NEVER_HIDE=['settings','notes'];
+const NEVER_HIDE=['settings'];
 function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return !!LIVE.admin;return !HIDDEN.has(id)||!!LIVE.admin}
 function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=s.now||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
@@ -3308,7 +3308,7 @@ const SV_ICON_OPTS=['sparkles','target','pencil','menu','star','heart','bulb','r
 const LI_=(n,s=18,fill)=>window.svgIcon?window.svgIcon(n,{size:s,fill:!!fill}):'';
 const ED_ICONS=['cal','mail','work','cam','chat','book','pen'],ED_COLORS=['c1','c2','c3','c4','c5','c6'];
 function edConfig(id){
-  const appOpts=[['','Opens a web address']].concat(APPS.filter(a=>!NEVER_HIDE.includes(a.id)||a.id==='notes').map(a=>[a.id,'Opens '+a.title+' on this site']));
+  const appOpts=[['','Opens a web address']].concat(APPS.filter(a=>!NEVER_HIDE.includes(a.id)).map(a=>[a.id,'Opens '+a.title+' on this site']));
   if(id==='about')return{title:'Edit About me',scalars:[{k:'bio',label:'Short bio',type:'area',max:1500,val:P.bio},{k:'skills',label:'Skills (separate with commas)',type:'csv',max:40,val:P.skills},{k:'photo',label:'Your photo (shown on About, the lock screen and Messages)',type:'image',val:(SITE.s&&SITE.s.photo)||''}],lists:[]};
   if(id==='resume')return{title:'Edit Resume',scalars:[{k:'skills',label:'Skills (separate with commas)',type:'csv',max:40,val:P.skills}],
     lists:[{k:'experience',label:'Experience and education',noun:'entry',items:P.experience,blank:{title:'',time:'',text:'',img:''},fields:[{k:'title',label:'Title',max:120},{k:'time',label:'When',max:40},{k:'text',label:'What you did',type:'area',max:600},{k:'img',label:'Logo or picture (optional)',type:'image'}]}]};
@@ -3571,7 +3571,7 @@ function ownerPlaceItems(id){
   if(!LIVE.admin)return[];const a=APPS.find(x=>x.id===id);if(!a)return[];const s=SITE.s||(SITE.s={hiddenApps:[]});
   const set=(k)=>{const hid=new Set(s.hiddenApps||[]);s.place=s.place||{};if(k==='hidden')hid.add(id);else{hid.delete(id);s.place[id]=k}s.hiddenApps=[...hid];applyHidden();siteSave();SFX.play('pop')};
   const here=appPlace(a);
-  return[null,["Rename or change icon…",()=>window.__editApp&&__editApp(id)],here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(['settings','notes'].includes(id)?[]:[["Hide from visitors",()=>set('hidden')]])]}
+  return[null,["Rename or change icon…",()=>window.__editApp&&__editApp(id)],here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(NEVER_HIDE.includes(id)?[]:[["Hide from visitors",()=>set('hidden')]])]}
 function ctxItemsFor(e){
   const t=e.target,el=t.closest?t:t.parentElement,out=[],sel=String(getSelection()||'').trim();
   const fld=el.closest('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea,[contenteditable="true"],[contenteditable=""]');

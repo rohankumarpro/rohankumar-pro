@@ -46,7 +46,7 @@ const Spot = {
     for (const a of APPS) if (appVisible(a.id)) C.push({ k: "Apps", t: a.title, s: a.drawer ? "Tool" : "App", i: "app", ih: icon(a), text: a.id, run: () => openApp(a.id), w: 3 });
     for (const p of D.posts) C.push({ k: "Journal", t: p.title, s: p.excerpt || "", i: "post", text: [p.title, p.excerpt, p.tag, (p.tags || []).join(" "), (p.body || "").slice(0, 2500)].join(" "), run: () => R.apply("/journal/" + p.slug), w: 2 });
     for (const p of D.projects) C.push({ k: "Projects", t: p.title, s: [p.field, p.year].filter(Boolean).join(" · "), i: "proj", text: [p.title, p.summary, p.field, (p.tags || []).join(" "), (p.tools || []).join(" "), p.client].join(" "), run: () => R.apply("/projects/" + p.slug), w: 2 });
-    for (const n of D.notes) C.push({ k: "Notes", t: n.title || "Untitled", s: (n.text || "").slice(0, 70), i: "note", text: (n.title || "") + " " + (n.text || ""), run: () => openApp("notes"), w: 1 });
+    if (appVisible("notes")) for (const n of D.notes) C.push({ k: "Notes", t: n.title || "Untitled", s: (n.text || "").slice(0, 70), i: "note", text: (n.title || "") + " " + (n.text || ""), run: () => openApp("notes"), w: 1 });
     for (const i of (D.hub && D.hub.items) || []) if (["link", "app", "email", "embed"].includes(i.type) && i.title) C.push({ k: "Links", t: i.title, s: i.sub || (i.url || "").replace(/^https?:\/\//, ""), i: "link", text: [i.title, i.sub, i.url].join(" "), run: () => (i.type === "app" ? openApp(i.app) : window.open(i.type === "email" ? "mailto:" + i.url : i.url, "_blank", "noopener")), w: 1 });
     for (const x of Spot.actions()) C.push({ ...x, text: x.t + " " + x.s, w: 1 });
     return C;
