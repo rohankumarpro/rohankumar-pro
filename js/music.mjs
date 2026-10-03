@@ -109,9 +109,26 @@ ENG.innerHTML = '<div class="mu-yt"><div class="mu-yt-in"></div></div><div class
 (document.getElementById("desk") || document.body).append(ENG);
 M.boxes = []; M.pos = 0; M.dur = 0;
 const fmt = (n) => { n = Math.max(0, Math.round(n || 0)); const m = Math.floor(n / 60), s = n % 60; return m + ":" + String(s).padStart(2, "0"); };
+const fmMin = (m) => (m < 1 ? Math.round(m * 60) + " sec" : Math.round(m) + " min");
+const VINYL = `<svg class="mpa-vinyl" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="98" fill="#1d1a1a"/>${[86, 74, 62, 50].map((r) => `<circle cx="100" cy="100" r="${r}" fill="none" stroke="#2e2a2a" stroke-width="1.4"/>`).join("")}<path d="M100 6a94 94 0 0 1 66 27" stroke="#fff" stroke-opacity=".16" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="100" cy="100" r="34" fill="var(--mu-c,#E4572E)"/><circle cx="100" cy="100" r="5" fill="#fff"/></svg>`;
+const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3l5-4v13l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+/* The Music app: a proper player. Now playing (cover, title, seek, controls, volume) and the records as a track list. */
+function appMarkup() {
+  return `<div class="mu-mini" hidden><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
+    <div class="mu-full mpa"><section class="mpa-now" aria-label="Now playing">
+      <div class="mpa-art"><img class="mpa-img" alt="" hidden referrerpolicy="no-referrer">${VINYL}</div>
+      <div class="mpa-meta"><div class="mpa-tt"><b class="mu-t"></b><small class="mu-a"></small></div><span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i></span></div>
+      <div class="mu-seek"><span class="mu-tc">0:00</span><input class="mu-sk" type="range" min="0" max="100" step="1" value="0" aria-label="Position in the song" disabled><span class="mu-td">0:00</span></div>
+      <div class="mu-ctl mpa-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button></div>
+      <label class="mpa-vol"><span aria-hidden="true">${SPK}</span><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></label>
+      <div class="mpa-tools"><div class="mu-fm" role="group" aria-label="Focus mode"><button class="mu-fm-b" type="button" aria-pressed="false" title="Focus mode: the music runs with a Focus timer and stops when it ends">Focus mode</button><button class="mu-fm-d" data-d="-5" type="button" aria-label="5 minutes shorter">−</button><span class="mu-fm-t"></span><button class="mu-fm-d" data-d="5" type="button" aria-label="5 minutes longer">+</button></div>
+        <span class="sp"></span><button class="mu-vid mpa-ib" aria-label="Show the video" title="Show the video" hidden>${ic.video}</button><button class="mu-manage mpa-ib" aria-label="Manage records" title="Manage records" hidden>${ic.gear}</button></div>
+    </section>
+    <section class="mpa-lib" aria-label="Records"><div class="mpa-lh"><b>Records</b><small class="mpa-n"></small></div><div class="mu-shelf mpa-list" role="list"></div><div class="mu-empty" hidden></div></section></div>`;
+}
 function makeBox(kind) {
   const box = h("div", { class: "mu mu-" + kind, "data-s": "idle" });
-  box.innerHTML = `<div class="mu-mini" role="group" aria-label="Music corner"><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
+  box.innerHTML = kind === "app" ? appMarkup() : `<div class="mu-mini" role="group" aria-label="Music corner"><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
     <div class="mu-full"><div class="mu-head"><b>${kind === "app" ? "Music" : "Music corner"}</b><span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="sp"></span><button class="mu-vid" aria-label="Show the video" title="Show the video" hidden>${ic.video}</button><button class="mu-manage" aria-label="Manage records" title="Manage records" hidden>${ic.gear}</button></div>
       <div class="mu-scene">${SCENE}</div>
       <div class="mu-now"><b class="mu-t"></b><small class="mu-a"></small></div>
@@ -160,6 +177,13 @@ setInterval(() => {
 function shelf(only) {
   (only ? [only] : M.boxes).forEach((box) => {
     const sh = $(".mu-shelf", box); if (!sh) return;
+    if (box.classList.contains("mu-app")) {
+      sh.innerHTML = M.tracks.map((t, i) => { const th = thumbOf(t);
+        return `<button class="mu-rec mpa-row${i === M.i ? " on" : ""}" role="listitem" data-i="${i}" style="--mu-c:${colorOf(t)}" aria-label="Play ${esc(t.title || "record")}"><span class="mpa-th"><b>${esc((t.title || "?").trim().slice(0, 1).toUpperCase())}</b>${th ? `<img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span><span class="mpa-rt"><b>${esc(t.title || "Untitled")}</b><small>${esc(t.artist || (t.k === "s" ? "Spotify" : "YouTube"))}${t.type === "playlist" || t.type === "album" ? " · " + (t.type === "album" ? "Album" : "Playlist") : ""}</small></span><span class="mpa-ix"><span class="mu-eq on" aria-hidden="true"><i></i><i></i><i></i></span><span class="mpa-no">${i + 1}</span></span></button>`; }).join("");
+      const n = $(".mpa-n", box); if (n) n.textContent = M.tracks.length ? M.tracks.length + (M.tracks.length === 1 ? " record" : " records") : "";
+      $$(".mu-rec", sh).forEach((b) => (b.onclick = () => { const i = +b.dataset.i; if (i === M.i && (M.playing || M.loading)) pause(); else play(i); }));
+      return;
+    }
     sh.innerHTML = M.tracks.map((t, i) => {
       const th = thumbOf(t), c = colorOf(t);
       return `<button class="mu-rec${i === M.i ? " on" : ""}" role="listitem" data-i="${i}" style="--mu-c:${c}" title="${esc(t.title || "Record")}${t.artist ? " — " + esc(t.artist) : ""}" aria-label="Play ${esc(t.title || "record")}"><span class="mu-vinyl"></span><span class="mu-sleeve">${th ? `<img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<b>${esc((t.title || "?").trim().slice(0, 1).toUpperCase())}</b>`}</span></button>`;
@@ -172,7 +196,7 @@ function fmPaint(box) {
   const f = window.__focusMode, on = !!(f && f.get()), b = $(".mu-fm-b", box), t = $(".mu-fm-t", box), has = typeof FT !== "undefined";
   if (!b) return; b.setAttribute("aria-pressed", String(on)); b.classList.toggle("on", on);
   const started = has && (FT.run || FT.left < FT.dur);
-  t.textContent = !has ? "" : on && FT.mode === "focus" ? ftFmt(FT.left) : FT_MODES.focus[0] + " min";
+  t.textContent = !has ? "" : on && FT.mode === "focus" ? ftFmt(FT.left) : fmMin(FT_MODES.focus[0]);
   $$(".mu-fm-d", box).forEach((d) => (d.disabled = !has || started));
 }
 function engine() {
@@ -193,6 +217,12 @@ function paintBox(box) {
   $(".mu-vol", box).hidden = !isY; $(".mu-vid", box).hidden = !isY || box.classList.contains("mu-widget"); $(".mu-vid", box).classList.toggle("on", M.video);
   $(".mu-manage", box).hidden = !isAdmin();
   seekPaint(box); fmPaint(box);
+  const art = $(".mpa-img", box);
+  if (art) { // the cover shows once it has loaded; until then (or if it cannot load) the record spins in its place
+    const th = t && thumbOf(t);
+    if (!th) { art.hidden = true; art.removeAttribute("src"); box.classList.remove("has-art"); }
+    else if (art.getAttribute("src") !== th) { box.classList.remove("has-art"); art.hidden = true; art.onload = () => { art.hidden = false; box.classList.add("has-art"); }; art.onerror = () => { art.hidden = true; box.classList.remove("has-art"); }; art.src = th; }
+  }
   const em = $(".mu-empty", box);
   if (!M.tracks.length) { em.hidden = false; const P0 = window.P && P.music; em.innerHTML = `<p>${isAdmin() ? "Pick a few records for your visitors." : "The owner hasn't put any records out yet."}</p>${isAdmin() ? '<button class="btn mu-addfirst">Add records</button>' : (P0 ? `<span class="mu-ext"><a href="${esc(P0.youtubeMusic)}" target="_blank" rel="noopener">YouTube Music</a><a href="${esc(P0.spotify)}" target="_blank" rel="noopener">Spotify</a></span>` : "")}`; $(".mu-addfirst", em)?.addEventListener("click", manage); } else em.hidden = true;
 }
