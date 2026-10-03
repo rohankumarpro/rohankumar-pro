@@ -68,7 +68,7 @@ function grid(body, quiet) {
     if (sort === "new") shown = shown.slice().sort((a, b) => (b.publishedAt || b.ts || 0) - (a.publishedAt || a.ts || 0));
     if (sort === "popular") shown = shown.slice().sort((a, b) => (b.likes || 0) + (b.views || 0) / 10 - ((a.likes || 0) + (a.views || 0) / 10));
     if (sort === "order") shown = [...shown.filter((p) => p.featured), ...shown.filter((p) => !p.featured)];
-    root.innerHTML = `<div class="nt-head"><h1>Projects</h1>${isAdmin() ? `<div class="nt-tools"><span class="nt-status">${esc(PR.status)}</span>${(PR.list.some((p) => /^dr\d+$/.test(p.id)) && !importLeft()) || PR.importing ? "" : '<button class="pj-imp">Import from Dribbble</button>'}<button class="pj-new">+ New project</button></div>` : ""}</div>
+    root.innerHTML = `<div class="nt-head"><h1>Projects</h1>${isAdmin() ? `<div class="nt-tools"><span class="nt-status">${esc(PR.status)}</span>${!missingPicks().length || PR.importing ? "" : `<button class="pj-imp">${PR.list.some((p) => (PR.pickIds || []).includes(p.id)) ? "Add missing Dribbble picks" : "Import from Dribbble"}</button>`}<button class="pj-new">+ New project</button></div>` : ""}</div>
       ${isAdmin() && PR.seeded ? '<p class="hint">These are sample projects. Edit one, or add your own.</p>' : ""}
       <div class="pj-tools"><input type="search" class="jr-search" placeholder="Search projects" aria-label="Search projects" value="${esc(q)}"><div class="seg pj-sort" role="group" aria-label="Sort">${[["order","Featured"],["new","Newest"],["popular","Popular"]].map(([k, l]) => `<button data-s="${k}" class="${sort === k ? "on" : ""}">${l}</button>`).join("")}</div></div>
       ${fields.length > 1 ? `<div class="jtags"><button class="${!field ? "on" : ""}" data-f="">All <span>${all.length}</span></button>${fields.map((f) => `<button class="${field === f ? "on" : ""}" data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>` : ""}
@@ -81,7 +81,7 @@ function grid(body, quiet) {
     const nb = $(".pj-new", root); if (nb) nb.onclick = () => studio(body, null);
     const ib = $(".pj-imp", root); if (ib) ib.onclick = () => importPicks(body);
   };
-  draw();
+  draw(); loadPickIds(() => root.isConnected && draw());
   if (!quiet) R.item(body, "", "", "push");
 }
 function cardMenu(btn, body) {
@@ -96,33 +96,38 @@ function cardMenu(btn, body) {
 }
 async function quick(meta, patch, body) {
   const full = await fetchFull(meta.id); if (!full) return;
-  const r = await api("/api/projects", { method: "PUT", body: { project: { ...full, ...patch } } });
+  const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, project: { ...full, ...patch } } });
   if (r.ok) { PR.list = r.data.projects; delete PR.cache[meta.id]; PR.seeded = false; grid(body, true); toast("Saved"); } else toast("Could not save (" + r.status + ")");
 }
 async function move(i, d, body) {
   const j = i + d; if (j < 0 || j >= PR.list.length) return;
   const ids = PR.list.map((p) => p.id); [ids[i], ids[j]] = [ids[j], ids[i]];
-  const r = await api("/api/projects", { method: "PUT", body: { order: ids } }); if (r.ok) { PR.list = r.data.projects; grid(body, true); }
+  const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, order: ids } }); if (r.ok) { PR.list = r.data.projects; grid(body, true); }
 }
 async function dup(meta, body) {
   const full = await fetchFull(meta.id); if (!full) return;
   const p = { ...full, id: uid(), title: full.title + " (copy)", slug: full.slug + "-copy", status: "draft", featured: false };
-  const r = await api("/api/projects", { method: "PUT", body: { project: p } }); if (r.ok) { PR.list = r.data.projects; PR.seeded = false; grid(body, true); toast("Duplicated as a draft"); }
+  const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, project: p } }); if (r.ok) { PR.list = r.data.projects; PR.seeded = false; grid(body, true); toast("Duplicated as a draft"); }
 }
 async function del(meta, body) {
   if (!(await confirmBox(`Delete “${meta.title}” for good?`))) return;
   const r = await api("/api/projects?id=" + encodeURIComponent(meta.id), { method: "DELETE" }); if (r.ok) { PR.list = r.data.projects; PR.seeded = false; grid(body, true); } else toast("Could not delete");
 }
-/* ---------- one-time import of the handpicked Dribbble shots ---------- */
-const importLeft = () => { try { return !!localStorage.getItem("pjImport"); } catch { return false; } };
-// Copies every picture to this site (shrunk, with a small copy, like any upload), saves each shot as a published project,
-// and only then deletes the projects that are not part of the picks. Pictures already copied are remembered, so a retry resumes.
+/* ---------- import of the handpicked Dribbble shots ---------- */
+// Adds the picks that are not on the site yet; it never deletes or changes other projects. A pick whose saved record still
+// exists (it can drop off the list) is put back as it is. Otherwise every picture is copied to this site (shrunk, with a small
+// copy, like any upload) and the shot is saved as a published project. Pictures already copied are remembered, so a retry resumes.
+const missingPicks = () => (PR.pickIds || []).filter((id) => !PR.list.some((p) => p.id === id));
+async function loadPickIds(redraw) {
+  if (PR.pickIds || !isAdmin()) return;
+  try { const { PICKS } = await import("/js/dribbble-picks.mjs"); PR.pickIds = PICKS.map((k) => k.id); redraw(); } catch {}
+}
 async function importPicks(body) {
   const { PICKS } = await import("/js/dribbble-picks.mjs");
-  const ids = new Set(PICKS.map((k) => k.id)), old = PR.list.filter((p) => !ids.has(p.id));
-  const pics = PICKS.reduce((n, k) => n + 1 + k.body.filter((x) => typeof x === "string").length, 0);
-  const msg = `Import ${PICKS.length} projects from Dribbble (${pics} pictures)?` + (old.length ? ` Afterwards ${old.length === 1 ? "this project is" : "these projects are"} deleted: ${old.map((p) => `“${p.title}”`).join(", ")}.` : "") + " It takes a few minutes. Keep this window open.";
-  if (!(await confirmBox(msg, "Import", false))) return;
+  const todo = PICKS.filter((k) => !PR.list.some((p) => p.id === k.id));
+  if (!todo.length) { toast("All your Dribbble picks are already here."); return; }
+  const msg = `Add ${todo.length === 1 ? `“${todo[0].title}”` : `${todo.length} projects`} from Dribbble? Nothing else changes. Keep this window open until it finishes.`;
+  if (!(await confirmBox(msg, "Add", false))) return;
   let done = {}; try { done = JSON.parse(localStorage.getItem("pjImport") || "{}"); } catch {}
   const remember = () => { try { localStorage.setItem("pjImport", JSON.stringify(done)); } catch {} };
   const copy = async (src, label) => {
@@ -135,35 +140,35 @@ async function importPicks(body) {
     done[src] = { url: r.url, w: r.w, h: r.h }; remember();
     return done[src];
   };
+  const save = async (project, title) => {
+    setStatus(`Saving ${title}…`);
+    const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, project } });
+    if (!r.ok) throw new Error(r.status === 401 ? "You are signed out. Sign in again, then press the button again." : `Could not save ${title} (${r.status}).`);
+    PR.list = r.data.projects; PR.seeded = false;
+  };
   PR.importing = true; grid(body, true);
-  let n = 0;
   try {
-    for (const k of PICKS) {
+    for (const k of todo) {
+      const kept = await api("/api/projects?id=" + encodeURIComponent(k.id));
+      if (kept.ok && kept.data.project && kept.data.project.blocks?.length) { await save({ ...kept.data.project, status: "published" }, k.title); continue; }
       const total = k.body.filter((x) => typeof x === "string").length;
-      const cover = await copy(k.cover, `${k.title}: cover (${++n} of ${pics})`);
+      const cover = await copy(k.cover, `${k.title}: cover`);
       const blocks = []; let i = 0;
       for (const x of k.body) {
-        if (typeof x === "string") { const im = await copy(x, `${k.title}: picture ${++i} of ${total} (${++n} of ${pics})`); blocks.push({ t: "image", src: im.url, alt: `${k.title}, picture ${i} of ${total}`, w: "w", rw: im.w, rh: im.h }); }
+        if (typeof x === "string") { const im = await copy(x, `${k.title}: picture ${++i} of ${total}`); blocks.push({ t: "image", src: im.url, alt: `${k.title}, picture ${i} of ${total}`, w: "w", rw: im.w, rh: im.h }); }
         else if (x.h) blocks.push({ t: "h2", h: esc(x.h) });
         else blocks.push({ t: "p", h: esc(x.p) });
       }
-      const project = { id: k.id, title: k.title, summary: k.summary, field: k.field, tags: k.tags, tools: [], year: k.year, client: "", role: "", color: "c2", status: "published", featured: false, license: "all-rights",
-        cover: { src: cover.url, fx: 50, fy: 50, alt: k.title }, links: [{ label: "View on Dribbble", url: k.link }], credits: [], blocks, slug: slugify(k.title) };
-      setStatus(`Saving ${k.title}…`);
-      const r = await api("/api/projects", { method: "PUT", body: { project } });
-      if (!r.ok) throw new Error(r.status === 401 ? "You are signed out. Sign in again, then press Import again." : `Could not save ${k.title} (${r.status}).`);
-      PR.list = r.data.projects; PR.seeded = false;
+      await save({ id: k.id, title: k.title, summary: k.summary, field: k.field, tags: k.tags, tools: [], year: k.year, client: "", role: "", color: "c2", status: "published", featured: false, license: "all-rights",
+        cover: { src: cover.url, fx: 50, fy: 50, alt: k.title }, links: [{ label: "View on Dribbble", url: k.link }], credits: [], blocks, slug: slugify(k.title) }, k.title);
     }
-    for (const p of old) {
-      setStatus(`Removing ${p.title}…`);
-      const r = await api("/api/projects?id=" + encodeURIComponent(p.id), { method: "DELETE" });
-      if (r.ok) PR.list = r.data.projects;
-    }
-    const r = await api("/api/projects", { method: "PUT", body: { order: PICKS.map((k) => k.id) } }); if (r.ok) PR.list = r.data.projects;
+    // keep the picks in their Dribbble order, ahead of anything else
+    const ids = PR.list.map((p) => p.id), order = [...PICKS.map((k) => k.id).filter((id) => ids.includes(id)), ...ids.filter((id) => !PICKS.some((k) => k.id === id))];
+    const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, order } }); if (r.ok) PR.list = r.data.projects;
     try { localStorage.removeItem("pjImport"); } catch {}
-    setStatus(""); toast(`Imported ${PICKS.length} projects from Dribbble`);
+    setStatus(""); toast(todo.length === 1 ? `Added “${todo[0].title}”` : `Added ${todo.length} projects from Dribbble`);
   } catch (e) {
-    setStatus("Import stopped"); toast(e.message + " Press Import again to carry on where it stopped.");
+    setStatus("Stopped"); toast(e.message + " Press the button again to carry on where it stopped.");
   } finally { PR.importing = false; PR.cache = {}; await loadList(true); grid(body, true); }
 }
 async function fetchFull(id) {
@@ -245,7 +250,7 @@ async function studio(body, meta) {
     if (!p.title) p.title = "Untitled project";
     PR.saving = true; setStatus("Saving…");
     try {
-      const r = await api("/api/projects", { method: "PUT", body: { project: p } });
+      const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, project: p } });
       if (r.ok) { created = true; PR.list = r.data.projects; PR.cache[S.id] = r.data.project; PR.seeded = false; S.slug = r.data.project.slug; const bk = $(".jed-bar .back", body); if (bk) bk.innerHTML = I("chevron-left") + "Back"; const se = q("[data-f=slug]"); if (se && se !== document.activeElement) se.value = S.slug; setStatus("Saved"); }
       else setStatus(r.status === 401 ? "Signed out. Not saved." : r.status === 0 ? "Offline. Not saved." : r.data.error || "Could not save (" + r.status + ")");
     } finally { PR.saving = false; if (PR.again) { PR.again = false; save(); } }

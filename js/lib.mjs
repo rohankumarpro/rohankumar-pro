@@ -158,11 +158,38 @@ export function lightbox(items, start = 0) {
 }
 
 /* ---------- small interface pieces ---------- */
-export async function share(url, title) {
+// The share panel: the link with a copy button and the usual places to post it, right on the page.
+// The device's own share sheet is one option inside it ("More"), never the first thing people see.
+export function share(url, title) {
   const full = url.startsWith("http") ? url : location.origin + url;
-  if (navigator.share) { try { await navigator.share({ url: full, title }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
-  try { await navigator.clipboard.writeText(full); toast("Link copied"); } catch { prompt("Copy this link", full); }
+  document.querySelector(".shr-dlg")?.remove();
+  const back = document.activeElement, e = encodeURIComponent, u = e(full), t = e(title || "");
+  const places = [
+    ["X", `https://twitter.com/intent/tweet?url=${u}&text=${t}`],
+    ["LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`],
+    ["Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`],
+    ["WhatsApp", `https://wa.me/?text=${e((title ? title + " " : "") + full)}`],
+    ["Email", `mailto:?subject=${t}&body=${u}`],
+  ];
+  const close = () => { d.remove(); document.removeEventListener("keydown", onKey, true); back && back.focus && back.focus(); };
+  const onKey = (ev) => { if (ev.key === "Escape") { ev.stopPropagation(); close(); } };
+  const field = h("input", { class: "shr-url", value: full, readonly: true, "aria-label": "Link", onfocus: (ev) => ev.target.select() });
+  const copyBtn = h("button", { type: "button", class: "btn shr-copy", onclick: async () => {
+    try { await navigator.clipboard.writeText(full); } catch { field.focus(); field.select(); try { document.execCommand("copy"); } catch {} }
+    copyBtn.innerHTML = `${icon("check", { size: 16 })}Copied`; copyBtn.classList.add("done");
+    setTimeout(() => { if (copyBtn.isConnected) { copyBtn.innerHTML = `${icon("copy", { size: 16 })}Copy`; copyBtn.classList.remove("done"); } }, 1800);
+  }, html: `${icon("copy", { size: 16 })}Copy` });
+  const card = h("div", { class: "shr-card", role: "dialog", "aria-modal": "true", "aria-label": "Share" },
+    h("div", { class: "shr-head" }, h("b", {}, "Share"), h("button", { type: "button", class: "shr-x", "aria-label": "Close", onclick: close, html: icon("x", { size: 18 }) })),
+    title ? h("p", { class: "shr-t" }, title) : null,
+    h("div", { class: "shr-row" }, field, copyBtn),
+    h("div", { class: "shr-to" }, places.map(([l, href]) => h("a", { class: "shr-p", href, target: "_blank", rel: "noopener", onclick: () => setTimeout(close, 0) }, l)),
+      navigator.share ? h("button", { type: "button", class: "shr-p", onclick: async () => { try { await navigator.share({ url: full, title }); close(); } catch {} }, html: `${icon("share", { size: 15 })}More` }) : null));
+  const d = h("div", { class: "shr-dlg", onclick: (ev) => { if (ev.target === d) close(); } }, card);
+  document.body.append(d); document.addEventListener("keydown", onKey, true);
+  copyBtn.focus();
 }
+window.share = share;
 export function chips(host, values, { placeholder = "Add…", suggestions = [], max = 12, onChange } = {}) {
   host.classList.add("chipin");
   const draw = () => {

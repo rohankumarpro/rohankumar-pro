@@ -14,6 +14,7 @@ let cid = 0;
 window.__customIcon = (a, E) => {
   if (!E || !E.icon) return "";
   const ic = E.icon, col = E.color || a.color || "c1", id = "ce" + ++cid;
+  if (ic.k === "app") return window.APP_ICONS && window.APP_ICONS[ic.v] ? window.appIconArt(ic.v, ` data-i="${esc(a.id)}"`) : "";
   let art = "";
   if (ic.k === "brand" && BRANDS[ic.v]) art = `<g><path transform="translate(26 26) scale(2)" d="${BRANDS[ic.v].d}" fill="${BRANDS[ic.v].h}"/></g>`;
   else if (ic.k === "glyph" && ICONS[ic.v]) art = `<svg x="27" y="27" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[ic.v]}</svg>`;
@@ -38,15 +39,16 @@ function dialog(html) { const d = h("div", { class: "own-dlg ae-dlg" }); d.inner
 
 window.__editApp = (id) => {
   if (!isAdmin()) return; const a = apps().find((x) => x.id === id); if (!a) return;
-  const cur = { ...(edits()[id] || {}) }; let tab = cur.icon && cur.icon.k === "brand" ? "brand" : cur.icon && cur.icon.k === "img" ? "img" : "glyph";
+  const cur = { ...(edits()[id] || {}) }; let tab = cur.icon && cur.icon.k === "brand" ? "brand" : cur.icon && cur.icon.k === "img" ? "img" : cur.icon && cur.icon.k === "glyph" ? "glyph" : "app";
   const d = dialog(""), card = $(".ae-card", d);
   const draw = () => {
     const prev = window.__customIcon(a, { ...cur }) || icon({ ...a, color: cur.color || a.color });
     card.innerHTML = `<div class="ae-h"><span class="ae-prev">${prev}</span><div><b>${esc(cur.title || a.__t0)}</b><small>Edit this app</small></div><button class="ae-x" aria-label="Close">${icon0("x")}</button></div>
       <label class="ae-l">Name<input class="ae-name" maxlength="30" value="${esc(cur.title || "")}" placeholder="${esc(a.__t0)}"></label>
       <div class="ae-l">Colour<div class="ae-cols">${COLORS.map((c) => `<button class="ae-col${(cur.color || a.color) === c ? " on" : ""}" data-c="${c}" style="background:var(--${c})" aria-label="Colour ${c}"></button>`).join("")}</div></div>
-      <div class="ae-l">Icon<div class="seg ae-tabs"><button data-t="glyph" class="${tab === "glyph" ? "on" : ""}">Symbols</button><button data-t="brand" class="${tab === "brand" ? "on" : ""}">Brands</button><button data-t="img" class="${tab === "img" ? "on" : ""}">Picture</button></div></div>
-      <div class="ae-grid" data-tab="${tab}">${tab === "glyph" ? iconNames.map((n) => `<button data-k="glyph" data-v="${n}" class="${cur.icon && cur.icon.v === n ? "on" : ""}" title="${n}">${icon0(n)}</button>`).join("")
+      <div class="ae-l">Icon<div class="seg ae-tabs"><button data-t="app" class="${tab === "app" ? "on" : ""}">Icons</button><button data-t="glyph" class="${tab === "glyph" ? "on" : ""}">Symbols</button><button data-t="brand" class="${tab === "brand" ? "on" : ""}">Brands</button><button data-t="img" class="${tab === "img" ? "on" : ""}">Picture</button></div></div>
+      <div class="ae-grid${tab === "app" ? " ae-lib" : ""}" data-tab="${tab}">${tab === "app" ? Object.entries(window.APP_ICONS || {}).map(([n, v]) => `<button data-k="app" data-v="${n}" class="${cur.icon && cur.icon.v === n ? "on" : ""}" title="${esc(v.t)}" aria-label="${esc(v.t)}">${window.appIconArt(n)}</button>`).join("")
+        : tab === "glyph" ? iconNames.map((n) => `<button data-k="glyph" data-v="${n}" class="${cur.icon && cur.icon.v === n ? "on" : ""}" title="${n}">${icon0(n)}</button>`).join("")
         : tab === "brand" ? Object.keys(BRANDS).map((n) => `<button data-k="brand" data-v="${n}" class="${cur.icon && cur.icon.v === n ? "on" : ""}" title="${BRANDS[n].n}"><svg viewBox="0 0 24 24" width="22" height="22"><path d="${BRANDS[n].d}" fill="${BRANDS[n].h}"/></svg></button>`).join("")
         : `<div class="ae-up"><button class="btn tonal" data-up>Upload a picture</button><p class="hint">Your picture is used as it is, never filtered.</p></div>`}</div>
       <div class="own-row"><button class="btn tonal" data-reset>Reset to original</button><span style="flex:1"></span><button class="btn tonal" data-x>Cancel</button><button class="btn" data-save>Save</button></div>`;

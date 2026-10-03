@@ -8,7 +8,7 @@ import { ICONS as ICON_SET } from "../../shared/icons.mjs";
 import { BRANDS as BRAND_LOGOS } from "../../shared/brands.mjs";
 
 // Apps that can never be hidden, so the owner can't lock themselves out.
-const KEEP = ["settings", "notes"];
+const KEEP = ["settings"];
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
 
 export function cleanSettings(s) {
@@ -94,6 +94,7 @@ export function cleanSettings(s) {
       const ic = v.icon;
       if (ic && typeof ic === "object") {
         if (ic.k === "glyph" && ICON_SET[ic.v]) e.icon = { k: "glyph", v: ic.v };
+        else if (ic.k === "app" && /^[a-z]{2,20}$/.test(String(ic.v))) e.icon = { k: "app", v: ic.v }; // an icon from shared/app-icons.js
         else if (ic.k === "brand" && BRAND_LOGOS[ic.v]) e.icon = { k: "brand", v: ic.v };
         else if (ic.k === "img") { const im = safeImg(ic.v); if (im) e.icon = { k: "img", v: im }; }
       }
