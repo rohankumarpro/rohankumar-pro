@@ -2,7 +2,7 @@
 /* Shared by every UI (Material, Notion, Apple): behaviour and layout that must not change with the look.
    Focus mode, the All-windows overview, icon layout helpers and picture wallpapers. Each css/ui-*.css only restyles on top of this. */
 /* ===== Focus mode: one app, truly full screen ===== */
-html.focus-mode .topbar,html.focus-mode .shelf,html.focus-mode .icons,html.focus-mode .widgets,html.focus-mode .cat,html.focus-mode .jar,html.focus-mode .dock-handle,html.focus-mode .launcher,html.focus-mode .qs,html.focus-mode .snap-prev,html.focus-mode .cat-chat{display:none!important}
+html.focus-mode .topbar,html.focus-mode .award,html.focus-mode .shelf,html.focus-mode .icons,html.focus-mode .widgets,html.focus-mode .cat,html.focus-mode .jar,html.focus-mode .dock-handle,html.focus-mode .launcher,html.focus-mode .qs,html.focus-mode .snap-prev,html.focus-mode .cat-chat{display:none!important}
 html.focus-mode .win:not(.focus){visibility:hidden;pointer-events:none}
 html.focus-mode .win.focus{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0!important;border:0!important;transform:none!important;z-index:5000!important;box-shadow:none!important;animation:none!important}
 html.focus-mode .win.focus .bar,html.focus-mode .win.focus .rz{display:none!important}
