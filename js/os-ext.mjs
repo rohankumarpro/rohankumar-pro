@@ -127,6 +127,59 @@ export const Install = { evt: null, installed: matchMedia("(display-mode: standa
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); Install.evt = e; document.dispatchEvent(new CustomEvent("install-ready")); });
 window.addEventListener("appinstalled", () => { Install.installed = true; Install.evt = null; toast("Installed. Find it on your home screen."); });
 window.Install = Install;
+/* ---------- installed app: the strip behind the window buttons takes the wallpaper's colour ---------- */
+// Chrome paints that strip in the theme colour and can't make it see-through, so draw the wallpaper off-screen,
+// read the colour under the buttons and use it. Runs again when the wallpaper, theme, lock state or window size changes.
+(function titleBarTint() {
+  const wco = navigator.windowControlsOverlay, mq = matchMedia("(display-mode: window-controls-overlay)");
+  if (!wco) return;
+  const metas = [...document.querySelectorAll('meta[name="theme-color"]')], orig = metas.map((m) => m.content);
+  const set = (c) => metas.forEach((m, i) => { const v = c || orig[i]; if (m.content !== v) m.content = v; });
+  const hex = (r, g, b) => "#" + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+  let busy = false, again = false, t = 0;
+  async function tint() {
+    if (busy) { again = true; return; }
+    const desk = document.getElementById("desk"), svg = document.querySelector("#wall svg");
+    if (!mq.matches || !wco.visible || !desk || !svg) return set(null);
+    busy = true;
+    try {
+      const r = wco.getTitlebarAreaRect(), W = innerWidth, H = innerHeight;
+      // the buttons sit on the right on Windows and Linux, on the left on macOS
+      const x0 = r.x > 0 ? 0 : Math.round(r.x + r.width), w = r.x > 0 ? Math.round(r.x) : W - x0, h = Math.max(1, Math.round(r.height));
+      if (w <= 0) return;
+      const cs = getComputedStyle(desk), c = svg.cloneNode(true);
+      c.setAttribute("xmlns", "http://www.w3.org/2000/svg"); c.setAttribute("width", W); c.setAttribute("height", H);
+      const src = new XMLSerializer().serializeToString(c).replace(/var\((--[\w-]+)\)/g, (_, n) => cs.getPropertyValue(n).trim() || "transparent");
+      const img = new Image(); img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(src); await img.decode();
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      const g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(img, -x0, 0, W, H);
+      // the most common colour, so a shape edge under the buttons doesn't give a muddy average
+      const d = g.getImageData(0, 0, w, h).data, bins = new Map();
+      for (let i = 0; i < d.length; i += 16) { const k = (d[i] >> 3) << 10 | (d[i + 1] >> 3) << 5 | d[i + 2] >> 3, b = bins.get(k) || [0, 0, 0, 0]; b[0]++; b[1] += d[i]; b[2] += d[i + 1]; b[3] += d[i + 2]; bins.set(k, b); }
+      let best = null; for (const b of bins.values()) if (!best || b[0] > best[0]) best = b;
+      if (!best) return;
+      let col = hex(best[1] / best[0], best[2] / best[0], best[3] / best[0]);
+      // the lock screen lays a tint of the third wallpaper colour over the desktop
+      if (desk.classList.contains("is-locked")) {
+        const k = cv.getContext("2d"); k.fillStyle = col; k.fillRect(0, 0, 1, 1); k.globalAlpha = .62; k.fillStyle = cs.getPropertyValue("--w3").trim() || col; k.fillRect(0, 0, 1, 1);
+        const p = k.getImageData(0, 0, 1, 1).data; col = hex(p[0], p[1], p[2]);
+      }
+      set(col);
+    } catch (e) { set(null); }
+    finally { busy = false; if (again) { again = false; queue(); } }
+  }
+  const queue = () => { clearTimeout(t); t = setTimeout(tint, 120); };
+  const watch = () => {
+    const wall = document.getElementById("wall"), desk = document.getElementById("desk");
+    if (wall) new MutationObserver(queue).observe(wall, { childList: true });
+    if (desk) new MutationObserver(queue).observe(desk, { attributes: true, attributeFilter: ["class", "data-wall"] });
+    new MutationObserver(queue).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
+    queue();
+  };
+  wco.addEventListener("geometrychange", queue); mq.addEventListener("change", queue);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", queue);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", watch); else watch();
+})();
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && !/--/.test(location.hostname)) {
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 }
