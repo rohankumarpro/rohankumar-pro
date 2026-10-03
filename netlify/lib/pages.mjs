@@ -1,7 +1,7 @@
 // Every public address of the site (/about, /projects/<slug>, /journal/<slug> ...) described as data:
 // what the page is called, how it reads in search results, the text a crawler should see, and which window the desktop opens.
 import { esc, renderBlocks, blocksText, stripTags, slugify, firstImage, readMinutes, wordCount, blocksToMd } from "../../shared/blocks.mjs";
-import { SITE, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate } from "./site-data.mjs";
+import { SITE, PLACEHOLDER, loadProfile, loadLivePosts, projectIndex, projectBySlug, loadHubPublic, loadPhotos, loadNotes, loadGuestbook, blocksOf, isoDate } from "./site-data.mjs";
 import { hrefOf } from "./hub.mjs";
 import { CAROUSELS, COVERS } from "./media.mjs";
 
@@ -20,13 +20,13 @@ export const APP_PAGES = {
   messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, settings: { path: "/settings", title: "Settings", index: false },
   calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
   focus: { path: "/focus", title: "Focus timer", index: false }, search: { path: "/search", title: "Search", index: false },
-  boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false },
+  boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false }, music: { path: "/music", title: "Music", index: false },
 };
 const BY_PATH = Object.fromEntries(Object.entries(APP_PAGES).map(([id, v]) => [v.path, id]));
 const tagSlug = (t) => slugify(t);
 const dateLabel = (p) => p.date || "";
 const person = (pr, hub) => ({
-  "@type": "Person", "@id": `${SITE}/#person`, name: pr.name, jobTitle: pr.role, url: `${SITE}/`, image: abs(pr.settings.photo || "/img/avatar.jpg"),
+  "@type": "Person", "@id": `${SITE}/#person`, name: pr.name, jobTitle: pr.role, url: `${SITE}/`, image: abs(pr.settings.photo || "/img/avatar.jpg"), description: pr.bio, address: { "@type": "PostalAddress", addressCountry: "IN" },
   ...(pr.skills.length ? { knowsAbout: pr.skills } : {}), ...(pr.email ? { email: pr.email } : {}), ...(pr.studio ? { worksFor: { "@type": "Organization", name: pr.studio } } : {}),
   sameAs: [...new Set([...(hub?.socials || []).map((s) => s.url).filter((u) => /^https?:/.test(u)), ...pr.links.map((l) => l.url).filter((u) => /^https?:/.test(u))])],
 });
@@ -36,6 +36,14 @@ const nav = (hidden) => `<nav aria-label="Main"><ul>${["about", "projects", "jou
 const postLi = (p) => `<li><a href="/journal/${esc(p.slug)}">${esc(p.title)}</a> <small>${esc(dateLabel(p))}${p.tag ? ` · ${esc(p.tag)}` : ""}</small><p>${esc(trim(p.excerpt, 200))}</p></li>`;
 const extraOf = (pr, k) => (pr.settings.extra && pr.settings.extra[k]) || [];
 const extraHtml = (pr, k) => { const b = extraOf(pr, k); return b.length ? `<section>${renderBlocks(b, { hBase: 2 })}</section>` : ""; };
+// Search titles: "<page> — Rohan Kumar" when it fits in about 60 characters, otherwise the page's own title alone.
+const fit = (main, suffix) => ((main + suffix).length <= 62 ? main + suffix : main);
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const titlesOf = (list, n = 3) => list.slice(0, n).map((x) => x.title).join(", ");
+// "From US$3,500 · within 1 month" -> an Offer search engines understand
+const offerOf = (price) => { const m = String(price || "").match(/(US\$|\$|€|£|₹|INR|USD|EUR|GBP)\s?([\d,]+(?:\.\d+)?)/i); if (!m) return price ? { "@type": "Offer", description: price } : null;
+  const cur = /€|EUR/i.test(m[1]) ? "EUR" : /£|GBP/i.test(m[1]) ? "GBP" : /₹|INR/i.test(m[1]) ? "INR" : "USD";
+  return { "@type": "Offer", description: price, priceSpecification: { "@type": "PriceSpecification", minPrice: +m[2].replace(/,/g, ""), priceCurrency: cur } }; };
 const projLi = (p) => `<li><a href="/projects/${esc(p.slug)}">${esc(p.title)}</a>${p.field ? ` <small>${esc(p.field)}${p.year ? ` · ${esc(p.year)}` : ""}</small>` : ""}<p>${esc(trim(p.summary, 200))}</p></li>`;
 
 export async function resolve(event, store, rawPath) {
@@ -55,7 +63,7 @@ export async function resolve(event, store, rawPath) {
   if (path === "/") {
     const posts = (await loadLivePosts(store)).slice(0, 5), projects = (await projectIndex(store)).filter((m) => m.status === "published").slice(0, 6);
     return finish({
-      ...base(seo.title || `${pr.name} — ${pr.role}`, seo.desc || pr.bio), app: "", title: seo.title || `${pr.name} — ${pr.role}`,
+      ...base(seo.title || `${pr.name} — ${pr.role} in India`, seo.desc || `${pr.name} is a ${pr.role.toLowerCase()} in India creating brand identities, logos, packaging and brand strategy.${projects.length ? ` Selected work: ${titlesOf(projects)}.` : ""}`), app: "", title: seo.title || `${pr.name} — ${pr.role} in India`,
       ld: [{ "@type": "WebSite", "@id": `${SITE}/#website`, url: `${SITE}/`, name: pr.name, inLanguage: "en", publisher: { "@id": `${SITE}/#person` } }, person(pr, hub)],
       body: `<header><h1>${esc(pr.name)} — ${esc(pr.role)}</h1><p>${esc(pr.bio)}</p>${pr.status ? `<p>${esc(pr.status)}.</p>` : ""}</header>${nav(hidden)}
 <section><h2>Latest from the journal</h2><ul>${posts.map(postLi).join("")}</ul><p><a href="/journal">All articles</a></p></section>
@@ -72,22 +80,24 @@ export async function resolve(event, store, rawPath) {
     const links = pr.links.filter((l) => /^https?:/.test(l.url)).map((l) => `<li><a href="${esc(l.url)}" rel="me noopener">${esc(l.label)}</a></li>`).join("");
     let title, desc, body, mdText;
     if (id === "about") {
-      title = `About ${pr.name} — ${pr.role}`; desc = pr.bio;
+      title = `About ${pr.name} — ${pr.role}`; desc = `${pr.bio} Skills: ${pr.skills.slice(0, 4).join(", ")}.`;
       body = `<h1>About ${esc(pr.name)}</h1><p>${esc(pr.role)}${pr.status ? ` · ${esc(pr.status)}` : ""}</p><p>${esc(pr.bio)}</p>${story}${pr.now ? `<h2>Right now</h2><p>${esc(pr.now)}</p>` : ""}
 ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}<h2>Elsewhere</h2><ul>${links}</ul>`;
       mdText = `# About ${pr.name}\n\n${pr.role}\n\n${pr.bio}\n\n${blocksToMd(pr.story)}\n\n## Skills\n\n${pr.skills.map((s) => `- ${s}`).join("\n")}\n`;
     } else if (id === "resume") {
-      title = `Resume — ${pr.name}`; desc = `${pr.name}, ${pr.role}. Experience, education and skills.`;
+      title = `Resume — ${pr.name}, ${pr.role}`; desc = `${pr.name}, ${pr.role.toLowerCase()} at ${pr.studio || "a design studio"} in India: experience, skills (${pr.skills.slice(0, 4).join(", ")}) and how to work together.`;
       const rd = Array.isArray(pr.settings.resumeDoc) ? pr.settings.resumeDoc : null; // the owner wrote the page as a document
       body = rd ? `<h1>Resume — ${esc(pr.name)}</h1>${renderBlocks(rd, { hBase: 2 })}` : `<h1>Resume — ${esc(pr.name)}</h1><p>${esc(pr.role)}</p><h2>Experience and education</h2>${exp}${pr.skills.length ? `<h2>Skills</h2><ul>${pr.skills.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}`;
       mdText = rd ? `# Resume — ${pr.name}\n\n${blocksToMd(rd)}\n` : `# Resume — ${pr.name}\n\n${pr.role}\n\n${pr.experience.map((e) => `## ${e.title}\n\n${e.time}\n\n${e.text}`).join("\n\n")}\n`;
     } else {
-      title = `Contact ${pr.name}`; desc = `Get in touch with ${pr.name}: book a call${pr.email ? " or send an email" : ""}.`;
-      body = `<h1>Contact ${esc(pr.name)}</h1><p>${pr.booking ? `<a href="${esc(pr.booking)}">Book a call</a>` : ""}${pr.email ? ` · <a href="mailto:${esc(pr.email)}">${esc(pr.email)}</a>` : ""}</p><ul>${links}</ul>`;
+      title = `Contact ${pr.name} — ${pr.role}`; desc = `Contact ${pr.name}, ${pr.role.toLowerCase()} in India. Book a free intro call${pr.email ? " or email" : ""} about a brand identity, logo, packaging or brand strategy project.`;
+      const svT = (pr.settings.services || []).map((v) => v.title).filter(Boolean);
+      body = `<h1>Contact ${esc(pr.name)}</h1><p>Have a brand identity, logo, packaging or brand strategy project in mind? ${pr.booking ? `<a href="${esc(pr.booking)}">Book a free intro call</a>` : "Get in touch"}${pr.email ? ` or email <a href="mailto:${esc(pr.email)}">${esc(pr.email)}</a>` : ""}, and tell me about your business, who it is for and when you would like to start.</p>${svT.length ? `<h2>What I can help with</h2><ul>${svT.map((t) => `<li><a href="/services">${esc(t)}</a></li>`).join("")}</ul>` : ""}<h2>Elsewhere</h2><ul>${links}</ul>`;
       mdText = `# Contact ${pr.name}\n\n${pr.booking ? `Book a call: ${pr.booking}\n` : ""}${pr.email ? `Email: ${pr.email}\n` : ""}`;
     }
     if (id !== "about") { body += extraHtml(pr, id); const xb = extraOf(pr, id); if (xb.length) mdText += "\n\n" + blocksToMd(xb); }
-    return finish({ title, desc: trim(desc), app: id, noindex: pr.placeholder || hidden.has(id), type: id === "about" ? "profile" : "website", body, mdText,
+    const tmpl = id === "resume" && !(Array.isArray(pr.settings.resumeDoc) && pr.settings.resumeDoc.length) && PLACEHOLDER.test(pr.experience.map((e) => e.title).join(" ")); // a resume still on the template stays out of search
+    return finish({ title, desc: trim(desc), app: id, noindex: hidden.has(id) || (id === "about" && PLACEHOLDER.test(pr.bio)) || tmpl, type: id === "about" ? "profile" : "website", body, mdText,
       ld: [{ "@type": id === "about" ? "ProfilePage" : "WebPage", "@id": `${SITE}${path}#page`, url: `${SITE}${path}`, name: title, description: trim(desc), mainEntity: person(pr, hub), isPartOf: { "@id": `${SITE}/#website` } }, crumbs([home, { name: ap.title, path }])] });
   }
 
@@ -108,14 +118,14 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
   if (path === "/timeline") {
     const t = pr.timeline;
     const sec = (k, h) => { const l = t.filter((x) => x.status === k); return l.length ? `<h2>${h}</h2><ul>${l.map((x) => `<li><b>${esc(x.title)}</b>${x.date ? ` <small>${esc(x.date)}</small>` : ""}${x.detail ? `<p>${esc(x.detail)}</p>` : ""}</li>`).join("")}</ul>` : ""; };
-    return finish({ title: `Timeline — ${pr.name}`, desc: `What ${pr.name} is working on now, what is next, and what is done.`, app: "timeline", noindex: pr.placeholder || hidden.has("timeline"),
+    return finish({ title: `Timeline — ${pr.name}`, desc: `What ${pr.name}, ${pr.role.toLowerCase()}, is working on now, what is next and what is done: projects, writing and milestones.`, app: "timeline", noindex: hidden.has("timeline") || !(pr.settings.timeline || []).length,
       body: `<h1>Timeline</h1>${sec("now", "Working on now")}${sec("next", "Up next")}${sec("done", "Done")}${extraHtml(pr, "timeline")}`, mdText: `# Timeline\n\n${t.map((x) => `- [${x.status}] ${x.title}`).join("\n")}\n`,
       ld: [crumbs([home, { name: "Timeline", path }])] });
   }
 
   if (path === "/photos") {
     const ph = await loadPhotos(store);
-    return finish({ title: `Photos — ${pr.name}`, desc: `A gallery of photos by ${pr.name}.`, app: "photos", noindex: !ph.length || hidden.has("photos"),
+    return finish({ title: `Photos — ${pr.name}`, desc: `Personal photos from ${pr.name}'s scrapbook: places, people and moments away from the design desk.`, app: "photos", noindex: !ph.length || hidden.has("photos"),
       body: `<h1>Photos</h1><ul>${ph.map((p) => `<li><img src="/api/photo?id=${esc(p.id)}&amp;s=t" alt="${esc(p.caption || "Photo by " + pr.name)}" loading="lazy">${p.caption ? `<p>${esc(p.caption)}</p>` : ""}</li>`).join("")}</ul>`,
       image: ph[0] ? `/api/photo?id=${ph[0].id}&s=f` : DEF, ld: [{ "@type": "ImageGallery", name: `Photos — ${pr.name}`, url: `${SITE}/photos` }, crumbs([home, { name: "Photos", path }])] });
   }
@@ -131,14 +141,14 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const bodyOf = (x) => (x.blocks?.length ? renderBlocks(x.blocks, { hBase: 3 }) : x.items?.length ? `<ul>${x.items.map((i) => `<li>${i.d ? "<s>" : ""}${esc(i.t)}${i.d ? "</s>" : ""}</li>`).join("")}</ul>` : `<p>${esc(x.text).replace(/\n/g, "<br>")}</p>`) + (x.img ? `<img src="${esc(x.img)}" alt="" loading="lazy">` : "");
     const textOf = (x) => x.blocks?.length ? blocksText(x.blocks) : x.items?.length ? x.items.map((i) => i.t).join(". ") : x.text;
     if (path === "/notes") {
-      return finish({ title: `Notes — ${pr.name}`, desc: `Short notes and thoughts from ${pr.name}.`, app: "notes", noindex: hidden.has("notes") || pr.placeholder || !all.length,
+      return finish({ title: `Notes — ${pr.name}`, desc: `Short notes and thoughts from ${pr.name}.`, app: "notes", noindex: true, // personal working notes: readable on the site, never in search
         body: `<h1>Notes</h1>${all.map((x) => `<article><h2><a href="/notes/${esc(x.id)}">${esc(x.title || "Untitled")}</a></h2>${bodyOf(x)}</article>`).join("")}`,
         mdText: `# Notes\n\n${all.map((x) => `## ${x.title || "Untitled"}\n\n${textOf(x)}`).join("\n\n")}\n`, ld: [crumbs([home, { name: "Notes", path }])] });
     }
     const x = all.find((n) => n.id === path.slice(7));
     if (!x || hidden.has("notes")) return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "notes", noindex: true, notFound: true, body: `<h1>Page not found</h1><p><a href="/notes">Back to Notes</a></p>` });
     const ttl = x.title || trim(textOf(x), 60) || "Note";
-    return finish({ title: `${ttl} — ${pr.name}`, desc: trim(textOf(x), 160), app: "notes", slug: x.id, noindex: pr.placeholder, type: "article", image: x.img || DEF,
+    return finish({ title: `${ttl} — ${pr.name}`, desc: trim(textOf(x), 160), app: "notes", slug: x.id, noindex: true, type: "article", image: x.img || DEF,
       body: `<article><nav aria-label="Breadcrumb"><a href="/notes">Notes</a></nav><h1>${esc(ttl)}</h1>${bodyOf(x)}</article>`, mdText: `# ${ttl}\n\n${textOf(x)}\n`,
       ld: [{ "@type": "Article", headline: ttl.slice(0, 110), description: trim(textOf(x), 160), url: `${SITE}/notes/${x.id}`, author: { "@id": `${SITE}/#person` }, dateModified: new Date(x.ts || Date.now()).toISOString().slice(0, 10) }, crumbs([home, { name: "Notes", path: "/notes" }, { name: ttl, path }])] });
   }
@@ -148,13 +158,14 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const saved = (pr.settings.services || []).length > 0;
     const sv = saved ? pr.settings.services : SV_DEF.services, proc = (pr.settings.process || []).length ? pr.settings.process : SV_DEF.process, faq = (pr.settings.faq || []).length ? pr.settings.faq : SV_DEF.faq;
     const pts = (v) => (Array.isArray(v.points) ? v.points : String(v.points || "").split(/\n|;/)).map((x) => x.trim()).filter(Boolean);
-    return finish({ title: `Services — ${pr.name}, ${pr.role}`, desc: trim(sv.map((s) => s.title).join(", ") + ". " + `Design services by ${pr.name}.`), app: "services", noindex: !saved || hidden.has("services"),
+    return finish({ title: `Services — ${pr.name}, ${pr.role}`, desc: trim(`${sv.map((s) => s.title).join(", ")} by ${pr.name}, ${pr.role.toLowerCase()} in India.${sv.some((s) => s.price) ? " Prices, timelines and what each includes." : ""}`), app: "services", noindex: !saved || hidden.has("services"),
       body: `<h1>Services</h1>${sv.map((s) => `<section><h2>${esc(s.title)}</h2><p>${esc(s.text || "")}</p>${pts(s).length ? `<ul>${pts(s).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${s.price ? `<p>${esc(s.price)}</p>` : ""}</section>`).join("")}<h2>How it works</h2><ol>${proc.map((x) => `<li><b>${esc(x.title)}</b>: ${esc(x.text || "")}</li>`).join("")}</ol><h2>Questions</h2>${faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}${extraHtml(pr, "services")}`,
       mdText: `# Services\n\n${sv.map((s) => `## ${s.title}\n\n${s.text || ""}\n\n${pts(s).map((x) => `- ${x}`).join("\n")}`).join("\n\n")}\n\n## FAQ\n\n${faq.map((f) => `**${f.q}** ${f.a}`).join("\n\n")}\n`,
-      ld: [...sv.map((s) => ({ "@type": "Service", name: s.title, description: s.text || "", provider: { "@id": `${SITE}/#person` }, ...(s.price ? { offers: { "@type": "Offer", description: s.price } } : {}) })), faq.length ? { "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) } : null, crumbs([home, { name: "Services", path }])].filter(Boolean) });
+      ld: [...sv.map((s) => ({ "@type": "Service", name: s.title, description: s.text || "", provider: { "@id": `${SITE}/#person` }, areaServed: "Worldwide", serviceType: s.title, ...(offerOf(s.price) ? { offers: offerOf(s.price) } : {}) })), faq.length ? { "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) } : null, crumbs([home, { name: "Services", path }])].filter(Boolean) });
   }
-  if (path === "/book") return finish({ title: `Book a call with ${pr.name}`, desc: `Pick a time for a free intro call with ${pr.name}.`, app: "book", noindex: !pr.booking,
-    body: `<h1>Book a call</h1><p>${pr.booking ? `<a href="${esc(pr.booking)}">Choose a time</a>` : ""}</p>`, ld: [crumbs([home, { name: "Book a call", path }])] });
+  if (path === "/book") { const svT = (pr.settings.services || []).map((v) => v.title).filter(Boolean);
+    return finish({ title: `Book a call with ${pr.name}`, desc: `Book a free intro call with ${pr.name}, ${pr.role.toLowerCase()}, to talk about a brand identity, logo, packaging or brand strategy project.`, app: "book", noindex: !pr.booking,
+    body: `<h1>Book a call with ${esc(pr.name)}</h1><p>A free, no-pressure intro call to talk about your business, who it is for and what you want your brand to do. ${pr.booking ? `<a href="${esc(pr.booking)}">Choose a time that suits you</a>.` : ""}</p>${svT.length ? `<h2>We can talk about</h2><ul>${svT.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}<p><a href="/services">See services and prices</a> · <a href="/projects">See projects</a></p>`, ld: [crumbs([home, { name: "Book a call", path }])] }); }
   if (path === "/youtube" || path === "/content") {
     const vids = Array.isArray(pr.settings.videos) ? pr.settings.videos : [];
     const lis = vids.map((v) => `<li><a href="https://www.youtube.com/watch?v=${esc(v.id)}" rel="noopener">${esc(v.title || "Video")}</a>${v.author ? ` — ${esc(v.author)}` : ""}${v.note ? `<br>${esc(v.note)}` : ""}</li>`).join("");
@@ -165,7 +176,7 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
   if (path === "/projects" || path.startsWith("/projects/")) {
     const idx = await projectIndex(store), pub = idx.filter((m) => m.status === "published");
     if (path === "/projects") {
-      return finish({ title: `Projects — ${pr.name}`, desc: `Selected work by ${pr.name}: ${[...new Set(pub.map((p) => p.field).filter(Boolean))].slice(0, 4).join(", ") || pr.role}.`, app: "projects", noindex: hidden.has("projects") || (pr.placeholder && pub.every((p) => /^Project /.test(p.title))),
+      return finish({ title: `Projects — ${pr.name}, ${pr.role}`, desc: trim(`${[...new Set(pub.map((p) => p.field).filter(Boolean))].slice(0, 3).join(" and ") || "Design"} projects by ${pr.name}, ${pr.role.toLowerCase()} in India: ${titlesOf(pub, 5)}.`), app: "projects", noindex: hidden.has("projects") || (pr.placeholder && pub.every((p) => /^Project /.test(p.title))),
         image: pub.find((p) => p.cover)?.cover.src || DEF,
         body: `<h1>Projects</h1><ul>${pub.map((p) => `<li>${p.cover ? `<img src="${esc(p.cover.src)}" alt="${esc(p.cover.alt || p.title)}" loading="lazy" width="320">` : ""}${projLi(p).replace(/^<li>/, "").replace(/<\/li>$/, "")}</li>`).join("")}</ul>`,
         mdText: `# Projects\n\n${pub.map((p) => `- [${p.title}](${abs("/projects/" + p.slug)}) — ${p.summary}`).join("\n")}\n`,
@@ -175,13 +186,15 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
     const p = await projectBySlug(store, slug);
     if (!p || (p.status === "draft")) return finish({ status: 404, title: "Project not found", desc: "This project could not be found.", app: "projects", noindex: true, body: `<h1>Project not found</h1><p><a href="/projects">See all projects</a></p>` });
     const img = p.cover?.src || firstImage(p.blocks) || DEF, i = pub.findIndex((m) => m.id === p.id);
-    const desc = p.seo?.desc || p.summary || trim(blocksText(p.blocks, " "));
+    const d0 = p.seo?.desc || p.summary || trim(blocksText(p.blocks, " "));
+    const about = `${p.title} is a ${(p.field || "design").toLowerCase()} project by ${pr.name}, ${pr.role.toLowerCase()} in India${p.year ? `, from ${p.year}` : ""}${(p.tags || []).length ? `, covering ${p.tags.slice(0, 3).join(", ")}` : ""}.`;
+    const desc = p.seo?.desc || (d0.length < 110 ? `${d0} ${about}` : d0);
     const credit = p.credits?.length ? `<h2>Credits</h2><ul>${p.credits.map((c) => `<li>${esc(c.name)}${c.role ? ` — ${esc(c.role)}` : ""}</li>`).join("")}</ul>` : "";
     const meta = [p.field && `Field: ${p.field}`, p.year && `Year: ${p.year}`, p.client && `Client: ${p.client}`, p.role && `Role: ${p.role}`, p.tools?.length && `Tools: ${p.tools.join(", ")}`].filter(Boolean);
     return finish({
-      title: p.seo?.title || `${p.title} — ${p.field || "Project"} by ${pr.name}`, desc: trim(desc), app: "projects", slug: p.slug, type: "article", image: img,
+      title: p.seo?.title || fit(p.title, ` — ${p.field || "Project"} by ${pr.name}`), desc: trim(desc), app: "projects", slug: p.slug, type: "article", image: img,
       imageAlt: p.cover?.alt || p.title, noindex: p.status === "unlisted" || hidden.has("projects"), modified: p.updated ? new Date(p.updated).toISOString() : undefined,
-      body: `<article><nav aria-label="Breadcrumb"><a href="/projects">Projects</a></nav><h1>${esc(p.title)}</h1><p>${esc(p.summary || "")}</p>${meta.length ? `<ul>${meta.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>` : ""}
+      body: `<article><nav aria-label="Breadcrumb"><a href="/projects">Projects</a></nav><h1>${esc(p.title)}</h1><p>${esc(p.summary || "")}</p><p>${esc(about)}</p>${meta.length ? `<ul>${meta.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>` : ""}
 ${p.cover ? `<img src="${esc(p.cover.src)}" alt="${esc(p.cover.alt || p.title)}">` : ""}${renderBlocks(p.blocks, { hBase: 2 })}${credit}
 ${p.link ? `<p><a href="${esc(p.link)}" rel="noopener">View the project</a></p>` : ""}${(p.links || []).map((l) => `<p><a href="${esc(l.url)}" rel="noopener">${esc(l.label)}</a></p>`).join("")}
 ${p.tags?.length ? `<p>${p.tags.map((t) => esc(t)).join(", ")}</p>` : ""}${pub[i - 1] ? `<p><a href="/projects/${esc(pub[i - 1].slug)}">Previous: ${esc(pub[i - 1].title)}</a></p>` : ""}${pub[i + 1] ? `<p><a href="/projects/${esc(pub[i + 1].slug)}">Next: ${esc(pub[i + 1].title)}</a></p>` : ""}</article>`,
@@ -206,8 +219,8 @@ ${p.tags?.length ? `<p>${p.tags.map((t) => esc(t)).join(", ")}</p>` : ""}${pub[i
       if (tag && !list.length) return finish({ status: 404, title: "Not found", desc: "", app: "journal", noindex: true, body: `<h1>No articles with this tag</h1><p><a href="/journal">All articles</a></p>` });
       const label = tag ? (all.find(([s]) => s === tag)?.[1] || tag) : "";
       const title = tag ? `${label} articles — Journal by ${pr.name}` : `Journal — ${pr.name}`;
-      const desc = tag ? `Articles by ${pr.name} about ${label}.` : `Notes on branding, design, and working with AI by ${pr.name}. Written as I learn, and updated when I'm wrong.`;
-      return finish({ title, desc, app: "journal", slug: tag ? `tag/${tag}` : "", noindex: hidden.has("journal"), modified: undefined,
+      const desc = tag ? trim(`${plural(list.length, "article")} by ${pr.name}, ${pr.role.toLowerCase()}, about ${label}: ${list.map((p) => p.title).join("; ")}.`) : `Articles on branding, design and working with AI by ${pr.name}, ${pr.role.toLowerCase()} in India. Written as I learn, and updated when I'm wrong.`;
+      return finish({ title, desc, app: "journal", slug: tag ? `tag/${tag}` : "", noindex: hidden.has("journal") || (tag && list.length < 2), modified: undefined,
         image: posts.find((p) => p.img)?.img || DEF,
         body: `<h1>${tag ? `Journal: ${esc(label)}` : "Journal"}</h1><p>${esc(desc)}</p><nav aria-label="Tags"><ul>${all.map(([s, t]) => `<li><a href="/journal/tag/${esc(s)}">${esc(t)}</a></li>`).join("")}</ul></nav><ul>${list.map(postLi).join("")}</ul>`,
         mdText: `# Journal${tag ? `: ${label}` : ""}\n\n${list.map((p) => `- [${p.title}](${abs("/journal/" + p.slug)}) — ${p.excerpt}`).join("\n")}\n`,
@@ -227,7 +240,7 @@ ${p.tags?.length ? `<p>${p.tags.map((t) => esc(t)).join(", ")}</p>` : ""}${pub[i
     const tags = [p.tag, ...(p.tags || [])].filter(Boolean);
     const iso = isoDate(p), mod = p.modified || iso;
     return finish({
-      title: p.seoTitle || `${p.title} — ${pr.name}`, desc: trim(desc), app: "journal", slug: p.slug, type: "article", image: img || DEF, imageAlt: p.imgAlt || p.title, sized: { ...P.sized, ...(og ? { [og]: [1200, 630] } : {}) }, noindex: !!p.noindex || hidden.has("journal"),
+      title: p.seoTitle || fit(p.title, ` — ${pr.name}`), desc: trim(desc), app: "journal", slug: p.slug, type: "article", image: img || DEF, imageAlt: p.imgAlt || p.title, sized: { ...P.sized, ...(og ? { [og]: [1200, 630] } : {}) }, noindex: !!p.noindex || hidden.has("journal"),
       published: iso, modified: mod, section: p.tag, tags,
       body: `<article><nav aria-label="Breadcrumb"><a href="/journal">Journal</a></nav><header><h1>${esc(p.title)}</h1><p>${iso ? `<time datetime="${iso}">${esc(p.date || iso)}</time>` : esc(p.date)} · ${readMinutes(blocks)} min read · <a href="/about">${esc(pr.name)}</a></p>${p.excerpt ? `<p><em>${esc(p.excerpt)}</em></p>` : ""}${img ? `<img src="${esc(img)}" alt="${esc(p.imgAlt || p.title)}">` : ""}</header>${html}
 ${p.url ? `<p><a href="${esc(p.url)}" rel="noopener">Also on ${esc(p.source || "the original")}</a></p>` : ""}${tags.length ? `<p>${tags.map((t) => `<a href="/journal/tag/${esc(tagSlug(t))}">${esc(t)}</a>`).join(" · ")}</p>` : ""}</article>

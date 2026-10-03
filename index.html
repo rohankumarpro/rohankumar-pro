@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--seo:head-->
 <title>Rohan Kumar — Brand Designer</title>
-<meta name="description" content="Rohan Kumar is a brand designer: logo design, visual identity, brand strategy and naming. Explore his work, journal and contact details.">
+<meta name="description" content="Rohan Kumar is a brand designer: logo design, visual identity, brand strategy and naming. Explore the work, journal and contact details.">
 <link rel="canonical" href="https://rohankumar.pro/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Rohan Kumar">
 <meta property="og:title" content="Rohan Kumar — Brand Designer"><meta property="og:description" content="Logo design, visual identity, brand strategy and naming by Rohan Kumar.">
@@ -1510,12 +1510,12 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 const P = {
   name: "Rohan Kumar",
   role: "Brand Designer",
-  bio: "I design and build digital things that feel good to use. This is a short intro about who you are, what you care about, and the kind of work you love doing.",
+  bio: "I'm Rohan Kumar, a brand designer at Sansser Design Studio in India. I create brand identities, logos, packaging and brand strategy for founders who want a brand people remember.",
   status: "Open to new projects",
-  now: "Currently working on something exciting. Tell visitors what you're up to.",
+  now: "Taking on new brand identity and packaging projects, and building this portfolio desktop.",
   skills: ["Logo design","Visual identity","Brand strategy","Brand naming","Typography","AI-assisted workflows"],
   email: "hello@yourname.com",
-  links: [{label:"LinkedIn",url:"https://www.linkedin.com/in/rohankumarpro/"}],
+  links: [{label:"Behance",url:"https://www.behance.net/rohankumarpro"},{label:"Dribbble",url:"https://dribbble.com/rohankumarpro"},{label:"LinkedIn",url:"https://www.linkedin.com/in/rohankumarpro/"},{label:"Instagram",url:"https://www.instagram.com/rohankumarpro/"},{label:"YouTube",url:"https://www.youtube.com/@rohankumarpro"}],
   booking: "https://cal.com/rohankumarpro",
   // Links page: edit, add, or reorder freely. "app" opens a window on this site instead of a URL.
   linkpage: [
@@ -1530,9 +1530,8 @@ const P = {
   studio: "Sansser Design Studio",
   music: {song:"Song title", artist:"Artist name", youtubeMusic:"https://music.youtube.com/", spotify:"https://open.spotify.com/"},
   experience: [
-    {title:"Role title — Company", time:"2024 – now", text:"What you did and what changed because of it."},
-    {title:"Role title — Company", time:"2022 – 2024", text:"A highlight or two from this role."},
-    {title:"Degree — University", time:"2018 – 2022", text:"Your field of study."}
+    {title:"Brand Designer — Sansser Design Studio", time:"Now", text:"Brand identity, logo design, packaging and brand strategy for clients in fashion, wellness, non-profits and personal brands."},
+    {title:"Brand designer on Behance and Dribbble", time:"2017 – now", text:"Sharing identity and packaging work with a global audience: over 36,000 project views and 2,300 appreciations on Behance, and the Dribbble Select: Top Branding Agency badge."}
   ]
 };
 const PROJECTS = [
@@ -3384,8 +3383,8 @@ const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,ar
 const NEVER_HIDE=['settings'];
 function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return !!LIVE.admin;return !HIDDEN.has(id)||!!LIVE.admin}
 function applyText(){const s=SITE.s||{};
-  P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=s.now||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
-  const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=s.bio||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.timeline=A('timeline');P.qrs=A('qrs');
+  P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=(s.now&&!/Tell visitors what you/.test(s.now)&&s.now)||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
+  const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=(s.bio&&!/This is a short intro/.test(s.bio)&&s.bio)||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.timeline=A('timeline');P.qrs=A('qrs');
   PHOTO=s.photo||'/img/avatar.jpg';PHOTO_POP=s.photo||'/img/avatar-pop.webp';{const li=document.getElementById('lkImg');if(li&&li.getAttribute('src')!==PHOTO)li.src=PHOTO}
   {const w=document.getElementById('wall');if(w){if(s.wallpaper){w.style.backgroundImage='url("'+s.wallpaper+'")';w.classList.add('pic')}else{w.style.backgroundImage='';w.classList.remove('pic')}}}
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};

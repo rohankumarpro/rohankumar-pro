@@ -14,13 +14,13 @@ export async function loadProfile(store) {
   const s = (await store.get("settings", { type: "json" })) ?? {};
   const { P: D, TIMELINE } = defaults();
   const p = {
-    name: s.name || D.name, role: s.role || D.role, status: s.status || D.status, now: s.now || D.now,
-    bio: s.bio || D.bio, email: s.email || D.email, booking: s.booking || D.booking, studio: D.studio,
+    name: s.name || D.name, role: s.role || D.role, status: s.status || D.status,
+    bio: (s.bio && !PLACEHOLDER.test(s.bio) && s.bio) || D.bio, now: (s.now && !/Tell visitors what you/.test(s.now) && s.now) || D.now, email: s.email || D.email, booking: s.booking || D.booking, studio: D.studio,
     skills: arr(s.skills, D.skills), experience: arr(s.experience, D.experience), links: arr(s.links, D.links),
     timeline: arr(s.timeline, TIMELINE), story: cleanBlocks(s.story), settings: s,
     music: { song: s.song || D.music?.song, artist: s.artist || D.music?.artist },
   };
-  p.placeholder = PLACEHOLDER.test([p.bio, p.email, ...p.experience.map((e) => e.title)].join(" "));
+  p.placeholder = PLACEHOLDER.test([p.bio, ...p.experience.map((e) => e.title)].join(" ")); // a template email alone is just left out, not a reason to hide pages
   p.email = /yourname\.com/.test(p.email || "") ? "" : p.email;
   return p;
 }
