@@ -160,7 +160,9 @@ a{color:var(--primary)}
 .win:hover .rz.se::after{border-color:var(--ink2)}
 .win.max .rz,.win.resizing .body{pointer-events:none}.win.max .rz{display:none}
 .win.resizing{user-select:none;transition:none}
-.body{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+/* no scrollbars in app windows: the bottom edge fades out while there is more to read below (see watchScroll) */
+.body,.jed-scroll{scrollbar-width:none}.body::-webkit-scrollbar,.jed-scroll::-webkit-scrollbar{display:none}
+.body.more-b,.jed-scroll.more-b{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 72px),rgba(0,0,0,.08));mask-image:linear-gradient(to bottom,#000 calc(100% - 72px),rgba(0,0,0,.08))}
 .win.max{left:12px!important;top:48px!important;width:calc(100% - 24px)!important;height:calc(100% - 140px)!important;border-radius:var(--r-win-max)}
 .bar{display:flex;align-items:center;gap:calc(10 * var(--u));padding:calc(10 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u)) calc(18 * var(--u));cursor:grab;user-select:none;touch-action:none}
 .win.max .bar{cursor:default}
@@ -2273,6 +2275,15 @@ function icon(a){
   if(typeof ART!=='undefined'&&ART[a.id])return `<span class="ico lay" data-i="${a.id}"><svg viewBox="0 0 100 100"><circle class="icbg" cx="50" cy="50" r="48"/><g class="art">${ART[a.id]}</g></svg></span>`;
   const gl=g?`<svg x="27" y="27" width="46" height="46" viewBox="${S.vb}" fill="var(--glyph)">${g}</svg>`:`<svg x="29" y="29" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a.glyph}</svg>`;
   return `<span class="ico" data-i="${a.id}" style="--ic:var(--${a.color})"><svg viewBox="0 0 100 100"><path d="${shape(a.shape)}" fill="var(--${a.color})"/>${gl}</svg></span>`}
+/* Scroll hint: a window's bottom edge fades while more content sits below, and clears once the end is reached. */
+const SCROLLERS='.win .body,.win .jed-scroll';
+function scrollHint(el){if(!el||!el.isConnected)return;const cs=getComputedStyle(el),can=cs.overflowY!=='hidden'&&cs.overflowY!=='visible';
+  el.classList.toggle('more-b',can&&el.scrollHeight-el.clientHeight-el.scrollTop>6)}
+const sh={q:new Set(),t:0,run(){sh.t=0;sh.q.forEach(scrollHint);sh.q.clear()},add(el){sh.q.add(el);if(!sh.t)sh.t=requestAnimationFrame(sh.run)}};
+const shRO=typeof ResizeObserver!=='undefined'?new ResizeObserver(es=>es.forEach(e=>sh.add(e.target.closest(SCROLLERS)||e.target))):null;
+const shMO=new MutationObserver(ms=>ms.forEach(m=>{const t=m.target.nodeType===1?m.target:m.target.parentElement;const el=t&&(t.matches(SCROLLERS)?t:t.closest(SCROLLERS));if(el){sh.add(el);if(shRO)[...el.children].forEach(c=>shRO.observe(c))}}));
+function watchScroll(body){if(!body||body.__sh)return;body.__sh=1;shMO.observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden','open']});if(shRO){shRO.observe(body);[...body.children].forEach(c=>shRO.observe(c))}sh.add(body)}
+document.addEventListener('scroll',e=>{const el=e.target;if(el&&el.nodeType===1&&el.matches(SCROLLERS))sh.add(el)},true);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const APPS=[
@@ -3549,6 +3560,7 @@ function openApp(id,opt){
   const body=w.querySelector('.body');
   const html=a.render(body); if(typeof html==="string")body.innerHTML=html;
   wire(body);
+  watchScroll(body);
   w.querySelector('.x').onclick=()=>closeWin(w,id);
   w.querySelector('.mn').onclick=()=>minimizeWin(w,id);
   w.querySelector('.mx').onclick=()=>{w.classList.add('resizing-anim');w.classList.toggle('max');SFX.play('tap');setTimeout(()=>w.classList.remove('resizing-anim'),380)};
