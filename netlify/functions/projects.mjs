@@ -2,6 +2,8 @@
 //   GET            visitors: published projects (list, no content).  Owner: every project including drafts.
 //   GET ?slug=     one full project (drafts and unlisted only for the owner or unlisted by direct link)
 //   PUT {project}  owner: create or save one project.   PUT {order:[ids]}: owner reorders.
+//                  Either may carry known:[project list as the page has it]. Blob reads can briefly lag a write, so the
+//                  stored index may miss a project saved moments ago; projects the page knows about are kept, never dropped.
 //   DELETE ?id=    owner
 //   POST ?a=view|like {id}   anyone: counters (limited per address)
 import { createHash } from "node:crypto";
@@ -66,6 +68,12 @@ export const handler = async (event) => {
       const b = body(event);
       if (!b) return json({ error: "Bad JSON" }, 400);
       if (seeded) { for (const p of seedProjects(await store.get("settings", { type: "json" }))) await store.setJSON(projKey(p.id), p); }
+      for (const k of Array.isArray(b.known) ? b.known.slice(0, 500) : []) {
+        if (!k || !/^[\w-]{3,24}$/.test(k.id || "") || index.some((x) => x.id === k.id)) continue;
+        const meta = metaOf(cleanProject({ ...k, blocks: [] }, { ts: k.ts, publishedAt: k.publishedAt }));
+        meta.words = Math.max(0, Math.round(+k.words || 0)); meta.updated = Number(k.updated) || meta.updated;
+        index.push(meta);
+      }
       if (Array.isArray(b.order)) {
         const by = new Map(index.map((x) => [x.id, x])), out = [];
         for (const id of b.order) if (by.has(id)) { out.push(by.get(id)); by.delete(id); }

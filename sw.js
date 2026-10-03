@@ -1,6 +1,6 @@
 // Service worker: makes the site open instantly, keeps it usable without a connection, and lets it be installed.
 // Pages and the API are always fetched fresh first; only static files are served from the cache.
-const VERSION = "rk-v18";
+const VERSION = "rk-v19";
 const STATIC = `${VERSION}-static`, PAGES = `${VERSION}-pages`;
 const PRECACHE = ["/css/tokens.css", "/css/core.css", "/css/blocks.css", "/css/apps.css", "/js/os-ext.mjs", "/js/lib.mjs", "/shared/blocks.mjs", "/img/avatar.jpg", "/img/icon-192.png", "/manifest.webmanifest"];
 
