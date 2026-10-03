@@ -641,25 +641,7 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 :root[data-theme="dark"]{--icbg:#2A2F2C;--ik:#5F6368;--igy:#9AA0A6}
 .ico.lay .icbg{fill:var(--icbg)}
 .ico.lay .art>*{transform-box:fill-box;transform-origin:center;transition:transform var(--d-3) var(--ease-spring)}
-.ico.lay .art .flap{transform-origin:50% 100%}
-.dicon:hover .ico.lay .l1{transform:translate(-2.5px,-2.5px)}
-.dicon:hover .ico.lay .l2{transform:translate(1.5px,1.5px)}
-.dicon:hover .ico.lay .l3{transform:translate(3px,3px)}
-.dicon:hover .ico.lay .up{transform:translateY(-7px) rotate(-3deg)}
-.dicon:hover .ico.lay .flap{transform:skewX(-8deg) scaleY(.82)}
-.dicon:hover .ico.lay .drop{transform:translateY(5px)}
-.dicon:hover .ico.lay .rise{transform:translateY(-5px) scale(1.2)}
-.dicon:hover .ico.lay .tiltb{transform:rotate(-7deg) translate(-2px,-2px)}
-.dicon:hover .ico.lay .pen{animation:scrib .5s ease-in-out 2}
-.dicon:hover .ico.lay .lift{transform:translate(2px,-3px) rotate(4deg)}
-.dicon:hover .ico.lay .spin{transform:rotate(90deg);transition-duration:.9s}
-.ico.lay .dr,.ico.lay .dr2{stroke-dasharray:60;stroke-dashoffset:0}
-.dicon:hover .ico.lay .dr,.dicon:hover .ico.lay .dr2{animation:lay-draw .7s ease-out both}
-@keyframes lay-draw{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
-.dicon:hover .ico.lay .dots circle{animation:gm-dot .9s ease-in-out infinite;transform-box:fill-box}
-.dicon:hover .ico.lay .dots circle:nth-child(2){animation-delay:.15s}.dicon:hover .ico.lay .dots circle:nth-child(3){animation-delay:.3s}
-.dicon:hover .ico.lay .pop{animation:tl-pop .5s ease-out both}
-.dicon:hover .ico.lay .p2{animation-delay:.12s}.dicon:hover .ico.lay .p3{animation-delay:.24s}
+.ico.lay:not([data-ic]) .art .flap{transform-origin:50% 100%}
 .sbtn .ico.lay{filter:drop-shadow(0 1px 2px rgba(0,0,0,.08))}
 /* calculator */
 .win[data-app="calculator"] .body{padding:0 calc(14 * var(--u)) calc(14 * var(--u));display:flex}
@@ -1381,7 +1363,7 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 .cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
 .cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
 </style>
-<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"></script>
+<link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"></script><link rel="stylesheet" href="/css/app-icons.css"><script src="/shared/app-icons.js"></script>
 <script>try{localStorage.removeItem("siteUi")}catch(e){}</script>
 <noscript><link rel="stylesheet" href="/css/core.css"><link rel="stylesheet" href="/css/material.css"></noscript>
 <script type="module">import { icon } from "/shared/icons.mjs"; window.svgIcon = icon; document.dispatchEvent(new Event("icons-ready"));</script>
@@ -2287,6 +2269,7 @@ function icon(a){
   {const E=SITE.s&&SITE.s.appEdits&&SITE.s.appEdits[a.id];if(E){if(E.icon&&window.__customIcon){const c=window.__customIcon(a,E);if(c)return c}if(E.color)a={...a,color:E.color}}}
   const S=window.__ICONSET,g=S&&S.a&&S.a[a.id];
   if(a.photo){a={...a,shape:'circle'};const id='cp'+(++cpN);return `<span class="ico photo"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}"><path d="${shape(a.shape)}"/></clipPath></defs><path d="${shape(a.shape)}" fill="#C2FF73"/><g clip-path="url(#${id})"><image class="g-face" href="${PHOTO}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice"/></g></svg></span>`}
+  {const nm=window.APP_ICON_FOR&&APP_ICON_FOR[a.id];if(nm&&window.appIconArt)return appIconArt(nm,` data-i="${a.id}"`)}
   if(typeof ART!=='undefined'&&ART[a.id])return `<span class="ico lay" data-i="${a.id}"><svg viewBox="0 0 100 100"><circle class="icbg" cx="50" cy="50" r="48"/><g class="art">${ART[a.id]}</g></svg></span>`;
   const gl=g?`<svg x="27" y="27" width="46" height="46" viewBox="${S.vb}" fill="var(--glyph)">${g}</svg>`:`<svg x="29" y="29" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a.glyph}</svg>`;
   return `<span class="ico" data-i="${a.id}" style="--ic:var(--${a.color})"><svg viewBox="0 0 100 100"><path d="${shape(a.shape)}" fill="var(--${a.color})"/>${gl}</svg></span>`}
