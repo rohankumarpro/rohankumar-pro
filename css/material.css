@@ -189,3 +189,11 @@ input[type=checkbox],input[type=radio]{accent-color:var(--primary)}
 @container (max-height:420px){.mu-app .mpa-tools{display:none}.mu-app .mpa-now{gap:8px;padding-bottom:12px}}
 /* the floating (popped-out) video: a way back into the app */
 .mu-engine .mu-pip-x{position:absolute;top:8px;right:8px;width:34px;height:34px;border:0;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;z-index:2}.mu-engine .mu-pip-x[hidden]{display:none}.mu-engine .mu-pip-x svg{width:18px;height:18px}
+/* Owner's desktop app only (no title bar): the site's own minimise, maximise and close buttons, top right */
+html.desk-app .wctl{position:fixed;top:10px;right:16px;z-index:3100;display:flex;gap:6px}
+html.desk-app .wctl .tb-ic svg{display:block}
+html.desk-app .wctl .wctl-close:hover,html.desk-app .wctl .wctl-close:focus-visible{background:#C4314B;color:#fff;border-color:transparent}
+html.desk-app .topbar{padding-right:calc(16px + 3 * 40px + 2 * 6px + 10px)}
+html.desk-app .lock .lfs{right:calc(16px + 3 * 40px + 2 * 6px + 10px)}
+html.desk-app .ov-top{padding-right:calc(16px + 3 * 40px + 2 * 6px + 16px)}
+html.desk-app.focus-mode .wctl,html.desk-app.grp-full .wctl{display:none}

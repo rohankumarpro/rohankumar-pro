@@ -127,6 +127,31 @@ export const Install = { evt: null, installed: matchMedia("(display-mode: standa
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); Install.evt = e; document.dispatchEvent(new CustomEvent("install-ready")); });
 window.addEventListener("appinstalled", () => { Install.installed = true; Install.evt = null; toast("Installed. Find it on your home screen."); });
 window.Install = Install;
+/* ---------- owner's desktop app: the site draws its own window buttons ---------- */
+// Only inside the personal desktop app (desktop/ in this repo), whose window has no title bar. Visitors never get this.
+(function desktopApp() {
+  const T = window.__TAURI__;
+  if (!T || !T.window) return;
+  const win = T.window.getCurrentWindow(), html = document.documentElement;
+  html.classList.add("desk-app");
+  const svg = (p) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const IC = { min: '<path d="M6 12h12"/>', max: '<rect x="6" y="6" width="12" height="12" rx="2.5"/>',
+    res: '<rect x="5" y="9" width="10" height="10" rx="2.5"/><path d="M9 6.5A1.5 1.5 0 0 1 10.5 5H17a2 2 0 0 1 2 2v6.5a1.5 1.5 0 0 1-1.5 1.5"/>', close: '<path d="M7 7l10 10M17 7 7 17"/>' };
+  const box = document.createElement("div"); box.className = "wctl"; box.setAttribute("role", "group"); box.setAttribute("aria-label", "Window");
+  const btn = (k, label, fn) => { const b = document.createElement("button"); b.className = "pill topbtn tb-ic wctl-" + k; b.innerHTML = svg(IC[k]); b.title = label; b.setAttribute("aria-label", label); b.onclick = fn; box.append(b); return b; };
+  btn("min", "Minimise", () => win.minimize());
+  const mx = btn("max", "Maximise", () => win.toggleMaximize().then(() => setTimeout(sync, 150)));
+  btn("close", "Close", () => win.close());
+  const sync = async () => { const m = await win.isMaximized().catch(() => false); const l = m ? "Restore" : "Maximise"; mx.innerHTML = svg(m ? IC.res : IC.max); mx.title = l; mx.setAttribute("aria-label", l); html.classList.toggle("desk-app-max", m); };
+  sync(); win.onResized(sync).catch(() => {});
+  // the empty part of the top bar moves the window; a double-click maximises
+  document.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 || !e.target.matches(".topbar")) return;
+    if (e.detail === 2) win.toggleMaximize(); else win.startDragging();
+  });
+  const mount = () => document.body.append(box);
+  if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+})();
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && !/--/.test(location.hostname)) {
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 }

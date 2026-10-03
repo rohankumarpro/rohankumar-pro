@@ -64,6 +64,11 @@
   to = "/404"
   status = 404
   force = true
+[[redirects]]
+  from = "/desktop/*"
+  to = "/404"
+  status = 404
+  force = true
 
 # A deck shared from Design with a private link: a static page (no function runs to show it)
 [[redirects]]
