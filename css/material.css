@@ -197,3 +197,55 @@ html.desk-app .topbar{padding-right:calc(16px + 3 * 40px + 2 * 6px + 10px)}
 html.desk-app .lock .lfs{right:calc(16px + 3 * 40px + 2 * 6px + 10px)}
 html.desk-app .ov-top{padding-right:calc(16px + 3 * 40px + 2 * 6px + 16px)}
 html.desk-app.focus-mode .wctl,html.desk-app.grp-full .wctl{display:none}
+
+/* ===== Phones (most visitors): one calm home screen =====
+   Top bar with the Dribbble badge hanging in the middle, four even columns of apps, the app drawer button at the bottom,
+   OGGY resting beside it, and apps opening as cards with the same rounded corners all round. */
+@media (max-width:760px){
+  .topbar{padding:calc(8px + env(safe-area-inset-top,0px)) 10px 6px;gap:6px}
+  .topbar .tb-ic{width:36px;height:36px}
+  .topbar .pill{padding:7px 12px;font-size:13px}
+  .topbar .status{gap:8px;padding-left:11px;padding-right:11px}
+  /* the open-windows button only when there is something to show */
+  #desk:not(:has(.win:not(.closing))) #tabsBtn{display:none}
+  /* Dribbble badge: small, top centre, like on desktop (hidden if the top bar has no room for it) */
+  .award{top:env(safe-area-inset-top,0px);left:50%;bottom:auto;width:34px;transform:translateX(-50%);filter:drop-shadow(0 3px 8px rgba(0,0,0,.18))}
+  .award:hover{transform:translateX(-50%)}
+  html.award-tight .award{display:none}
+
+  /* home screen: four even columns that never spill off a small screen */
+  .icons{top:calc(60px + env(safe-area-inset-top,0px));left:6px;right:6px;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 0}
+  .icons .dicon{padding:8px 2px 6px;min-width:0;gap:6px}
+  .icons .dicon .ico{width:58px;height:58px}
+  .icons .dicon .lb{font-size:12px;line-height:1.25;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-align:center}
+
+  /* app drawer: a clean round button at the bottom centre */
+  .shelf{bottom:calc(18px + env(safe-area-inset-bottom,0px));padding:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .shelf .launch{width:56px;height:56px;margin:0;box-shadow:var(--md-elev3)}
+  .shelf .launch svg{width:24px;height:24px}
+
+  /* apps open as a card: the same 28px corners all round, clear of the top bar and the home handle */
+  .win{border-radius:28px!important;top:calc(58px + env(safe-area-inset-top,0px))!important;height:calc(100% - 58px - 96px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important}
+  html.dock-auto .win,html.dock-peek .win{height:calc(100% - 58px - 40px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important}
+  .win.max,.win.focus{border-radius:0!important}
+}
+@media (max-width:360px){
+  .topbar .pill{padding:6px 10px;font-size:12px}
+  .icons .dicon .ico{width:50px;height:50px}
+  .icons .dicon .lb{font-size:11px}
+}
+@media (max-width:760px){
+  /* OGGY rests on the bottom edge beside the app drawer button, the treat jar on the other side */
+  .cat{width:84px;height:84px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .jar,#desk[data-catpos] .jar{left:22px;right:auto;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:32px;height:40px}
+  #desk[data-catpos="left"] .jar{left:auto;right:22px}
+  html.dock-auto .cat,html.dock-peek .cat{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:760px){
+  /* OGGY's chat on phones: the answer scrolls, the follow-up buttons and the question box always stay in view */
+  .cat-chat.sheet:not([hidden]){display:flex;flex-direction:column;overflow:hidden;max-height:min(64vh,540px);bottom:calc(var(--kb,0px) + 86px + env(safe-area-inset-bottom,0px))}
+  .cat-chat.sheet .cc-msg{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;font-size:15px;line-height:1.5}
+  .cat-chat.sheet .cc-ui{flex:none}
+  .cat-chat.sheet .cc-form{position:static}
+  .cat-chat.sheet .cc-chip{min-height:36px}
+}

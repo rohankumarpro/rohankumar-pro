@@ -222,3 +222,36 @@ import("/js/ctx-apps.mjs").catch((e) => console.error("ctx-apps", e));
     }, true);
   }
 })();
+
+/* ---------- phones: the Dribbble badge hangs from the top, in the middle of the top bar ----------
+   Dead centre when the pills leave room there, otherwise centred in the gap between them; hidden only if there is no gap. */
+(function fitAward() {
+  const html = document.documentElement;
+  let raf = 0;
+  const check = () => {
+    raf = 0;
+    const a = document.querySelector(".award");
+    if (!a) return;
+    if (innerWidth > 760) { a.style.left = ""; return html.classList.remove("award-tight"); }
+    const w = a.offsetWidth || 34, pad = 8;
+    const boxes = [...document.querySelectorAll(".topbar > *")].map((e) => e.getBoundingClientRect()).filter((q) => q.width && q.height);
+    const mid = innerWidth / 2;
+    const leftEdge = Math.max(0, ...boxes.filter((q) => q.left + q.width / 2 < mid).map((q) => q.right));
+    const rightEdge = Math.min(innerWidth, ...boxes.filter((q) => q.left + q.width / 2 >= mid).map((q) => q.left));
+    let x = null;
+    if (mid - w / 2 - pad >= leftEdge && mid + w / 2 + pad <= rightEdge) x = mid;
+    else if (rightEdge - leftEdge >= w + pad * 2) x = (leftEdge + rightEdge) / 2;
+    html.classList.toggle("award-tight", x === null);
+    a.style.left = x === null ? "" : x + "px";
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(check); };
+  const start = () => {
+    const tb = document.querySelector(".topbar"), wins = document.getElementById("wins");
+    if (tb) new MutationObserver(queue).observe(tb, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class", "style", "hidden"] });
+    if (wins) new MutationObserver(queue).observe(wins, { childList: true });
+    addEventListener("resize", queue); addEventListener("orientationchange", queue);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+    queue(); setTimeout(queue, 1500);
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();

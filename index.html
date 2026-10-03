@@ -19,9 +19,10 @@
 <link rel="preload" href="/img/avatar.jpg" as="image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
 <style>
 :root{
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -2886,7 +2887,9 @@ function plantShelf(){
 /* ============ Boot splash ============ */
 (function boot(){try{if(sessionStorage.getItem('booted'))return;sessionStorage.setItem('booted','1')}catch(e){}
   const b=document.createElement('div');b.id='boot';b.innerHTML=`<div class="bt-mark"><svg viewBox="0 0 100 100"><path d="${shape('cookie')}"/></svg><img src="${PHOTO}" alt=""></div><div class="bt-name">${esc(P.name)}</div><div class="bt-role">${esc(P.role)}</div><div class="bt-bar"><i></i></div>`;
-  document.body.appendChild(b);const t0=Date.now();const go=()=>{setTimeout(()=>{b.classList.add('out');setTimeout(()=>b.remove(),700);setTimeout(()=>SFX.play('chime'),50)},Math.max(0,1400-(Date.now()-t0)))};document.readyState==='complete'?go():addEventListener('load',go,{once:true})})();
+  document.body.appendChild(b);const t0=Date.now();let gone=false;const go=()=>{if(gone)return;gone=true;setTimeout(()=>{b.classList.add('out');setTimeout(()=>b.remove(),700);setTimeout(()=>SFX.play('chime'),50)},Math.max(0,900-(Date.now()-t0)))};
+  /* leave as soon as the page font is in (at most 1.5s): pictures keep loading behind it instead of holding phones on the splash */
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(go,go);setTimeout(go,1500)})();
 
 /* ============ Layered app icons (original set) ============ */
 function gearPath(cx,cy,R,r,n){let d='';for(let i=0;i<n*2;i++){const a0=Math.PI*i/n,a1=Math.PI*(i+1)/n,rr=i%2?r:R;const p=(a,q)=>[(cx+Math.cos(a)*q).toFixed(1),(cy+Math.sin(a)*q).toFixed(1)];
@@ -2970,7 +2973,7 @@ function messages(body){
     body.querySelector('.gm').appendChild(pop);
     pop.querySelector('[data-cp]').onclick=async ev=>{try{await navigator.clipboard.writeText(PHONE_SHOW);ev.target.textContent='Copied'}catch(x){ev.target.textContent=PHONE_SHOW}};
     setTimeout(()=>document.addEventListener('pointerdown',function f(ev){if(!pop.contains(ev.target)&&!callBtn.contains(ev.target)){pop.remove();document.removeEventListener('pointerdown',f)}}),0)};
-  draw();setTimeout(()=>inp.focus(),60);
+  draw();if(!matchMedia('(hover:none)').matches)setTimeout(()=>inp.focus(),60); /* on phones the keyboard waits until they tap the box */
 }
 function links(body){
   const L=P.linkpage;let grp='',rows='';
@@ -3406,7 +3409,7 @@ function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return
 function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=(s.now&&!/Tell visitors what you/.test(s.now)&&s.now)||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
   const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=(s.bio&&!/This is a short intro/.test(s.bio)&&s.bio)||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.timeline=A('timeline');P.qrs=A('qrs');
-  PHOTO=s.photo||'/img/avatar.jpg';PHOTO_POP=s.photo||'/img/avatar-pop.webp';{const li=document.getElementById('lkImg');if(li&&li.getAttribute('src')!==PHOTO)li.src=PHOTO}
+  PHOTO=s.photo?String(s.photo).replace(/([a-f0-9]{10})\.(jpe?g|png|webp)$/i,'$1-t.$2'):'/img/avatar.jpg'; /* small spots (icon, chat, splash) use the thumbnail */PHOTO_POP=s.photo||'/img/avatar-pop.webp';{const li=document.getElementById('lkImg');if(li&&li.getAttribute('src')!==PHOTO)li.src=PHOTO}
   {const w=document.getElementById('wall');if(w){if(s.wallpaper){w.style.backgroundImage='url("'+s.wallpaper+'")';w.classList.add('pic')}else{w.style.backgroundImage='';w.classList.remove('pic')}}}
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
   document.title=window.__STANDALONE?`${P.name} — Links`:`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist);window.__applyStatusDot&&__applyStatusDot()}
@@ -3843,13 +3846,15 @@ function unlock(){if(lockEl.classList.contains('off'))return;desk.classList.remo
 /* Phones and tablets: swipe up to unlock (the screen follows your finger). A mouse or keyboard still unlocks with a click, Enter or Space. */
 const swipeLock=()=>matchMedia('(pointer:coarse)').matches&&matchMedia('(hover:none)').matches;
 (()=>{const go=document.getElementById('lkGo');
-  const setHint=()=>{if(go)go.textContent=swipeLock()?'Swipe up to unlock':'Tap to unlock';lockEl.classList.toggle('swipe',swipeLock())};setHint();addEventListener('resize',setHint);
+  const setHint=()=>{if(go)go.textContent=swipeLock()?'Tap or swipe up to open':'Tap to unlock';lockEl.classList.toggle('swipe',swipeLock())};setHint();addEventListener('resize',setHint);
   let st=null;
   lockEl.addEventListener('pointerdown',e=>{if(!swipeLock()||e.target.closest('#lkFs'))return;st={y:e.clientY,t:performance.now(),id:e.pointerId,dy:0};try{lockEl.setPointerCapture(e.pointerId)}catch(x){}lockEl.style.transition='none'});
   lockEl.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;st.dy=Math.min(0,e.clientY-st.y);lockEl.style.transform=`translateY(${st.dy}px)`;lockEl.style.opacity=String(Math.max(.25,1+st.dy/(innerHeight*.9)))});
   const end=e=>{if(!st||e.pointerId!==st.id)return;const dy=st.dy,v=-dy/Math.max(1,performance.now()-st.t);st=null;lockEl.style.transition='';
     if(dy<-90||(dy<-30&&v>.5)){lockEl.style.transform='';lockEl.style.opacity='';unlock()}
-    else{lockEl.style.transform='';lockEl.style.opacity='';if(dy>-8)lockEl.classList.add('nudge'),setTimeout(()=>lockEl.classList.remove('nudge'),600)}};
+    else{lockEl.style.transform='';lockEl.style.opacity='';if(dy>-8&&!(e.target.closest&&e.target.closest('#lkFs'))){ /* a plain tap opens it too: no hoops for a first visit */
+      const eat=ev=>{ev.preventDefault();ev.stopPropagation()};addEventListener('click',eat,true);setTimeout(()=>removeEventListener('click',eat,true),450); /* the tap's click must not land on the app icon under the lock */
+      unlock()}}};
   lockEl.addEventListener('pointerup',end);lockEl.addEventListener('pointercancel',end);
   lockEl.addEventListener('click',e=>{if(swipeLock()&&e.detail!==0)return;unlock()});
 })();
@@ -4196,7 +4201,8 @@ const TOUCH=matchMedia('(hover:none)').matches;
 const catPos=()=>desk.dataset.catpos||'roam';
 const home=()=>catPos()==='left'?(small()?6:10):catPos()==='right'?innerWidth-W()-(small()?4:8):innerWidth-W()-(small()?36:52);
 const peekX=()=>innerWidth-W()*0.45;
-const clampX=v=>clamp(v,0,innerWidth-W()*0.4);
+/* on phones he keeps to his half of the bottom edge, beside the app drawer button, unless he is carried or placed somewhere */
+const clampX=v=>{if(small()&&!C.free&&!C.carry){const mid=innerWidth/2,gap=40;return catPos()==='left'?clamp(v,0,Math.max(0,mid-gap-W())):clamp(v,Math.min(mid+gap,innerWidth-W()),innerWidth-W()*0.4)}return clamp(v,0,innerWidth-W()*0.4)};
 const awake=()=>C.pose!=='sleep';
 const full=()=>now()<C.fullUntil;
 const dockR=()=>document.getElementById('shelf').getBoundingClientRect();
@@ -4318,7 +4324,7 @@ function activity(){
   if(window.OGGY_LIFE&&OGGY_LIFE.turn())return; /* owner mode: now and then he does something of his own */
   const roll=Math.random();C.busy=true;const done=()=>{C.busy=false;if(!C.jump&&!MOVING.has(C.pose))pose('sit');paint()};
   if(catPos()!=='roam'&&(roll<.28||roll>.54)){done();return} /* parked in a corner: he only grooms and stretches */
-  if(roll<.28){walkTo(rand(innerWidth*.3,home()),rand(70,95),'walk',()=>{pose('sit');done()})}
+  if(roll<.28){walkTo(rand(innerWidth*(small()?.55:.3),home()),rand(70,95),'walk',()=>{pose('sit');done()})}
   else if(roll<.44){pose('groom');if(Math.random()<.5)say('*lick lick*',1200);later(()=>{pose('sit');done()},rand(2600,4200))}
   else if(roll<.54){pose('stretch');mood('blink',0);later(()=>{mood('',0);done()},1700)}
   else if(roll<.68&&canDock){const tx=r.right-W()*0.40;walkTo(tx,90,'walk',()=>{C.dir=-1;pose('scratch');say('*scritch scratch*',1800);later(()=>{pose('sit');done()},2600)})}
@@ -4432,7 +4438,7 @@ function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
   const addChips=()=>(ui.chips||[]).forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cc-chip'+(c.pri?' pri':'');b.textContent=c.t;b.onclick=c.fn;chatUI.appendChild(b)});
   if(ui.inputLast)addChips();
   if(ui.input){const f=document.createElement('form');f.className='cc-form';f.innerHTML=`<input type="${ui.input.type||'text'}" maxlength="${ui.input.max||120}" placeholder="${esc(ui.input.ph||'')}" aria-label="${esc(ui.input.ph||'Your answer')}"><button type="submit">Send</button>`;
-    f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return;ui.input.done(v)};chatUI.appendChild(f);if(!ui.inputLast)setTimeout(()=>{const ae=document.activeElement;if(!ae||ae===document.body||chatEl.contains(ae)||cat.contains(ae))f.querySelector('input').focus({preventScroll:true})},30)}
+    f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return;ui.input.done(v)};chatUI.appendChild(f);if(!ui.inputLast&&!TOUCH)setTimeout(()=>{const ae=document.activeElement;if(!ae||ae===document.body||chatEl.contains(ae)||cat.contains(ae))f.querySelector('input').focus({preventScroll:true})},30)}
   if(!ui.inputLast)addChips();
 }
 const moreChip={t:'Ask me about Rohan',fn:()=>askMenu()};
@@ -4441,8 +4447,8 @@ function book(){window.open(P.booking,'_blank','noopener');record('action','open
 function askEmail(q){openChat(`Leave your email and I’ll make sure Rohan sees it${nm()}. Only he will read it.`,{input:{type:'email',ph:'you@example.com',max:120,done:v=>{record(q||'email',v);V.email=v;saveV();trust(.5);openChat('Got it! I’ll put it right on his keyboard. Where he can’t miss it.',{chips:[moreChip,byeChip]})}},chips:[{t:'Never mind',fn:()=>closeChat()}]})}
 /* scripted questions she asks over time */
 const STAGES=[
-  ()=>openChat("psst… hi! I’m <b>OGGY</b>. What’s your name?",{input:{ph:'Your name',max:40,done:v=>{V.name=v.slice(0,40);V.stage=1;saveV();record('name',V.name);trust(.5);hearts(2);
-      openChat(`Nice to meet you, <b>${esc(V.name)}</b>! I’ll remember you.`,{chips:[{t:'Nice to meet you too',fn:()=>closeChat()},moreChip]})}},
+  ()=>openChat(`Hi! Welcome to <b>${esc(String(P.name||'Rohan').split(' ')[0])}’s</b> desk. I’m <b>OGGY</b>, I live here. What should I call you?`,{input:{ph:'Your name',max:40,done:v=>{V.name=v.slice(0,40);V.stage=1;saveV();record('name',V.name);trust(.5);hearts(2);
+      openChat(`Nice to meet you, <b>${esc(V.name)}</b>! Tap any app to explore, or ask me anything about Rohan.`,{chips:[{t:'Show me his work',pri:1,fn:()=>{openApp('projects');closeChat(true)}},moreChip,{t:'Just looking',fn:()=>closeChat()}]})}},
     chips:[{t:'I’d rather not say',fn:()=>{V.stage=1;V.name='';saveV();record('name','(skipped)');openChat("That’s okay. Mysterious. I respect that.",{chips:[byeChip]})}}]}),
   ()=>openChat(`So${nm()}… what brings you here?`,{chips:[
       {t:'Looking to hire a designer',fn:()=>{record('reason','hiring');openChat(`Ooh! Rohan does logos, identities, and brand strategy. Want him to reach out to you?`,{chips:[{t:'Yes, take my email',pri:1,fn:()=>askEmail('hire-email')},{t:'I’ll book a call',fn:()=>{book();closeChat(true)}},byeChip]})}},
@@ -4456,7 +4462,7 @@ const STAGES=[
 function maybeTalk(){
   if(desk.dataset.cat==='off'||C.chat||C.busy||C.drag||C.treat||C.hiding||C.pose!=='sit'||C.y>2||now()-(C.lastTreat||0)<15000)return;
   if(V.stage>=STAGES.length)return;const n=now();
-  const gap=V.stage===0?20000:60000;
+  const gap=V.stage===0?(small()?12000:20000):60000;
   if(n-bootAt<gap||n-lastTalk<gap||n-C.lastPoke<15000||n-(C.cameOut||0)<15000||n-C.awakeSince<6000)return;
   if(document.querySelector('.win.top .cc-form, .win.top input:focus'))return;
   /* never start a chat for the owner, and never interrupt someone who is working in a window or typing */
@@ -4531,12 +4537,30 @@ function classify(q){const s=q.toLowerCase();
   if(/who|rohan|about him/.test(s))return'who';
   if(/cat|mochi|oggy|you\b|your name/.test(s))return'cat';
   return'unknown'}
-function askMenu(){if(!awake())wake();
+/* OGGY's brain (js/oggy-brain.mjs) answers from the live site: services, prices, process, FAQ, journal. Loaded on the first question. */
+let BRAIN=null;const brain=()=>BRAIN||(BRAIN=import('/js/oggy-brain.mjs').catch(e=>{BRAIN=null;throw e}));
+const bctx=()=>({P,S:(typeof SITE!=='undefined'&&SITE&&SITE.s)||{},journal:(typeof JOURNAL!=='undefined'?JOURNAL:[]),name:V.name||''});
+function act(c,q){const d=String(c.do||'');
+  if(d.startsWith('open:')){record('action','opened '+d.slice(5));openApp(d.slice(5));closeChat(true);say(pick(['here you go!','right this way!','*points paw*']),1400);return}
+  if(d.startsWith('url:')){record('action','opened '+d.slice(4));window.open(d.slice(4),'_blank','noopener');return}
+  if(d.startsWith('say:'))return brainSay(d.slice(4));
+  if(d==='menu-who')return brainSay('who');
+  if(d==='book'){book();closeChat(true);return}
+  if(d==='email'){record('action','email link');location.href='mailto:'+(P.email||'');return}
+  if(d==='leave-email')return askEmail('contact-email');
+  if(d==='pass'){record('question-for-rohan',q||'(no question)');hearts(2);openChat(`Done! I’ll make sure ${esc(String(P.name||'Rohan').split(' ')[0])} sees it. ${V.email?'He’ll reply to your email.':'Want him to reply by email?'}`,{chips:(V.email?[]:[{t:'Leave my email',pri:1,fn:()=>askEmail('reply-email')}]).concat([moreChip,byeChip])});return}
+  if(d==='bye')return closeChat();
+  askMenu()}
+function show(r,q){const chips=(r.chips||[]).slice(0,3).map((c,i)=>({t:c.t,pri:c.pri||i===0,fn:()=>act(c,q)}));
+  openChat(r.html,{chips:chips.concat([{t:'Ask something else',fn:()=>askMenu()}]),inputLast:true,input:{ph:'Ask me anything…',max:200,done:v=>brainReply(v)}})}
+async function brainReply(q){record('asked',q);try{const m=await brain();show(m.think(q,bctx()),q)}catch(e){reply(classify(q),q)}}
+async function brainSay(id){try{const m=await brain();const r=m.say(id,bctx());if(r)return show(r,id)}catch(e){}askMenu()}
+function askMenu(){if(!awake())wake();brain().catch(()=>{});
   openChat(`What would you like to know${nm()}?`,{chips:[
-    {t:'Who is Rohan?',fn:()=>reply('who','Who is Rohan?')},{t:'How is he as a boss?',fn:()=>reply('boss','How is he as a boss?')},
-    {t:'What does he do?',fn:()=>reply('what','What does he do?')},{t:'Is he available?',fn:()=>reply('available','Is he available?')},
-    {t:'How do I contact him?',fn:()=>reply('contact','How do I contact him?')},{t:'Show me his work',fn:()=>{record('asked','Show me his work');openApp('projects');closeChat(true);say('here you go!',1400)}}],
-    inputLast:true,input:{ph:'Or ask anything…',max:200,done:v=>reply(classify(v),v)}})}
+    {t:'Who is Rohan?',fn:()=>{record('asked','Who is Rohan?');brainSay('who')}},{t:'What does he do?',fn:()=>{record('asked','What does he do?');brainSay('services')}},
+    {t:'How much does it cost?',fn:()=>{record('asked','How much does it cost?');brainSay('price')}},{t:'Is he available?',fn:()=>{record('asked','Is he available?');brainSay('available')}},
+    {t:'How do I contact him?',fn:()=>{record('asked','How do I contact him?');brainSay('contact')}},{t:'Show me his work',fn:()=>{record('asked','Show me his work');openApp('projects');closeChat(true);say('here you go!',1400)}}],
+    inputLast:true,input:{ph:'Or ask anything…',max:200,done:v=>brainReply(v)}})}
 
 /* ---------- hooks ---------- */
 window.MOCHI={setPos:v=>setCatPos(v),reset:()=>resetPlaces(),wake:()=>wake(),sleep:()=>{if(C.pose!=='sleep')goSleep()},asleep:()=>C.pose==='sleep',talk:askMenu,
