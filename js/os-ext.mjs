@@ -120,7 +120,7 @@ export const moreReady = new Promise((res) => { window.__resolveMore = res; });
   if (document.readyState === "complete") setTimeout(go, 120); else window.addEventListener("load", () => setTimeout(go, 120));
 })();
 /* ---------- installable app + offline ---------- */
-export const Install = { evt: null, installed: matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,
+export const Install = { evt: null, installed: matchMedia("(display-mode: standalone), (display-mode: window-controls-overlay)").matches || navigator.standalone === true,
   async prompt() { if (!Install.evt) return false; Install.evt.prompt(); const r = await Install.evt.userChoice.catch(() => ({})); Install.evt = null; return r.outcome === "accepted"; },
   can() { return !!Install.evt && !Install.installed; },
   ios() { return /iphone|ipad|ipod/i.test(navigator.userAgent) && !Install.installed; } };
