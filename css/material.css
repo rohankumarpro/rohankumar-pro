@@ -101,3 +101,14 @@ input[type=checkbox],input[type=radio]{accent-color:var(--primary)}
 }
 
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Title bars without the solid strip: the icon, title and window buttons float over the top of the window.
+   The body keeps that height clear with a transparent top border (its own background shows through), so nothing
+   moves. Full-colour apps (Links) run their colour up under the buttons and get a frosted bar once scrolled. */
+.win{--barh:56px}
+.win .bar,.win:not(.top) .bar{position:absolute;top:0;left:0;right:0;z-index:6;min-height:var(--barh);box-sizing:border-box;background:transparent;transition:background-color .2s ease,box-shadow .2s ease}
+.win>.body{border-top:var(--barh) solid transparent}
+.win:has(>.body .hub)>.body{border-top-width:0}
+.win:has(>.body .hub) .hub{padding-top:var(--barh)}
+.win.scrolled:has(>.body .hub) .bar{background:color-mix(in srgb,var(--surface) 84%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 1px 0 color-mix(in srgb,var(--line) 60%,transparent)}
+@media (max-width:760px){.win{--barh:60px}}

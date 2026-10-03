@@ -2278,7 +2278,8 @@ function icon(a){
 /* Scroll hint: a window's bottom edge fades while more content sits below, and clears once the end is reached. */
 const SCROLLERS='.win .body,.win .jed-scroll';
 function scrollHint(el){if(!el||!el.isConnected)return;const cs=getComputedStyle(el),can=cs.overflowY!=='hidden'&&cs.overflowY!=='visible';
-  el.classList.toggle('more-b',can&&el.scrollHeight-el.clientHeight-el.scrollTop>6)}
+  el.classList.toggle('more-b',can&&el.scrollHeight-el.clientHeight-el.scrollTop>6);
+  if(el.classList.contains('body')){const w=el.closest('.win');if(w)w.classList.toggle('scrolled',el.scrollTop>4)}}
 const sh={q:new Set(),t:0,run(){sh.t=0;sh.q.forEach(scrollHint);sh.q.clear()},add(el){sh.q.add(el);if(!sh.t)sh.t=requestAnimationFrame(sh.run)}};
 const shRO=typeof ResizeObserver!=='undefined'?new ResizeObserver(es=>es.forEach(e=>sh.add(e.target.closest(SCROLLERS)||e.target))):null;
 const shMO=new MutationObserver(ms=>ms.forEach(m=>{const t=m.target.nodeType===1?m.target:m.target.parentElement;const el=t&&(t.matches(SCROLLERS)?t:t.closest(SCROLLERS));if(el){sh.add(el);if(shRO)[...el.children].forEach(c=>shRO.observe(c))}}));
