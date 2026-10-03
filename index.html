@@ -124,6 +124,7 @@ a{color:var(--primary)}
 /* widgets */
 .widgets{position:absolute;top:60px;right:28px;display:flex;flex-direction:column;gap:calc(16 * var(--u));align-items:flex-end;z-index:1}
 .widgets .wcard,.widgets .wclock{box-sizing:border-box}.widgets .wcard{width:260px;max-width:260px}
+.award{position:absolute;top:36px;right:244px;width:148px;height:auto;filter:drop-shadow(0 8px 18px rgba(0,0,0,.16));pointer-events:none;user-select:none}
 .wclock{position:relative;width:220px;height:220px;display:grid;place-items:center}
 .wclock svg{position:absolute;inset:0;width:100%;height:100%}
 .wclock svg path{fill:var(--c1)}
@@ -808,7 +809,9 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 .lhead div{flex:1}.lhead h2,.lhead .sub{margin:0}
 
 @media (max-width:760px){
-  .widgets{display:none}
+  .widgets{top:auto;right:auto;left:14px;bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  .widgets>:not(.award){display:none}
+  .award{position:static;width:92px}
   .icons{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:repeat(4,1fr);grid-auto-columns:auto;left:12px;right:12px;bottom:auto}
   .win{left:8px!important;top:48px!important;width:calc(100% - 16px)!important;height:calc(100% - 140px)!important;min-width:0;border-radius:var(--r-7)}
   .bar{cursor:default}
@@ -1368,6 +1371,7 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
   <nav class="icons" id="icons" aria-label="Desktop"></nav>
   <aside class="widgets">
     <div class="wclock"><svg viewBox="0 0 100 100"><path id="clockShape"/></svg><div class="t"><div class="h" id="wTime"></div><div class="d" id="wDate"></div></div></div>
+    <img class="award" src="/img/top-branding-agency.svg" width="236" height="236" alt="Dribbble Select: Top Branding Agency" title="Dribbble Select: Top Branding Agency">
     <div class="wcard st"><button class="wx" id="stHide" aria-label="Hide this widget" title="Hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><b><span class="dot"></span><span id="wStatus"></span></b><p id="wNow"></p></div>
     <div class="wcard mw" id="musicW"><div class="mw-ctl"><button class="wb2" id="mwMin" aria-label="Minimise music widget" title="Minimise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg></button><button class="wb2" id="mwHide" aria-label="Hide music widget" title="Hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="wmusic"><div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="var(--glyph)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div>
     <div><small class="meta"><span class="eq"><i></i><i></i><i></i></span>On repeat</small><br><b id="mSong"></b><p id="mArtist" style="margin:2px 0 0"></p></div></div><div class="mini" id="mLinks"></div></div>
