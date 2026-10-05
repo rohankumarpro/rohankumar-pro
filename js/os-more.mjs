@@ -107,6 +107,7 @@ function cycleWin(dir) {
   if (nxt.classList.contains("min")) openApp(winId(nxt)); else focus(nxt);
 }
 let chord = 0;
+const fullToggle = () => { if (typeof canFull === "function" && !canFull()) return toast("Full screen is not available here"); window.osFullToggle && osFullToggle(); };
 document.addEventListener("keydown", (e) => {
   const ae = document.activeElement, typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae?.tagName) || ae?.isContentEditable;
   const mod = e.ctrlKey || e.metaKey, k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
@@ -129,23 +130,25 @@ document.addEventListener("keydown", (e) => {
     else if (k === "z") { const w = topWin(); if (w) Focus.toggle(w); }
     else if (k === "n") Notif.toggle();
     else if (k === "s") openApp("settings");
+    else if (k === "f") fullToggle();
     else if (/^[1-9]$/.test(k)) { const ids = [...$$(".shelf .app, .shelf [data-app]")].map((b) => b.dataset.app).filter(Boolean); if (ids[+k - 1]) openApp(ids[+k - 1]); else used = false; }
     else used = false;
     if (used) { e.preventDefault(); e.stopPropagation(); }
     return;
   }
-  if (typing || mod || ae?.closest?.("[data-own-keys]")) return; // an app that handles its own single-key shortcuts (Boards)
+  if (typing || mod || e.defaultPrevented || ae?.closest?.("[data-own-keys]")) return; // an app that handles its own single-key shortcuts (Boards)
   if (chord && Date.now() - chord < 1600) { chord = 0; const id = GO[k]; if (id) { e.preventDefault(); openApp(id); } return; }
   if (k === "/" && !e.shiftKey) { e.preventDefault(); Spot.show(); }
   else if (k === "?" || (k === "/" && e.shiftKey)) { e.preventDefault(); shortcuts(); }
   else if (k === "g") { chord = Date.now(); toast("Go to… press a letter. ? lists them"); }
+  else if (k === "f" && !e.shiftKey && !e.altKey) { e.preventDefault(); fullToggle(); }
 }, true);
 
 function shortcuts() {
   if ($(".kbd-ov")) return;
   const grp = (t, rows) => [h("h4", {}, t), h("dl", {}, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]))];
   const d = h("div", { class: "own-dlg kbd-ov" }, h("div", { class: "own-card kbd", role: "dialog", "aria-modal": "true", "aria-label": "Keyboard shortcuts" }, h("b", {}, "Keyboard shortcuts"),
-    grp("Anywhere", [["Ctrl K  or  /", "Search everything"], ["?", "Show this list"], ["Esc", "Close the top box"], ["Ctrl Shift E", "Owner sign-in"]]),
+    grp("Anywhere", [["Ctrl K  or  /", "Search everything"], ["?", "Show this list"], ["F  or  Alt F", "Full screen on or off"], ["Esc", "Close the top box"], ["Ctrl Shift E", "Owner sign-in"]]),
     grp("Go to an app: press G, then a letter", [["G A", "About"], ["G P", "Projects"], ["G J", "Journal"], ["G N", "Notes"], ["G D", "Docs"], ["G L", "Links"], ["G M", "Messages"], ["G R", "Resume"], ["G C", "Contact"], ["G G", "Guestbook"], ["G T", "Timeline"], ["G H", "Photos"], ["G W", "Wallet"], ["G V", "Services"], ["G B", "Book a call"], ["G X", "Content"], ["G S", "Settings"]]),
     grp("Windows (hold Alt)", [["Alt W", "Close the window"], ["Alt M", "Minimise"], ["Alt Enter  or  Alt Up", "Maximise or restore"], ["Alt Down", "Restore size"], ["Alt Left  /  Alt Right", "Snap to left or right half"], ["Alt ]  /  Alt [", "Switch window"], ["Alt D", "Show the desktop"], ["Alt A", "All open windows (overview)"], ["Alt Z", "Focus mode: full screen, nothing else"], ["Alt L  or  Alt Space", "App launcher"], ["Alt N", "Notifications"], ["Alt S", "Settings"], ["Alt 1 … 9", "Open the nth app in the dock"]]),
     grp("Writing (Journal, Projects, Docs, Notes)", [["/", "Insert a block (heading, image, video…)"], ["Ctrl B / I / U", "Bold, italic, underline"], ["Ctrl K", "Add a link"], ["Ctrl Z / Ctrl Shift Z", "Undo and redo"], ["Ctrl S", "Save now"], ["Tab / Shift Tab", "Indent or outdent a list item"], ["# , ## , - , 1. , [] , > , ```", "Markdown shortcuts at the start of a line"]]),
@@ -264,7 +267,7 @@ window.settingsExtra = function (body) {
       draw(); return [h("h3", {}, title), h("p", { class: "hint" }, hint), row];
     };
     { const slot = h("div"); sec.append(slot); import("/js/site-settings.mjs").then((m) => slot.replaceWith(m.websiteSection())).catch(() => slot.remove()); } // Website: search and share details
-    sec.append(...picRow("Wallpaper picture", "wallpaper", "Shown behind everything for every visitor. Remove it to go back to the coloured shapes."), ...picRow("Your photo", "photo", "Used on About, the lock screen and Messages."));
+    sec.append(...picRow("Wallpaper picture (light mode)", "wallpaper", "Shown behind everything for every visitor in light mode. Remove both pictures to go back to the coloured shapes, which already follow light and dark."), ...picRow("Wallpaper picture (dark mode)", "wallpaperDark", "The dark version of the same wallpaper. It switches by itself when the theme or the device turns dark. Without it, the light picture is used in both."), ...picRow("Your photo", "photo", "Used on About, the lock screen and Messages."));
     const msg = h("p", { class: "hint" }, "Everything you write in Owner mode is stored on the server, so updating the website never resets it. A backup is a copy you can keep.");
     sec.append(h("h3", {}, "Backup"), msg, h("div", { class: "ow-row" },
       h("a", { class: "btn tonal", href: "/api/backup", download: "" }, "Download backup"),

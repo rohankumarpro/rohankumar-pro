@@ -131,7 +131,7 @@ a{color:var(--primary)}
 @media (max-width:1400px) and (min-width:761px){.musicpill{max-width:150px}.musicpill .mp-t{max-width:70px}#tDate{display:none}}
 @media (max-width:1180px) and (min-width:761px){.musicpill .mp-t{display:none}}
 @media (max-width:760px){.topbar{gap:calc(4 * var(--u))}.topbar>#who{min-width:0;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}.topbar>#ownPill{padding:0 calc(9 * var(--u))!important}}
-.award{position:absolute;top:0;left:50%;z-index:55;width:118px;transform:translateX(-50%);transform-origin:50% 0;filter:drop-shadow(0 10px 22px rgba(0,0,0,.2));transition:transform var(--d-2) var(--ease);-webkit-tap-highlight-color:transparent}
+.award{position:absolute;top:0;left:50%;z-index:3;width:118px;transform:translateX(-50%);transform-origin:50% 0;filter:drop-shadow(0 10px 22px rgba(0,0,0,.2));transition:transform var(--d-2) var(--ease);-webkit-tap-highlight-color:transparent}
 .award img{display:block;width:100%;height:auto;-webkit-user-drag:none}
 .award:hover{transform:translateX(-50%) scale(1.05)}
 .award:focus-visible{outline:3px solid var(--primary);outline-offset:4px;border-radius:0 0 50% 50%}
@@ -684,7 +684,7 @@ button.tl-item:hover b{text-decoration:underline;text-underline-offset:3px}
 .dicon:hover .g-t2{animation-delay:.12s}.dicon:hover .g-t3{animation-delay:.24s}
 @keyframes tl-pop{40%{transform:scale(1.6)}}
 /* messages (Google Messages style) */
-.win[data-app="messages"] .body{padding:0;display:flex;overflow:hidden}
+.win[data-app="messages"] .body{padding:0;display:flex;overflow:hidden;container-type:inline-size}
 .gm{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
 .gm-bar{display:flex;align-items:center;gap:calc(12 * var(--u));padding:calc(6 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-bottom:1px solid var(--line)}
 .gm-bar img{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#C2FF73}
@@ -711,6 +711,34 @@ button.tl-item:hover b{text-decoration:underline;text-underline-offset:3px}
 .gm-send svg{width:20px;height:20px}.gm-send:disabled{opacity:.35}.gm-send:not(:disabled):active{transform:scale(.92)}
 @keyframes gm-in{from{opacity:0;transform:translateY(6px) scale(.98)}}
 @keyframes gm-dot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+/* messages: the contact form and the owner's inbox */
+.ct-wrap{gap:calc(8 * var(--u))}
+.ct{display:flex;flex-direction:column;gap:2px;background:var(--surface2);border-radius:var(--r-7);padding:calc(6 * var(--u)) calc(16 * var(--u)) calc(12 * var(--u));margin:calc(6 * var(--u)) 0 calc(4 * var(--u))}
+.ct .ow-f{margin:calc(6 * var(--u)) 0;font-weight:var(--fw-m)}.ct .ow-f small{font-weight:400;color:var(--ink2)}
+.ct .ow-f input,.ct .ow-f select,.ct .ow-f textarea{font:inherit;font-size:var(--fs-5);font-weight:400;padding:calc(10 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;box-sizing:border-box;min-width:0}
+.ct .ow-f textarea{resize:vertical;min-height:110px}
+.ct .ow-f input:focus,.ct .ow-f select:focus,.ct .ow-f textarea:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.ct-two{display:grid;grid-template-columns:1fr 1fr;gap:0 calc(12 * var(--u))}.ct-two[hidden]{display:none}
+@container (max-width:460px){.ct-two{grid-template-columns:1fr}}
+.ct-topic{border:0;padding:0;margin:calc(8 * var(--u)) 0 calc(4 * var(--u))}.ct-topic legend{font-size:var(--fs-3);font-weight:var(--fw-m);padding:0;margin-bottom:calc(6 * var(--u))}
+.ct-chips{display:flex;flex-wrap:wrap;gap:calc(6 * var(--u))}
+.ct-chip input{position:absolute;opacity:0;pointer-events:none}
+.ct-chip span{display:inline-block;padding:calc(7 * var(--u)) calc(14 * var(--u));border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface);font-size:var(--fs-4);font-weight:var(--fw-m);cursor:pointer}
+.ct-chip input:checked+span{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.ct-chip input:focus-visible+span{box-shadow:0 0 0 2px var(--primary)}
+.ct-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.ct-err{color:var(--danger,#d93025)!important;margin:calc(4 * var(--u)) 0}
+.ct-row{display:flex;gap:calc(8 * var(--u));flex-wrap:wrap;margin:calc(8 * var(--u)) 0}
+.ct-link{border:0;background:none;padding:0;font:inherit;color:var(--primary);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.ct-sum{background:var(--surface2);border-radius:var(--r-6);padding:calc(10 * var(--u)) calc(14 * var(--u))}.ct-sum small{color:var(--ink2);font-size:var(--fs-2)}.ct-sum p{margin:calc(4 * var(--u)) 0 0;white-space:pre-wrap;word-break:break-word}
+.ct-top{display:flex;align-items:center;justify-content:space-between;gap:calc(8 * var(--u));flex-wrap:wrap;margin-bottom:calc(4 * var(--u))}.ct-top small{color:var(--ink2)}.ct-top .btn{padding:calc(8 * var(--u)) calc(14 * var(--u))}
+.ct-card{border:1px solid var(--line);border-radius:var(--r-6);padding:calc(12 * var(--u)) calc(14 * var(--u));background:var(--surface)}.ct-card.new{border-color:#2ecc71}.ct-card.done{opacity:.7}
+.ct-h{display:flex;align-items:baseline;gap:calc(8 * var(--u));flex-wrap:wrap}.ct-h small{margin-left:auto;color:var(--ink2)}
+.ct-st{background:var(--surface2);border-radius:var(--r-pill);font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(8 * var(--u))}
+.ct-msg{white-space:pre-wrap;word-break:break-word;margin:calc(8 * var(--u)) 0;line-height:1.45}
+.ct-dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:calc(6 * var(--u)) calc(12 * var(--u));margin:calc(8 * var(--u)) 0;font-size:var(--fs-3)}
+.ct-dl dt{color:var(--ink2);font-size:var(--fs-2)}.ct-dl dd{margin:0;word-break:break-word}
+.ct-card .ed-ctl{display:flex;gap:calc(6 * var(--u));flex-wrap:wrap;align-items:center}.ct-card .ed-ctl .btn{padding:calc(7 * var(--u)) calc(14 * var(--u))}
 /* call popover (desktop) */
 .gm{position:relative}
 .gm-callpop{position:absolute;right:12px;top:64px;z-index:20;width:min(320px,calc(100% - 24px));background:var(--surface);color:var(--ink);border-radius:var(--r-7);padding:calc(18 * var(--u));box-shadow:0 12px 40px rgba(0,0,0,.25);animation:pop var(--d-2) var(--ease-spring)}
@@ -751,6 +779,7 @@ button.lk:hover .lk-c{transform:translateX(3px)}
 /* guestbook */
 .gbf{display:flex;flex-direction:column;gap:calc(10 * var(--u));background:var(--surface2);padding:calc(16 * var(--u));border-radius:var(--r-7);margin:calc(10 * var(--u)) 0 calc(18 * var(--u))}
 .gbf input,.gbf textarea{font:inherit;font-size:var(--fs-5);border:0;border-radius:var(--r-5);padding:calc(12 * var(--u)) calc(14 * var(--u));background:var(--surface);color:var(--ink);resize:vertical}
+.gb-anon{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:var(--fs-4);color:var(--ink2);cursor:pointer;width:max-content}.gbf .gb-anon input{width:auto;padding:0;accent-color:var(--primary)}.gbf input[hidden]{display:none}
 .gbf .r{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--u));flex-wrap:wrap}
 .gbf input,.gbf textarea{box-sizing:border-box;width:100%;max-width:100%}
 .gbf .sw{display:flex;flex-direction:row;flex:none;align-items:center;justify-content:flex-start;gap:calc(8 * var(--u));padding:0;background:none;transition:none}.gbf .sw button{flex:none}.gbf .sw:hover{flex:none}
@@ -2283,7 +2312,7 @@ const APPS=[
   {id:"focus",drawer:true,title:"Focus",shape:"circle",color:"c2",glyph:G.spark,w:420,h:720,render:focusApp},
   {id:"calculator",drawer:true,title:"Calculator",shape:"flower",color:"c6",glyph:G.calc,w:340,h:540,render:calculator},
   {id:"timeline",title:"Timeline",shape:"sun",color:"c3",glyph:G.tl,w:560,h:640,render:timeline},
-  {id:"messages",title:"Messages",shape:"cookie",color:"c1",glyph:G.msg,w:420,h:620,render:messages},
+  {id:"messages",title:"Messages",shape:"cookie",color:"c1",glyph:G.msg,w:520,h:700,render:messages},
   {id:"links",title:"Links",shape:"squircle",color:"c5",glyph:G.link,w:460,h:680,render:links},
   {id:"settings",drawer:true,title:"Settings",shape:"circle",color:"c6",glyph:G.gear,w:460,h:560,render:settings}
 ];
@@ -2853,50 +2882,99 @@ const ART={
   focus:`<rect x="46" y="18" width="8" height="8" rx="3" fill="${IR}"/><circle class="l1" cx="50" cy="52" r="25" fill="${IR}"/><circle cx="50" cy="52" r="17" fill="#fff"/>
     <g class="spin"><path d="M50 52V42M50 52l7 5" stroke="${IK}" stroke-width="4" stroke-linecap="round"/></g>`
 };
-/* ============ Messages (Google Messages style) ============ */
-const MS=(()=>{try{return JSON.parse(localStorage.getItem('rkMessages')||'null')||{}}catch(e){return{}}})();MS.items=MS.items||[];
-const saveMS=()=>{try{localStorage.setItem('rkMessages',JSON.stringify(MS))}catch(e){}};
-const EMAIL_RE=/[^\s@]+@[^\s@]+\.[^\s@]{2,}/;
-/* Visitor messages are sent to the same /api/mochi inbox OGGY uses, so they work for everyone on the live site. */
-async function sendMS(q,a){const v=visitor();if(!v.id)return;
-  try{await fetch('/api/mochi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:v.id,name:v.name||'',q,a:String(a).slice(0,500)})})}catch(e){}}
+/* ============ Messages: a contact form (name and email required) that reaches Rohan's inbox ============ */
+/* Each message is stored on the server with its details (/api/contact). Anonymous notes belong in the Guestbook. */
+const CT_KEY='rkContact',EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const ctMe=()=>{try{return JSON.parse(localStorage.getItem(CT_KEY)||'null')||{}}catch(e){return{}}};
+const ctSave=o=>{try{localStorage.setItem(CT_KEY,JSON.stringify(o))}catch(e){}};
+const CT_TOPICS=[["project","A project"],["job","A job or role"],["collab","A collaboration"],["question","A question"],["other","Something else"]];
+const CT_BUDGET=["Not sure yet","Under $1,000","$1,000 to $5,000","$5,000 to $15,000","Over $15,000"];
+const CT_WHEN=["Flexible","As soon as possible","Within a month","In 1 to 3 months","Later than that"];
 function msgTime(t){return new Date(t).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
 const PHONE_TEL='+918076211418',PHONE_SHOW='+91-8076211418';
 function messages(body){
-  if(!MS.items.length){MS.items.push({from:'him',text:`Hi! I'm ${P.name.split(' ')[0]}. Drop me a message here, whether it's a project, a question, or just a hello, and I'll get back to you.`,t:Date.now(),auto:1});saveMS()}
   body.innerHTML=`<div class="gm">
-    <header class="gm-bar"><img src="${PHOTO}" alt=""><div class="gm-who"><b>${esc(P.name)}</b><small>Usually replies within a day</small></div>
+    <header class="gm-bar"><img src="${PHOTO}" alt=""><div class="gm-who"><b>${esc(P.name)}</b><small>${LIVE.admin?'Your messages':'Usually replies within a day'}</small></div>
       <a class="gm-ic gm-call" href="tel:${PHONE_TEL}" aria-label="Call ${PHONE_SHOW}" title="Call ${PHONE_SHOW}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></a></header>
-    <div class="gm-list" aria-live="polite"></div>
-    <form class="gm-comp"><div class="gm-field"><input placeholder="Text message" aria-label="Message" maxlength="1000" autocomplete="off"></div>
-      <button class="gm-send" aria-label="Send" disabled><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button></form>
+    <div class="gm-list ct-wrap" aria-live="polite"></div>
   </div>`;
-  const list=body.querySelector('.gm-list'),form=body.querySelector('.gm-comp'),inp=form.querySelector('input'),btn=form.querySelector('.gm-send');
-  const draw=(typing)=>{let html='<div class="gm-day">Today</div>',prev=null;
-    MS.items.forEach((m,i)=>{const nx=MS.items[i+1],last=!nx||nx.from!==m.from;
-      html+=`<div class="gm-row ${m.from==='me'?'me':'him'}${prev===m.from?' cont':''}">${m.from==='him'?(last?`<img class="gm-av" src="${PHOTO}" alt="">`:'<span class="gm-av"></span>'):''}
-        <div class="gm-b">${esc(m.text)}</div></div>`;
-      if(last)html+=`<div class="gm-meta ${m.from==='me'?'me':'him'}">${msgTime(m.t)}${m.from==='me'&&i===MS.items.length-1?' · Delivered':''}${m.auto?' · Auto-reply':''}</div>`;prev=m.from});
-    if(typing)html+=`<div class="gm-row him"><img class="gm-av" src="${PHOTO}" alt=""><div class="gm-b gm-typing"><i></i><i></i><i></i></div></div>`;
-    list.innerHTML=html;list.scrollTop=list.scrollHeight};
-  const autoReply=(text,delay)=>new Promise(res=>{setTimeout(()=>{draw(true);setTimeout(()=>{MS.items.push({from:'him',text,t:Date.now(),auto:1});saveMS();draw();SFX.play('receive');res()},1300)},delay||500)});
-  inp.oninput=()=>{btn.disabled=!inp.value.trim()};
-  form.onsubmit=async e=>{e.preventDefault();const text=inp.value.trim();if(!text)return;inp.value='';btn.disabled=true;
-    const firstMine=!MS.items.some(m=>m.from==='me');MS.items.push({from:'me',text,t:Date.now()});saveMS();draw();sendMS('message',text);SFX.play('send');
-    const em=text.match(EMAIL_RE);
-    if(em&&!MS.email){MS.email=em[0];saveMS();sendMS('message email',em[0]);await autoReply(`Got it! I'll reply to ${MS.email}.`);return}
-    if(firstMine){await autoReply("Thanks for the message! I'll read it and get back to you soon.");
-      if(!MS.email){MS.askedEmail=1;saveMS();await autoReply("What's the best email to reach you?",400)}}
+  const wrap=body.querySelector('.ct-wrap');
+  const hello=t=>`<div class="gm-row him"><img class="gm-av" src="${PHOTO}" alt=""><div class="gm-b">${t}</div></div>`;
+  let view=LIVE.admin?'inbox':'form';
+  const form=()=>{const me=ctMe(),sent=me.sent;
+    if(sent){wrap.innerHTML=`${hello(`Thanks, ${esc(sent.name.split(' ')[0])}! Your message is with me. I'll reply to <b>${esc(sent.email)}</b>, usually within a day.`)}
+      <div class="gm-meta him">${msgTime(sent.ts)} · Delivered</div>
+      <div class="ct-sum"><small>${esc((CT_TOPICS.find(x=>x[0]===sent.topic)||CT_TOPICS[4])[1])}</small><p>${esc(sent.msg)}</p></div>
+      <div class="ct-row"><button class="btn tonal" data-again>Send another message</button>${appVisible('book')?'<button class="btn tonal" data-open="book">Book a call</button>':''}</div>`;
+      wrap.querySelector('[data-again]').onclick=()=>{const m=ctMe();delete m.sent;ctSave(m);form()};wire(wrap);return}
+    const opt=(list,val)=>list.map(x=>`<option${x===val?' selected':''}>${esc(x)}</option>`).join('');
+    wrap.innerHTML=`${hello(`Hi! I'm ${esc(P.name.split(' ')[0])}. Tell me who you are and what you need, and I'll reply by email.`)}
+      <form class="ct" novalidate>
+        <div class="ct-two"><label class="ow-f">Your name *<input name="name" maxlength="80" autocomplete="name" required value="${esc(me.name||'')}"></label>
+          <label class="ow-f">Email *<input name="email" type="email" maxlength="120" autocomplete="email" required value="${esc(me.email||'')}"></label></div>
+        <div class="ct-two"><label class="ow-f"><span>Phone <small>(optional)</small></span><input name="phone" type="tel" maxlength="30" autocomplete="tel" value="${esc(me.phone||'')}"></label>
+          <label class="ow-f"><span>Company <small>(optional)</small></span><input name="company" maxlength="80" autocomplete="organization" value="${esc(me.company||'')}"></label></div>
+        <fieldset class="ct-topic"><legend>What is it about?</legend><div class="ct-chips">${CT_TOPICS.map(([k,t],i)=>`<label class="ct-chip"><input type="radio" name="topic" value="${k}"${i===0?' checked':''}><span>${t}</span></label>`).join('')}</div></fieldset>
+        <div class="ct-two ct-proj"><label class="ow-f">Budget<select name="budget">${opt(CT_BUDGET)}</select></label><label class="ow-f">Timeline<select name="when">${opt(CT_WHEN)}</select></label></div>
+        <label class="ow-f">Message *<textarea name="msg" rows="5" maxlength="3000" required placeholder="A few lines about what you have in mind"></textarea></label>
+        <input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="ct-hp">
+        <p class="hint ct-err" role="alert" hidden></p>
+        <div class="ct-row"><button class="btn" type="submit">Send message</button></div>
+        <p class="hint">Your name and email are sent with your message so I can reply. Want to stay anonymous? <button type="button" class="ct-link" data-open="guestbook">Sign the guestbook</button> instead.</p>
+      </form>`;
+    const f=wrap.querySelector('form'),err=f.querySelector('.ct-err'),proj=f.querySelector('.ct-proj');
+    const sync=()=>{proj.hidden=!['project','collab'].includes(f.topic.value)};f.querySelectorAll('[name=topic]').forEach(r=>r.onchange=sync);sync();
+    if(!appVisible('guestbook'))f.querySelector('.ct-link').parentElement.remove();
+    wire(wrap);
+    f.onsubmit=async e=>{e.preventDefault();err.hidden=true;
+      const v=Object.fromEntries(new FormData(f));
+      const bad=(m,el)=>{err.textContent=m;err.hidden=false;if(el)f[el].focus()};
+      if(!v.name.trim())return bad('Please add your name.','name');
+      if(!EMAIL_RE.test(v.email.trim()))return bad('Please add an email address I can reply to.','email');
+      if(v.msg.trim().length<2)return bad('Please write a message.','msg');
+      const isProj=['project','collab'].includes(v.topic);if(!isProj){delete v.budget;delete v.when}
+      const btn=f.querySelector('[type=submit]');btn.disabled=true;btn.textContent='Sending…';
+      let tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone}catch(x){}
+      try{const r=await fetch('/api/contact',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...v,tz,lang:navigator.language||'',ref:document.referrer||'',page:location.pathname,vid:visitor().id})});
+        const d=await r.json().catch(()=>({}));
+        if(!r.ok){btn.disabled=false;btn.textContent='Send message';return bad(d.error||'Could not send. Please try again.')}
+        ctSave({name:v.name.trim(),email:v.email.trim(),phone:v.phone.trim(),company:v.company.trim(),sent:{name:v.name.trim(),email:v.email.trim(),topic:v.topic,msg:v.msg.trim(),ts:Date.now()}});
+        SFX.play('send');form()}
+      catch(x){btn.disabled=false;btn.textContent='Send message';bad('Could not send. Check your connection and try again.')}};
+  };
+  const inbox=async()=>{wrap.innerHTML='<p class="hint">Loading messages…</p>';
+    let d=null;try{const r=await fetch('/api/contact',{cache:'no-store'});if(r.status===401){LIVE.admin=false;ownerChanged();return}if(r.ok)d=await r.json()}catch(e){}
+    if(view!=='inbox')return;
+    if(!d){wrap.innerHTML='<p class="hint">Could not load your messages. Try again shortly.</p>';return}
+    const L=d.messages||[],nNew=L.filter(m=>m.status==='new').length;
+    const when=t=>new Date(t).toLocaleString([], {day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'});
+    const row=(k,v)=>v?`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`:'';
+    const card=m=>`<article class="ct-card${m.status==='new'?' new':''}${m.status==='done'?' done':''}" data-id="${esc(m.id)}">
+      <div class="ct-h"><b>${esc(m.name)}</b>${m.status==='new'?'<span class="mi-new">new</span>':m.status==='done'?'<span class="ct-st">done</span>':''}<small>${esc(when(m.ts))}</small></div>
+      <p class="mi-e"><a href="mailto:${esc(m.email)}">${esc(m.email)}</a>${m.phone?` · <a href="tel:${esc(m.phone.replace(/[^\d+]/g,''))}">${esc(m.phone)}</a>`:''}</p>
+      <p class="ct-msg">${esc(m.msg)}</p>
+      <dl class="ct-dl">${row('About',(CT_TOPICS.find(x=>x[0]===m.topic)||CT_TOPICS[4])[1])}${row('Company',m.company)}${row('Budget',m.budget)}${row('Timeline',m.when)}${row('From',[m.city,m.countryName||m.country].filter(Boolean).join(', '))}${row('Time zone',m.tz)}${row('Language',m.lang)}${row('Came from',m.ref)}${row('Page',m.page)}${row('Device',m.ua)}</dl>
+      <div class="ed-ctl"><a class="btn" href="mailto:${esc(m.email)}?subject=${encodeURIComponent('Re: your message to '+P.name)}"${m.status==='new'?' data-st="read"':''}>Reply by email</a>
+        <button type="button" data-st="${m.status==='done'?'read':'done'}">${m.status==='done'?'Mark not done':'Mark done'}</button>${m.status==='new'?'<button type="button" data-st="read">Mark read</button>':''}
+        <button type="button" class="ed-del" data-del>Delete</button></div></article>`;
+    wrap.innerHTML=`<div class="ct-top"><small>${L.length} message${L.length===1?'':'s'}${nNew?`, ${nNew} new`:''}</small><button class="btn tonal" data-view="form">See the form visitors get</button></div>
+      ${L.length?L.map(card).join(''):'<p class="hint">No messages yet. When someone sends one from this app, it shows up here with their details.</p>'}
+      <p class="hint">Older notes visitors left for OGGY are in Settings, under OGGY's inbox.</p>`;
+    wrap.querySelector('[data-view]').onclick=()=>{view='form';form();const b=document.createElement('div');b.className='ct-top';b.innerHTML='<small>This is what visitors see.</small><button class="btn tonal">Back to messages</button>';b.querySelector('button').onclick=()=>{view='inbox';inbox()};wrap.prepend(b)};
+    const put=async(id,status)=>{try{await fetch('/api/contact',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({id,status})})}catch(e){}};
+    wrap.querySelectorAll('.ct-card').forEach(c=>{const id=c.dataset.id;
+      c.querySelectorAll('[data-st]').forEach(b=>b.addEventListener('click',async()=>{await put(id,b.dataset.st);if(b.tagName!=='A')inbox();else{c.classList.remove('new');const n=c.querySelector('.mi-new');n&&n.remove()}}));
+      c.querySelector('[data-del]').onclick=async()=>{if(!confirm('Delete this message for good?'))return;try{const r=await fetch('/api/contact?id='+encodeURIComponent(id),{method:'DELETE'});if(r.ok)c.remove()}catch(e){}}});
   };
   const callBtn=body.querySelector('.gm-call');
   callBtn.onclick=e=>{ if(matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad/i.test(navigator.userAgent))return; /* phones dial straight away */
     e.preventDefault();const old=body.querySelector('.gm-callpop');if(old){old.remove();return}
     const pop=document.createElement('div');pop.className='gm-callpop';
-    pop.innerHTML=`<b>Call ${esc(P.name.split(' ')[0])}</b><p class="gm-num">${PHONE_SHOW}</p><ol><li>Pick up your phone and open the dialer.</li><li>Dial the number above (it's an Indian number: +91).</li><li>No answer? Leave a message here and I'll call back.</li></ol><div class="gm-callbtns"><button class="btn" data-cp>Copy number</button><a class="btn tonal" href="tel:${PHONE_TEL}">Call from this device</a></div><small>Calls from a computer need a phone app such as Phone Link or Google Voice.</small>`;
+    pop.innerHTML=`<b>Call ${esc(P.name.split(' ')[0])}</b><p class="gm-num">${PHONE_SHOW}</p><ol><li>Pick up your phone and open the dialer.</li><li>Dial the number above (it's an Indian number: +91).</li><li>No answer? Send a message here and I'll call back.</li></ol><div class="gm-callbtns"><button class="btn" data-cp>Copy number</button><a class="btn tonal" href="tel:${PHONE_TEL}">Call from this device</a></div><small>Calls from a computer need a phone app such as Phone Link or Google Voice.</small>`;
     body.querySelector('.gm').appendChild(pop);
     pop.querySelector('[data-cp]').onclick=async ev=>{try{await navigator.clipboard.writeText(PHONE_SHOW);ev.target.textContent='Copied'}catch(x){ev.target.textContent=PHONE_SHOW}};
     setTimeout(()=>document.addEventListener('pointerdown',function f(ev){if(!pop.contains(ev.target)&&!callBtn.contains(ev.target)){pop.remove();document.removeEventListener('pointerdown',f)}}),0)};
-  draw();setTimeout(()=>inp.focus(),60);
+  if(view==='inbox')inbox();else{form();setTimeout(()=>{const i=wrap.querySelector('input[name=name]');if(i&&!i.value)i.focus({preventScroll:true})},60)}
 }
 function links(body){
   const L=P.linkpage;let grp='',rows='';
@@ -2925,7 +3003,7 @@ function settings(body){
   const th=document.documentElement.dataset.theme||"auto", wl=desk.dataset.wall, gr=desk.dataset.grain;
   const segs=(key,val,opts)=>`<div class="seg">${opts.map(t=>`<button data-${key}="${t}" class="${t===val?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
   body.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div class="walls">${Object.keys(WALLS).map(k=>`<button data-wl="${k}" aria-label="${k}" class="${k===wl?'on':''}">${WALLS[k]('p'+k)}<span class="lb">${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</div>
-  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>OGGY the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>OGGY's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold OGGY or the treat jar, then drag them anywhere.</p><h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
+  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}${desk.dataset.catlock?'':`<h3>OGGY the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>OGGY's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets him wander. Right or left parks him (and the treats) in that corner. You can also press and hold OGGY or the treat jar, then drag them anywhere.</p>`}<h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
   if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
   body.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('rkTapMin',b.dataset.tm==='on'?'1':'0')}catch(e){}settings(body)});
@@ -3210,6 +3288,11 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(
 /* ===== Owner mode (stage 1): site settings the owner edits live; visitors see them read-only ===== */
 var HIDDEN=new Set();
 var SITE={s:null,saveT:null,status:''};
+/* The owner can hide OGGY from every visitor (System settings). The owner still sees him. A visitor's own on/off choice is kept underneath. */
+var CAT_PREF=null;
+function catLock(off){if(off){if(!desk.dataset.catlock){CAT_PREF=desk.dataset.cat;desk.dataset.catlock='1'}desk.dataset.cat='off'}else if(desk.dataset.catlock){delete desk.dataset.catlock;desk.dataset.cat=CAT_PREF||'on'}}
+function applyCatSite(){if(SITE.s)try{localStorage.setItem('rkCatOff',SITE.s.oggyHidden?'1':'0')}catch(e){}
+  const off=SITE.s?!!SITE.s.oggyHidden:(()=>{try{return localStorage.getItem('rkCatOff')==='1'}catch(e){return false}})();catLock(off&&!LIVE.admin)}
 const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),timeline:JSON.parse(JSON.stringify(TIMELINE)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
 const NEVER_HIDE=['settings','notes'];
 function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return !!LIVE.admin;return !HIDDEN.has(id)||!!LIVE.admin}
@@ -3217,7 +3300,8 @@ function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=s.now||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
   const A=(k)=>Array.isArray(s[k])?s[k]:P0[k];P.bio=s.bio||P0.bio;P.email=s.email||P0.email;P.booking=s.booking||P0.booking;P.skills=A('skills');P.experience=A('experience');P.links=A('links');P.linkpage=A('linkpage');P.projects=A('projects');P.timeline=A('timeline');P.qrs=A('qrs');
   PHOTO=s.photo||'/img/avatar.jpg';PHOTO_POP=s.photo||'/img/avatar-pop.webp';{const li=document.getElementById('lkImg');if(li&&li.getAttribute('src')!==PHOTO)li.src=PHOTO}
-  {const w=document.getElementById('wall');if(w){if(s.wallpaper){w.style.backgroundImage='url("'+s.wallpaper+'")';w.classList.add('pic')}else{w.style.backgroundImage='';w.classList.remove('pic')}}}
+  {const w=document.getElementById('wall');if(w){const L=s.wallpaper||s.wallpaperDark,D=s.wallpaperDark||s.wallpaper,u=x=>'url("'+x+'")';w.style.backgroundImage='';
+    if(L){w.style.setProperty('--wp-l',u(L));w.style.setProperty('--wp-d',u(D));w.classList.add('pic')}else{w.style.removeProperty('--wp-l');w.style.removeProperty('--wp-d');w.classList.remove('pic')}}}
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
   document.title=window.__STANDALONE?`${P.name} — Links`:`${P.name} — Portfolio`;set('who',P.name);set('wStatus',P.status);set('wNow',P.now);set('lHi',`Hi, I'm ${P.name}`);set('lSub',P.role);set('lkN',P.name);set('mSong',P.music.song);set('mArtist',P.music.artist);window.__applyStatusDot&&__applyStatusDot()}
 function applyHidden(){window.__applyAppEdits&&__applyAppEdits();HIDDEN=new Set(((SITE.s&&SITE.s.hiddenApps)||[]).filter(x=>!NEVER_HIDE.includes(x)));renderIcons()}
@@ -3227,6 +3311,7 @@ async function siteInit(){await Promise.all([liveAuth(),siteLoad()]);applyText()
 function ownerChanged(){
   /* OGGY's own life (antics) runs only for the owner; visitors keep the calm cat and never download it */
   if(LIVE.admin)import('/js/oggy.mjs').then(m=>m.start()).catch(()=>{});else if(window.OGGY_LIFE)OGGY_LIFE.stop();
+  applyCatSite();
   window.__ownerEditUI&&__ownerEditUI();
   let p=document.getElementById('ownPill');
   if(LIVE.admin){if(!p){p=document.createElement('button');p.id='ownPill';p.className='pill topbtn ownpill';p.innerHTML='<i></i>Owner mode';p.title='Open System Settings';p.onclick=()=>openApp('settings');const w=document.getElementById('who');w?w.after(p):document.querySelector('.topbar').prepend(p)}}
@@ -3234,7 +3319,7 @@ function ownerChanged(){
   desk.classList.toggle('owner',!!LIVE.admin);
   renderIcons();
   const sw=open.settings;if(sw)settings(sw.querySelector('.body'));
-  EDITABLE.concat(['photos','resume','links','projects','timeline']).forEach(rerenderApp);gbInit();window.__musicRefresh&&__musicRefresh()}
+  EDITABLE.concat(['photos','resume','links','projects','timeline','messages']).forEach(rerenderApp);gbInit();window.__musicRefresh&&__musicRefresh()}
 function siteSave(){clearTimeout(SITE.saveT);SITE.status='Saving…';siteStatus();
   SITE.saveT=setTimeout(async()=>{try{const r=await fetch('/api/site',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({settings:SITE.s})});
     if(r.status===401){LIVE.admin=false;SITE.status='Signed out. Changes not saved.';ownerChanged();return}
@@ -3256,6 +3341,8 @@ function ownerPanel(body){
   <h3>Where each app lives</h3><p class="hint">Desktop shows the app on the desktop and in the app drawer. Drawer keeps it only in the drawer. Hidden removes it for visitors (you still see it, dimmed).</p>
   <div class="ow-places">${APPS.map(a=>{const hide=hid.has(a.id),can=!NEVER_HIDE.includes(a.id),pl=hide?'hidden':appPlace(a);return `<div class="ow-pl" data-app="${a.id}"><span class="ow-pln">${icon(a)}<b>${esc(a.title)}</b></span><div class="seg" role="group" aria-label="${esc(a.title)} placement">${['desktop','drawer'].concat(can?['hidden']:[]).map(k=>`<button data-pl="${k}" class="${pl===k?'on':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`}).join('')}</div>
   <h3>Guestbook</h3><label class="ow-app"><input type="checkbox" id="gbAuto" ${SITE.s&&SITE.s.gbAuto?'checked':''}><span>Publish notes right away (otherwise each note waits for your approval)</span></label>
+  <h3>OGGY</h3><label class="ow-app"><input type="checkbox" id="oggyHide" ${SITE.s&&SITE.s.oggyHidden?'checked':''}><span>Hide OGGY from visitors (you still see him while signed in)</span></label>
+  <h3>Messages</h3><p class="hint">What visitors send from the Messages app: name, email, what it is about and where they came from.</p><div class="ow-row"><button class="btn tonal ow-msgs">Open messages</button></div>
   <h3>OGGY's inbox</h3><p class="hint">What visitors tell OGGY: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
   <div class="ow-row"><button class="btn tonal ow-out">Sign out</button></div>`;
   body.appendChild(sec);
@@ -3265,6 +3352,8 @@ function ownerPanel(body){
     s.place=s.place||{};if(k==='hidden')set.add(id);else{set.delete(id);s.place[id]=k}s.hiddenApps=[...set];
     row.querySelectorAll('[data-pl]').forEach(x=>x.classList.toggle('on',x===b));applyHidden();siteSave();SFX.play('toggle')});
   sec.querySelector('#gbAuto').onchange=e=>{cur().gbAuto=e.target.checked;siteSave()};
+  sec.querySelector('#oggyHide').onchange=e=>{if(e.target.checked)cur().oggyHidden=true;else delete cur().oggyHidden;applyCatSite();siteSave()};
+  sec.querySelector('.ow-msgs').onclick=()=>openApp('messages');
   const ib=sec.querySelector('.ow-inbox');ib.onclick=()=>mochiInbox(body);
   fetch('/api/mochi',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(!d)return;let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}const n=d.visitors.filter(v=>(v.updated||0)>seen).length;if(n)ib.textContent=`Open inbox (${n} new)`}).catch(()=>{});
   sec.querySelector('.ow-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';SITE.status='';ownerChanged();refreshNotes()}}
@@ -3392,29 +3481,31 @@ function gbRender(){
     const mine=gbMine();
     const active=document.activeElement&&body.contains(document.activeElement)&&document.activeElement.matches('input,textarea');
     const date=ts=>ts?new Date(ts).toLocaleDateString([], {day:'numeric',month:'short',year:'numeric'}):'';
-    const card=e=>`<div class="gbe${e.status==='pending'?' hid':''}" style="background:var(--${GBC.includes(e.color)?e.color:'c4'})"><b style="color:var(--glyph)">${esc(String(e.name||'Someone').slice(0,40))}${e.status==='pending'?' · waiting':''}</b><small>${date(e.ts)}</small><p>${esc(String(e.msg||'').slice(0,280))}</p>${LIVE.admin?`<div class="ed-ctl">${e.status==='pending'?`<button data-gm="approve" data-id="${e.id}">Approve</button>`:`<button data-gm="unapprove" data-id="${e.id}">Hide</button>`}<button class="ed-del" data-gm="delete" data-id="${e.id}">Delete</button></div>`:''}</div>`;
+    const card=e=>`<div class="gbe${e.status==='pending'?' hid':''}" style="background:var(--${GBC.includes(e.color)?e.color:'c4'})"><b style="color:var(--glyph)">${esc(String(e.name||'Anonymous').slice(0,40))}${e.status==='pending'?' · waiting':''}</b><small>${date(e.ts)}</small><p>${esc(String(e.msg||'').slice(0,280))}</p>${LIVE.admin?`<div class="ed-ctl">${e.status==='pending'?`<button data-gm="approve" data-id="${e.id}">Approve</button>`:`<button data-gm="unapprove" data-id="${e.id}">Hide</button>`}<button class="ed-del" data-gm="delete" data-id="${e.id}">Delete</button></div>`:''}</div>`;
     let form="";
     if(!GB.ready)form=`<p class="hint">Loading the guestbook…</p>`;
-    else if(mine&&mine.status==='pending'&&!LIVE.admin)form=`<p class="hint">Thank you, ${esc(mine.name)}! Your note will appear here once Rohan has read it.</p>`;
-    else form=`<div class="gbf"><input id="gbN" maxlength="40" placeholder="Your name" value="${esc(mine?.name||'')}"><textarea id="gbM" maxlength="280" rows="3" placeholder="Say hi, leave feedback, or share a thought"></textarea>
+    else if(mine&&mine.status==='pending'&&!LIVE.admin)form=`<p class="hint">Thank you${mine.name?', '+esc(mine.name):''}! Your note will appear here once Rohan has read it.</p>`;
+    else form=`<div class="gbf"><input id="gbN" maxlength="40" placeholder="Your name" value="${esc(mine?.anon?'':(mine?.name||''))}"${mine?.anon?' hidden':''}><label class="gb-anon"><input type="checkbox" id="gbA"${mine?.anon?' checked':''}><span>Sign anonymously</span></label><textarea id="gbM" maxlength="280" rows="3" placeholder="Say hi, leave feedback, or share a thought"></textarea>
       <input id="gbW" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <div class="r"><div class="sw">${GBC.map(c=>`<button data-c="${c}" aria-label="Card color ${c}" style="background:var(--${c})" class="${(mine?.color||'c4')===c?'on':''}"></button>`).join('')}</div><button class="btn" id="gbS">Sign guestbook</button></div>${GB.err?`<p class="hint">${esc(GB.err)}</p>`:!GB.auto?`<p class="hint">New notes appear after Rohan approves them.</p>`:''}</div>`;
     const shown=LIVE.admin?GB.entries:GB.entries.filter(e=>e.status!=='pending');
     const list=shown.length?`<div class="gbl">${shown.map(card).join('')}</div>`:(GB.ready?`<p class="hint">No notes yet. Be the first to sign.</p>`:'');
     const wait=LIVE.admin?GB.entries.filter(e=>e.status==='pending').length:0;
     if(active){const l=body.querySelector('.gblist');if(l){l.innerHTML=list;bindMod(body);return}}
-    body.innerHTML=`<h1>Guestbook</h1><p>Thanks for stopping by. Leave a note for me and future visitors.</p>${LIVE.admin?`<p class="hint">${wait?`${wait} note${wait>1?'s':''} waiting for your approval.`:'Nothing waiting for approval.'} ${GB.auto?'Notes publish right away.':'Notes wait for your approval.'} Change this in System Settings.</p>`:''}${form}<div class="gblist">${list}</div>`;
+    body.innerHTML=`<h1>Guestbook</h1><p>Thanks for stopping by. Leave a note for me and future visitors, with your name or anonymously.</p>${LIVE.admin?`<p class="hint">${wait?`${wait} note${wait>1?'s':''} waiting for your approval.`:'Nothing waiting for approval.'} ${GB.auto?'Notes publish right away.':'Notes wait for your approval.'} Change this in System Settings.</p>`:''}${form}<div class="gblist">${list}</div>`;
     bindMod(body);
     let color=mine?.color||'c4';
     body.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{color=b.dataset.c;body.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b))});
-    const sb=body.querySelector('#gbS');
+    const sb=body.querySelector('#gbS'),an=body.querySelector('#gbA');
+    if(an)an.onchange=()=>{const n=body.querySelector('#gbN');n.hidden=an.checked;if(!an.checked)n.focus()};
     if(sb)sb.onclick=async()=>{
-      const name=body.querySelector('#gbN').value.trim(),msg=body.querySelector('#gbM').value.trim();
-      if(!name||!msg){sb.textContent="Add your name and a message";return}
+      const anon=!!(an&&an.checked),name=anon?'':body.querySelector('#gbN').value.trim(),msg=body.querySelector('#gbM').value.trim();
+      if(!msg){sb.textContent="Add a message";return}
+      if(!name&&!anon){sb.textContent="Add your name, or sign anonymously";return}
       sb.disabled=true;sb.textContent="Signing…";
-      try{const r=await fetch('/api/guestbook',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,msg,color,vid:visitor().id,website:body.querySelector('#gbW').value})});
+      try{const r=await fetch('/api/guestbook',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,anon,msg,color,vid:visitor().id,website:body.querySelector('#gbW').value})});
         const d=await r.json().catch(()=>({}));
-        if(r.ok){GB.err='';try{localStorage.setItem('gbMine',JSON.stringify({name,color,status:d.status||'pending',ts:Date.now()}))}catch(e){}
+        if(r.ok){GB.err='';try{localStorage.setItem('gbMine',JSON.stringify({name:anon?'':name,anon,color,status:d.status||'pending',ts:Date.now()}))}catch(e){}
           await gbInit();return}
         GB.err=d.error||"Couldn't sign. Try again";gbRender()}
       catch(e){GB.err="Couldn't sign. Check your connection and try again";gbRender()}
@@ -3504,6 +3595,13 @@ function minimizeWin(w,id,quiet,to){if(w.classList.contains('min')||w.classList.
   w.classList.add('minimizing');if(!quiet)SFX.play('min');const done=()=>{if(!w.classList.contains('minimizing'))return;w.classList.remove('minimizing');w.classList.add('min');w.classList.remove('top');shelf()};
   w.addEventListener('animationend',done,{once:true});setTimeout(done,380)}
 function minimizeAll(){const ws=Object.entries(open).filter(([id,w])=>!w.classList.contains('min')&&!w.classList.contains('minimizing'));if(!ws.length)return;SFX.play('min');ws.forEach(([id,w])=>minimizeWin(w,id,true))}
+/* Booking links (cal.com, Calendly or the owner's own booking link) open in the Book a call window instead of a new tab. */
+function isBookingUrl(u){u=String(u||'');return !!u&&(u===P.booking||/^https:\/\/(www\.)?(cal\.com|calendly\.com)\//i.test(u))}
+function openBook(url){window.__bookUrl=url||P.booking;
+  const w=open.book,a=APPS.find(x=>x.id==='book');if(w&&a){const b=w.querySelector('.body');if(b)a.render(b)}openApp('book')}
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href]');if(!a||e.defaultPrevented||e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;
+  if(a.closest('.bk-foot')||a.dataset.ext!==undefined||!isBookingUrl(a.href)||!APPS.find(x=>x.id==='book')||!appVisible('book'))return;
+  e.preventDefault();openBook(a.href)},true);
 function wire(body){
   if(LIVE.admin&&window.edBtn)edBtn(body);
   body.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openApp(b.dataset.open));
@@ -3546,7 +3644,7 @@ function showCtx(x,y,custom){SFX.play('tap');
   const items=custom||[["Open About me",()=>openApp('about')],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
     [isDark()?"Switch to light mode":"Switch to dark mode",()=>{document.documentElement.dataset.theme=isDark()?"light":"dark";save()}],
     ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],
-    ...(desk.dataset.cat==="off"?[["Bring OGGY back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake OGGY gently",()=>MOCHI.wake()]]:[["Talk to OGGY",()=>MOCHI.talk()],["Let OGGY nap",()=>MOCHI.sleep()]]),
+    ...(desk.dataset.catlock?[]:desk.dataset.cat==="off"?[["Bring OGGY back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake OGGY gently",()=>MOCHI.wake()]]:[["Talk to OGGY",()=>MOCHI.talk()],["Let OGGY nap",()=>MOCHI.sleep()]]),
     ...(desk.dataset.status==="off"?[["Show status widget",()=>{desk.dataset.status="on";save()}]]:[]),
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
     ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),...(window.__tileDesktop?__tileDesktop():[]),
@@ -3832,8 +3930,8 @@ LS.onkeydown=e=>{if(e.key==="Enter"){const b=L.querySelector('[data-app]');if(b)
 document.addEventListener('keydown',e=>{if(e.key==="Escape")hideLauncher()});
 desk.addEventListener('pointerdown',e=>{if(!L.hidden&&!e.target.closest('#launcher,#lBtn'))hideLauncher()});
 
-function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.cat,music:desk.dataset.music}))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;}}catch(e){}}
+function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.catlock?(CAT_PREF||'on'):desk.dataset.cat,music:desk.dataset.music}))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;}}catch(e){}applyCatSite()}
 
 function tick(){
   const d=new Date();
@@ -4143,7 +4241,6 @@ setInterval(()=>{
     if(d<120&&n-C.lastMove>1800&&n-C.lastSlow>9000){C.lastSlow=n;mood('slow',1400);say(pick(['…','*slow blink*']),1300);trust(.5);return}
     const r=Math.random();if(r<.2)mood('blink',170);else if(r<.26)mood('twitch',360);
   }
-  maybeTalk();
 },1100);
 
 /* ---------- conversation ---------- */
@@ -4151,7 +4248,7 @@ const V=(()=>{try{return JSON.parse(localStorage.getItem('mochiVisitor')||'null'
 V.answers=V.answers||[];V.stage=V.stage||0;V.name=V.name||'';
 if(!V.id){V.id=Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{localStorage.setItem('mochiVisitor',JSON.stringify(V))}catch(e){}}
 const saveV=()=>{try{localStorage.setItem('mochiVisitor',JSON.stringify(V))}catch(e){}};
-const bootAt=now();let lastTalk=0;
+let lastTalk=0;
 async function record(q,a){V.answers.push({q,a,t:now()});saveV();
   try{await fetch('/api/mochi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:V.id,name:V.name||'',q:String(q).slice(0,40),a:String(a).slice(0,500)})})}catch(e){}}
 function nm(){return V.name?`, <b>${esc(V.name)}</b>`:''}
@@ -4178,33 +4275,9 @@ function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
 }
 const moreChip={t:'Ask me about Rohan',fn:()=>askMenu()};
 const byeChip={t:'Bye, OGGY',fn:()=>closeChat()};
-function book(){window.open(P.booking,'_blank','noopener');record('action','opened booking link')}
+function book(){openBook();record('action','opened booking link')}
 function askEmail(q){openChat(`Leave your email and I’ll make sure Rohan sees it${nm()}. Only he will read it.`,{input:{type:'email',ph:'you@example.com',max:120,done:v=>{record(q||'email',v);V.email=v;saveV();trust(.5);openChat('Got it! I’ll put it right on his keyboard. Where he can’t miss it.',{chips:[moreChip,byeChip]})}},chips:[{t:'Never mind',fn:()=>closeChat()}]})}
-/* scripted questions she asks over time */
-const STAGES=[
-  ()=>openChat("psst… hi! I’m <b>OGGY</b>. What’s your name?",{input:{ph:'Your name',max:40,done:v=>{V.name=v.slice(0,40);V.stage=1;saveV();record('name',V.name);trust(.5);hearts(2);
-      openChat(`Nice to meet you, <b>${esc(V.name)}</b>! I’ll remember you.`,{chips:[{t:'Nice to meet you too',fn:()=>closeChat()},moreChip]})}},
-    chips:[{t:'I’d rather not say',fn:()=>{V.stage=1;V.name='';saveV();record('name','(skipped)');openChat("That’s okay. Mysterious. I respect that.",{chips:[byeChip]})}}]}),
-  ()=>openChat(`So${nm()}… what brings you here?`,{chips:[
-      {t:'Looking to hire a designer',fn:()=>{record('reason','hiring');openChat(`Ooh! Rohan does logos, identities, and brand strategy. Want him to reach out to you?`,{chips:[{t:'Yes, take my email',pri:1,fn:()=>askEmail('hire-email')},{t:'I’ll book a call',fn:()=>{book();closeChat(true)}},byeChip]})}},
-      {t:'Just exploring',fn:()=>{record('reason','exploring');openChat('Take your time. The Journal is where his thoughts live. And the treat jar is… just saying.',{chips:[{t:'Open the Journal',fn:()=>{openApp('journal');closeChat(true)}},byeChip]})}},
-      {t:'Reading the journal',fn:()=>{record('reason','journal');openChat('Good taste. The goodwill one is my favourite. Mostly because I nap on it.',{chips:[byeChip]})}},
-      {t:'Something else',fn:()=>openChat('Tell me! I won’t judge. Much.',{input:{ph:'What brings you here?',done:v=>{record('reason',v);openChat('Noted! I’ll tell Rohan.',{chips:[moreChip,byeChip]})}}})}]}),
-  ()=>openChat(`Hey${nm()}, where are you visiting from?`,{input:{ph:'City or country',max:60,done:v=>{record('location',v);openChat(`${esc(v)}! Never been. I’ve only been to the bottom of this screen.`,{chips:[byeChip]})}},chips:[{t:'Skip',fn:()=>closeChat()}]}),
-  ()=>openChat('Can I ask… how did you find Rohan?',{chips:['LinkedIn','Reddit','Instagram','A friend'].map(s=>({t:s,fn:()=>{record('source',s);openChat(s==='A friend'?'Tell your friend OGGY says hi.':`${s}! He’s always posting there. I prefer napping.`,{chips:[byeChip]})}})).concat([{t:'Other',fn:()=>openChat('Where from?',{input:{ph:'How did you find him?',done:v=>{record('source',v);openChat('Interesting! Noted.',{chips:[byeChip]})}}})}])}),
-  ()=>openChat(`Last one${nm()}: anything you’d like me to tell Rohan? Feedback, ideas, a hello?`,{input:{ph:'Your message',max:400,done:v=>{record('message',v);hearts(3);openChat('Delivered. Well, it will be when he wakes up from his nap.',{chips:[moreChip,byeChip]})}},chips:[{t:'Not now',fn:()=>closeChat()}]})
-];
-function maybeTalk(){
-  if(desk.dataset.cat==='off'||C.chat||C.busy||C.drag||C.treat||C.hiding||C.pose!=='sit'||C.y>2||now()-(C.lastTreat||0)<15000)return;
-  if(V.stage>=STAGES.length)return;const n=now();
-  const gap=V.stage===0?20000:60000;
-  if(n-bootAt<gap||n-lastTalk<gap||n-C.lastPoke<15000||n-(C.cameOut||0)<15000||n-C.awakeSince<6000)return;
-  if(document.querySelector('.win.top .cc-form, .win.top input:focus'))return;
-  /* never start a chat for the owner, and never interrupt someone who is working in a window or typing */
-  if(LIVE.admin)return;
-  {const ae=document.activeElement;if(ae&&ae!==document.body&&(ae.closest('.win')||ae.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)))return}
-  const s=V.stage;V.stage++;saveV();STAGES[s]();
-}
+/* OGGY never starts a conversation by himself: he only talks when a visitor taps him or picks “Talk to OGGY”. */
 
 /* ---------- move OGGY and the treat jar: press and hold for half a second, then drag anywhere ---------- */
 const HOLD=450;

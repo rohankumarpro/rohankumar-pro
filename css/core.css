@@ -71,7 +71,10 @@ button .ic,a .ic{pointer-events:none}
 .jed-add span{display:inline-grid;vertical-align:middle}
 
 /* an uploaded wallpaper replaces the coloured shapes */
-.wall.pic{background-size:cover!important;background-position:center!important}
+.wall.pic{background-size:cover!important;background-position:center!important;background-image:var(--wp-l)}
+/* a second picture for dark mode, when the owner adds one; follows the theme and the system setting */
+:root[data-theme="dark"] .wall.pic{background-image:var(--wp-d,var(--wp-l))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .wall.pic{background-image:var(--wp-d,var(--wp-l))}}
 .wall.pic>*,.wall.pic svg{display:none!important}
 
 /* a picture that could not load: invisible, so the tile behind it shows instead of a broken-image icon */

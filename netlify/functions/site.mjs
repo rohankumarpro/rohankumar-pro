@@ -23,6 +23,7 @@ export function cleanSettings(s) {
   const bio = str(s?.bio, 1500); if (bio) o.bio = bio;
   const photo = safeImg(s?.photo); if (photo) o.photo = photo;
   const wallpaper = safeImg(s?.wallpaper); if (wallpaper) o.wallpaper = wallpaper;
+  const wallpaperDark = safeImg(s?.wallpaperDark); if (wallpaperDark) o.wallpaperDark = wallpaperDark; // the same wallpaper, made for dark mode
   const img = (v) => { const x = safeImg(v); return x ? { img: x } : {}; };
   const email = str(s?.email, 120); if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) o.email = email;
   const booking = url(s?.booking, WEB); if (booking) o.booking = booking;
@@ -80,6 +81,7 @@ export function cleanSettings(s) {
   if (Array.isArray(s?.resumeDoc)) o.resumeDoc = cleanBlocks(s.resumeDoc); // the owner's own resume page (a block document); its presence switches the page to it
   if (Array.isArray(s?.resumeDocBackup) && s.resumeDocBackup.length) o.resumeDocBackup = cleanBlocks(s.resumeDocBackup);
   if (s?.gbAuto === true) o.gbAuto = true; // guestbook notes publish without waiting for approval
+  if (s?.oggyHidden === true) o.oggyHidden = true; // OGGY the cat is hidden from visitors (the owner still sees him)
   if (s?.place && typeof s.place === "object") { // where each app lives: on the desktop, or only in the app drawer
     const pl = {};
     for (const [k, v] of Object.entries(s.place).slice(0, 60)) if (/^[a-z0-9_-]{1,30}$/.test(k) && (v === "desktop" || v === "drawer")) pl[k] = v;

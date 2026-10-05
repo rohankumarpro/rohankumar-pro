@@ -1,6 +1,6 @@
 // /api/guestbook
 //   GET     anyone: approved notes.  Owner: every note, with its status.
-//   POST    anyone: sign the guestbook {name, msg, color, vid}. Notes wait for approval unless the owner turned on "Publish notes right away".
+//   POST    anyone: sign the guestbook {name, anon, msg, color, vid}. Name is optional: anonymous notes show as "Anonymous". Notes wait for approval unless the owner turned on "Publish notes right away".
 //   PUT     owner: {id, action: "approve" | "unapprove"}
 //   DELETE  owner: ?id=<id>
 import { createHash } from "node:crypto";
@@ -37,8 +37,9 @@ export const handler = async (event) => {
       const b = body(event);
       if (!b) return json({ error: "Bad JSON" }, 400);
       if (b.website) return json({ ok: true, status: "pending" }); // hidden field only bots fill in: pretend it worked
-      const name = clean(b.name, 40), msg = clean(b.msg, 280);
-      if (!name || !msg) return json({ error: "Add your name and a message" }, 400);
+      const anon = b.anon === true || !clean(b.name, 40); // signing without a name is fine: the note shows as "Anonymous"
+      const name = anon ? "Anonymous" : clean(b.name, 40), msg = clean(b.msg, 280);
+      if (!msg) return json({ error: "Add a message" }, 400);
       if (/(https?:\/\/|www\.)\S+.*(https?:\/\/|www\.)\S+/i.test(msg)) return json({ error: "Please keep it to one link at most" }, 400);
       const vid = /^[a-z0-9]{10,32}$/.test(b.vid || "") ? b.vid : "";
       const h = event.headers || {};
@@ -53,6 +54,7 @@ export const handler = async (event) => {
         id: Math.random().toString(16).slice(2, 14).padEnd(12, "0"), name, msg,
         color: COLORS.includes(b.color) ? b.color : "c4", ts: Date.now(), status, ip, vid,
       };
+      if (anon) entry.anon = true;
       await gbAdd(store, entry);
       return json({ ok: true, status, entry: pub(entry) });
     }
