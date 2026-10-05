@@ -179,8 +179,8 @@ input[type=checkbox],input[type=radio]{accent-color:var(--primary)}
 .mu-app[data-s=playing] .mpa-row.on .mu-eq i{animation:mu-eq .9s ease-in-out infinite}
 .mu-app .mu-empty{padding:18px 0}.mu-app .mu-empty p{color:var(--ink2)}
 /* while a video plays here, the controls step aside until the pointer moves */
-.mu-app.vid.idle .mpa-now,.mu-app.vid.idle .mpa-top{opacity:0;transform:translateY(6px);pointer-events:none}.mu-app.vid.idle .mpa-scrim{opacity:.25}.mu-app .mpa-scrim{transition:opacity .4s ease}
-.mu-app.vid.idle{cursor:none}
+.mu-app.idle .mpa-now,.mu-app.idle .mpa-top{opacity:0;transform:translateY(6px);pointer-events:none}.mu-app.idle .mpa-scrim{opacity:.25}.mu-app .mpa-now{transition:opacity .4s ease,transform .4s ease}.mu-app .mpa-scrim{transition:opacity .4s ease}
+.mu-app.idle{cursor:none}
 /* wide windows: the records sit in a glass panel at the right */
 @container (min-width:760px){
   .mu-app .mpa-lib{left:auto;right:14px;top:calc(var(--barh,56px) + 56px);bottom:14px;width:320px;transform:translateX(calc(100% + 24px))}

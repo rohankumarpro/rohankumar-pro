@@ -135,26 +135,55 @@ export function showBlocks(el, blocks, opts = {}) {
   el.innerHTML = renderBlocks(blocks, { hBase: opts.hBase ?? 2, media: opts.media || { carousels: typeof CAROUSELS !== "undefined" ? CAROUSELS : {} } });
   wireBlocks(el);
 }
+const LB_SEL = ".lb-z, .bk-fig img, .bk-gal img";
+const fullOf = (i) => (i.dataset.full || i.currentSrc || i.src).replace(/-t\.(jpe?g|png|webp)(\?|$)/, ".$1$2");
+// every zoomable picture in the same article (the project cover too), in page order, opening on the one tapped
+export function zoomFrom(img) {
+  const root = img.closest("[data-lb-root]") || img.closest(".bk-doc") || img.parentElement;
+  const all = [...root.querySelectorAll(LB_SEL)].filter((i) => i.offsetParent !== null || i === img);
+  lightbox(all.map((i) => ({ src: fullOf(i), thumb: i.currentSrc || i.src, alt: i.alt })), Math.max(0, all.indexOf(img)));
+}
 export function wireBlocks(el) {
   el.querySelectorAll(".bk-fig img, .bk-gal img").forEach((img) => { img.classList.add("bk-img-zoom"); });
+  if (el.__lbWired) return; el.__lbWired = true; // showing the same page again never adds a second viewer
   el.addEventListener("click", (e) => {
     const img = e.target.closest(".bk-fig img, .bk-gal img"); if (!img || e.target.closest("a")) return;
-    const all = [...el.querySelectorAll(".bk-fig img, .bk-gal img")];
-    lightbox(all.map((i) => ({ src: (i.getAttribute("srcset") ? i.src.replace(/-t\.(jpe?g|png|webp)/, ".$1") : i.currentSrc || i.src).replace(/-t\./, "."), alt: i.alt })), all.indexOf(img));
+    e.preventDefault(); zoomFrom(img);
   });
 }
 export function lightbox(items, start = 0) {
-  let i = start;
+  if (!items.length) return;
+  document.querySelector(".lb-ov")?.remove();
+  let i = Math.min(Math.max(0, start), items.length - 1), tok = 0, swiped = false;
+  const back = document.activeElement;
   const ov = h("div", { class: "lb-ov", role: "dialog", "aria-modal": "true", "aria-label": "Picture viewer" });
-  const img = h("img", { alt: "" }), cap = h("div", { class: "lb-c" });
-  const show = () => { img.src = items[i].src; img.alt = items[i].alt || ""; cap.textContent = (items[i].alt || "") + (items.length > 1 ? `  ·  ${i + 1} / ${items.length}` : ""); };
-  const close = () => { ov.remove(); document.removeEventListener("keydown", key, true); };
-  const go = (d) => { i = (i + d + items.length) % items.length; show(); };
-  const key = (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); } if (e.key === "ArrowRight" && items.length > 1) go(1); if (e.key === "ArrowLeft" && items.length > 1) go(-1); };
-  ov.append(img, cap, h("button", { class: "lb-x", "aria-label": "Close", onclick: close, html: icon("x", { size: 22 }) }), items.length > 1 ? [h("button", { class: "lb-p", "aria-label": "Previous", onclick: () => go(-1), html: icon("chevron-left", { size: 26 }) }), h("button", { class: "lb-n", "aria-label": "Next", onclick: () => go(1), html: icon("chevron-right", { size: 26 }) })] : null);
-  ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
-  let sx = null; ov.addEventListener("pointerdown", (e) => { sx = e.clientX; }); ov.addEventListener("pointerup", (e) => { if (sx != null && items.length > 1) { const dx = e.clientX - sx; if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1); } sx = null; });
-  document.body.append(ov); document.addEventListener("keydown", key, true); show();
+  const img = h("img", { alt: "", class: "lb-img", draggable: "false" }), cap = h("div", { class: "lb-c" });
+  const ready = new Map(), load = (src) => { if (!src) return Promise.resolve(); if (!ready.has(src)) { const im = new Image(); im.decoding = "async"; ready.set(src, new Promise((r) => { im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(r); im.onerror = r; })); im.src = src; } return ready.get(src); };
+  const show = async (dir) => {
+    const it = items[i], my = ++tok;
+    cap.textContent = (it.alt || "") + (items.length > 1 ? `${it.alt ? "  ·  " : ""}${i + 1} / ${items.length}` : "");
+    if (dir) { img.style.setProperty("--dx", (dir > 0 ? -30 : 30) + "px"); img.classList.add("out"); }
+    else if (!img.src && it.thumb) img.src = it.thumb; // the small picture straight away, the large one when it arrives
+    await Promise.all([load(it.src), new Promise((r) => setTimeout(r, dir ? 150 : 0))]); if (my !== tok) return;
+    img.style.transition = "none"; img.style.setProperty("--dx", (dir > 0 ? 30 : dir < 0 ? -30 : 0) + "px"); img.src = it.src; img.alt = it.alt || ""; void img.offsetWidth; img.style.transition = "";
+    requestAnimationFrame(() => { if (my === tok) { img.style.setProperty("--dx", "0px"); img.classList.remove("out"); } });
+    if (items.length > 1) { load(items[(i + 1) % items.length].src); load(items[(i - 1 + items.length) % items.length].src); }
+  };
+  const close = () => { tok++; document.removeEventListener("keydown", key, true); ov.classList.add("lb-out"); setTimeout(() => ov.remove(), 160); back && back.focus && back.focus({ preventScroll: true }); };
+  const go = (d) => { if (items.length < 2) return; i = (i + d + items.length) % items.length; show(d); };
+  const key = (e) => {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); e.stopPropagation(); go(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); go(-1); }
+  };
+  const x = h("button", { class: "lb-x", "aria-label": "Close", onclick: close, html: icon("x", { size: 22 }) });
+  ov.append(img, cap, x, items.length > 1 ? [h("button", { class: "lb-p", "aria-label": "Previous picture", onclick: () => go(-1), html: icon("chevron-left", { size: 26 }) }), h("button", { class: "lb-n", "aria-label": "Next picture", onclick: () => go(1), html: icon("chevron-right", { size: 26 }) })] : null);
+  ov.addEventListener("click", (e) => { if (swiped) { swiped = false; return; } if (e.target === ov) close(); }); // a swipe never closes it
+  let sx = null, sy = 0;
+  ov.addEventListener("pointerdown", (e) => { if (e.target.closest("button")) return; sx = e.clientX; sy = e.clientY; });
+  ov.addEventListener("pointerup", (e) => { if (sx == null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { swiped = true; go(dx < 0 ? 1 : -1); } else if (dy > 90) { swiped = true; close(); } });
+  ov.addEventListener("pointercancel", () => (sx = null));
+  document.body.append(ov); document.addEventListener("keydown", key, true); x.focus({ preventScroll: true }); show(0);
 }
 
 /* ---------- small interface pieces ---------- */

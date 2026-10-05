@@ -1,6 +1,6 @@
 // Projects: a portfolio like Behance or Dribbble. A grid of covers, a full page for each project, and a studio for the owner
 // with a cover, rich content blocks, tags, tools, credits, extra links, licence and search settings. Each project has its own address.
-import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, fmtNum } from "/js/lib.mjs";
+import { h, $, $$, esc, api, isAdmin, toast, mobile, showBlocks, makeEditor, Up, share, chips, confirmBox, fmtNum, zoomFrom } from "/js/lib.mjs";
 import { slugify, upSrc, upThumb } from "/shared/blocks.mjs";
 import { R } from "/js/os-ext.mjs";
 import { icon as _ic, ICONS as _ICONS } from "/shared/icons.mjs";
@@ -80,6 +80,16 @@ function grid(body, quiet) {
     $$(".pj-sort [data-s]", root).forEach((b) => (b.onclick = () => { sort = b.dataset.s; draw(); }));
     const nb = $(".pj-new", root); if (nb) nb.onclick = () => studio(body, null);
     const ib = $(".pj-imp", root); if (ib) ib.onclick = () => importPicks(body);
+    // owner: drag cards into a new order (in the Featured view, with nothing filtered); it is saved for every visitor at once
+    const gr = $(".pj-grid", root);
+    if (isAdmin() && gr && sort === "order" && !field && !q && window.ownSort) {
+      $$(".pj-card[data-id]", gr).forEach((c) => (c.dataset.i = PR.list.findIndex((p) => p.id === c.dataset.id)));
+      ownSort(gr, ".pj-card[data-id]", async (o) => {
+        const ids = applyOrder(PR.list.map((p) => p.id), o);
+        const r = await api("/api/projects", { method: "PUT", body: { known: PR.list, order: ids } });
+        if (r.ok) { PR.list = r.data.projects; toast("New order saved"); draw(); } else { toast("Could not save the order (" + r.status + ")"); draw(); }
+      });
+    }
   };
   draw(); loadPickIds(() => root.isConnected && draw());
   if (!quiet) R.item(body, "", "", "push");
@@ -202,6 +212,7 @@ async function detail(body, slug, quiet) {
     ${more.length ? `<section class="jr-rel"><h2>More projects</h2><div class="pj-grid mini">${more.map((m) => card({ ...m })).join("")}</div></section>` : ""}
     <nav class="jr-pn">${prev ? `<a href="/projects/${esc(prev.slug)}" data-slug="${esc(prev.slug)}"><small>${I("chevron-left", 13)}Previous</small><b>${esc(prev.title)}</b></a>` : "<span></span>"}${next ? `<a href="/projects/${esc(next.slug)}" data-slug="${esc(next.slug)}"><small>Next${I("chevron-right", 13)}</small><b>${esc(next.title)}</b></a>` : "<span></span>"}</nav></article>`;
   showBlocks($(".pj-content", body), p.blocks, { hBase: 2 });
+  { const art = $(".pj-art", body), hero = $(".pj-hero", body); art.dataset.lbRoot = ""; if (hero) { hero.classList.add("lb-z", "bk-img-zoom"); hero.onclick = () => zoomFrom(hero); } } // the cover opens the viewer too, with the pictures below
   const bar = $(".rprog i", body);
   body.onscroll = () => { if (!bar.isConnected) { body.onscroll = null; return; } const m = body.scrollHeight - body.clientHeight; bar.style.width = (m > 0 ? (body.scrollTop / m) * 100 : 0) + "%"; };
   $(".back", body).onclick = () => grid(body);

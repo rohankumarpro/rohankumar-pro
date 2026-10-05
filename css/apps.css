@@ -472,3 +472,6 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .shr-p{display:inline-flex;align-items:center;gap:6px;padding:calc(8 * var(--u)) calc(14 * var(--u));border:1px solid var(--line);border-radius:var(--r-pill);background:transparent;color:var(--ink);font:inherit;font-size:var(--fs-3);font-weight:var(--fw-m);text-decoration:none;cursor:pointer}.shr-p:hover{background:var(--surface2)}
 @keyframes shrIn{from{opacity:0}to{opacity:1}}
 @media (max-width:760px){.shr-dlg{place-items:end stretch;padding:0}.shr-card{width:100%;border-radius:var(--r-8) var(--r-8) 0 0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}}
+/* the standalone /links page: a way into the full website */
+.hb-site{display:flex;align-items:center;justify-content:center;gap:calc(8 * var(--u));width:max-content;max-width:100%;margin:calc(22 * var(--u)) auto calc(10 * var(--u));padding:calc(11 * var(--u)) calc(18 * var(--u));border-radius:999px;background:var(--hb-ac);color:var(--hb-on);font-weight:var(--fw-b);text-decoration:none;box-shadow:0 6px 18px -8px rgba(0,0,0,.35);transition:transform .2s ease}
+.hb-site:hover{transform:translateY(-2px)}.hb-site svg{flex:none}

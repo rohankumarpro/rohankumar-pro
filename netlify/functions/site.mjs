@@ -29,7 +29,9 @@ export function cleanSettings(s) {
   const booking = url(s?.booking, WEB); if (booking) o.booking = booking;
   if (Array.isArray(s?.skills)) o.skills = s.skills.map((x) => str(x, 40)).filter(Boolean).slice(0, 30);
   if (Array.isArray(s?.experience)) o.experience = s.experience.slice(0, 30).map((e) => ({ title: str(e?.title, 120), time: str(e?.time, 40), text: str(e?.text, 600), ...img(e?.img) })).filter((e) => e.title || e.time || e.text);
-  if (Array.isArray(s?.links)) o.links = s.links.slice(0, 12).map((l) => ({ label: str(l?.label, 40), url: url(l?.url, ANY) })).filter((l) => l.label && l.url);
+  // an icon from the library: "name" (a symbol) or "b:name" (a brand logo)
+  const libIcon = (v) => { const x = str(v, 40); if (x.startsWith("b:") ? BRAND_LOGOS[x.slice(2)] : ICON_SET[x]) return x; return ""; };
+  if (Array.isArray(s?.links)) o.links = s.links.slice(0, 12).map((l) => { const it = { label: str(l?.label, 40), url: url(l?.url, ANY) }, ic = libIcon(l?.icon); if (ic) it.icon = ic; return it; }).filter((l) => l.label && l.url);
   if (Array.isArray(s?.linkpage)) o.linkpage = s.linkpage.slice(0, 40).map((l) => {
     const it = { group: str(l?.group, 40), label: str(l?.label, 60), color: COLORS.includes(l?.color) ? l.color : "c1", icon: ICONS.includes(l?.icon) ? l.icon : "work" };
     const sub = str(l?.sub, 100); if (sub) it.sub = sub;
@@ -47,6 +49,7 @@ export function cleanSettings(s) {
     const it = { status: ["now", "next", "done"].includes(t?.status) ? t.status : "now", title: str(t?.title, 120), tag: str(t?.tag, 40), date: str(t?.date, 40) };
     const detail = str(t?.detail, 300); if (detail) it.detail = detail;
     Object.assign(it, img(t?.img));
+    const ic = libIcon(t?.icon); if (ic) it.icon = ic;
     const p = Number(t?.progress); if (it.status === "now" && t?.progress !== "" && t?.progress != null && Number.isFinite(p)) it.progress = Math.max(0, Math.min(100, Math.round(p)));
     return it;
   }).filter((t) => t.title);
@@ -72,7 +75,7 @@ export function cleanSettings(s) {
       const it = { k, id, type: k === "s" ? (["track", "album", "playlist", "episode", "show"].includes(t?.type) ? t.type : "track") : (t?.type === "playlist" ? "playlist" : "video"), title: str(t?.title, 100), artist: str(t?.artist, 80) };
       const th = str(t?.thumb, 300); if (th && THUMB.test(th)) it.thumb = th; return it;
     }).filter(Boolean);
-    o.music = { tracks };
+    o.music = { tracks }; if (s.music.hq === true) o.music.hq = true; // high-quality covers, loaded only after a visitor taps a record
   }
   if (Array.isArray(s?.videos)) o.videos = s.videos.slice(0, 120).map((v) => { // the YouTube app: videos the owner picked
     const id = str(v?.id, 11); if (!/^[\w-]{11}$/.test(id)) return null;
@@ -81,6 +84,9 @@ export function cleanSettings(s) {
   if (Array.isArray(s?.resumeDoc)) o.resumeDoc = cleanBlocks(s.resumeDoc); // the owner's own resume page (a block document); its presence switches the page to it
   if (Array.isArray(s?.resumeDocBackup) && s.resumeDocBackup.length) o.resumeDocBackup = cleanBlocks(s.resumeDocBackup);
   if (s?.gbAuto === true) o.gbAuto = true; // guestbook notes publish without waiting for approval
+  if (s?.tlManual === true) o.tlManual = true; // the owner dragged finished timeline entries into an order of their own
+  if (["circle", "squircle", "square", "pop"].includes(s?.photoShape)) o.photoShape = s.photoShape; // the About me picture's shape
+  if (s?.noLock === true) o.noLock = true; // the site opens straight to the desktop, without the lock screen
   if (s?.oggyHidden === true) o.oggyHidden = true; // OGGY the cat is hidden from visitors (the owner still sees him)
   if (s?.place && typeof s.place === "object") { // where each app lives: on the desktop, or only in the app drawer
     const pl = {};

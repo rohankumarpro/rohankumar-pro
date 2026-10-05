@@ -266,7 +266,7 @@ window.settingsExtra = function (body) {
       };
       draw(); return [h("h3", {}, title), h("p", { class: "hint" }, hint), row];
     };
-    { const slot = h("div"); sec.append(slot); import("/js/site-settings.mjs").then((m) => slot.replaceWith(m.websiteSection())).catch(() => slot.remove()); } // Website: search and share details
+    { const slot = h("div", { "data-cat": "website" }); sec.append(slot); import("/js/site-settings.mjs").then((m) => slot.replaceWith(m.websiteSection())).catch(() => slot.remove()); } // Website: search and share details
     sec.append(...picRow("Wallpaper picture (light mode)", "wallpaper", "Shown behind everything for every visitor in light mode. Remove both pictures to go back to the coloured shapes, which already follow light and dark."), ...picRow("Wallpaper picture (dark mode)", "wallpaperDark", "The dark version of the same wallpaper. It switches by itself when the theme or the device turns dark. Without it, the light picture is used in both."), ...picRow("Your photo", "photo", "Used on About, the lock screen and Messages."));
     const msg = h("p", { class: "hint" }, "Everything you write in Owner mode is stored on the server, so updating the website never resets it. A backup is a copy you can keep.");
     sec.append(h("h3", {}, "Backup"), msg, h("div", { class: "ow-row" },

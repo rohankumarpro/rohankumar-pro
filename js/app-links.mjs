@@ -55,7 +55,7 @@ async function load(force) {
 /* The dedicated /links address: only the link page, no desktop around it. */
 export async function linksStandalone(box) {
   await load(true);
-  renderHub(box, H.hub, { owner: false, track: true });
+  renderHub(box, H.hub, { owner: false, track: true, standalone: true });
 }
 export async function linksApp(body) {
   R.handlers.links = (b) => linksApp(b);
@@ -108,7 +108,7 @@ function itemHtml(i, st, hub) {
     default: { const href = hrefOf(i); return `<a class="${cls}" href="${esc(href)}"${/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : ""} data-id="${esc(i.id)}">${inner}</a>`; }
   }
 }
-export function renderHub(box, hub, { owner, onEdit, preview, track } = {}) {
+export function renderHub(box, hub, { owner, onEdit, preview, track, standalone } = {}) {
   const pr = profileOf(hub), th = hub.theme || {}, vars = themeVars(hub);
   const now = Date.now();
   const items = hub.items.filter((i) => (preview ? !i.hidden : true) && !(!owner && !preview && i.hidden) && (!(i.start && i.start > now) && !(i.end && i.end <= now) || (owner || preview)));
@@ -130,16 +130,17 @@ export function renderHub(box, hub, { owner, onEdit, preview, track } = {}) {
     <header class="hb-head"><img class="hb-av" src="${esc(pr.avatar)}" alt="${esc(pr.name)}" width="96" height="96"><h1>${esc(pr.name)}</h1>${pr.role ? `<p class="hb-role">${esc(pr.role)}</p>` : ""}${pr.status ? `<span class="hb-status"><i></i>${esc(pr.status)}</span>` : ""}${pr.bio ? `<p class="hb-bio">${esc(pr.bio)}</p>` : ""}</header>
     ${hub.socials.length ? `<div class="hb-socs">${hub.socials.map(socialBtn).join("")}</div>` : ""}
     <div class="hb-list">${list || '<p class="hb-empty">No links yet.</p>'}</div>
-    <footer class="hb-foot">${hub.settings.share !== false ? `<button data-act="share">${glyph("share", 18)} Share</button>` : ""}${hub.settings.qr !== false ? `<button data-act="qr">${glyph("qr", 18)} QR code</button>` : ""}${hub.settings.vcard !== false && hub.vcard.name ? `<a href="/api/hub?a=vcard" download>${glyph("person", 18)} Save contact</a>` : ""}</footer></div>`;
+    <footer class="hb-foot">${hub.settings.share !== false ? `<button data-act="share">${glyph("share", 18)} Share</button>` : ""}${hub.settings.qr !== false ? `<button data-act="qr">${glyph("qr", 18)} QR code</button>` : ""}${hub.settings.vcard !== false && hub.vcard.name ? `<a href="/api/hub?a=vcard" download>${glyph("person", 18)} Save contact</a>` : ""}</footer>
+    ${standalone ? `<a class="hb-site" href="/">${glyph("globe", 18)}<span>Go to the website</span>${I("chevron-right", 16)}</a>` : ""}</div>`;
   box.append(root);
   // behaviour
   const beacon = (a, data) => { if (!track) return; try { const blob = new Blob([JSON.stringify(data)], { type: "application/json" }); if (!navigator.sendBeacon || !navigator.sendBeacon("/api/hub?a=" + a, blob)) fetch("/api/hub?a=" + a, { method: "POST", body: JSON.stringify(data), headers: { "content-type": "application/json" }, keepalive: true }); } catch {} };
   root.addEventListener("click", (e) => {
     const t = e.target, id = t.closest("[data-id]")?.dataset.id;
     if (t.closest(".hb-edit")) return onEdit && onEdit();
-    const app = t.closest(".hb-it[data-app]"); if (app) { if (id) beacon("click", { id }); if (preview) return; return openApp(app.dataset.app); }
+    const app = t.closest(".hb-it[data-app]"); if (app) { if (id) beacon("click", { id }); if (preview) return; if (standalone) { location.href = "/" + encodeURIComponent(app.dataset.app); return; } return openApp(app.dataset.app); }
     const cp = t.closest(".hb-it[data-copy]"); if (cp) { if (id) beacon("click", { id }); navigator.clipboard?.writeText(cp.dataset.copy).then(() => toast("Copied")).catch(() => prompt("Copy this", cp.dataset.copy)); return; }
-    const hd = t.closest(".hb-h.hb-col"); if (hd) { const it = hub.items.find((x) => x.id === hd.dataset.id); if (it) { it.closed = !it.closed; renderHub(box, hub, { owner, onEdit, preview, track }); } return; }
+    const hd = t.closest(".hb-h.hb-col"); if (hd) { const it = hub.items.find((x) => x.id === hd.dataset.id); if (it) { it.closed = !it.closed; renderHub(box, hub, { owner, onEdit, preview, track, standalone }); } return; }
     const pl = t.closest(".hb-play"); if (pl) { const w = pl.closest(".hb-emb"); if (id) beacon("click", { id }); w.innerHTML = `<iframe src="${esc(w.dataset.src)}${w.dataset.src.includes("?") ? "&" : "?"}autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen title="Video"></iframe>`; return; }
     const a = t.closest("a[data-id]"); if (a && id) { beacon("click", { id }); if (preview) e.preventDefault(); return; }
     const act = t.closest("[data-act]")?.dataset.act;
