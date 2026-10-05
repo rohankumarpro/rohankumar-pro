@@ -127,6 +127,46 @@ export const Install = { evt: null, installed: matchMedia("(display-mode: standa
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); Install.evt = e; document.dispatchEvent(new CustomEvent("install-ready")); });
 window.addEventListener("appinstalled", () => { Install.installed = true; Install.evt = null; toast("Installed. Find it on your home screen."); });
 window.Install = Install;
+/* ---------- owner's desktop app: the site draws its own window buttons ---------- */
+// Only inside the personal desktop app (desktop/ in this repo), whose window has no title bar. Visitors never get this.
+(function desktopApp() {
+  const T = window.__TAURI__;
+  if (!T || !T.window) return;
+  const win = T.window.getCurrentWindow(), html = document.documentElement;
+  html.classList.add("desk-app");
+  const svg = (p) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const IC = { min: '<path d="M6 12h12"/>', max: '<rect x="6" y="6" width="12" height="12" rx="2.5"/>',
+    res: '<rect x="5" y="9" width="10" height="10" rx="2.5"/><path d="M9 6.5A1.5 1.5 0 0 1 10.5 5H17a2 2 0 0 1 2 2v6.5a1.5 1.5 0 0 1-1.5 1.5"/>', close: '<path d="M7 7l10 10M17 7 7 17"/>' };
+  const box = document.createElement("div"); box.className = "wctl"; box.setAttribute("role", "group"); box.setAttribute("aria-label", "Window");
+  const btn = (k, label, fn) => { const b = document.createElement("button"); b.className = "pill topbtn tb-ic wctl-" + k; b.innerHTML = svg(IC[k]); b.title = label; b.setAttribute("aria-label", label); b.onclick = fn; box.append(b); return b; };
+  btn("min", "Minimise", () => win.minimize());
+  const mx = btn("max", "Maximise", () => win.toggleMaximize().then(() => setTimeout(sync, 150)));
+  btn("close", "Close", () => win.close());
+  const sync = async () => { const m = await win.isMaximized().catch(() => false); const l = m ? "Restore" : "Maximise"; mx.innerHTML = svg(m ? IC.res : IC.max); mx.title = l; mx.setAttribute("aria-label", l); html.classList.toggle("desk-app-max", m); };
+  sync(); win.onResized(sync).catch(() => {});
+  // the empty part of the top bar moves the window; a double-click maximises
+  document.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 || !e.target.matches(".topbar")) return;
+    if (e.detail === 2) win.toggleMaximize(); else win.startDragging();
+  });
+  const mount = () => document.body.append(box);
+  if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+  // once a day, a copy of the owner's backup goes to Documents\Rohan Kumar backups on this PC (the app keeps 14 days).
+  // Read only: it downloads /api/backup, the same file Settings offers, and never changes anything on the site.
+  const backup = async () => {
+    const day = new Date().toLocaleDateString("en-CA"); let last = "";
+    try { last = localStorage.getItem("deskBackup") || ""; } catch {}
+    if (last === day || !T.core) return;
+    try {
+      const r = await fetch("/api/backup", { credentials: "same-origin", cache: "no-store" });
+      if (!r.ok) return; // not signed in as the owner: nothing to save
+      const where = await T.core.invoke("save_backup", { day, json: await r.text() });
+      try { localStorage.setItem("deskBackup", day); } catch {}
+      console.info("Backup saved to", where);
+    } catch (e) { console.warn("Daily backup failed", e); }
+  };
+  setTimeout(backup, 15000); setInterval(backup, 3 * 60 * 60 * 1000);
+})();
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && !/--/.test(location.hostname)) {
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 }
@@ -135,3 +175,83 @@ window.addEventListener("online", () => toast("Back online"));
 window.__extReady = true;
 setTimeout(() => import("/js/os-more.mjs").catch((e) => console.error("os-more", e)), 400);
 import("/js/ctx-apps.mjs").catch((e) => console.error("ctx-apps", e));
+
+/* ---------- visitor analytics: Microsoft Clarity (recordings and heatmaps) ---------- */
+// Visitors on the live site only. Never the owner (signed in now, or ever before on this browser), the desktop app,
+// previews or localhost, so Owner mode, the vault and editing are never recorded. Typed text is masked by Clarity.
+// Each app a visitor opens is tagged ("app"), and sent messages, guestbook entries, sign-ups and outbound clicks are events.
+(function analytics() {
+  const CLARITY = "yrz7r3hbnx";
+  if (!/^(www\.)?rohankumar\.pro$/.test(location.hostname) || window.__TAURI__) return;
+  const isOwner = () => { try { return localStorage.getItem("noTrack") === "1"; } catch { return false; } };
+  const markOwner = () => { try { localStorage.setItem("noTrack", "1"); } catch {} };
+  if (isOwner()) return;
+  fetch("/api/auth", { cache: "no-store" }).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((d) => {
+    if (d && d.admin) return markOwner();
+    start();
+  });
+  function start() {
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", CLARITY);
+    const cl = (...a) => { try { window.clarity(...a); } catch {} };
+    // which apps visitors open
+    const open = window.openApp;
+    if (typeof open === "function") window.openApp = function (id, opt) { if (typeof id === "string") { cl("set", "app", id); cl("event", "open-" + id); } return open.call(this, id, opt); };
+    // things visitors send
+    const EV = [[/^\/api\/mochi/, "message"], [/^\/api\/guestbook/, "guestbook"], [/^\/api\/hub\?a=subscribe/, "subscribe"]];
+    const f = window.fetch;
+    window.fetch = function (input, init) {
+      const p = f.apply(this, arguments);
+      try {
+        const url = typeof input === "string" ? input : input && input.url || "", m = (init && init.method || "GET").toUpperCase();
+        const path = url.startsWith(location.origin) ? url.slice(location.origin.length) : url;
+        const hit = m === "POST" && EV.find(([re]) => re.test(path));
+        if (hit) p.then((r) => { if (r.ok) cl("event", hit[1]); }).catch(() => {});
+        // the owner signing in partway through a visit: never load Clarity on this browser again, and mask the rest of this one
+        if (path.startsWith("/api/auth") && m === "POST") p.then((r) => { if (r.ok) { markOwner(); document.documentElement.setAttribute("data-clarity-mask", "true"); cl("consentv2", { ad_Storage: "denied", analytics_Storage: "denied" }); } }).catch(() => {});
+      } catch {}
+      return p;
+    };
+    // clicks that leave the site (Behance, Dribbble, LinkedIn, mail…)
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
+      try { const u = new URL(a.href, location.href); if (u.protocol === "mailto:") cl("event", "out-mail"); else if (u.hostname !== location.hostname) cl("event", "out-" + u.hostname.replace(/^www\./, "")); } catch {}
+    }, true);
+  }
+})();
+
+/* ---------- phones: the Dribbble badge hangs from the top, in the middle of the top bar ----------
+   Dead centre when the pills leave room there, otherwise centred in the gap between them; hidden only if there is no gap. */
+(function fitAward() {
+  const html = document.documentElement;
+  let raf = 0;
+  const check = () => {
+    raf = 0;
+    const a = document.querySelector(".award");
+    if (!a) return;
+    if (innerWidth > 760) { a.style.left = ""; return html.classList.remove("award-tight"); }
+    const w = a.offsetWidth || 34, pad = 8;
+    const boxes = [...document.querySelectorAll(".topbar > *")].map((e) => e.getBoundingClientRect()).filter((q) => q.width && q.height);
+    const mid = innerWidth / 2;
+    const leftEdge = Math.max(0, ...boxes.filter((q) => q.left + q.width / 2 < mid).map((q) => q.right));
+    const rightEdge = Math.min(innerWidth, ...boxes.filter((q) => q.left + q.width / 2 >= mid).map((q) => q.left));
+    let x = null;
+    if (mid - w / 2 - pad >= leftEdge && mid + w / 2 + pad <= rightEdge) x = mid;
+    else if (rightEdge - leftEdge >= w + pad * 2) x = (leftEdge + rightEdge) / 2;
+    html.classList.toggle("award-tight", x === null);
+    a.style.left = x === null ? "" : x + "px";
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(check); };
+  const start = () => {
+    const tb = document.querySelector(".topbar"), wins = document.getElementById("wins");
+    if (tb) new MutationObserver(queue).observe(tb, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class", "style", "hidden"] });
+    if (wins) new MutationObserver(queue).observe(wins, { childList: true });
+    addEventListener("resize", queue); addEventListener("orientationchange", queue);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+    queue(); setTimeout(queue, 1500);
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();

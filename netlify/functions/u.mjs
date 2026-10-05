@@ -2,11 +2,12 @@
 import { connectLambda } from "@netlify/blobs";
 import { contentStore } from "../lib/store.mjs";
 import { kindOf, upKey } from "../lib/media-store.mjs";
+import { afterPrefix } from "../lib/reqpath.mjs";
 
 export const handler = async (event) => {
   try {
     connectLambda(event);
-    const f = String((event.queryStringParameters || {}).f || "");
+    const f = String((event.queryStringParameters || {}).f || afterPrefix(event, "/u/") || "");
     const m = f.match(/^([a-f0-9]{10})(-t)?\.(jpe?g|png|webp|gif|pdf)$/i);
     if (!m) return { statusCode: 404, body: "Not found" };
     const store = contentStore(event);

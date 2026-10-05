@@ -18,6 +18,9 @@ const ic = {
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>',
   video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3z"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  pip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="7" height="6" rx="1.5" fill="currentColor"/></svg>',
+  unpip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M15 15 9 9M9 13V9h4"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h11M4 12h11M4 17h7"/><circle cx="19" cy="16" r="2.4" fill="currentColor" stroke="none"/><path d="M21.4 16V6.5l-2.4.8"/></svg>',
 };
 const SCENE = `<svg class="mu-svg" viewBox="0 0 240 112" aria-hidden="true">
   <defs><radialGradient id="mu-gl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFC46B" stop-opacity=".95"/><stop offset="1" stop-color="#FFC46B" stop-opacity="0"/></radialGradient></defs>
@@ -51,15 +54,28 @@ function stopOthers(kind) {
   try { if (kind !== "y" && M.yt && M.yt.pauseVideo) M.yt.pauseVideo(); } catch {}
   try { if (kind !== "s" && M.sp && M.sp.pause) M.sp.pause(); } catch {}
 }
+const YT_VARS = { autoplay: 1, controls: 0, rel: 0, playsinline: 1, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1 };
+/* Where the YouTube player lives: the Music app's stage when the video is shown in the app, otherwise the engine
+   (hidden, or the small floating player when popped out). */
+const hostFor = () => { if (M.video === "app") { const st = M.boxes.map((b) => b.isConnected && $(".mpa-video", b)).find(Boolean); if (st) return st; } return $(".mu-yt", ENG); };
+function makeYT(t, host, start = 0, index = 0, autoplay = true) {
+  const slot = document.createElement("div"); host.replaceChildren(slot); M.ytHost = host;
+  const pv = { ...YT_VARS, autoplay: autoplay ? 1 : 0, ...(start ? { start: Math.floor(start) } : {}) };
+  M.yt = new window.YT.Player(slot, { width: "100%", height: "100%", videoId: t.type === "video" ? t.id : undefined, playerVars: t.type === "playlist" ? { ...pv, listType: "playlist", list: t.id, index } : pv,
+    events: { onReady: (e) => { try { e.target.setVolume(M.vol); if (autoplay) e.target.playVideo(); } catch {} }, onStateChange: onYT, onError: onYTError } });
+}
+/* Move the playing video to where it should be now (the app, the floating player or out of sight), carrying on from the same moment. */
+function rehost() {
+  const t = cur(), want = hostFor(); if (!t || t.k !== "y" || !M.yt || !window.YT || M.ytHost === want) return;
+  let at = M.pos || 0, idx = 0; try { at = M.yt.getCurrentTime() || at; idx = (M.yt.getPlaylistIndex && M.yt.getPlaylistIndex()) || 0; } catch {}
+  const playing = M.playing || M.loading; try { M.yt.destroy(); } catch {} M.yt = null;
+  makeYT(t, want, at, idx, playing);
+}
 async function startYT(t) {
   stopOthers("y");
   const ok = await loadYT(); if (!ok) { fail("YouTube could not load. Check your connection."); return; }
-  const el = $(".mu-yt-in", ENG); if (!el) return;
-  const vars = { autoplay: 1, controls: 0, rel: 0, playsinline: 1, modestbranding: 1, iv_load_policy: 3, fs: 0 };
-  if (!M.yt) {
-    M.yt = new window.YT.Player(el, { width: "100%", height: "100%", videoId: t.type === "video" ? t.id : undefined, playerVars: t.type === "playlist" ? { ...vars, listType: "playlist", list: t.id } : vars,
-      events: { onReady: (e) => { try { e.target.setVolume(M.vol); e.target.playVideo(); } catch {} }, onStateChange: onYT, onError: onYTError } });
-  } else {
+  if (!M.yt || !M.ytHost || !M.ytHost.isConnected) { try { M.yt && M.yt.destroy(); } catch {} M.yt = null; makeYT(t, hostFor()); }
+  else {
     try { M.yt.setVolume(M.vol); if (t.type === "video") M.yt.loadVideoById(t.id); else M.yt.loadPlaylist({ listType: "playlist", list: t.id }); M.yt.playVideo(); } catch { fail("That record could not start."); }
   }
 }
@@ -105,13 +121,32 @@ function prev() { if (!M.tracks.length) return; const i = M.i <= 0 ? M.tracks.le
 /* The players themselves (YouTube's hidden one, Spotify's small strip) live in one place of their own, so the corner and the
    Music app can both be controls for the same music without either one owning the sound. */
 const ENG = h("div", { id: "muEngine", class: "mu-engine", hidden: true });
-ENG.innerHTML = '<div class="mu-yt"><div class="mu-yt-in"></div></div><div class="mu-sp" hidden><div class="mu-sp-in"></div></div>';
+ENG.innerHTML = '<div class="mu-yt"><div class="mu-yt-in"></div></div><div class="mu-sp" hidden><div class="mu-sp-in"></div></div><button class="mu-pip-x" type="button" aria-label="Put the video back in the Music app" title="Back to the app" hidden></button>';
 (document.getElementById("desk") || document.body).append(ENG);
 M.boxes = []; M.pos = 0; M.dur = 0;
 const fmt = (n) => { n = Math.max(0, Math.round(n || 0)); const m = Math.floor(n / 60), s = n % 60; return m + ":" + String(s).padStart(2, "0"); };
+const fmMin = (m) => (m < 1 ? Math.round(m * 60) + " sec" : Math.round(m) + " min");
+const VINYL = `<svg class="mpa-vinyl" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="98" fill="#1d1a1a"/>${[86, 74, 62, 50].map((r) => `<circle cx="100" cy="100" r="${r}" fill="none" stroke="#2e2a2a" stroke-width="1.4"/>`).join("")}<path d="M100 6a94 94 0 0 1 66 27" stroke="#fff" stroke-opacity=".16" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="100" cy="100" r="34" fill="var(--mu-c,#E4572E)"/><circle cx="100" cy="100" r="5" fill="#fff"/></svg>`;
+const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3l5-4v13l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+/* The Music app: a proper player. Now playing (cover, title, seek, controls, volume) and the records as a track list. */
+function appMarkup() {
+  return `<div class="mu-mini" hidden><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
+    <div class="mu-full mpa">
+      <div class="mpa-stage"><div class="mpa-fb">${VINYL}</div><img class="mpa-img" alt="" hidden referrerpolicy="no-referrer"><div class="mpa-video"></div><div class="mpa-scrim"></div></div>
+      <div class="mpa-top"><button class="mu-vid mpa-ib" aria-label="Play the video here" title="Video" hidden>${ic.video}</button><button class="mpa-pip mpa-ib" aria-label="Pop the video out" title="Pop out" hidden>${ic.pip}</button><button class="mpa-libbtn mpa-ib" aria-label="Records" title="Records" aria-expanded="false">${ic.list}</button><button class="mu-manage mpa-ib" aria-label="Manage records" title="Manage records" hidden>${ic.gear}</button></div>
+      <section class="mpa-now" aria-label="Now playing">
+        <div class="mpa-meta"><div class="mpa-tt"><b class="mu-t"></b><small class="mu-a"></small></div><span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="mu-seek"><span class="mu-tc">0:00</span><input class="mu-sk" type="range" min="0" max="100" step="1" value="0" aria-label="Position in the song" disabled><span class="mu-td">0:00</span></div>
+        <div class="mpa-row2"><div class="mu-ctl mpa-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button></div>
+          <label class="mpa-vol"><span aria-hidden="true">${SPK}</span><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></label></div>
+        <div class="mpa-tools"><div class="mu-fm" role="group" aria-label="Focus mode"><button class="mu-fm-b" type="button" aria-pressed="false" title="Focus mode: the music runs with a Focus timer and stops when it ends">Focus mode</button><button class="mu-fm-d" data-d="-5" type="button" aria-label="5 minutes shorter">−</button><span class="mu-fm-t"></span><button class="mu-fm-d" data-d="5" type="button" aria-label="5 minutes longer">+</button></div></div>
+      </section>
+      <section class="mpa-lib" aria-label="Records"><div class="mpa-lh"><b>Records</b><small class="mpa-n"></small><button class="mpa-libx mpa-ib" aria-label="Close records">${ic.x}</button></div><div class="mu-shelf mpa-list" role="list"></div><div class="mu-empty" hidden></div></section>
+    </div>`;
+}
 function makeBox(kind) {
   const box = h("div", { class: "mu mu-" + kind, "data-s": "idle" });
-  box.innerHTML = `<div class="mu-mini" role="group" aria-label="Music corner"><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
+  box.innerHTML = kind === "app" ? appMarkup() : `<div class="mu-mini" role="group" aria-label="Music corner"><span class="mu-disc"></span><span class="mu-mt"><b></b><small></small></span><button class="mu-mp" aria-label="Play or pause"></button></div>
     <div class="mu-full"><div class="mu-head"><b>${kind === "app" ? "Music" : "Music corner"}</b><span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="sp"></span><button class="mu-vid" aria-label="Show the video" title="Show the video" hidden>${ic.video}</button><button class="mu-manage" aria-label="Manage records" title="Manage records" hidden>${ic.gear}</button></div>
       <div class="mu-scene">${SCENE}</div>
       <div class="mu-now"><b class="mu-t"></b><small class="mu-a"></small></div>
@@ -131,7 +166,13 @@ function makeBox(kind) {
   sk.onpointerup = sk.onpointercancel = () => setTimeout(() => (box.__seeking = false), 50);
   $(".mu-fm-b", box).onclick = () => { const f = window.__focusMode; if (f) f.set(!f.get()); paint(); };
   $$(".mu-fm-d", box).forEach((b) => (b.onclick = () => { if (typeof FT === "undefined" || FT.run || FT.left < FT.dur) return; if (FT.mode !== "focus") ftSet("focus"); ftSetLen(FT_MODES.focus[0] + +b.dataset.d); paint(); }));
-  $(".mu-vid", box).onclick = () => { M.video = !M.video; paint(); };
+  $(".mu-vid", box).onclick = () => setVideo(box.classList.contains("mu-app") ? (M.video === "app" ? "off" : "app") : (M.video === "pip" ? "off" : "pip"));
+  const pipB = $(".mpa-pip", box); if (pipB) pipB.onclick = () => setVideo(M.video === "pip" ? "app" : "pip");
+  const libB = $(".mpa-libbtn", box), libX = $(".mpa-libx", box);
+  if (libB) { const setLib = (on) => { box.classList.toggle("lib-open", on); libB.setAttribute("aria-expanded", String(on)); }; libB.onclick = () => setLib(!box.classList.contains("lib-open")); libX.onclick = () => setLib(false); box.__setLib = setLib; setLib(M.i < 0); }
+  if (kind === "app") { // while a video plays in the app, the controls fade out until the pointer moves
+    let idle = 0; const wake = () => { box.classList.remove("idle"); clearTimeout(idle); idle = setTimeout(() => { if (box.classList.contains("vid") && M.playing && !box.classList.contains("lib-open")) box.classList.add("idle"); }, 2800); };
+    box.addEventListener("pointermove", wake); box.addEventListener("pointerdown", wake); box.addEventListener("focusin", wake); box.__wake = wake; }
   $(".mu-manage", box).onclick = manage;
   M.boxes.push(box); shelf(box); paintBox(box);
   return box;
@@ -153,6 +194,7 @@ function seekPaint(box) {
   $(".mu-tc", box).textContent = fmt(on ? M.pos : 0); $(".mu-td", box).textContent = on ? fmt(M.dur) : "0:00";
 }
 setInterval(() => {
+  if (M.video === "app" && M.yt && M.ytHost && !M.ytHost.isConnected) { M.video = "off"; const t = cur(), playing = M.playing || M.loading; try { M.yt.destroy(); } catch {} M.yt = null; if (t && t.k === "y") makeYT(t, hostFor(), M.pos, 0, playing); paint(); }
   const f = window.__focusMode; if (!M.playing && !M.loading && !(f && f.get())) return;
   const t = cur(); try { if (t && t.k === "y" && M.yt && M.yt.getCurrentTime) { M.pos = M.yt.getCurrentTime() || 0; M.dur = M.yt.getDuration() || 0; } } catch {}
   M.boxes.forEach((b) => { if (b.isConnected) { seekPaint(b); fmPaint(b); } });
@@ -160,6 +202,13 @@ setInterval(() => {
 function shelf(only) {
   (only ? [only] : M.boxes).forEach((box) => {
     const sh = $(".mu-shelf", box); if (!sh) return;
+    if (box.classList.contains("mu-app")) {
+      sh.innerHTML = M.tracks.map((t, i) => { const th = thumbOf(t);
+        return `<button class="mu-rec mpa-row${i === M.i ? " on" : ""}" role="listitem" data-i="${i}" style="--mu-c:${colorOf(t)}" aria-label="Play ${esc(t.title || "record")}"><span class="mpa-th"><b>${esc((t.title || "?").trim().slice(0, 1).toUpperCase())}</b>${th ? `<img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span><span class="mpa-rt"><b>${esc(t.title || "Untitled")}</b><small>${esc(t.artist || (t.k === "s" ? "Spotify" : "YouTube"))}${t.type === "playlist" || t.type === "album" ? " · " + (t.type === "album" ? "Album" : "Playlist") : ""}</small></span><span class="mpa-ix"><span class="mu-eq on" aria-hidden="true"><i></i><i></i><i></i></span><span class="mpa-no">${i + 1}</span></span></button>`; }).join("");
+      const n = $(".mpa-n", box); if (n) n.textContent = M.tracks.length ? M.tracks.length + (M.tracks.length === 1 ? " record" : " records") : "";
+      $$(".mu-rec", sh).forEach((b) => (b.onclick = () => { const i = +b.dataset.i; if (i === M.i && (M.playing || M.loading)) pause(); else play(i); if (box.__setLib && box.clientWidth < 760) box.__setLib(false); }));
+      return;
+    }
     sh.innerHTML = M.tracks.map((t, i) => {
       const th = thumbOf(t), c = colorOf(t);
       return `<button class="mu-rec${i === M.i ? " on" : ""}" role="listitem" data-i="${i}" style="--mu-c:${c}" title="${esc(t.title || "Record")}${t.artist ? " — " + esc(t.artist) : ""}" aria-label="Play ${esc(t.title || "record")}"><span class="mu-vinyl"></span><span class="mu-sleeve">${th ? `<img src="${esc(th)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<b>${esc((t.title || "?").trim().slice(0, 1).toUpperCase())}</b>`}</span></button>`;
@@ -172,12 +221,15 @@ function fmPaint(box) {
   const f = window.__focusMode, on = !!(f && f.get()), b = $(".mu-fm-b", box), t = $(".mu-fm-t", box), has = typeof FT !== "undefined";
   if (!b) return; b.setAttribute("aria-pressed", String(on)); b.classList.toggle("on", on);
   const started = has && (FT.run || FT.left < FT.dur);
-  t.textContent = !has ? "" : on && FT.mode === "focus" ? ftFmt(FT.left) : FT_MODES.focus[0] + " min";
+  t.textContent = !has ? "" : on && FT.mode === "focus" ? ftFmt(FT.left) : fmMin(FT_MODES.focus[0]);
   $$(".mu-fm-d", box).forEach((d) => (d.disabled = !has || started));
 }
+const openAppBox = () => M.boxes.find((b) => b.isConnected && b.classList.contains("mu-app"));
+function setVideo(mode) { M.video = mode; rehost(); paint(); }
 function engine() {
   const t = cur(), isY = t && t.k === "y", isS = t && t.k === "s";
-  ENG.hidden = !(isS || (isY && M.video)); ENG.classList.toggle("showvid", !!(isY && M.video));
+  ENG.hidden = !(isS || (isY && M.video === "pip")); ENG.classList.toggle("showvid", !!(isY && M.video === "pip"));
+  const back = $(".mu-pip-x", ENG); if (back) { back.hidden = !(isY && M.video === "pip"); back.innerHTML = ic.unpip; back.onclick = () => setVideo(openAppBox() ? "app" : "off"); }
   $(".mu-sp", ENG).hidden = !isS;
 }
 function paintBox(box) {
@@ -190,9 +242,17 @@ function paintBox(box) {
   $("[data-a=toggle]", box).setAttribute("aria-label", state === "idle" ? "Play" : "Pause");
   $$(".mu-rec", box).forEach((b) => b.classList.toggle("on", +b.dataset.i === M.i));
   const isY = t && t.k === "y";
-  $(".mu-vol", box).hidden = !isY; $(".mu-vid", box).hidden = !isY || box.classList.contains("mu-widget"); $(".mu-vid", box).classList.toggle("on", M.video);
+  $(".mu-vol", box).hidden = !isY; $(".mu-vid", box).hidden = !isY || box.classList.contains("mu-widget");
+  const inApp = box.classList.contains("mu-app"); $(".mu-vid", box).classList.toggle("on", inApp ? M.video === "app" : M.video === "pip");
+  if (inApp) { const pb = $(".mpa-pip", box); pb.hidden = !isY || M.video !== "app"; box.classList.toggle("vid", !!(isY && M.video === "app")); if (box.__wake) box.__wake(); }
   $(".mu-manage", box).hidden = !isAdmin();
   seekPaint(box); fmPaint(box);
+  const art = $(".mpa-img", box);
+  if (art) { // the cover shows once it has loaded; until then (or if it cannot load) the record spins in its place
+    const th = t && thumbOf(t);
+    if (!th) { art.hidden = true; art.removeAttribute("src"); box.classList.remove("has-art"); }
+    else if (art.getAttribute("src") !== th) { box.classList.remove("has-art"); art.hidden = true; art.onload = () => { art.hidden = false; box.classList.add("has-art"); }; art.onerror = () => { art.hidden = true; box.classList.remove("has-art"); }; art.src = th; }
+  }
   const em = $(".mu-empty", box);
   if (!M.tracks.length) { em.hidden = false; const P0 = window.P && P.music; em.innerHTML = `<p>${isAdmin() ? "Pick a few records for your visitors." : "The owner hasn't put any records out yet."}</p>${isAdmin() ? '<button class="btn mu-addfirst">Add records</button>' : (P0 ? `<span class="mu-ext"><a href="${esc(P0.youtubeMusic)}" target="_blank" rel="noopener">YouTube Music</a><a href="${esc(P0.spotify)}" target="_blank" rel="noopener">Spotify</a></span>` : "")}`; $(".mu-addfirst", em)?.addEventListener("click", manage); } else em.hidden = true;
 }

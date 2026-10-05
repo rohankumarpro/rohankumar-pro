@@ -1,0 +1,227 @@
+/* App icon library (shared/app-icons.js): soft shadow under the artwork, and one natural motion per icon.
+   A motion plays once, all the way through, when the icon gets the class "go" (pointed at, focused or tapped), then settles. */
+.ico.lay[data-ic] .art{filter:url(#ai-sh)}
+.ico.lay[data-ic] .art :not([transform]){transform-box:fill-box;transform-origin:center}
+.ico.go[data-ic]{--e:cubic-bezier(.3,.7,.2,1);--sp:cubic-bezier(.34,1.56,.64,1)}
+
+/* shared motions */
+@keyframes ai-there{40%{transform:translate(var(--x,0),var(--y,0)) rotate(var(--r,0deg)) scale(var(--s,1))}}
+@keyframes ai-pop{0%{transform:scale(1)}35%{transform:scale(.55)}70%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes ai-draw{0%{stroke-dashoffset:var(--len,60)}100%{stroke-dashoffset:0}}
+@keyframes ai-turn{to{transform:rotate(var(--r,360deg))}}
+@keyframes ai-swing{15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}}
+@keyframes ai-beat{15%{transform:scale(1.16)}30%{transform:scale(.97)}45%{transform:scale(1.1)}70%{transform:scale(1)}}
+@keyframes ai-grow{0%{transform:scaleX(.15)}100%{transform:scaleX(1)}}
+@keyframes ai-growy{0%{transform:scaleY(.15)}100%{transform:scaleY(1)}}
+@keyframes ai-fade{0%,100%{opacity:1}40%{opacity:.25}}
+@keyframes ai-hop{30%{transform:translateY(-5px)}55%{transform:translateY(0)}70%{transform:translateY(-1.5px)}}
+@keyframes ai-glow{40%{opacity:.35}100%{opacity:0}}
+
+.ico.go .art>*{animation-duration:.9s;animation-timing-function:var(--e);animation-fill-mode:both}
+/* nothing natural to do: the whole icon lifts a little */
+.ico.go[data-ic=cloud] .art,.ico.go[data-ic=nut] .art{animation:ai-hop .7s var(--e)}
+
+/* folder: the front flap tips forward and the paper inside peeks up */
+.ico.go[data-ic=folder] .lid,.ico.go[data-ic=sharedfolder] .lid{transform-origin:50% 100%;animation:ai-there .9s var(--e);--r:0deg;--s:1;animation-name:ai-flap}
+@keyframes ai-flap{40%{transform:perspective(60px) rotateX(-28deg)}}
+.ico.go[data-ic=folder] .peek{animation:ai-there .9s var(--e);--y:-7px}
+.ico.go[data-ic=sharedfolder] .who{animation:ai-there .9s var(--e);--y:-5px}
+/* journal: the ribbon slips down and a line is written */
+.ico.go[data-ic=journal] .ribbon{transform-origin:50% 0;animation:ai-there .9s var(--e);--y:4px}
+.ico .write{stroke-dasharray:60;stroke-dashoffset:0}
+.ico.go .write{animation:ai-draw .8s var(--e) both}
+/* timeline: the points light up in order and the bars fill in */
+.ico.go[data-ic=timeline] .dot{animation:ai-pop .5s var(--e) both}
+.ico.go[data-ic=timeline] .bar{transform-origin:0 50%;animation:ai-grow .6s var(--e) both}
+.ico.go .d2,.ico.go .b2{animation-delay:.12s!important}.ico.go .d3,.ico.go .b3{animation-delay:.24s!important}
+/* photos and picture: the sun rises over the hills */
+.ico.go[data-ic=photos] .sun,.ico.go[data-ic=picture] .sun{animation:ai-there .9s var(--e);--y:-6px;--s:1.15}
+/* messages: someone is typing */
+.ico.go[data-ic=messages] .tdot{animation:ai-typing .9s ease-in-out both}
+.ico.go[data-ic=messages] .t2{animation-delay:.12s}.ico.go[data-ic=messages] .t3{animation-delay:.24s}
+@keyframes ai-typing{30%{transform:translateY(-4px)}60%{transform:translateY(0)}}
+/* briefcase: picked up by the handle */
+.ico.go[data-ic=briefcase] .bag,.ico.go[data-ic=briefcase] .handle{animation:ai-there .8s var(--e);--y:-5px}
+.ico.go[data-ic=briefcase] .bag{animation-delay:.05s}
+/* link: the two links pull apart and click back together */
+.ico.go[data-ic=link] .lk-a{animation:ai-there .8s var(--sp);--x:-4px;--y:4px}
+.ico.go[data-ic=link] .lk-b{animation:ai-there .8s var(--sp);--x:4px;--y:-4px}
+/* sign and sketch: the pen writes the line */
+.ico.go .pen{transform-origin:20% 80%;animation:ai-write .9s ease-in-out}
+@keyframes ai-write{20%{transform:translate(-2px,1px) rotate(-6deg)}45%{transform:translate(2px,0) rotate(4deg)}70%{transform:translate(-1px,1px) rotate(-3deg)}}
+.ico .scrib{stroke-dasharray:70;stroke-dashoffset:0}
+.ico.go .scrib{animation:ai-draw .9s ease-in-out both;--len:70}
+/* calendar: the top page flips and the days fill in */
+.ico.go[data-ic=calendar] .page{transform-origin:50% 0;animation:ai-flip .7s var(--e)}
+@keyframes ai-flip{45%{transform:scaleY(.2)}}
+.ico.go[data-ic=calendar] .cd{animation:ai-pop .45s var(--e) both}
+.ico.go .c2{animation-delay:.08s!important}.ico.go .c3{animation-delay:.16s!important}.ico.go .c4{animation-delay:.24s!important}.ico.go .c5{animation-delay:.32s!important}
+/* video: the play button is pressed */
+.ico.go[data-ic=play] .tri{animation:ai-there .6s var(--sp);--s:.8}
+.ico.go[data-ic=play] .screen{animation:ai-there .6s var(--sp);--s:.96}
+/* music: the record spins */
+.ico.go[data-ic=record] .vinyl{animation:ai-turn 1.1s cubic-bezier(.4,0,.2,1);--r:360deg}
+/* document: the corner folds and the lines are written */
+.ico.go[data-ic=document] .corner{transform-origin:0 100%;animation:ai-there .8s var(--e);--s:1.25}
+/* boards: the cards are laid down one by one */
+.ico.go[data-ic=boards] .tile{animation:ai-pop .5s var(--e) both}
+.ico.go[data-ic=boards] .t2{animation-delay:.08s}.ico.go[data-ic=boards] .t4{animation-delay:.16s}.ico.go[data-ic=boards] .t3{animation-delay:.24s}
+/* mail: the flap opens and the letter rises */
+.ico.go[data-ic=mail] .flap{transform-origin:50% 0;animation:ai-flip .9s var(--e)}
+.ico.go[data-ic=mail] .letter{animation:ai-there .9s var(--e);--y:-9px}
+/* wallet: a card slides out */
+.ico.go[data-ic=wallet] .card{animation:ai-there .9s var(--e);--y:-7px;--r:-4deg}
+/* note: the bottom corner curls */
+.ico.go[data-ic=note] .curl{transform-origin:100% 100%;animation:ai-there .8s var(--e);--s:1.35}
+/* palette: the paints are dabbed on */
+.ico.go[data-ic=palette] .pd{animation:ai-pop .5s var(--e) both}
+.ico.go .p2{animation-delay:.1s!important}.ico.go .p3{animation-delay:.2s!important}.ico.go .p4{animation-delay:.3s!important}
+/* stopwatch: the hand sweeps round */
+.ico.go[data-ic=stopwatch] .hand{transform-origin:50% 100%;animation:ai-turn 1s cubic-bezier(.45,0,.2,1);--r:360deg}
+/* calculator: the plus key is pressed */
+.ico.go[data-ic=calculator] .key{animation:ai-there .45s var(--sp);--s:.88}
+/* settings: the gear turns one tooth at a time */
+.ico.go[data-ic=gear] .cog{animation:ai-turn 1s var(--sp);--r:45deg}
+/* apps: a ripple runs across the grid */
+.ico.go[data-ic=apps] .ad{animation:ai-pop .45s var(--e) both}
+.ico.go .a1{animation-delay:.07s!important}.ico.go .a2{animation-delay:.14s!important}.ico.go .a3{animation-delay:.21s!important}.ico.go .a4{animation-delay:.28s!important}
+/* profile: the person looks up; the friend behind nods */
+.ico.go[data-ic=user] .head{animation:ai-there .7s var(--e);--y:-3px}
+.ico.go[data-ic=user] .back{animation:ai-there .7s var(--e) .12s;--y:-2px}
+/* phone: it rings */
+.ico.go[data-ic=phone] .ring{animation:ai-swing .8s ease-in-out}
+/* video call: the recording light blinks */
+.ico.go[data-ic=video] .rec{animation:ai-fade .45s ease-in-out 2}
+.ico.go[data-ic=video] .lens{transform-origin:0 50%;animation:ai-there .7s var(--e);--s:1.1}
+/* camera: the shutter closes and the flash fires */
+.ico.go[data-ic=camera] .iris{animation:ai-there .5s var(--e);--s:.35}
+.ico.go[data-ic=camera] .flash{animation:ai-beat .5s ease-out}
+/* inbox: the drawer slides out */
+.ico.go[data-ic=tray] .drawer{animation:ai-there .8s var(--e);--y:5px}
+.ico.go[data-ic=tray] .badge{animation:ai-pop .5s var(--e) .25s both}
+/* desktop and laptop: the screen lights up */
+.ico.go[data-ic=monitor] .glow{animation:ai-glow .9s ease-out}
+.ico.go[data-ic=laptop] .lid{transform-origin:50% 100%;animation:ai-there .8s var(--e);--s:1;animation-name:ai-lid}
+@keyframes ai-lid{40%{transform:perspective(80px) rotateX(18deg)}}
+/* globe: it turns */
+.ico.go[data-ic=globe] .land{animation:ai-spin-land 1.1s cubic-bezier(.45,0,.2,1)}
+@keyframes ai-spin-land{to{transform:translateX(58px)}}
+/* location: the pin drops in */
+.ico.go[data-ic=pin] .drop{animation:ai-pindrop .8s var(--e)}
+@keyframes ai-pindrop{0%{transform:translateY(0)}30%{transform:translateY(-9px)}60%{transform:translateY(0) scale(1.06,.94)}80%{transform:translateY(-2px)}}
+.ico.go[data-ic=pin] .shadow{animation:ai-there .8s var(--e);--s:.6}
+/* weather: the sun peeks out from behind the cloud */
+.ico.go[data-ic=weather] .sun{animation:ai-there .9s var(--e);--x:4px;--y:-4px}
+.ico.go[data-ic=weather] .cl{animation:ai-there .9s var(--e);--x:-3px}
+/* clock: the hands go round */
+.ico.go[data-ic=clock] .min{transform-origin:50% 100%;animation:ai-turn 1s cubic-bezier(.45,0,.2,1);--r:360deg}
+.ico.go[data-ic=clock] .hr{transform-origin:0 0;animation:ai-turn 1s cubic-bezier(.45,0,.2,1);--r:30deg}
+/* delete: the lid opens */
+.ico.go[data-ic=trash] .tlid{transform-origin:0 100%;animation:ai-there .8s var(--e);--r:-18deg;--y:-2px}
+/* protected: the tick is drawn */
+.ico .chk{stroke-dasharray:40;stroke-dashoffset:0}
+.ico.go[data-ic=shield] .chk{animation:ai-draw .7s var(--e) .1s both;--len:40}
+.ico.go[data-ic=shield] .sh{animation:ai-there .7s var(--sp);--s:1.05}
+/* download and upload: the arrow travels */
+.ico.go[data-ic=download] .arr-d{animation:ai-travel .9s var(--e);--d:1}
+.ico.go[data-ic=upload] .arr-u{animation:ai-travel .9s var(--e);--d:-1}
+@keyframes ai-travel{35%{transform:translateY(calc(var(--d) * 9px));opacity:0}36%{transform:translateY(calc(var(--d) * -9px));opacity:0}70%{opacity:1}}
+/* search: the glass sweeps in a little circle */
+.ico.go[data-ic=search] .lens{animation:ai-look 1s ease-in-out}
+@keyframes ai-look{25%{transform:translate(-3px,-2px)}50%{transform:translate(2px,-3px)}75%{transform:translate(3px,2px)}}
+/* microphone: the level rises */
+.ico.go[data-ic=mic] .lvl{animation:ai-there .5s ease-in-out 2;--y:-14px}
+/* headphones: nodding to the beat */
+.ico.go[data-ic=headphones] .hp{animation:ai-there .45s ease-in-out 2;--y:-3px;--r:-3deg}
+/* notifications: the bell rings */
+.ico.go[data-ic=bell] .bell{transform-origin:50% 0;animation:ai-swing .9s ease-in-out}
+.ico.go[data-ic=bell] .clap{animation:ai-swing-c .9s ease-in-out}
+@keyframes ai-swing-c{15%{transform:translateX(-4px)}30%{transform:translateX(4px)}45%{transform:translateX(-3px)}60%{transform:translateX(2px)}}
+/* bookmark: it is pinned to the page */
+.ico.go[data-ic=bookmark] .bm{transform-origin:50% 0;animation:ai-there .7s var(--sp);--s:1;--y:4px}
+/* favourite and love */
+.ico.go[data-ic=star] .st{animation:ai-there .8s var(--sp);--r:72deg;--s:1.12}
+.ico.go[data-ic=heart] .ht{animation:ai-beat .9s ease-out}
+/* share: the link reaches out to the others */
+.ico .wire{stroke-dasharray:40;stroke-dashoffset:0}
+.ico.go[data-ic=share] .wire{animation:ai-draw .6s var(--e) .1s both;--len:40}
+.ico.go[data-ic=share] .n1,.ico.go[data-ic=share] .n2{animation:ai-pop .5s var(--e) .3s both}
+/* refresh: one turn */
+.ico.go[data-ic=refresh] .rf{animation:ai-turn .9s cubic-bezier(.45,0,.2,1);--r:360deg}
+/* magic: the sparkles twinkle in turn */
+.ico.go[data-ic=sparkles] .sp{animation:ai-pop .55s var(--e) both}
+.ico.go[data-ic=sparkles] .s2{animation-delay:.12s}.ico.go[data-ic=sparkles] .s3{animation-delay:.24s}
+/* key: it turns in the lock */
+.ico.go[data-ic=key] .ky{transform-origin:30% 70%;animation:ai-there .8s var(--e);--r:-25deg}
+/* lock: the shackle opens */
+.ico.go[data-ic=lock] .shk{transform-origin:100% 100%;animation:ai-there .9s var(--e);--y:-6px}
+/* light and dark */
+.ico.go[data-ic=sun] .rays{animation:ai-turn 1s var(--e);--r:45deg}
+.ico.go[data-ic=sun] .core{animation:ai-beat .9s ease-out}
+.ico.go[data-ic=moon] .mn{animation:ai-there .9s ease-in-out;--r:-14deg}
+/* battery: it charges */
+.ico.go[data-ic=battery] .fill{transform-origin:0 50%;animation:ai-grow .9s var(--e) both}
+/* signal and wifi: the bars and waves come in one after another */
+.ico.go[data-ic=signal] .sg{transform-origin:50% 100%;animation:ai-growy .5s var(--e) both}
+.ico.go[data-ic=signal] .g2{animation-delay:.1s}.ico.go[data-ic=signal] .g3{animation-delay:.2s}.ico.go[data-ic=signal] .g4{animation-delay:.3s}
+.ico.go[data-ic=wifi] .wf{animation:ai-fade .5s ease both}
+.ico.go[data-ic=wifi] .w0{animation-delay:0s}.ico.go[data-ic=wifi] .w1{animation-delay:.1s}.ico.go[data-ic=wifi] .w2{animation-delay:.2s}.ico.go[data-ic=wifi] .w3{animation-delay:.3s}
+/* bluetooth: a pairing pulse */
+.ico.go[data-ic=bluetooth] .bt{animation:ai-beat .9s ease-out}
+/* scan: the frame closes in on the target */
+.ico.go[data-ic=scan] .c1{animation:ai-there .7s var(--e);--x:5px;--y:5px}.ico.go[data-ic=scan] .c2{animation:ai-there .7s var(--e);--x:-5px;--y:5px}
+.ico.go[data-ic=scan] .c3{animation:ai-there .7s var(--e);--x:-5px;--y:-5px}.ico.go[data-ic=scan] .c4{animation:ai-there .7s var(--e);--x:5px;--y:-5px}
+/* copy: the copy slides off the original */
+.ico.go[data-ic=copy] .front{animation:ai-there .8s var(--e);--x:-8px;--y:-7px}
+/* print: the page comes out */
+.ico.go[data-ic=printer] .paper{transform-origin:50% 0;animation:ai-there .9s var(--e);--y:5px}
+/* home: the door opens */
+.ico.go[data-ic=home] .door{transform-origin:0 50%;animation:ai-there .9s var(--e);--s:1;animation-name:ai-door}
+@keyframes ai-door{40%{transform:perspective(40px) rotateY(-40deg)}}
+/* chart: the bars grow */
+.ico.go[data-ic=chart] .cb{transform-origin:50% 100%;animation:ai-growy .55s var(--e) both}
+.ico.go[data-ic=chart] .b2{animation-delay:.1s!important}.ico.go[data-ic=chart] .b3{animation-delay:.2s!important}
+/* launch: lift-off */
+.ico.go[data-ic=rocket] .rk{animation:ai-there .9s var(--e);--y:-7px}
+.ico.go[data-ic=rocket] .flame{transform-origin:50% 0;animation:ai-there .3s ease-in-out 3;--s:1.3}
+/* gift: the lid pops */
+.ico.go[data-ic=gift] .glid{transform-origin:0 100%;animation:ai-there .8s var(--sp);--y:-6px;--r:-8deg}
+/* coffee: steam rises */
+.ico.go[data-ic=coffee] .sm{animation:ai-steam .9s ease-out both}
+.ico.go[data-ic=coffee] .s2{animation-delay:.12s}.ico.go[data-ic=coffee] .s3{animation-delay:.24s}
+@keyframes ai-steam{0%{transform:translateY(5px);opacity:0}60%{opacity:1}100%{transform:translateY(0)}}
+/* award: a glint */
+.ico.go[data-ic=trophy] .shine{animation:ai-there .8s var(--e);--x:18px}
+/* shop: the cart rolls */
+.ico.go[data-ic=cart] .cart{animation:ai-there .8s var(--e);--x:4px}
+/* code: the brackets open */
+.ico.go[data-ic=code] .cl-l{animation:ai-there .7s var(--e);--x:-3px}.ico.go[data-ic=code] .cl-r{animation:ai-there .7s var(--e);--x:3px}
+/* terminal: the cursor blinks */
+.ico.go[data-ic=terminal] .caret{animation:ai-fade .4s steps(1) 3}
+/* explore: the needle swings and settles */
+.ico.go[data-ic=compass] .needle{transform-origin:50% 50%;animation:ai-needle 1s ease-out}
+@keyframes ai-needle{25%{transform:rotate(50deg)}50%{transform:rotate(-25deg)}75%{transform:rotate(10deg)}}
+/* travel: it takes off */
+.ico.go[data-ic=plane] .pl{animation:ai-there .8s var(--e);--x:5px;--y:-5px}
+/* goal: the flag waves */
+.ico.go[data-ic=flag] .fl{transform-origin:0 50%;animation:ai-wave .8s ease-in-out}
+@keyframes ai-wave{25%{transform:skewY(-6deg) scaleX(.93)}60%{transform:skewY(4deg)}}
+/* reading: the page turns */
+.ico.go[data-ic=bookopen] .pg{transform-origin:0 50%;animation:ai-turnpage .9s var(--e)}
+@keyframes ai-turnpage{45%{transform:scaleX(-.15)}}
+/* idea: it switches on */
+.ico.go[data-ic=bulb] .glow circle{animation:ai-glow .9s ease-out}
+
+@media (prefers-reduced-motion:reduce){.ico.go *,.ico.go .art{animation:none!important}}
+
+/* the icon library sheet in owner mode */
+.ail{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:calc(10 * var(--u))}
+.ail-cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border:0;border-radius:var(--r-6);background:transparent;color:var(--ink);font:inherit;font-size:var(--fs-2);cursor:pointer}
+.ail-cell:hover,.ail-cell.on{background:var(--surface2)}.ail-cell.on{outline:2px solid var(--primary)}
+.ail-cell .ico{width:56px;height:56px;display:block}.ail-cell .ico svg{width:100%;height:100%}
+/* the "Icons" tab of Rename or change icon */
+.ae-grid.ae-lib{grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:4px}
+.ae-grid.ae-lib button{height:54px;background:transparent;padding:0}
+.ae-grid.ae-lib button:hover{background:var(--surface2)}
+.ae-lib .ico{display:block;width:46px;height:46px}.ae-lib .ico svg{display:block;width:100%;height:100%}
+.ae-tabs{display:flex}.ae-tabs button{flex:1 1 0;min-width:0;padding-inline:6px;white-space:nowrap}
