@@ -7,6 +7,7 @@ import { saveJSON } from "../lib/safe.mjs";
 
 const COLORS = ["c0", "c1", "c2", "c3", "c4", "c5", "c6"];
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
+export const cleanNotes = (list) => clean(list);
 const clean = (list) =>
   (Array.isArray(list) ? list : []).slice(0, 400).map((n) => {
     const blocks = Array.isArray(n?.blocks) ? cleanBlocks(n.blocks) : [];

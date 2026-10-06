@@ -658,6 +658,8 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 .tle-media{display:flex;flex-wrap:wrap;gap:calc(6 * var(--u));margin:calc(8 * var(--u)) 0}
 .tle-mb{display:inline-flex;align-items:center;gap:calc(6 * var(--u));border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:var(--fs-3);padding:calc(6 * var(--u)) calc(12 * var(--u));border-radius:var(--r-pill);cursor:pointer}
 .tle-mb:hover{background:var(--surface2)}.tle-mb img{width:22px;height:22px;object-fit:cover;border-radius:4px}
+.gs-steps{margin:calc(6 * var(--u)) 0;padding-left:calc(20 * var(--u));font-size:var(--fs-4);line-height:1.55}.gs-steps li{margin:calc(6 * var(--u)) 0}.gs-steps code,.gs-box code{font-size:var(--fs-2);word-break:break-all;background:var(--surface2);padding:1px 5px;border-radius:6px}
+.gs-box .gs-err,.gs-box .gs-err b{color:#c5221f!important;font-size:var(--fs-4)}:root[data-theme="dark"] .gs-box .gs-err,:root[data-theme="dark"] .gs-box .gs-err b{color:#f28b82!important}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gs-box .gs-err,:root:not([data-theme="light"]) .gs-box .gs-err b{color:#f28b82!important}}.gs-box .ow-app small{color:var(--ink2)}
 .own-sec{margin-top:calc(26 * var(--u));padding-top:calc(6 * var(--u));border-top:1px solid rgba(127,127,127,.3)}.own-sec h2{margin:calc(14 * var(--u)) 0 2px}.ow-top{display:flex;justify-content:space-between;gap:calc(10 * var(--u));margin:0 0 calc(4 * var(--u));opacity:.8}.ow-st{font-size:var(--fs-3);min-width:6ch;text-align:right}
 .ow-f{display:flex;flex-direction:column;gap:calc(4 * var(--u));font-size:var(--fs-3);margin:calc(8 * var(--u)) 0;opacity:.95}.ow-f input{font:inherit;font-size:var(--fs-5);padding:calc(9 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 .ow-apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:calc(6 * var(--u)) calc(12 * var(--u));margin:calc(10 * var(--u)) 0}.ow-app{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:var(--fs-5);padding:calc(6 * var(--u)) 2px;cursor:pointer}.ow-app input{width:18px;height:18px;accent-color:#2ecc71}
@@ -3210,6 +3212,7 @@ const SET_CATS=[
   ['sound','Sound','music','Sounds and haptics',['sounds']],
   ['profile','Profile','user','Name, photo, what you are up to',['about you','on repeat','your photo']],
   ['inbox','Messages & guestbook','mail','Messages, guestbook, OGGY’s inbox',['messages','guestbook',"oggy's inbox"]],
+  ['sync','Sync','refresh','Google Docs and Google Keep',['google']],
   ['website','Website','globe','Search, sharing, how the site opens',['website','live check','opening the site']],
   ['backup','Backup','shield','Download, restore, safety copies',['backup','automatic safety copies']],
   ['device','This device','laptop','Install the app, keyboard shortcuts',['this site as an app','keyboard']],
@@ -3711,6 +3714,7 @@ function ownerPanel(body){
   <h3>OGGY</h3><label class="ow-app"><input type="checkbox" id="oggyHide" ${SITE.s&&SITE.s.oggyHidden?'checked':''}><span>Hide OGGY from visitors (you still see him while signed in)</span></label>
   <h3>Messages</h3><p class="hint">What visitors send from the Messages app: name, email, what it is about and where they came from.</p><div class="ow-row"><button class="btn tonal ow-msgs">Open messages</button></div>
   <h3>OGGY's inbox</h3><p class="hint">What visitors tell OGGY: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
+  <h3>Google Docs and Keep</h3><div class="gs-box"><p class="hint">Checking…</p></div>
   <h3>Account</h3><p class="hint">You are signed in as the owner on this device.</p><div class="ow-row"><button class="btn tonal ow-out">Sign out</button></div>`;
   body.appendChild(sec);
   const cur=()=>{if(!SITE.s)SITE.s={hiddenApps:[]};return SITE.s};
@@ -3719,6 +3723,7 @@ function ownerPanel(body){
     s.place=s.place||{};if(k==='hidden')set.add(id);else{set.delete(id);s.place[id]=k}s.hiddenApps=[...set];
     row.querySelectorAll('[data-pl]').forEach(x=>x.classList.toggle('on',x===b));applyHidden();siteSave();SFX.play('toggle')});
   sec.querySelector('#gbAuto').onchange=e=>{cur().gbAuto=e.target.checked;siteSave()};
+  gsyncPanel(sec.querySelector('.gs-box'));
   sec.querySelector('#noLock').onchange=e=>{if(e.target.checked)cur().noLock=true;else delete cur().noLock;try{localStorage.setItem('rkNoLock',e.target.checked?'1':'0')}catch(x){}siteSave()};
   sec.querySelector('#oggyHide').onchange=e=>{if(e.target.checked)cur().oggyHidden=true;else delete cur().oggyHidden;applyCatSite();siteSave()};
   sec.querySelector('.ow-msgs').onclick=()=>openApp('messages');
@@ -3726,6 +3731,33 @@ function ownerPanel(body){
   fetch('/api/mochi',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(!d)return;let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}const n=d.visitors.filter(v=>(v.updated||0)>seen).length;if(n)ib.textContent=`Open inbox (${n} new)`}).catch(()=>{});
   sec.querySelector('.ow-out').onclick=async()=>{try{await fetch('/api/auth',{method:'DELETE'})}catch(e){}LIVE.admin=false;LIVE.status='';SITE.status='';ownerChanged();refreshNotes()}}
 
+
+/* ===== Google Docs and Keep sync (owner only). The work happens on the server every ten minutes; this shows it and runs it now. ===== */
+async function gsyncPanel(box){if(!box)return;
+  let d=null;try{const r=await fetch('/api/gsync',{cache:'no-store'});if(r.status===401){LIVE.admin=false;ownerChanged();return}if(r.ok)d=await r.json()}catch(e){}
+  if(!box.isConnected)return;
+  if(!d){box.innerHTML='<p class="hint">Could not check the sync. Try again shortly.</p>';return}
+  const when=t=>t?new Date(t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'never';
+  const line=(name,o)=>!o?'':o.error?`<p class="gs-err"><b>${name}:</b> ${esc(o.error)}</p>`:`<p class="hint"><b>${name}:</b> ${[o.pushed&&o.pushed+' sent to Google',o.pulled&&o.pulled+' updated from Google',o.created&&o.created+' new from Google',o.unlinked&&o.unlinked+' no longer on Google (kept here)'].filter(Boolean).join(', ')||'everything matches'}${o.more?'. More next time.':''}</p>`;
+  if(!d.configured){box.innerHTML=`<p class="hint">Keeps your Docs pages in step with Google Docs (in a Drive folder called “rohankumar.pro Docs”) and your Notes with Google Keep, both ways. It needs a one-time setup in Google and Netlify:</p>
+    <ol class="gs-steps"><li>In <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud</a>, create a project and turn on <b>Google Drive API</b> and <b>Google Keep API</b>.</li>
+    <li>Under <b>IAM &amp; Admin → Service accounts</b>, create one, open it, and under <b>Keys</b> add a JSON key. Note its <b>Unique ID</b> (client ID).</li>
+    <li>In <a href="https://admin.google.com/" target="_blank" rel="noopener">Google Admin</a>: <b>Security → Access and data control → API controls → Manage domain-wide delegation → Add new</b>. Paste the client ID and these scopes: <code>https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/keep</code></li>
+    <li>In Netlify, <b>Site configuration → Environment variables</b>, add <code>GOOGLE_SA_EMAIL</code> (the key file's <code>client_email</code>), <code>GOOGLE_SA_KEY</code> (its <code>private_key</code>, the whole text) and <code>GOOGLE_SYNC_USER</code> = your Workspace address. Then deploy again.</li></ol>
+    <div class="ow-row"><button class="btn tonal gs-check">Check again</button></div>`;
+    box.querySelector('.gs-check').onclick=()=>{box.innerHTML='<p class="hint">Checking…</p>';gsyncPanel(box)};return}
+  const L=d.last||{};
+  box.innerHTML=`<p class="hint">Connected as <b>${esc(d.user)}</b>. Syncs both ways every ten minutes. If the same page changed on both sides, the newer edit wins and the other stays in the page’s history. Nothing on this site is ever deleted by the sync: if you delete a doc or note in Google, the site keeps its copy and stops syncing it. Notes that come from Keep start private.</p>
+    ${d.preview?'<p class="gs-err">This is a preview address: sync only runs on the live site.</p>':''}
+    <label class="ow-app"><input type="checkbox" data-gs="docsOn" ${d.docsOn?'checked':''}><span>Docs ↔ Google Docs ${d.linkedDocs?`<small>(${d.linkedDocs} linked)</small>`:''}</span></label>
+    <label class="ow-app"><input type="checkbox" data-gs="keepOn" ${d.keepOn?'checked':''}><span>Notes ↔ Google Keep ${d.linkedNotes?`<small>(${d.linkedNotes} linked)</small>`:''}</span></label>
+    <p class="hint">Last sync: ${when(L.ts)}</p>${line('Docs',L.docs)}${line('Keep',L.keep)}
+    <div class="ow-row"><button class="btn tonal gs-run"${d.preview?' disabled':''}>Sync now</button>${d.folderId?`<a class="btn tonal" href="https://drive.google.com/drive/folders/${encodeURIComponent(d.folderId)}" target="_blank" rel="noopener">Open the Drive folder</a>`:''}</div>
+    <p class="hint">Keep can’t edit a note in place, so a note you change here is replaced in Keep with a fresh copy. Keep has no colours or labels for other apps, so those stay on the site. Pages with columns, callouts or embeds are best edited here: Google Docs has no such blocks.</p>`;
+  box.querySelectorAll('[data-gs]').forEach(c=>c.onchange=async()=>{try{await fetch('/api/gsync',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({[c.dataset.gs]:c.checked})})}catch(e){}toast('Saved')});
+  const rb=box.querySelector('.gs-run');rb.onclick=async()=>{rb.disabled=true;rb.textContent='Syncing…';
+    try{const r=await fetch('/api/gsync',{method:'POST'});const x=await r.json().catch(()=>({}));toast(x.error==='busy'?'A sync is already running':r.ok?'Synced':x.error||'Sync failed',3500)}catch(e){toast('Could not reach the server')}
+    gsyncPanel(box);refreshNotes&&refreshNotes()}}
 
 /* ===== OGGY's inbox (owner only; the server checks the sign-in on every request) ===== */
 async function mochiInbox(body){
