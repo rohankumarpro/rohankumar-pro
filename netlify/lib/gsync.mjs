@@ -19,29 +19,41 @@ const DOC_MIME = "application/vnd.google-apps.document";
 const hash = (s) => createHash("sha1").update(String(s)).digest("hex").slice(0, 16);
 
 /* ---------- connecting ---------- */
+const env = (k) => String(process.env[k] || "").trim().replace(/^["']|["'],?$/g, "").trim(); // stray spaces, quotes or a comma from copying out of the key file
 function creds() {
   let k = null; try { k = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT || "null"); } catch {}
-  const email = (k && k.client_email) || process.env.GOOGLE_SA_EMAIL || "", key = String((k && k.private_key) || process.env.GOOGLE_SA_KEY || "").replace(/\\n/g, "\n");
+  const email = (k && k.client_email) || env("GOOGLE_SA_EMAIL"), key = String((k && k.private_key) || env("GOOGLE_SA_KEY")).replace(/\\n/g, "\n");
   return email && key.includes("PRIVATE KEY") ? { client_email: email, private_key: key } : null;
 }
 export function configured() { return !!(creds() && user()); }
-const user = () => process.env.GOOGLE_SYNC_USER || process.env.OWNER_EMAIL || "";
+const user = () => env("GOOGLE_SYNC_USER") || env("OWNER_EMAIL");
 const tokens = {};
 async function token(scope) {
   if (tokens[scope] && tokens[scope].exp > Date.now() + 60_000) return tokens[scope].v;
   const k = creds(), now = Math.floor(Date.now() / 1000);
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
   const head = b64({ alg: "RS256", typ: "JWT" }), claim = b64({ iss: k.client_email, sub: user(), scope, aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 });
-  const sig = createSign("RSA-SHA256").update(head + "." + claim).sign(k.private_key, "base64url");
+  let sig; try { sig = createSign("RSA-SHA256").update(head + "." + claim).sign(k.private_key, "base64url"); }
+  catch { throw new Error("GOOGLE_SA_KEY in Netlify is not a readable private key. Paste the text between the quotes after \"private_key\" in the key file, from -----BEGIN PRIVATE KEY----- to -----END PRIVATE KEY-----."); }
   const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: `${head}.${claim}.${sig}` }) });
   const d = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(`Google sign-in failed (${d.error || r.status}${d.error_description ? ": " + d.error_description : ""}). Check the service account and its domain-wide delegation.`);
+  if (!r.ok) {
+    const why = d.error === "invalid_client" ? `Google has no service account called ${k.client_email}. Check GOOGLE_SA_EMAIL in Netlify against client_email in the key file.`
+      : d.error === "invalid_grant" && /signature/i.test(d.error_description || "") ? `The key in GOOGLE_SA_KEY doesn't belong to ${k.client_email}, or it was deleted in Google Cloud. Make a new key and paste its private_key.`
+      : d.error === "unauthorized_client" ? `${k.client_email} isn't allowed to act as ${user()}. In Google Admin > Security > API controls > Domain-wide delegation, add its client ID with the Drive and Keep scopes.`
+      : d.error === "invalid_grant" ? `Google refused to act as ${user()} (${d.error_description || "invalid_grant"}). Check GOOGLE_SYNC_USER is a user in your Workspace.` : "";
+    throw new Error(`Google sign-in failed (${d.error || r.status}${d.error_description ? ": " + d.error_description : ""}). ${why || "Check the service account and its domain-wide delegation."}`);
+  }
   tokens[scope] = { v: d.access_token, exp: Date.now() + (d.expires_in || 3600) * 1000 };
   return d.access_token;
 }
 async function g(scope, url, opt = {}) {
   const r = await fetch(url, { ...opt, headers: { authorization: "Bearer " + (await token(scope)), ...(opt.headers || {}) } });
-  if (!r.ok) { const t = await r.text().catch(() => ""); const e = new Error(`Google ${r.status}: ${t.slice(0, 300)}`); e.status = r.status; throw e; }
+  if (!r.ok) {
+    const t = await r.text().catch(() => ""); let msg = t.slice(0, 300); try { msg = JSON.parse(t).error?.message || msg; } catch {}
+    const hint = /has not been used|is disabled/i.test(msg) ? ` Turn on the ${/keep/i.test(url) ? "Google Keep" : "Google Drive"} API in your Google Cloud project.` : r.status === 403 && /scope|insufficient/i.test(msg) ? ` Add the ${/keep/i.test(url) ? "keep" : "drive"} scope to the domain-wide delegation in Google Admin.` : "";
+    const e = new Error(`Google ${r.status}: ${msg}${hint}`); e.status = r.status; throw e;
+  }
   return r;
 }
 const DRIVE = "https://www.googleapis.com/auth/drive", KEEP = "https://www.googleapis.com/auth/keep";
@@ -158,14 +170,22 @@ async function syncDocs(store, st, out, until) {
 
 /* ---------- Notes <-> Google Keep ---------- */
 const NOTE_RE = /^[\w-]{3,16}$/;
-const keepBody = (n) => n.kind === "list" ? { list: { listItems: (n.items || []).slice(0, 1000).map((i) => ({ text: { text: String(i.t || "").slice(0, 1000) }, checked: !!i.d })) } } : { text: { text: String(n.text || "").slice(0, 19000) } };
-const noteHash = (n) => hash(JSON.stringify([n.title || "", n.kind === "list" ? (n.items || []).map((i) => [i.t, !!i.d]) : n.text || ""]));
+function keepBody(n) {
+  if (n.kind !== "list") return { text: { text: String(n.text || "").slice(0, 19000) } };
+  const out = [];
+  for (const i of (n.items || []).slice(0, 1000)) {
+    const it = { text: { text: String(i.t || "").slice(0, 1000) }, checked: !!i.d };
+    if (i.ind && out.length) (out[out.length - 1].childListItems ||= []).push(it); else out.push(it);
+  }
+  return { list: { listItems: out } };
+}
+const noteHash = (n) => hash(JSON.stringify([n.title || "", n.kind === "list" ? (n.items || []).map((i) => [i.t, !!i.d, !!i.ind]) : n.text || ""]));
 function fromKeep(k, prev) {
   const n = { ...(prev || { id: rid(), color: "c0", private: true, created: Date.now() }) }; // notes that come from Keep start private
   n.title = String(k.title || "").slice(0, 120);
   if (k.body && k.body.list) {
-    const flat = []; const walk = (l) => (l || []).forEach((x) => { flat.push({ id: rid(), t: String(x.text?.text || "").slice(0, 300), ...(x.checked ? { d: true } : {}) }); walk(x.childListItems); });
-    walk(k.body.list.listItems); n.kind = "list"; n.items = flat; n.text = flat.map((x) => x.t).join("\n"); delete n.blocks;
+    const flat = []; const walk = (l, ind) => (l || []).forEach((x) => { flat.push({ id: rid(), t: String(x.text?.text || "").slice(0, 300), ...(x.checked ? { d: true } : {}), ...(ind ? { ind: 1 } : {}) }); walk(x.childListItems, 1); });
+    walk(k.body.list.listItems, 0); n.kind = "list"; n.items = flat; n.text = flat.map((x) => x.t).join("\n"); delete n.blocks;
   } else {
     const text = String(k.body?.text?.text || ""); n.text = text; delete n.kind; delete n.items;
     n.blocks = text ? text.split("\n").map((x) => ({ id: rid(), t: "p", h: esc(x) })) : [];
@@ -223,7 +243,7 @@ export async function runSync(store, { budgetMs = 20000 } = {}) {
   const st = (await store.get(STATE, { type: "json" })) ?? {};
   const until = Date.now() + budgetMs, res = { ts: Date.now(), docs: null, keep: null };
   try {
-    if (st.docsOn !== false) { const o = { pushed: 0, pulled: 0, created: 0, unlinked: 0 }; try { await syncDocs(store, st, o, until); } catch (e) { o.error = String(e.message || e).slice(0, 400); } res.docs = o; }
+    if (st.docsOn === true) { const o = { pushed: 0, pulled: 0, created: 0, unlinked: 0 }; try { await syncDocs(store, st, o, until); } catch (e) { o.error = String(e.message || e).slice(0, 400); } res.docs = o; }
     if (st.keepOn !== false) { const o = { pushed: 0, pulled: 0, created: 0, unlinked: 0 }; try { await syncKeep(store, st, o, until); } catch (e) { o.error = String(e.message || e).slice(0, 400); } res.keep = o; }
     st.last = res; st.log = [res, ...(st.log || [])].slice(0, 20);
     await store.setJSON(STATE, st);
@@ -232,7 +252,7 @@ export async function runSync(store, { budgetMs = 20000 } = {}) {
 }
 export async function status(store) {
   const st = (await store.get(STATE, { type: "json" })) ?? {};
-  return { configured: configured(), user: configured() ? user() : "", docsOn: st.docsOn !== false, keepOn: st.keepOn !== false, folderId: st.folderId || "", last: st.last || null, linkedDocs: Object.keys(st.docs || {}).length, linkedNotes: Object.keys(st.keep || {}).length };
+  return { configured: configured(), user: configured() ? user() : "", docsOn: st.docsOn === true, keepOn: st.keepOn !== false, folderId: st.folderId || "", last: st.last || null, linkedDocs: Object.keys(st.docs || {}).length, linkedNotes: Object.keys(st.keep || {}).length };
 }
 export async function setOptions(store, o) {
   const st = (await store.get(STATE, { type: "json" })) ?? {};

@@ -5,13 +5,13 @@ import { cleanBlocks, blocksText, rid, safeImg } from "../../shared/blocks.mjs";
 import { contentStore } from "../lib/store.mjs";
 import { saveJSON } from "../lib/safe.mjs";
 
-const COLORS = ["c0", "c1", "c2", "c3", "c4", "c5", "c6"];
+const COLORS = ["c0", "c1", "c2", "c3", "c4", "c5", "c6", "k-coral", "k-peach", "k-sand", "k-mint", "k-sage", "k-fog", "k-storm", "k-dusk", "k-blossom", "k-clay", "k-chalk"];
 const str = (v, n) => String(v ?? "").trim().slice(0, n);
 export const cleanNotes = (list) => clean(list);
 const clean = (list) =>
   (Array.isArray(list) ? list : []).slice(0, 400).map((n) => {
     const blocks = Array.isArray(n?.blocks) ? cleanBlocks(n.blocks) : [];
-    const items = (Array.isArray(n?.items) ? n.items : []).slice(0, 300).map((i) => ({ id: /^[\w-]{3,16}$/.test(i?.id || "") ? i.id : rid(), t: str(i?.t, 300), ...(i?.d ? { d: true } : {}) }));
+    const items = (Array.isArray(n?.items) ? n.items : []).slice(0, 300).map((i) => ({ id: /^[\w-]{3,16}$/.test(i?.id || "") ? i.id : rid(), t: str(i?.t, 300), ...(i?.d ? { d: true } : {}), ...(i?.ind ? { ind: 1 } : {}) }));
     const o = {
       id: /^[\w-]{3,16}$/.test(n?.id || "") ? n.id : rid(),
       title: str(n?.title, 120),

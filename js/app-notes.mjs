@@ -7,8 +7,10 @@ import { icon } from "/shared/icons.mjs";
 const I = (n, size = 18) => icon(n, { size });
 
 const N = { list: null, status: "", saving: false, again: false, q: "", filter: "notes", fromSeed: false };
-const COLORS = ["c0", "c1", "c2", "c3", "c4", "c5", "c6"];
-const COLOR_NAMES = { c0: "Default", c1: "Blue", c2: "Peach", c3: "Lilac", c4: "Sun", c5: "Mint", c6: "Rose" };
+// Google Keep's own colours (what the picker offers), plus the older ones, which existing notes keep
+const KEEP_COLORS = ["c0", "k-coral", "k-peach", "k-sand", "k-mint", "k-sage", "k-fog", "k-storm", "k-dusk", "k-blossom", "k-clay", "k-chalk"];
+const COLORS = [...KEEP_COLORS, "c1", "c2", "c3", "c4", "c5", "c6"];
+const COLOR_NAMES = { c0: "Default", "k-coral": "Coral", "k-peach": "Peach", "k-sand": "Sand", "k-mint": "Mint", "k-sage": "Sage", "k-fog": "Fog", "k-storm": "Storm", "k-dusk": "Dusk", "k-blossom": "Blossom", "k-clay": "Clay", "k-chalk": "Chalk", c1: "Blue", c2: "Soft peach", c3: "Lilac", c4: "Sun", c5: "Soft mint", c6: "Rose" };
 const BIN_DAYS = 30;
 const uid = () => Math.random().toString(36).slice(2, 10);
 const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
@@ -115,7 +117,7 @@ function card(n, owner) {
   const items = n.items || [];
   const todo = items.filter((i) => !i.d), done = items.filter((i) => i.d);
   const content = n.kind === "list" || items.length
-    ? `<ul class="kn-li">${todo.slice(0, 8).map((i) => `<li><button class="kn-cb" data-chk="${i.id}" aria-label="Mark done"></button><span>${esc(i.t)}</span></li>`).join("")}${todo.length > 8 ? `<li class="more">+ ${todo.length - 8} more</li>` : ""}${done.length ? `<li class="more">${done.length} completed</li>` : ""}</ul>`
+    ? `<ul class="kn-li">${todo.slice(0, 8).map((i) => `<li${i.ind ? ' class="sub"' : ""}><button class="kn-cb" data-chk="${i.id}" aria-label="Mark done"></button><span>${esc(i.t)}</span></li>`).join("")}${todo.length > 8 ? `<li class="more">+ ${todo.length - 8} more</li>` : ""}${done.length ? `<li class="more">${done.length} completed</li>` : ""}</ul>`
     : `<p class="kn-tx">${esc(textOf(n).slice(0, 360))}</p>`;
   return `<article class="kn-card ${n.color || "c0"}" data-id="${esc(n.id)}" tabindex="0" role="button" aria-label="Open note ${esc(n.title || "Untitled")}">${n.img ? `<img class="kn-img" src="${esc(n.img)}" alt="" loading="lazy">` : ""}
     <div class="kn-in">${n.title ? `<h3>${esc(n.title)}</h3>` : ""}${content}${(n.labels || []).length ? `<div class="kn-lb">${n.labels.map((l) => `<span>${esc(l)}</span>`).join("")}</div>` : ""}</div>
@@ -147,7 +149,7 @@ function drawLists(body) {
 }
 function colorPop(anchor, n, done) {
   $$(".kn-pop").forEach((x) => x.remove());
-  const p = h("div", { class: "kn-pop", role: "menu" }, COLORS.map((c) => h("button", { class: `kn-sw ${c}${n.color === c ? " on" : ""}`, "aria-label": COLOR_NAMES[c], title: COLOR_NAMES[c], onclick: (e) => { e.stopPropagation(); n.color = c; touchNote(n); p.remove(); done(); } })));
+  const p = h("div", { class: "kn-pop kn-pop12", role: "menu" }, [...KEEP_COLORS, ...(KEEP_COLORS.includes(n.color) ? [] : [n.color])].map((c) => h("button", { class: `kn-sw ${c}${n.color === c ? " on" : ""}`, "aria-label": COLOR_NAMES[c], title: COLOR_NAMES[c], onclick: (e) => { e.stopPropagation(); n.color = c; touchNote(n); p.remove(); done(); } })));
   anchor.closest(".kn-card, .kn-edit, .kn-compose-card").append(p);
   setTimeout(() => document.addEventListener("pointerdown", function f(e) { if (!p.contains(e.target)) { p.remove(); document.removeEventListener("pointerdown", f, true); } }, true), 0);
 }
@@ -218,7 +220,7 @@ function itemsEditor(host, n, onChange) {
   const fit = (t) => { t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; };
   const draw = (focusId) => {
     const open = n.items.filter((i) => !i.d), done = n.items.filter((i) => i.d);
-    const row = (i) => `<div class="kn-row${i.d ? " d" : ""}" data-id="${i.id}"><span class="kn-grip" aria-hidden="true">${I("grip", 14)}</span><button class="kn-cb${i.d ? " on" : ""}" data-t aria-label="${i.d ? "Mark not done" : "Mark done"}"></button><textarea rows="1" maxlength="300" aria-label="List item" placeholder="List item">${esc(i.t)}</textarea><button class="kn-rm" data-rm aria-label="Delete item">${I("x", 14)}</button></div>`;
+    const row = (i) => `<div class="kn-row${i.d ? " d" : ""}${i.ind ? " sub" : ""}" data-id="${i.id}"><span class="kn-grip" aria-hidden="true">${I("grip", 14)}</span><button class="kn-cb${i.d ? " on" : ""}" data-t aria-label="${i.d ? "Mark not done" : "Mark done"}"></button><textarea rows="1" maxlength="300" aria-label="List item" placeholder="List item">${esc(i.t)}</textarea><button class="kn-rm" data-rm aria-label="Delete item">${I("x", 14)}</button></div>`;
     host.innerHTML = `${open.map(row).join("")}<button class="kn-addrow" data-add>${I("plus", 16)}<span>List item</span></button>${done.length ? `<details class="kn-doneblk"${n.__openDone ? " open" : ""}><summary>${done.length} completed</summary>${done.map(row).join("")}</details>` : ""}`;
     $$("textarea", host).forEach(fit);
     if (focusId) { const t = $(`[data-id="${focusId}"] textarea`, host); t && t.focus(); }
@@ -226,7 +228,8 @@ function itemsEditor(host, n, onChange) {
       const it = n.items.find((x) => x.id === r.dataset.id), ta = $("textarea", r);
       ta.oninput = () => { it.t = ta.value.replace(/\n/g, " "); fit(ta); onChange(); };
       ta.onkeydown = (e) => {
-        if (e.key === "Enter") { e.preventDefault(); const at = n.items.indexOf(it), ni = { id: uid(), t: "" }; n.items.splice(at + 1, 0, ni); onChange(); draw(ni.id); }
+        if (e.key === "Enter") { e.preventDefault(); const at = n.items.indexOf(it), ni = { id: uid(), t: "", ...(it.ind ? { ind: 1 } : {}) }; n.items.splice(at + 1, 0, ni); onChange(); draw(ni.id); }
+        if (e.key === "Tab") { e.preventDefault(); const at = n.items.indexOf(it); if (e.shiftKey) delete it.ind; else if (at > 0) it.ind = 1; onChange(); draw(it.id); } // a sub-item, one level deep like Keep
         if (e.key === "Backspace" && !ta.value && n.items.length > 1) { e.preventDefault(); const at = n.items.indexOf(it); n.items.splice(at, 1); onChange(); draw((n.items[Math.max(0, at - 1)] || {}).id); }
         if (e.key === "ArrowUp" && ta.selectionStart === 0) { const p = r.previousElementSibling; if (p && p.matches(".kn-row")) { e.preventDefault(); $("textarea", p).focus(); } }
         if (e.key === "ArrowDown" && ta.selectionStart === ta.value.length) { const nx = r.nextElementSibling; if (nx && nx.matches(".kn-row")) { e.preventDefault(); $("textarea", nx).focus(); } }
@@ -276,7 +279,7 @@ async function openNote(body, id, mode = "push") {
     } else if (n.kind === "list" || (n.items && n.items.length)) {
       if (!n.items) n.items = [];
       if (editable) itemsEditor(content, n, () => touchNote(n));
-      else content.innerHTML = `<ul class="kn-li">${n.items.map((i) => `<li class="${i.d ? "d" : ""}"><span class="kn-cb${i.d ? " on" : ""}"></span><span>${esc(i.t)}</span></li>`).join("")}</ul>`;
+      else content.innerHTML = `<ul class="kn-li">${n.items.map((i) => `<li class="${i.d ? "d" : ""}${i.ind ? " sub" : ""}"><span class="kn-cb${i.d ? " on" : ""}"></span><span>${esc(i.t)}</span></li>`).join("")}</ul>`;
     } else if (editable) {
       content.innerHTML = `<textarea class="kn-ta" placeholder="Note" aria-label="Note text">${esc(n.text || "")}</textarea>`;
       const ta = $("textarea", content); fit(ta); ta.oninput = () => { n.text = ta.value; fit(ta); touchNote(n); };
