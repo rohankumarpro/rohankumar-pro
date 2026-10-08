@@ -1,5 +1,6 @@
 // Shared article helpers.
 import { SEED } from "./seed.mjs";
+import { CODE_POSTS } from "./code-posts.mjs";
 import { cleanBlocks, blocksToMd, mdToBlocks, safeImg, slugify as sl } from "../../shared/blocks.mjs";
 
 const slugify = (t) => sl(t) || "post";
@@ -52,5 +53,13 @@ export function cleanPosts(list) {
 
 export async function loadPosts(store) {
   const saved = await store.get("journal", { type: "json" });
-  return Array.isArray(saved) ? saved : SEED;
+  return withCodePosts(Array.isArray(saved) ? saved : SEED);
+}
+// Articles published from the repository (code-posts.mjs) join the saved ones, newest first, unless the saved journal
+// already has that slug (the owner's copy always wins). Read only: nothing is written back.
+function withCodePosts(list) {
+  const have = new Set(list.map((p) => p && p.slug));
+  const extra = CODE_POSTS.filter((p) => !have.has(p.slug));
+  if (!extra.length) return list;
+  return [...extra, ...list].sort((a, b) => String(isoDate(b) || "").localeCompare(String(isoDate(a) || "")));
 }
