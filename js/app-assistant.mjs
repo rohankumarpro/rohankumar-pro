@@ -1,8 +1,9 @@
 // Assistant (owner only): Claude, on the owner's own Claude plan.
 //  - In the desktop app, Claude itself shows inside this window (the app lays its own Claude window exactly over the
 //    window's body and keeps it there; it hides whenever something else is on top).
-//  - On the web and on a phone, it opens Claude in a new tab, with the question already typed.
-//  - Either way Claude can reach the workspace through the private connector (/api/mcp) once it is added in Claude.
+//  - On the web and on a phone, it is a chat right here: Google Gemini through /api/assistant, with the same workspace tools
+//    as the connector. Reading is free; every change shows an Apply / Cancel card first.
+//  - Claude itself can still reach the workspace through the private connector (/api/mcp) once it is added in Claude.
 import { h, $, esc, api, toast } from "/js/lib.mjs";
 import { faceSvg, lively, asName, setAsName, faceOn, setFaceOn, mountFace } from "/js/assistant-face.mjs";
 
@@ -88,21 +89,93 @@ function desktop(body) {
   return { destroy: stop };
 }
 
-/* ---------- web and phone: Ask Claude ---------- */
+/* ---------- web and phone: a chat right here (Gemini, through /api/assistant) ---------- */
+const human = (n) => String(n || "").replace(/_/g, " ");
+// small, safe markdown: **bold**, `code`, "- " and "1. " lists. Everything is escaped first.
+function mdHtml(text) {
+  const inline = (t) => esc(t).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  const out = []; let list = null;
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const line of String(text || "").replace(/\r/g, "").split("\n")) {
+    let m;
+    if ((m = line.match(/^\s*[-*]\s+(.*)$/))) { if (list !== "ul") { close(); out.push("<ul>"); list = "ul"; } out.push(`<li>${inline(m[1])}</li>`); }
+    else if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== "ol") { close(); out.push("<ol>"); list = "ol"; } out.push(`<li>${inline(m[1])}</li>`); }
+    else { close(); if (line.trim()) out.push(`<p>${inline(line.replace(/^#{1,3}\s+/, ""))}</p>`); }
+  }
+  close(); return out.join("");
+}
+const argText = (v) => (v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v));
+
 function web(body) {
   body.innerHTML = `<div class="as-w">
-    <div class="as-hero">${faceSvg("big")}<h2 class="as-nm">${esc(asName())}</h2><p>Ask Claude anything. It opens in a new tab on your own Claude plan, and can work in your workspace once the connector is added.</p>
-      <form class="as-ask"><textarea rows="1" placeholder="Ask anything…" aria-label="Ask Claude"></textarea><button class="as-go" type="submit" aria-label="Ask">${ic("send", 20)}</button></form>
+    <div class="as-top" hidden>${faceSvg("sm")}<b class="as-nm">${esc(asName())}</b><span class="as-sp"></span>
+      <button class="as-ib" data-a="new" title="New chat" aria-label="New chat">${ic("plus")}</button>
+      <button class="as-ib" data-a="ext" title="Open Claude in a new tab" aria-label="Open Claude in a new tab">${ic("ext")}</button></div>
+    <div class="as-hero">${faceSvg("big")}<h2 class="as-nm">${esc(asName())}</h2><p>Ask anything about your day, tasks, notes, videos or money. I can look things up and, when you press Apply, change them.</p>
       <div class="as-chips"></div></div>
+    <div class="as-log" role="log" aria-live="polite" hidden></div>
+    <form class="as-ask"><textarea rows="1" placeholder="Ask anything…" aria-label="Message"></textarea><button class="as-go" type="submit" aria-label="Send">${ic("send", 20)}</button></form>
     <div class="as-cards"></div></div>`;
-  lively($(".as-hero .asf", body));
-  const ta = $("textarea", body);
-  const ask = (q) => { const w = window.open(askUrl(q), "_blank", "noopener"); if (!w) location.href = askUrl(q); };
+  lively($(".as-hero .asf", body)); lively($(".as-top .asf", body));
+  const ta = $("textarea", body), log = $(".as-log", body), top = $(".as-top", body), hero = $(".as-hero", body), cards = $(".as-cards", body), form = $(".as-ask", body), go = $(".as-go", body);
+  let contents = [], busy = false;
+
+  const scroll = () => requestAnimationFrame(() => { const w = $(".as-w", body); w.scrollTop = w.scrollHeight; });
+  const say = (who, node) => { const m = h("div", { class: "as-msg " + who }, node); log.append(m); scroll(); return m; };
+  const started = () => { hero.hidden = true; cards.hidden = true; top.hidden = false; log.hidden = false; };
+  const reset = () => { if (busy) return; contents = []; log.replaceChildren(); log.hidden = true; top.hidden = true; hero.hidden = false; cards.hidden = false; ta.focus(); };
+  const lock = (on) => { busy = on; go.disabled = on; ta.disabled = on; if (!on) ta.focus(); };
+  const typing = () => say("bot", h("span", { class: "as-dots", "aria-label": "Thinking" }, h("i"), h("i"), h("i")));
+
+  // what the assistant looked at since the last answer, as small quiet lines
+  const steps = (from, all) => { const names = []; for (const t of all.slice(from)) if (t.role === "model") for (const p of t.parts) if (p.functionCall) names.push(human(p.functionCall.name)); if (names.length) say("step", h("small", {}, "Looked at: " + [...new Set(names)].join(", "))); };
+
+  const problem = (d, retry) => {
+    const setup = d && (d.code === "no_key" || d.code === "bad_key" || d.code === "bad_model");
+    const node = h("div", { class: "as-card as-err" }, h("p", {}, (d && d.error) || "Something went wrong."),
+      setup ? h("p", { class: "as-mut" }, "Get a free key at aistudio.google.com, then in Netlify open Site configuration, Environment variables and add GEMINI_API_KEY with it. Redeploy once and this chat starts working.") : null,
+      retry ? h("button", { class: "btn tonal", type: "button", onclick: () => { node.closest(".as-msg")?.remove(); post(); } }, "Try again") : null);
+    say("bot", node);
+  };
+
+  const pendingCard = (list) => {
+    const rows = list.map((c) => h("div", { class: "as-act" }, h("b", {}, c.title), ...Object.entries(c.args || {}).filter(([, v]) => v !== "" && v != null).map(([k, v]) => h("div", { class: "as-kv" }, h("span", {}, human(k)), h("code", {}, argText(v))))));
+    const apply = h("button", { class: "btn", type: "button" }, "Apply"), cancel = h("button", { class: "btn tonal", type: "button" }, "Cancel");
+    const card = h("div", { class: "as-card as-pend" }, h("h3", {}, list.length > 1 ? "Apply these changes?" : "Apply this change?"), ...rows, h("div", { class: "as-btns" }, cancel, apply));
+    const decide = (yes) => { apply.disabled = cancel.disabled = true; card.classList.add(yes ? "yes" : "no"); const note = h("small", {}, yes ? "Applying…" : "Cancelled"); card.querySelector(".as-btns").replaceChildren(note); post({ approve: yes }).then(() => { if (yes) note.textContent = "Approved"; }); };
+    apply.onclick = () => decide(true); cancel.onclick = () => decide(false);
+    say("bot", card);
+  };
+
+  async function post(extra) {
+    if (busy) return; lock(true);
+    const wait = typing();
+    try {
+      for (let i = 0; i < 6; i++) {
+        const before = contents.length;
+        const r = await api("/api/assistant", { method: "POST", body: { contents, ...(i ? {} : extra) } });
+        if (!r.ok) { wait.remove(); lock(false); if (r.status === 401) return say("bot", h("p", {}, "Sign in as the owner to use this.")); return problem(r.data, true); }
+        contents = r.data.contents; steps(before, contents); wait.remove();
+        if (r.data.pending) { pendingCard(r.data.pending); lock(false); return; }
+        if (r.data.text) { say("bot", h("div", { class: "as-md", html: mdHtml(r.data.text) })); lock(false); return; }
+        if (!r.data.more) break;
+        log.append(wait); scroll();
+      }
+      wait.remove(); lock(false);
+    } catch (e) { console.error("assistant", e); wait.remove(); lock(false); problem({ error: "Something went wrong." }, true); }
+  }
+
+  const send = (q) => {
+    q = String(q || "").trim(); if (!q || busy) return;
+    started(); say("me", h("p", {}, q)); contents.push({ role: "user", parts: [{ text: q }] });
+    ta.value = ""; ta.style.height = ""; post();
+  };
   ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(200, ta.scrollHeight) + "px"; });
-  ta.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $(".as-ask", body).requestSubmit(); } });
-  $(".as-ask", body).onsubmit = (e) => { e.preventDefault(); ask(ta.value.trim()); ta.value = ""; ta.style.height = ""; };
-  $(".as-chips", body).append(...CHIPS.map(([t, q]) => h("button", { class: "as-chip", type: "button", onclick: () => { if (q.endsWith(": ")) { ta.value = q; ta.focus(); ta.dispatchEvent(new Event("input")); } else ask(q); } }, t)));
-  settings($(".as-cards", body), {});
+  ta.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
+  form.onsubmit = (e) => { e.preventDefault(); send(ta.value); };
+  top.addEventListener("click", (e) => { const b = e.target.closest("[data-a]"); if (!b) return; if (b.dataset.a === "new") reset(); if (b.dataset.a === "ext") window.open(CLAUDE, "_blank", "noopener"); });
+  $(".as-chips", body).append(...CHIPS.map(([t, q]) => h("button", { class: "as-chip", type: "button", onclick: () => { if (q.endsWith(": ")) { ta.value = q.replace("Use my workspace connector to add a task: ", "Add a task: "); ta.focus(); ta.dispatchEvent(new Event("input")); } else send(q.replace("Use my workspace connector: ", "")); } }, t)));
+  settings(cards, {});
 }
 
 /* ---------- connector, name and face (both) ---------- */
@@ -130,5 +203,5 @@ function settings(box, { chips }) {
   box.append(card, h("div", { class: "as-card" }, h("h3", {}, "Name and face"),
     h("label", { class: "as-row" }, h("span", {}, "Name"), name),
     h("label", { class: "as-row" }, h("span", {}, "Show the face on the desktop"), face),
-    h("p", { class: "as-mut" }, T() ? "In this desktop app Claude opens right inside the window." : "In the desktop app Claude opens right inside this window. Here it opens in a new tab.")));
+    h("p", { class: "as-mut" }, T() ? "In this desktop app Claude opens right inside the window." : "Here you chat with Gemini. Changes always wait for your Apply. The button at the top opens Claude itself in a new tab.")));
 }
