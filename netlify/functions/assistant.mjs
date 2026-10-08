@@ -69,10 +69,15 @@ const okModel = (m) => typeof m === "string" && /^gemini-[\w.-]{1,50}$/.test(m);
 async function gemini(contents, pick) {
   const key = process.env.GEMINI_API_KEY; if (!key) throw new Soft("no_key", "The assistant needs a Gemini key.");
   const model = okModel(pick) ? pick : DEFAULT_MODEL();
-  let r;
+  // Gemini 3 models think for a long time by default; a chat with tools wants a quick answer, so ask for little thinking.
+  // A model that does not take the setting answers 400 about "thinking", and then we ask again without it.
+  const ask = async (think) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": key }, body: JSON.stringify({ systemInstruction: { parts: [{ text: system() }] }, contents, tools: [{ functionDeclarations: DECLS }], generationConfig: { temperature: 0.4, ...(think ? { thinkingConfig: { thinkingLevel: "low" } } : {}) } }), signal: AbortSignal.timeout(25_000) });
+  let r, t0 = Date.now();
   try {
-    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": key }, body: JSON.stringify({ systemInstruction: { parts: [{ text: system() }] }, contents, tools: [{ functionDeclarations: DECLS }], generationConfig: { temperature: 0.4 } }), signal: AbortSignal.timeout(25_000) });
-  } catch (e) { throw new Soft("busy", e?.name === "TimeoutError" ? "Gemini took too long. Try again." : "Could not reach Gemini. Try again."); }
+    const think = /^gemini-(3|flash-latest|pro-latest)/.test(model);
+    r = await ask(think);
+    if (think && r.status === 400) { const m = await r.clone().json().then((j) => j?.error?.message || "").catch(() => ""); if (/think/i.test(m)) r = await ask(false); }
+  } catch (e) { console.error("assistant gemini", model, e?.name, Date.now() - t0, "ms"); throw new Soft("busy", e?.name === "TimeoutError" ? "Gemini took too long. Try again, or pick another model." : "Could not reach Gemini. Try again.", e?.name === "TimeoutError" ? `no answer from ${model} in 25 seconds` : undefined); }
   if (!r.ok) {
     let msg = ""; try { msg = (await r.json())?.error?.message || ""; } catch {}
     console.error("assistant gemini", r.status, msg.slice(0, 200));
