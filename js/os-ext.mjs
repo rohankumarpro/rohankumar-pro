@@ -63,13 +63,18 @@ window.closeWin = function (w, id, quiet) { try { const b = w.querySelector(".bo
 window.addEventListener("popstate", () => R.apply(location.pathname));
 
 /* ---------- lazy apps ---------- */
+// an app's own stylesheets are added when its code loads; wait for them so it never shows unstyled for a moment
+function cssReady() {
+  const wait = [...document.querySelectorAll('link[rel="stylesheet"]')].filter((l) => !l.sheet).map((l) => new Promise((r) => { l.addEventListener("load", r, { once: true }); l.addEventListener("error", r, { once: true }); }));
+  return wait.length ? Promise.race([Promise.all(wait), new Promise((r) => setTimeout(r, 4000))]) : Promise.resolve();
+}
 export function lazyApp(id, mod, fn, extra) {
   const a = APPS.find((x) => x.id === id); if (!a) return;
   const orig = a.render;
   a.render = (body) => {
     const slug = R.take(id);
     body.innerHTML = '<div class="app-loading"><span class="rb-spin"></span></div>';
-    return import(mod).then((m) => m[fn](body, slug)).catch((e) => { console.error("app", id, e); if (orig) { const r = orig(body); if (typeof r === "string") body.innerHTML = r; } else body.innerHTML = "<p class='hint'>This app could not load. Check your connection and try again.</p>"; });
+    return import(mod).then((m) => cssReady().then(() => m[fn](body, slug))).catch((e) => { console.error("app", id, e); if (orig) { const r = orig(body); if (typeof r === "string") body.innerHTML = r; } else body.innerHTML = "<p class='hint'>This app could not load. Check your connection and try again.</p>"; });
   };
 }
 export function registerApp(app) {

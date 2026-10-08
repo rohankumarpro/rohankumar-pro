@@ -3273,7 +3273,7 @@ var HIDDEN=new Set();
 var SITE={s:null,saveT:null,status:''};
 const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),timeline:JSON.parse(JSON.stringify(TIMELINE)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
 const NEVER_HIDE=['settings'];
-var HID_TAG='<span class="hid-tag" title="Hidden from visitors. Only you can see it."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6 0 9.5 7 9.5 7a17 17 0 0 1-2.9 3.7M6.6 6.6C3.9 8.4 2.5 12 2.5 12s3.5 7 9.5 7c1.8 0 3.4-.6 4.7-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>Hidden</span>';
+var HID_TAG=''; /* hidden items look exactly like the rest for the owner; what visitors see is in Settings and the visitor preview */
 function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return !!LIVE.admin;return !HIDDEN.has(id)||!!LIVE.admin}
 function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=(s.now&&!/Tell visitors what you/.test(s.now)&&s.now)||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
