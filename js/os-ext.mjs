@@ -1,6 +1,6 @@
 // Plugs the newer parts into the desktop: an address for every window, and lazy loading for the bigger apps.
 import "/js/tiling.mjs";
-import "/js/music.mjs"; import "/js/app-edit.mjs"; import "/js/os-manage.mjs"; import "/js/focus-extra.mjs";
+import "/js/music.mjs"; import "/js/app-edit.mjs"; import "/js/os-manage.mjs";
 import { h, $, toast } from "/js/lib.mjs";
 
 const SITE_NAME = () => (typeof P !== "undefined" && P.name) || "Rohan Kumar";
@@ -12,11 +12,11 @@ export const R = {
   take(id) { const p = R.pending; if (p && p.id === id && !p.used) { p.used = true; return p.slug; } return ""; },
   handlers: {},   // app id -> (body, slug, quiet) => shows that item, or the app's main view when slug is empty
   applying: false,
-  alias: { wallet: "documents", youtube: "content" }, // the Wallet window keeps its old internal name "documents" so saved settings still work
+  alias: { youtube: "content" },
   pathFor(id, slug) { const n = Object.keys(R.alias).find((k) => R.alias[k] === id) || id; return "/" + n + (slug ? "/" + slug : ""); },
   parse(path) {
     const seg = decodeURIComponent(path).replace(/^\/+|\/+$/g, "").split("/");
-    const id = R.alias[seg[0]] || seg[0]; const app = APPS.find((a) => a.id === id);
+    const id = R.alias[seg[0]] || ({ book: "contact", messages: "contact" })[seg[0]] || seg[0]; if (seg[0] === "book" && window.CN) window.CN.tab = "book"; const app = APPS.find((a) => a.id === id);
     return app ? { id, slug: seg.slice(1).join("/") } : { id: "", slug: "" };
   },
   top() {

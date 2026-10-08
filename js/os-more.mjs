@@ -86,7 +86,7 @@ const Spot = {
   hide() { if (Spot.el) { Spot.el.remove(); Spot.el = null; } },
 };
 /* ================= keyboard shortcuts (they all really work; the list below is what the ? sheet shows) ================= */
-const GO = { a: "about", p: "projects", j: "journal", n: "notes", d: "boards", l: "links", m: "messages", s: "settings", r: "resume", c: "contact", g: "guestbook", t: "timeline", h: "photos", w: "documents", v: "services", b: "book", x: "content" };
+const GO = { a: "about", p: "projects", j: "journal", n: "notes", d: "boards", l: "links", m: "contact", s: "settings", r: "resume", c: "contact", g: "guestbook", t: "timeline", h: "photos", v: "services", b: "contact", x: "content" };
 const topWin = () => { const w = (window.Router || {}).top && Router.top(); return w || null; };
 const winId = (w) => w && w.dataset.app;
 function snapWin(w, side) {
@@ -304,7 +304,6 @@ const ART_ADD = {
   design: `<rect class="l1" x="22" y="22" width="56" height="56" rx="14" fill="${IB}"/><circle class="up" cx="40" cy="42" r="10" fill="#fff"/><path class="rise" d="M50 70 64 46l14 24z" fill="${IY}"/><rect x="28" y="60" width="18" height="10" rx="3" fill="${IG}"/>`,
   music: `<circle class="l1" cx="50" cy="50" r="29" fill="#2B2625"/><circle cx="50" cy="50" r="21" fill="none" stroke="#4A4240" stroke-width="1.4"/><circle cx="50" cy="50" r="15" fill="none" stroke="#3B3534" stroke-width="1"/><g class="rise"><circle cx="50" cy="50" r="9.5" fill="#E4572E"/><circle cx="50" cy="50" r="2.2" fill="#fff"/></g><path d="M50 21a29 29 0 0 1 21 9" stroke="#fff" stroke-opacity=".22" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   content: `<g class="rise"><path transform="translate(20 19) scale(2.5)" d="${BRANDS.youtube.d}" fill="#FF0000"/></g>`, // the official YouTube play button
-  documents: `<rect class="l1" x="20" y="30" width="60" height="44" rx="11" fill="${IG}"/><path class="up" d="M24 34 62 21a4 4 0 0 1 5.4 3.8V32z" fill="#fff"/><rect x="54" y="46" width="28" height="18" rx="9" fill="#fff"/><circle class="rise" cx="65" cy="55" r="3.6" fill="${IK}"/>`,
   services: `<rect class="l1" x="26" y="38" width="48" height="34" rx="8" fill="${IG}"/><path class="up" d="M41 38v-5a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v5" fill="none" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect x="26" y="52" width="48" height="4" fill="#2a8a45"/><circle class="rise" cx="50" cy="56" r="5" fill="#fff"/>`,
   analytics: `<rect class="l1" x="20" y="20" width="60" height="60" rx="16" fill="${IB}"/><rect class="rise" x="31" y="50" width="9" height="19" rx="4.5" fill="#fff"/><rect class="up" x="45.5" y="34" width="9" height="35" rx="4.5" fill="${IY}"/><rect x="60" y="43" width="9" height="26" rx="4.5" fill="#fff"/>`,
   planner: `<rect class="l1" x="20" y="24" width="60" height="54" rx="14" fill="${IB}"/><rect x="20" y="24" width="60" height="16" rx="8" fill="#1558C0"/><path class="up" d="M34 18v12M66 18v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect class="rise" x="30" y="48" width="18" height="10" rx="4" fill="#fff"/><rect x="52" y="48" width="18" height="10" rx="4" fill="${IY}"/><rect x="30" y="62" width="18" height="8" rx="4" fill="#fff" opacity=".7"/>`,
@@ -313,12 +312,10 @@ const ART_ADD = {
   studio: `<rect class="l1" x="18" y="24" width="64" height="48" rx="13" fill="${IR}"/><path class="up" d="M44 38v20l16-10z" fill="#fff"/><rect class="rise" x="24" y="76" width="18" height="6" rx="3" fill="${IY}"/><rect x="45" y="76" width="12" height="6" rx="3" fill="${IB}"/><rect x="60" y="76" width="16" height="6" rx="3" fill="${IG}"/>`,
   library: `<rect class="l1" x="20" y="24" width="15" height="54" rx="4" fill="${IB}"/><rect class="up" x="38" y="18" width="15" height="60" rx="4" fill="${IY}"/><rect class="rise" x="57" y="28" width="15" height="50" rx="4" fill="${IG}" transform="rotate(-12 64 53)"/><rect x="16" y="78" width="68" height="5" rx="2.5" fill="${IK}"/>`,
   assistant: `<rect class="l1" x="16" y="20" width="68" height="62" rx="24" fill="${IB}"/><rect x="26" y="27" width="20" height="7" rx="3.5" fill="#fff" opacity=".3"/><g class="up"><ellipse cx="38" cy="50" rx="8" ry="9.5" fill="#fff"/><ellipse cx="62" cy="50" rx="8" ry="9.5" fill="#fff"/><circle cx="39" cy="51" r="4.2" fill="${IK}"/><circle cx="63" cy="51" r="4.2" fill="${IK}"/></g><path class="rise" d="M43 66q7 6 14 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M78 10l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="${IY}"/>`,
-  book: `<rect class="l1" x="24" y="30" width="52" height="46" rx="8" fill="${IR}"/><rect x="24" y="44" width="52" height="32" rx="7" fill="#fff"/><path class="up" d="M36 24v12M64 24v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><g class="dots" fill="${IR}"><circle cx="38" cy="56" r="3.5"/><circle cx="50" cy="56" r="3.5"/><circle cx="62" cy="56" r="3.5"/><circle cx="38" cy="67" r="3.5"/><circle cx="50" cy="67" r="3.5"/></g>`,
 };
 function newApps() {
   if (typeof ART !== "undefined") Object.assign(ART, ART_ADD);
   const SV = { id: "services", title: "Services", shape: "clover", color: "c1", glyph: G.work || G.folder, w: 640, h: 640, render: () => "" };
-  const BK = { id: "book", title: "Book a call", shape: "cookie", color: "c2", glyph: G.mail, w: 560, h: 680, render: () => "" };
   const BD = { id: "boards", title: "Workspace", shape: "squircle", color: "c5", glyph: G.docs || G.folder, w: 1320, h: 840, ownerOnly: true, render: () => "" };
   const DZ = { id: "design", title: "Design", shape: "squircle", color: "c1", glyph: G.palette || G.docs || G.folder, w: 1380, h: 860, ownerOnly: true, render: () => "" };
   const AN = { id: "analytics", title: "Analytics", shape: "squircle", color: "c4", glyph: G.chart || G.spark, w: 1040, h: 780, ownerOnly: true, render: () => "" };
@@ -328,13 +325,13 @@ function newApps() {
   const ST = { id: "studio", title: "Studio", shape: "squircle", color: "c1", glyph: G.play || G.spark, w: 1360, h: 880, ownerOnly: true, render: () => "" };
   const LB = { id: "library", title: "Library", shape: "squircle", color: "c5", glyph: G.book || G.spark, w: 1040, h: 780, ownerOnly: true, render: () => "" };
   const AS = { id: "assistant", title: "Ask Rohan", shape: "squircle", color: "c4", glyph: G.spark, w: 760, h: 780, render: () => "" };
-  registerApp(AS); registerApp(PL); registerApp(TK); registerApp(BD); registerApp(ST); registerApp(LB); registerApp(SB); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);
+  registerApp(AS); registerApp(PL); registerApp(TK); registerApp(BD); registerApp(ST); registerApp(LB); registerApp(SB); registerApp(DZ); registerApp(AN); registerApp(SV);
   lazyApp("boards", "/js/app-boards.mjs", "boardsApp");
   lazyApp("design", "/js/app-design.mjs", "designApp");
   lazyApp("analytics", "/js/app-analytics.mjs", "analyticsApp");
   lazyApp("planner", "/js/app-planner.mjs", "plannerApp"); lazyApp("tasks", "/js/app-tasks.mjs", "tasksApp"); lazyApp("subs", "/js/app-subs.mjs", "subsApp");
   lazyApp("studio", "/js/app-studio.mjs", "studioApp"); lazyApp("library", "/js/app-library.mjs", "libraryApp"); lazyApp("assistant", "/js/app-assistant.mjs", "assistantApp");
-  lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services"); lazyApp("book", "/js/app-book.mjs", "bookApp");
+  lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services");
   if (!EDITABLE.includes("services")) EDITABLE.push("services");
   renderIcons();
 }

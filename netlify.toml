@@ -104,6 +104,18 @@
   status = 200
   force = true
 
+# Book a call and Messages are now tabs of Contact
+[[redirects]]
+  from = "/book"
+  to = "/contact?tab=book"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/messages"
+  to = "/contact"
+  status = 301
+  force = true
+
 # ---- Every window has its own address. The server sends the desktop with that page's text already inside it. ----
 [[redirects]]
   from = "/"

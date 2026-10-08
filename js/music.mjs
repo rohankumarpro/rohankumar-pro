@@ -134,7 +134,6 @@ ENG.innerHTML = '<div class="mu-yt"><div class="mu-yt-in"></div></div><div class
 (document.getElementById("desk") || document.body).append(ENG);
 M.boxes = []; M.pos = 0; M.dur = 0;
 const fmt = (n) => { n = Math.max(0, Math.round(n || 0)); const m = Math.floor(n / 60), s = n % 60; return m + ":" + String(s).padStart(2, "0"); };
-const fmMin = (m) => (m < 1 ? Math.round(m * 60) + " sec" : Math.round(m) + " min");
 const VINYL = `<svg class="mpa-vinyl" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="98" fill="#1d1a1a"/>${[86, 74, 62, 50].map((r) => `<circle cx="100" cy="100" r="${r}" fill="none" stroke="#2e2a2a" stroke-width="1.4"/>`).join("")}<path d="M100 6a94 94 0 0 1 66 27" stroke="#fff" stroke-opacity=".16" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="100" cy="100" r="34" fill="var(--mu-c,#E4572E)"/><circle cx="100" cy="100" r="5" fill="#fff"/></svg>`;
 const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3l5-4v13l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
 /* The Music app: a proper player. Now playing (cover, title, seek, controls, volume) and the records as a track list. */
@@ -148,7 +147,6 @@ function appMarkup() {
         <div class="mu-seek"><span class="mu-tc">0:00</span><input class="mu-sk" type="range" min="0" max="100" step="1" value="0" aria-label="Position in the song" disabled><span class="mu-td">0:00</span></div>
         <div class="mpa-row2"><div class="mu-ctl mpa-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button></div>
           <label class="mpa-vol"><span aria-hidden="true">${SPK}</span><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></label></div>
-        <div class="mpa-tools"><div class="mu-fm" role="group" aria-label="Focus mode"><button class="mu-fm-b" type="button" aria-pressed="false" title="Focus mode: the music runs with a Focus timer and stops when it ends">Focus mode</button><button class="mu-fm-d" data-d="-5" type="button" aria-label="5 minutes shorter">−</button><span class="mu-fm-t"></span><button class="mu-fm-d" data-d="5" type="button" aria-label="5 minutes longer">+</button></div></div>
       </section>
       <section class="mpa-lib" aria-label="Records"><div class="mpa-lh"><b>Records</b><small class="mpa-n"></small><button class="mpa-libx mpa-ib" aria-label="Close records">${ic.x}</button></div><div class="mu-shelf mpa-list" role="list"></div><div class="mu-empty" hidden></div></section>
     </div>`;
@@ -161,7 +159,6 @@ function makeBox(kind) {
       <div class="mu-now"><b class="mu-t"></b><small class="mu-a"></small></div>
       <div class="mu-seek"><span class="mu-tc">0:00</span><input class="mu-sk" type="range" min="0" max="100" step="1" value="0" aria-label="Position in the song" disabled><span class="mu-td">0:00</span></div>
       <div class="mu-ctl"><button class="mu-b" data-a="prev" aria-label="Previous record">${ic.prev}</button><button class="mu-b mu-big" data-a="toggle" aria-label="Play or pause"></button><button class="mu-b" data-a="next" aria-label="Next record">${ic.next}</button><input class="mu-vol" type="range" min="0" max="100" value="${M.vol}" aria-label="Volume"></div>
-      <div class="mu-fm" role="group" aria-label="Focus mode"><button class="mu-fm-b" type="button" aria-pressed="false" title="Focus mode: the music runs with a Focus timer and stops when it ends">Focus mode</button><span class="mu-fm-t"></span><button class="mu-fm-d" data-d="-5" type="button" aria-label="5 minutes shorter">−</button><button class="mu-fm-d" data-d="5" type="button" aria-label="5 minutes longer">+</button></div>
       <div class="mu-shelf" role="list" aria-label="Records"></div>
       <div class="mu-empty" hidden></div></div>`;
   $(".mu-mp", box).onclick = (e) => { e.stopPropagation(); toggle(); };
@@ -173,8 +170,6 @@ function makeBox(kind) {
   sk.oninput = () => { box.__seeking = true; tc.textContent = fmt(+sk.value); };
   sk.onchange = () => { seekTo(+sk.value); box.__seeking = false; };
   sk.onpointerup = sk.onpointercancel = () => setTimeout(() => (box.__seeking = false), 50);
-  $(".mu-fm-b", box).onclick = () => { const f = window.__focusMode; if (f) f.set(!f.get()); paint(); };
-  $$(".mu-fm-d", box).forEach((b) => (b.onclick = () => { if (typeof FT === "undefined" || FT.run || FT.left < FT.dur) return; if (FT.mode !== "focus") ftSet("focus"); ftSetLen(FT_MODES.focus[0] + +b.dataset.d); paint(); }));
   $(".mu-vid", box).onclick = () => setVideo(box.classList.contains("mu-app") ? (M.video === "app" ? "off" : "app") : (M.video === "pip" ? "off" : "pip"));
   const pipB = $(".mpa-pip", box); if (pipB) pipB.onclick = () => setVideo(M.video === "pip" ? "app" : "pip");
   const libB = $(".mpa-libbtn", box), libX = $(".mpa-libx", box);
@@ -204,9 +199,9 @@ function seekPaint(box) {
 }
 setInterval(() => {
   if (M.video === "app" && M.yt && M.ytHost && !M.ytHost.isConnected) { M.video = "off"; const t = cur(), playing = M.playing || M.loading; try { M.yt.destroy(); } catch {} M.yt = null; if (t && t.k === "y") makeYT(t, hostFor(), M.pos, 0, playing); paint(); }
-  const f = window.__focusMode; if (!M.playing && !M.loading && !(f && f.get())) return;
+  if (!M.playing && !M.loading) return;
   const t = cur(); try { if (t && t.k === "y" && M.yt && M.yt.getCurrentTime) { M.pos = M.yt.getCurrentTime() || 0; M.dur = M.yt.getDuration() || 0; } } catch {}
-  M.boxes.forEach((b) => { if (b.isConnected) { seekPaint(b); fmPaint(b); } });
+  M.boxes.forEach((b) => { if (b.isConnected) { seekPaint(b); } });
 }, 500);
 function shelf(only) {
   (only ? [only] : M.boxes).forEach((box) => {
@@ -230,13 +225,6 @@ function shelf(only) {
   });
 }
 function paint(full) { M.boxes = M.boxes.filter((b) => b.isConnected || !b.parentNode); M.boxes.forEach((b) => paintBox(b)); if (full) shelf(); engine(); pill(); session(); }
-function fmPaint(box) {
-  const f = window.__focusMode, on = !!(f && f.get()), b = $(".mu-fm-b", box), t = $(".mu-fm-t", box), has = typeof FT !== "undefined";
-  if (!b) return; b.setAttribute("aria-pressed", String(on)); b.classList.toggle("on", on);
-  const started = has && (FT.run || FT.left < FT.dur);
-  t.textContent = !has ? "" : on && FT.mode === "focus" ? ftFmt(FT.left) : fmMin(FT_MODES.focus[0]);
-  $$(".mu-fm-d", box).forEach((d) => (d.disabled = !has || started));
-}
 const openAppBox = () => M.boxes.find((b) => b.isConnected && b.classList.contains("mu-app"));
 function setVideo(mode) { M.video = mode; rehost(); paint(); }
 function engine() {
@@ -259,7 +247,7 @@ function paintBox(box) {
   const inApp = box.classList.contains("mu-app"); $(".mu-vid", box).classList.toggle("on", inApp ? M.video === "app" : M.video === "pip");
   if (inApp) { const pb = $(".mpa-pip", box); pb.hidden = !isY || M.video !== "app"; box.classList.toggle("vid", !!(isY && M.video === "app")); if (box.__wake) box.__wake(); }
   $(".mu-manage", box).hidden = !isAdmin();
-  seekPaint(box); fmPaint(box);
+  seekPaint(box);
   const art = $(".mpa-img", box);
   if (art) { // the cover shows once it has loaded; until then (or if it cannot load) the record spins in its place
     const th = t && coverOf(t), small = t && thumbOf(t);

@@ -78,37 +78,4 @@ reg("guestbook", (el, e, w) => {
   return items;
 });
 
-reg("sketch", (el, e, w) => first(
-  ["Undo the last stroke", click(w, ".sk-undo")],
-  ["Save as a picture", () => { const c = w.querySelector(".sk-cv"); if (!c) return; const o = document.createElement("canvas"); o.width = c.width; o.height = c.height; const x = o.getContext("2d"); x.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#fff"; x.fillRect(0, 0, o.width, o.height); x.drawImage(c, 0, 0); const a = document.createElement("a"); a.href = o.toDataURL("image/png"); a.download = "sketch.png"; a.click(); }],
-  null, ["Clear the canvas", click(w, ".sk-clear"), "danger"]));
-
-reg("calculator", (el, e, w) => first(
-  ["Copy the result", () => copy((w.querySelector(".calc-ex")?.textContent || "").replace(/,/g, ""), "Copied")],
-  ["Clear", click(w, '.ck[data-k="AC"]')]));
-
-reg("focus", (el, e, w) => first(
-  [(w.querySelector(".ft-go")?.textContent || "Start") + " the timer", click(w, ".ft-go")],
-  ["Reset", click(w, ".ft-reset")],
-  ["Set the time", click(w, ".ft-edit")]));
-
-reg("palette", (el, e, w) => {
-  const sw = el.closest(".sw"), items = [];
-  if (sw) { const hex = (sw.textContent.match(/#[0-9a-fA-F]{6}/) || [])[0]; if (hex) items.push(["Copy " + hex.toUpperCase(), () => copy(hex.toUpperCase(), "Colour copied")]); }
-  items.push(["Make a new palette", click(w, ".pal-gen")], ["Copy the whole palette", click(w, ".pal-all")]);
-  return items;
-});
-
-reg("documents", (el, e, w) => {
-  const card = el.closest(".dc-card"), items = [];
-  if (card) {
-    const qr = card.querySelector(".dc-qr");
-    if (qr) items.push(["Enlarge the QR code", () => qr.click()]);
-    const link = card.querySelector("a[href]"); if (link) items.push(["Copy this link", () => copy(link.href)]);
-  }
-  if (owner() && has(w, ".ed-btn")) items.push(null, ["Edit the wallet", click(w, ".ed-btn")]);
-  return items;
-});
-
 reg("services", (el, e, w) => first(["Book a call", () => openApp("book")], ["Copy email address", () => copy(P.email, "Email copied")]));
-reg("book", () => first(["Open booking in a new tab", () => window.open(P.booking, "_blank", "noopener")], ["Copy booking link", () => copy(P.booking)]));

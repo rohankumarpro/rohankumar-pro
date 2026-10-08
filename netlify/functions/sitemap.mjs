@@ -19,7 +19,7 @@ export const handler = async (event) => {
   const add = (path, lastmod, images = [], pri) => urls.push({ loc: SITE + path, lastmod, images: images.filter(Boolean).map(abs), pri });
   add("/", today, [], "1.0");
   // static pages carry no date: a date that changes on every visit teaches search engines to ignore it
-  for (const id of ["about", "resume", "contact", "timeline", "links", "services", "book"]) if (!hidden.has(id) && !(pr.placeholder && ["about", "resume"].includes(id)) && !(id === "timeline" && !(pr.settings.timeline || []).length) && !(id === "services" && !(pr.settings.services || []).length)) add(APP_PAGES[id].path, "", [], "0.7");
+  for (const id of ["about", "resume", "contact", "timeline", "links", "services"]) if (!hidden.has(id) && !(pr.placeholder && ["about", "resume"].includes(id)) && !(id === "timeline" && !(pr.settings.timeline || []).length) && !(id === "services" && !(pr.settings.services || []).length)) add(APP_PAGES[id].path, "", [], "0.7");
   if (!hidden.has("projects") && !(pr.placeholder && projects.every((p) => /^Project /.test(p.title)))) {
     add("/projects", projects[0]?.updated ? new Date(projects[0].updated).toISOString().slice(0, 10) : today, projects.map((p) => p.cover?.src), "0.8");
     for (const p of projects) add(`/projects/${p.slug}`, new Date(p.updated || p.ts || Date.now()).toISOString().slice(0, 10), [p.cover?.src], "0.8");

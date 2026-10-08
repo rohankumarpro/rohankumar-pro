@@ -16,10 +16,9 @@ export const APP_PAGES = {
   links: { path: "/links", title: "Links", index: true }, resume: { path: "/resume", title: "Resume", index: true }, contact: { path: "/contact", title: "Contact", index: true },
   timeline: { path: "/timeline", title: "Timeline", index: true }, photos: { path: "/photos", title: "Photos", index: true }, notes: { path: "/notes", title: "Notes", index: true },
   guestbook: { path: "/guestbook", title: "Guestbook", index: true }, content: { path: "/youtube", title: "YouTube", index: true },
-  services: { path: "/services", title: "Services", index: true }, book: { path: "/book", title: "Book a call", index: true },
-  messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, settings: { path: "/settings", title: "Settings", index: false },
-  calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
-  focus: { path: "/focus", title: "Focus timer", index: false }, search: { path: "/search", title: "Search", index: false },
+  services: { path: "/services", title: "Services", index: true },
+  settings: { path: "/settings", title: "Settings", index: false },
+  search: { path: "/search", title: "Search", index: false },
   boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false }, analytics: { path: "/analytics", title: "Analytics", index: false }, planner: { path: "/planner", title: "Planner", index: false }, tasks: { path: "/tasks", title: "Tasks", index: false }, subs: { path: "/subs", title: "Subscriptions", index: false }, studio: { path: "/studio", title: "Studio", index: false }, library: { path: "/library", title: "Library", index: false }, assistant: { path: "/assistant", title: "Assistant", index: false }, music: { path: "/music", title: "Music", index: false },
 };
 const BY_PATH = Object.fromEntries(Object.entries(APP_PAGES).map(([id, v]) => [v.path, id]));
@@ -163,9 +162,6 @@ ${pr.skills.length ? `<h2>What I work with</h2><ul>${pr.skills.map((s) => `<li>$
       mdText: `# Services\n\n${sv.map((s) => `## ${s.title}\n\n${s.text || ""}\n\n${pts(s).map((x) => `- ${x}`).join("\n")}`).join("\n\n")}\n\n## FAQ\n\n${faq.map((f) => `**${f.q}** ${f.a}`).join("\n\n")}\n`,
       ld: [...sv.map((s) => ({ "@type": "Service", name: s.title, description: s.text || "", provider: { "@id": `${SITE}/#person` }, areaServed: "Worldwide", serviceType: s.title, ...(offerOf(s.price) ? { offers: offerOf(s.price) } : {}) })), faq.length ? { "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) } : null, crumbs([home, { name: "Services", path }])].filter(Boolean) });
   }
-  if (path === "/book") { const svT = (pr.settings.services || []).map((v) => v.title).filter(Boolean);
-    return finish({ title: `Book a call with ${pr.name}`, desc: `Book a free intro call with ${pr.name}, ${pr.role.toLowerCase()}, to talk about a brand identity, logo, packaging or brand strategy project.`, app: "book", noindex: !pr.booking,
-    body: `<h1>Book a call with ${esc(pr.name)}</h1><p>A free, no-pressure intro call to talk about your business, who it is for and what you want your brand to do. ${pr.booking ? `<a href="${esc(pr.booking)}">Choose a time that suits you</a>.` : ""}</p>${svT.length ? `<h2>We can talk about</h2><ul>${svT.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}<p><a href="/services">See services and prices</a> · <a href="/projects">See projects</a></p>`, ld: [crumbs([home, { name: "Book a call", path }])] }); }
   if (path === "/youtube" || path === "/content") {
     const vids = Array.isArray(pr.settings.videos) ? pr.settings.videos : [];
     const lis = vids.map((v) => `<li><a href="https://www.youtube.com/watch?v=${esc(v.id)}" rel="noopener">${esc(v.title || "Video")}</a>${v.author ? ` — ${esc(v.author)}` : ""}${v.note ? `<br>${esc(v.note)}` : ""}</li>`).join("");
