@@ -5,76 +5,46 @@
 
 export const CODE_POSTS = [
   {
-    slug: "i-almost-reported-dribbble-as-a-scam-then-they-featured-me",
-    title: "I almost reported Dribbble as a scam. Then they featured me.",
-    tag: "Design",
-    tags: ["Dribbble", "Branding", "Career"],
+    slug: "featured-in-dribbbles-client-approved-branding-agencies-of-2026",
+    title: "Featured in Dribbble's Client-Approved Branding Agencies of 2026",
+    tag: "Branding",
+    tags: ["Dribbble", "Branding"],
     date: "Oct 8, 2026",
     published: "2026-10-08",
     modified: "2026-10-08T12:00:00.000Z",
-    excerpt: "Dribbble picked me for its Client-Approved Branding Agencies in 2026 list. Here's the honest story behind it: the email I thought was a scam, the four-month wait, and what actually got me in.",
+    excerpt: "Dribbble has featured me in Client-Approved Branding Agencies in 2026, a list of branding studios and independent designers recommended for the work their clients approved.",
     seoTitle: "Featured by Dribbble: Client-Approved Branding Agencies 2026",
-    seoDesc: "Rohan Kumar was featured in Dribbble's Client-Approved Branding Agencies in 2026. The honest story, and what got him in.",
+    seoDesc: "Rohan Kumar is featured in Dribbble's Client-Approved Branding Agencies in 2026, alongside 17 branding studios and designers.",
     img: "/api/u?f=c3e80e68bb.png",
     imgAlt: "Selected by Dribbble: the Dribbble Select Top Branding Agency badge for @rohankumarpro",
-    body: `In June, I got an email from someone at Dribbble. They were putting together an editorial piece on client-approved agencies, and they wanted to include me. At no cost.
+    body: `I'm happy to share that Dribbble has featured me in **[Client-Approved Branding Agencies in 2026](https://dribbble.com/stories/2026/08/01/client-approved-branding-agencies-in-2026#rohan-kumar)**.
 
-And my first thought was: *"Yeah, right."*
+It's a list of 18 branding studios and independent designers, put together to help founders and companies find a branding partner whose work has already been approved by real clients. And I'm one of them.
 
-Free feature, an exclusive badge, a deadline of two days. If you've been freelancing for a while, you know exactly what that smells like. So I checked with Dribbble support, and the answer I got made it sound like they don't reach out like this. So I did what any careful person would do. I replied to the email and asked, very politely, why this person was trying to scam me.
+## What they said
 
-She wasn't. She actually works at Dribbble. Support confirmed it the same day.
+Dribbble describes me as an independent designer working across branding, graphic design, web design and animation, someone who can take a project from the first brand identity all the way to the digital experience, with a strong focus on cohesive visual systems.
 
-So yes, I accused a real Dribbble employee of being a scammer, and then had to write back and apologise. Not my finest moment. But I'm sharing it because I think a lot of you would have done the same thing.
+Which is honestly a better description of my job than the one I usually give at family functions.
 
-> Being careful is good. Being careful and still polite is better. The second email is much easier to write.
+## Why this one matters to me
 
-## What actually happened
+There are a lot of design awards out there that are about how good the work looks. And I love good-looking work. But this list is about something else: **whether clients were happy with the work and the way it was done.**
 
-Yesterday, Dribbble published my feature in **[Client-Approved Branding Agencies in 2026](https://dribbble.com/stories/2026/08/01/client-approved-branding-agencies-in-2026#rohan-kumar)**. It's a list of 18 branding studios and independent designers, and I'm one of them.
+That's the part I care about the most. A brand isn't a nice logo on a Behance page. It's something a business has to live with every day, long after the project is over. So being recognised for the client side of the work, the thinking, the communication and the delivery, means a lot more to me than a pretty shot getting likes.
 
-They describe me as an independent designer who works across branding, graphic design, web design and animation, and who can take a project from the first brand identity all the way to the digital experience. Which is basically my whole job description, written better than I've ever written it.
+> Good branding isn't approved by designers. It's approved by the people who have to use it.
 
-But my favourite part isn't what they wrote about me. It's what a client wrote.
-
-## A client's words, not my shots
-
-Before the feature went live, Dribbble asked for one more thing: a client testimonial. Not a shot. Not a case study. A real client, in their own words, with a link to where they said it.
-
-I have plenty of video reviews, but they wanted a written one. So I sent them my reviews on [Contra](https://contra.com/rohankumarpro/reviews), and they used one from Baziger, who said their identity project was "in great hands with Rohan" and that I was "always providing insightful ideas and timely communication."
-
-**That one line from a client did more for this feature than any of my work could have.**
-
-And honestly, that's the part I'll remember. As designers, we keep polishing shots and thinking the work will speak for itself. But when someone is about to hire you, they want to hear from somebody who already took the risk. If you only keep your reviews as videos on an old website, or in your inbox, start putting them somewhere public. Future you will thank you.
-
-## The waiting
-
-The article was supposed to go live at the end of July. Then mid-September. Then "this week". Then it was out, but my profile link wasn't working, so I wasn't linked in it yet.
-
-I sent the fix on October 3rd, which happened to be my birthday. I was secretly hoping it would be my birthday present. It came a few days late, and that's fine. Good things in this field rarely arrive on schedule. Clients, projects, recognition: almost everything takes longer than the email says.
-
-## What this is, and what it isn't
-
-I want to be clear about this, because I'd rather you hear it from me.
-
-- **I didn't pay for it.** Dribbble included me for free. In return, they asked me to show the Dribbble Select badge on my website, linking to their [branding agencies page](https://dribbble.com/branding-agency). That's the badge you see at the top of this site.
-- **Dribbble Select is also part of Dribbble's paid promotion for agencies.** I'm on the free side of it, but it's fair that you know it exists.
-- **There's no badge on my Dribbble profile.** I asked. The recognition lives in the article and the listing, and the badge is for my own site.
-
-I wrote a while ago that [every brand's first principle should be: we don't bullsh*t you](/journal/every-brands-first-principle-should-be-we-dont-bullsht-you). It would be a bit weird to skip that rule the first time it's about me.
-
-## What I'm taking from it
-
-- **Verify, but stay kind.** Check every "free feature" email. Just don't burn the bridge while you're checking.
-- **Testimonials are a real asset.** Ask your happy clients for a few written lines, and keep them where anyone can see them.
-- **Recognition is goodwill, not a finish line.** I wrote about [branding being a journey of earning more goodwill](/journal/branding-is-a-journey-of-earning-more-goodwill). A feature like this is a little deposit into that account. The work still has to keep earning it.
+I wrote about this in [branding is a journey of earning more goodwill](/journal/branding-is-a-journey-of-earning-more-goodwill). Recognition like this isn't a finish line. It's a small deposit into that account, and the work still has to keep earning it.
 
 ## Thank you
 
-To Baziger, for trusting me with your identity and for saying such kind things about it. To Amanda and Camila at Dribbble, for your patience with my suspicion, my follow-ups and my broken profile link. And congratulations to the other 17 studios on the list, including Marka Works, Radiyal, GALAX Studios and Wells Collins. It's good company to be in.
+To every client who trusted me with their brand: this one is really yours. Thank you for the trust, the honest feedback, and for taking the time to tell others about working together.
 
-If you've ever been featured somewhere and thought *"wait, is this real?"*, I'd love to hear your story.
+Thank you to the Dribbble team for including me, and congratulations to everyone else on the list, including Marka Works, Radiyal, GALAX Studios and Wells Collins. It's good company to be in.
 
-!! Building a brand and want someone who'll be honest with you from the first call? I'm taking on new brand identity and packaging projects.`,
+You can see the badge at the top of this site, and the full list on [Dribbble's branding agencies page](https://dribbble.com/branding-agency).
+
+!! Building a brand and looking for a partner? I'm taking on new brand identity and packaging projects.`,
   },
 ];
