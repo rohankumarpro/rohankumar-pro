@@ -20,7 +20,7 @@ export const APP_PAGES = {
   messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, settings: { path: "/settings", title: "Settings", index: false },
   calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
   focus: { path: "/focus", title: "Focus timer", index: false }, search: { path: "/search", title: "Search", index: false },
-  boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false }, analytics: { path: "/analytics", title: "Analytics", index: false }, planner: { path: "/planner", title: "Planner", index: false }, tasks: { path: "/tasks", title: "Tasks", index: false }, subs: { path: "/subs", title: "Subscriptions", index: false }, music: { path: "/music", title: "Music", index: false },
+  boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false }, analytics: { path: "/analytics", title: "Analytics", index: false }, planner: { path: "/planner", title: "Planner", index: false }, tasks: { path: "/tasks", title: "Tasks", index: false }, subs: { path: "/subs", title: "Subscriptions", index: false }, studio: { path: "/studio", title: "Studio", index: false }, library: { path: "/library", title: "Library", index: false }, music: { path: "/music", title: "Music", index: false },
 };
 const BY_PATH = Object.fromEntries(Object.entries(APP_PAGES).map(([id, v]) => [v.path, id]));
 const tagSlug = (t) => slugify(t);
@@ -256,6 +256,8 @@ ${rel.length ? `<aside><h2>More to read</h2><ul>${rel.map(postLi).join("")}</ul>
   // Boards are private: the address opens the desktop (the app itself asks the owner to sign in), never indexed
   if (path.startsWith("/design/")) return finish({ title: `Design — ${pr.name}`, desc: "Private designs.", app: "design", slug: path.slice(8), noindex: true, body: "<h1>Design</h1>", ld: [] });
   if (path.startsWith("/boards/")) return finish({ title: `Boards — ${pr.name}`, desc: "Private boards.", app: "boards", slug: path.slice(8), noindex: true, body: "<h1>Boards</h1>", ld: [] });
+  if (path.startsWith("/studio/")) return finish({ title: `Studio — ${pr.name}`, desc: "Private.", app: "studio", slug: path.slice(8), noindex: true, body: "<h1>Studio</h1>", ld: [] });
+  if (path.startsWith("/library/")) return finish({ title: `Library — ${pr.name}`, desc: "Private.", app: "library", slug: path.slice(9), noindex: true, body: "<h1>Library</h1>", ld: [] });
   const id = BY_PATH[path];
   if (id) { const ap = APP_PAGES[id]; return finish({ title: `${ap.title} — ${pr.name}`, desc: `${ap.title} on ${pr.name}'s portfolio.`, app: id, noindex: true, body: `<h1>${esc(ap.title)}</h1>`, ld: [] }); }
   return finish({ status: 404, title: `Page not found — ${pr.name}`, desc: "This page could not be found.", app: "", noindex: true, notFound: true, body: `<h1>Page not found</h1>${nav(hidden)}` });

@@ -310,6 +310,8 @@ const ART_ADD = {
   planner: `<rect class="l1" x="20" y="24" width="60" height="54" rx="14" fill="${IB}"/><rect x="20" y="24" width="60" height="16" rx="8" fill="#1558C0"/><path class="up" d="M34 18v12M66 18v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect class="rise" x="30" y="48" width="18" height="10" rx="4" fill="#fff"/><rect x="52" y="48" width="18" height="10" rx="4" fill="${IY}"/><rect x="30" y="62" width="18" height="8" rx="4" fill="#fff" opacity=".7"/>`,
   tasks: `<rect class="l1" x="22" y="20" width="56" height="60" rx="14" fill="${IG}"/><path class="up" d="m32 40 6 6 10-12" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="54" y="36" width="16" height="6" rx="3" fill="#fff"/><path class="rise" d="m32 62 6 6 10-12" fill="none" stroke="${IY}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="54" y="58" width="16" height="6" rx="3" fill="#fff" opacity=".75"/>`,
   subs: `<rect class="l1" x="18" y="28" width="64" height="44" rx="12" fill="${IY}"/><rect x="18" y="38" width="64" height="9" fill="#C77C02"/><rect class="up" x="26" y="55" width="22" height="7" rx="3.5" fill="#fff"/><circle class="rise" cx="66" cy="60" r="9" fill="${IR}"/><path d="M66 55v10M63 58h6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`,
+  studio: `<rect class="l1" x="18" y="24" width="64" height="48" rx="13" fill="${IR}"/><path class="up" d="M44 38v20l16-10z" fill="#fff"/><rect class="rise" x="24" y="76" width="18" height="6" rx="3" fill="${IY}"/><rect x="45" y="76" width="12" height="6" rx="3" fill="${IB}"/><rect x="60" y="76" width="16" height="6" rx="3" fill="${IG}"/>`,
+  library: `<rect class="l1" x="20" y="24" width="15" height="54" rx="4" fill="${IB}"/><rect class="up" x="38" y="18" width="15" height="60" rx="4" fill="${IY}"/><rect class="rise" x="57" y="28" width="15" height="50" rx="4" fill="${IG}" transform="rotate(-12 64 53)"/><rect x="16" y="78" width="68" height="5" rx="2.5" fill="${IK}"/>`,
   book: `<rect class="l1" x="24" y="30" width="52" height="46" rx="8" fill="${IR}"/><rect x="24" y="44" width="52" height="32" rx="7" fill="#fff"/><path class="up" d="M36 24v12M64 24v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><g class="dots" fill="${IR}"><circle cx="38" cy="56" r="3.5"/><circle cx="50" cy="56" r="3.5"/><circle cx="62" cy="56" r="3.5"/><circle cx="38" cy="67" r="3.5"/><circle cx="50" cy="67" r="3.5"/></g>`,
 };
 function newApps() {
@@ -322,11 +324,14 @@ function newApps() {
   const PL = { id: "planner", title: "Planner", shape: "squircle", color: "c4", glyph: G.cal || G.spark, w: 1180, h: 820, ownerOnly: true, render: () => "" };
   const TK = { id: "tasks", title: "Tasks", shape: "squircle", color: "c3", glyph: G.check || G.spark, w: 980, h: 720, ownerOnly: true, render: () => "" };
   const SB = { id: "subs", title: "Subscriptions", shape: "squircle", color: "c2", glyph: G.spark, w: 760, h: 760, ownerOnly: true, render: () => "" };
-  registerApp(PL); registerApp(TK); registerApp(BD); registerApp(SB); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);
+  const ST = { id: "studio", title: "Studio", shape: "squircle", color: "c1", glyph: G.play || G.spark, w: 1360, h: 880, ownerOnly: true, render: () => "" };
+  const LB = { id: "library", title: "Library", shape: "squircle", color: "c5", glyph: G.book || G.spark, w: 1040, h: 780, ownerOnly: true, render: () => "" };
+  registerApp(PL); registerApp(TK); registerApp(BD); registerApp(ST); registerApp(LB); registerApp(SB); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);
   lazyApp("boards", "/js/app-boards.mjs", "boardsApp");
   lazyApp("design", "/js/app-design.mjs", "designApp");
   lazyApp("analytics", "/js/app-analytics.mjs", "analyticsApp");
   lazyApp("planner", "/js/app-planner.mjs", "plannerApp"); lazyApp("tasks", "/js/app-tasks.mjs", "tasksApp"); lazyApp("subs", "/js/app-subs.mjs", "subsApp");
+  lazyApp("studio", "/js/app-studio.mjs", "studioApp"); lazyApp("library", "/js/app-library.mjs", "libraryApp");
   lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services"); lazyApp("book", "/js/app-book.mjs", "bookApp");
   if (!EDITABLE.includes("services")) EDITABLE.push("services");
   renderIcons();
@@ -340,5 +345,5 @@ function init() {
   if (isAdmin()) setInterval(() => Notif.gather().catch(() => {}), 120000);
   document.addEventListener("owner-changed", () => Notif.gather().catch(() => {}));
 }
-const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined") for (const k of ["boards", "design", "analytics", "planner", "tasks", "subs"]) if (open[k]) { try { closeWin(open[k], k, true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); Notif.gather().catch(() => {}); }, 50); return r; };
+const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined") for (const k of ["boards", "design", "analytics", "planner", "tasks", "subs", "studio", "library"]) if (open[k]) { try { closeWin(open[k], k, true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); Notif.gather().catch(() => {}); }, 50); return r; };
 if (document.readyState === "complete") init(); else addEventListener("load", init);

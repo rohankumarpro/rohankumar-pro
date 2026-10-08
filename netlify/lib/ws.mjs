@@ -129,9 +129,9 @@ export const TEMPLATES = {
     const status = P("Status", "status", { opts: [O("Planned", "grey", "todo"), O("In progress", "blue", "doing"), O("Done", "green", "done")] });
     return { props: [status, P("Client", "text"), P("Start", "date"), P("Deadline", "date"), P("Budget", "number", { fmt: "inr" }), P("Link", "url")], views: [{ id: rid(), name: "Board", type: "board", group: status.id }, { id: rid(), name: "Table", type: "table" }] };
   } },
-  reading: { title: "Reading list", icon: "bookmark", make() {
+  reading: { title: "Library", icon: "bookmark", role: "reading", make() {
     const st = P("Status", "status", { opts: [O("To read", "grey", "todo"), O("Reading", "blue", "doing"), O("Finished", "green", "done")] });
-    return { props: [P("Author", "text"), st, P("Rating", "select", { opts: [O("5", "green"), O("4", "blue"), O("3", "yellow"), O("2", "orange"), O("1", "red")] }), P("Finished", "date")], views: [{ id: rid(), name: "Shelf", type: "gallery", cover: "page" }, { id: rid(), name: "By status", type: "board", group: st.id }] };
+    return { props: [P("Author", "text"), st, P("Rating", "select", { opts: [O("5", "green"), O("4", "blue"), O("3", "yellow"), O("2", "orange"), O("1", "red")] }), P("Progress", "number", { fmt: "percent" }), P("Pages", "number"), P("Started", "date"), P("Finished", "date"), P("Link", "url")], views: [{ id: rid(), name: "Shelf", type: "gallery", cover: "page" }, { id: rid(), name: "By status", type: "board", group: st.id }] };
   } },
   subs: { title: "Subscriptions", icon: "wallet", role: "subs", make() {
     const st = P("Status", "status", { opts: [O("Trial", "yellow", "todo"), O("Active", "green", "doing"), O("Cancelled", "grey", "done")] });

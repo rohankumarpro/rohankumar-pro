@@ -55,14 +55,14 @@ export function openDoc(host, src, ctx = {}) {
         ${src.kind === "page" ? `<button class="wp-ib${m.fav ? " on" : ""}" data-a="fav" title="${m.fav ? "Remove from favourites" : "Add to favourites"}" aria-label="Favourite">${WI("star", 18)}</button>` : ""}
         <button class="wp-ib" data-a="more" title="More" aria-label="More">${WI("more", 18)}</button></div>
       <div class="wp-scroll">
-        ${m.cover ? `<div class="wp-cover" style="background:${coverStyle(m.cover)}"><div class="wp-cvb"><button data-a="cover">Change cover</button><button data-a="nocover">Remove</button></div></div>` : ""}
-        <div class="wp-in${m.cover ? " has-cover" : ""}">
-          ${m.icon && ICONS[m.icon] ? `<button class="wp-icon" data-a="icon" title="Change icon" aria-label="Change icon">${WI(m.icon, 40)}</button>` : ""}
-          <div class="wp-add">${!(m.icon && ICONS[m.icon]) ? `<button data-a="icon">${WI("smile", 15)}Add icon</button>` : ""}${!m.cover ? `<button data-a="cover">${WI("image", 15)}Add cover</button>` : ""}</div>
+        ${ctx.head ? "" : m.cover ? `<div class="wp-cover" style="background:${coverStyle(m.cover)}"><div class="wp-cvb"><button data-a="cover">Change cover</button><button data-a="nocover">Remove</button></div></div>` : ""}
+        <div class="wp-in${m.cover && !ctx.head ? " has-cover" : ""}">
+          ${ctx.head ? `<div class="wp-head">${ctx.head(m)}</div>` : `${m.icon && ICONS[m.icon] ? `<button class="wp-icon" data-a="icon" title="Change icon" aria-label="Change icon">${WI(m.icon, 40)}</button>` : ""}
+          <div class="wp-add">${!(m.icon && ICONS[m.icon]) ? `<button data-a="icon">${WI("smile", 15)}Add icon</button>` : ""}${!m.cover ? `<button data-a="cover">${WI("image", 15)}Add cover</button>` : ""}</div>`}
           <textarea class="wp-title" rows="1" placeholder="Untitled" aria-label="Page title" maxlength="200"></textarea>
-          ${src.kind === "row" ? `<div class="wp-props"></div>` : ""}
+          ${src.kind === "row" && !ctx.noProps ? `<div class="wp-props"></div>` : ""}${ctx.afterTitle ? ctx.afterTitle(m) : ""}
           ${P.conflict ? `<div class="wp-conf">${WI("warning", 18)}<span>This page was changed on another device while you were writing.</span><button data-a="mine">Keep mine</button><button data-a="theirs">Use theirs</button></div>` : ""}
-          <div class="wp-ed"></div>
+          ${ctx.edLabel ? `<div class="wp-edl">${ctx.edLabel}</div>` : ""}<div class="wp-ed"></div>
           ${src.kind === "page" ? `<div class="wp-kids"></div>` : ""}
         </div>
       </div>`;
@@ -80,7 +80,8 @@ export function openDoc(host, src, ctx = {}) {
     root.querySelector('[data-a="more"]').onclick = (e) => moreMenu(e.currentTarget);
     root.querySelector('[data-a="mine"]')?.addEventListener("click", () => { P.conflict = null; save(true); draw(); mountEd(); });
     root.querySelector('[data-a="theirs"]')?.addEventListener("click", () => { const c = P.conflict; P.conflict = null; P.blocks = c.blocks; P.updated = c.updated; P.dirty = false; draw(); mountEd(); });
-    if (src.kind === "row") drawProps();
+    if (src.kind === "row" && !ctx.noProps) drawProps();
+    if (ctx.wireHead) ctx.wireHead(root, m, { redraw: () => redrawHead() });
     if (src.kind === "page") drawKids();
   }
   // icon or cover changed: draw again but keep the editor (and the caret) as it is
@@ -163,7 +164,7 @@ export function openDoc(host, src, ctx = {}) {
     draw(); await mountEd();
     if (src.fresh) setTimeout(() => root.querySelector(".wp-title")?.focus(), 60);
   }
-  const offDb = src.kind === "row" ? DB.on(src.db, () => { if (!P.dead) drawProps(); }) : null;
+  const offDb = src.kind === "row" ? DB.on(src.db, () => { if (P.dead) return; if (!ctx.noProps) drawProps(); if (ctx.onRowChange) ctx.onRowChange(root, meta()); }) : null;
   const offWs = WS.on(() => { if (!P.dead && src.kind === "page") drawKids(); });
   // live: another device's saved writing comes in while nothing is being typed here
   const live = setInterval(async () => {

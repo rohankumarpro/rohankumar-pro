@@ -11,7 +11,7 @@ import { WS, DB, fmtDate } from "/js/ws-core.mjs";
 import { mountDatabase, WI, choose, askText, iconPick } from "/js/ws-db.mjs";
 import { openDoc } from "/js/ws-page.mjs";
 
-const DB_TPL = { blank: ["Empty database", "table", "Your own columns"], tasks: ["Tasks", "checkbox", "To do, doing, done, with due dates"], content: ["Content calendar", "video", "Ideas to published, by date"], projects: ["Projects", "rocket", "Clients, deadlines and budgets"], reading: ["Reading list", "bookmark", "Books with covers and notes"] };
+const DB_TPL = { blank: ["Empty database", "table", "Your own columns"], tasks: ["Tasks", "checkbox", "To do, doing, done, with due dates"], content: ["Content calendar", "video", "Ideas to published, by date"], projects: ["Projects", "rocket", "Clients, deadlines and budgets"], reading: ["Library", "bookmark", "Books with covers and notes"] };
 
 if (!document.querySelector('link[href="/css/boards.css"]')) document.head.append(h("link", { rel: "stylesheet", href: "/css/boards.css" }));
 
