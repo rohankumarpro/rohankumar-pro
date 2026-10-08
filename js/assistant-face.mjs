@@ -1,9 +1,8 @@
-// The Assistant's face: a small animated companion on the owner's desktop (it took OGGY's place).
-// It blinks, looks at the pointer, and opens the Assistant app when pressed. Owner only, never shown to visitors.
-// faceSvg() is also used, larger, inside the Assistant app. Restyle freely: everything is in css/assistant.css.
+// The face of "Ask Rohan", the visitor bot: a small animated companion on the desktop (it took OGGY's place).
+// It blinks, looks at the pointer, and opens the Ask Rohan app when pressed. Everyone sees it (unless the owner hides the app).
+// faceSvg() is also used, larger, inside the app. Restyle freely: everything is in css/assistant.css.
 const ls = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
-export const asName = () => String(ls.get("rkAsName", "") || "").trim() || "Assistant";
-export const setAsName = (v) => ls.set("rkAsName", String(v || "").trim().slice(0, 24));
+export const ASK = "Ask Rohan";
 export const faceOn = () => ls.get("rkFace", true) !== false;
 export const setFaceOn = (v) => { ls.set("rkFace", !!v); mountFace(); };
 
@@ -41,18 +40,18 @@ export function lively(el) {
 
 const css = () => { if (!document.querySelector('link[href="/css/assistant.css"]')) document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: "/css/assistant.css" })); };
 
-// the desktop companion: shown to the signed-in owner only, and only while they want it
+// the desktop companion: shown to everyone while they want it, and only while the app is not hidden by the owner
 export function mountFace() {
-  const admin = !!(window.LIVE && window.LIVE.admin);
   let el = document.querySelector(".as-buddy");
-  if (!admin || !faceOn()) { el && el.remove(); return; }
+  const hidden = typeof appVisible === "function" && !appVisible("assistant");
+  if (hidden || !faceOn()) { el && el.remove(); return; }
   if (el) return;
   css();
   el = document.createElement("button");
-  el.className = "as-buddy"; el.type = "button"; el.title = asName(); el.setAttribute("aria-label", "Open " + asName());
-  el.innerHTML = faceSvg("idle") + `<span class="as-buddy-tip">${asName().replace(/[<&]/g, "")}</span>`;
+  el.className = "as-buddy"; el.type = "button"; el.title = ASK; el.setAttribute("aria-label", "Open " + ASK);
+  el.innerHTML = faceSvg("idle") + `<span class="as-buddy-tip">${ASK}</span>`;
   el.onclick = () => { el.classList.add("hop"); setTimeout(() => el.classList.remove("hop"), 500); window.openApp && openApp("assistant"); };
-  el.oncontextmenu = (e) => { e.preventDefault(); setFaceOn(false); window.toast && toast(`Face hidden. Bring it back from the ${asName()} app.`); };
+  el.oncontextmenu = (e) => { e.preventDefault(); setFaceOn(false); window.toast && toast(`Face hidden. Bring it back from the ${ASK} app, under Options.`); };
   document.body.append(el);
   lively(el.querySelector(".asf"));
 }

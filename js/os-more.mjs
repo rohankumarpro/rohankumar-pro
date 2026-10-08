@@ -327,7 +327,7 @@ function newApps() {
   const SB = { id: "subs", title: "Subscriptions", shape: "squircle", color: "c2", glyph: G.spark, w: 760, h: 760, ownerOnly: true, render: () => "" };
   const ST = { id: "studio", title: "Studio", shape: "squircle", color: "c1", glyph: G.play || G.spark, w: 1360, h: 880, ownerOnly: true, render: () => "" };
   const LB = { id: "library", title: "Library", shape: "squircle", color: "c5", glyph: G.book || G.spark, w: 1040, h: 780, ownerOnly: true, render: () => "" };
-  const AS = { id: "assistant", title: (() => { try { return JSON.parse(localStorage.getItem("rkAsName")) || "Assistant"; } catch { return "Assistant"; } })(), shape: "squircle", color: "c4", glyph: G.spark, w: 980, h: 820, ownerOnly: true, render: () => "" };
+  const AS = { id: "assistant", title: "Ask Rohan", shape: "squircle", color: "c4", glyph: G.spark, w: 760, h: 780, render: () => "" };
   registerApp(AS); registerApp(PL); registerApp(TK); registerApp(BD); registerApp(ST); registerApp(LB); registerApp(SB); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);
   lazyApp("boards", "/js/app-boards.mjs", "boardsApp");
   lazyApp("design", "/js/app-design.mjs", "designApp");
@@ -339,8 +339,8 @@ function newApps() {
   renderIcons();
 }
 
-// the Assistant's face on the owner's desktop (loaded only for the owner)
-function face() { if (isAdmin() || document.querySelector(".as-buddy")) import("/js/assistant-face.mjs").then((m) => m.mountFace()).catch((e) => console.error("face", e)); }
+// the Ask Rohan face on the desktop (for everyone)
+function face() { import("/js/assistant-face.mjs").then((m) => m.mountFace()).catch((e) => console.error("face", e)); }
 
 /* ================= go ================= */
 function init() {
@@ -350,5 +350,5 @@ function init() {
   if (isAdmin()) setInterval(() => Notif.gather().catch(() => {}), 120000);
   document.addEventListener("owner-changed", () => Notif.gather().catch(() => {}));
 }
-const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined") for (const k of ["boards", "design", "analytics", "planner", "tasks", "subs", "studio", "library", "assistant"]) if (open[k]) { try { closeWin(open[k], k, true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); face(); Notif.gather().catch(() => {}); }, 50); return r; };
+const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined") for (const k of ["boards", "design", "analytics", "planner", "tasks", "subs", "studio", "library"]) if (open[k]) { try { closeWin(open[k], k, true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); face(); Notif.gather().catch(() => {}); }, 50); return r; };
 if (document.readyState === "complete") init(); else addEventListener("load", init);
