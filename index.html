@@ -416,6 +416,10 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 :root[data-theme="dark"]{--wx-gbase:#0B0D1A;--wx-gop:.9;--wx-ch-bg:#0F1218;--wx-ch-b:#2F6BD8;--wx-ch-r:#C5372B;--wx-ch-y:#D19A00;--wx-ch-g:#2A8C46;--wx-ch-s:#5E8FE0;
   --wx-ex-a:#2B2238;--wx-ex-b:#3A2230;--wx-ex-1:#4F378B;--wx-ex-2:#7D2B33;--wx-ex-3:#1F5144;--wx-ex-4:#5E4B0F;--wx-ex-5:#284777;
   --wx-px-bg:#0E1422;--wx-px-1:#1F3E72;--wx-px-2:#6A2A2A;--wx-px-3:#5E4A12;--wx-px-4:#1E4A2E;--wx-rb-bg:#0C1324;--wx-rb-op:.95}
+/* Swatches wallpaper: a designer's colour chips, warm paper by day, deep ink by night */
+:root{--wx-sw-bg:#F5F1EA;--wx-sw-glow:#FFE0CC;--wx-sw-1:#FF8A65;--wx-sw-2:#FFCA4F;--wx-sw-3:#4DB6AC;--wx-sw-4:#7986CB;--wx-sw-5:#F48FB1;--wx-sw-strip:#FFFFFF;--wx-sw-ink:#2B2B2B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wx-sw-bg:#12110F;--wx-sw-glow:#3A2418;--wx-sw-1:#D0613F;--wx-sw-2:#C99A1F;--wx-sw-3:#2F8A80;--wx-sw-4:#4D5AA6;--wx-sw-5:#B2567A;--wx-sw-strip:#22201D;--wx-sw-ink:#E8E3DA}}
+:root[data-theme="dark"]{--wx-sw-bg:#12110F;--wx-sw-glow:#3A2418;--wx-sw-1:#D0613F;--wx-sw-2:#C99A1F;--wx-sw-3:#2F8A80;--wx-sw-4:#4D5AA6;--wx-sw-5:#B2567A;--wx-sw-strip:#22201D;--wx-sw-ink:#E8E3DA}
 #desk[data-vivid] .icons .dicon .lb{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.25)}
 #desk[data-motion="off"] .ico,#desk[data-motion="off"] .ico *:not([transform]){transition:none!important;animation:none!important;transform:none!important}
 #desk[data-motion="off"] .dicon:hover .g-pen,#desk[data-motion="off"] .dicon:hover .g-draw{animation:none!important}
@@ -3329,7 +3333,14 @@ const WALLS={
     <rect width="1600" height="1000" style="fill:var(--wx-rb-bg)"/>
     <g filter="url(#rb${id}f)" style="opacity:var(--wx-rb-op)">
       <g class="fl" style="--d:30s;--x:120px;--y:30px;--r:4deg"><path d="M-200 520C200 300 520 720 900 520S1500 260 1800 440V560C1460 400 1140 700 760 640S180 460 -200 660Z" fill="url(#rb${id}a)"/></g>
-      <g class="fl" style="--d:38s;--x:-140px;--y:-30px;--r:-4deg"><path d="M-200 700C240 520 600 860 980 700S1500 520 1800 680V760C1440 620 1120 900 740 820S160 680 -200 820Z" fill="url(#rb${id}b)"/></g></g></svg>`
+      <g class="fl" style="--d:38s;--x:-140px;--y:-30px;--r:-4deg"><path d="M-200 700C240 520 600 860 980 700S1500 520 1800 680V760C1440 620 1120 900 740 820S160 680 -200 820Z" fill="url(#rb${id}b)"/></g></g></svg>`,
+  /* Swatches: a fanned swatch book of colour chips with label strips, drifting slowly */
+  swatches:id=>{const chips=[['--wx-sw-4',-34],['--wx-sw-3',-22],['--wx-sw-2',-10],['--wx-sw-5',2],['--wx-sw-1',14]];
+    return `<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="sg${id}"><stop offset="0" style="stop-color:var(--wx-sw-glow)"/><stop offset="1" style="stop-color:var(--wx-sw-glow);stop-opacity:0"/></radialGradient></defs>
+    <rect width="1600" height="1000" style="fill:var(--wx-sw-bg)"/>
+    <g class="fl" style="--d:40s;--x:60px;--y:30px"><circle cx="420" cy="260" r="520" fill="url(#sg${id})"/></g>
+    ${S('cookie',160,640,3.2,0,'var(--wx-sw-3)','opacity=".22"','rt|--d:150s')}${S('sun',1380,60,1.6,0,'var(--wx-sw-2)','opacity=".35"','rt|--d:90s')}
+    <g class="fl" style="--d:34s;--x:-30px;--y:-20px;--r:2deg">${chips.map(([c,a],i)=>`<g transform="rotate(${a} 1180 1080)"><rect x="1060" y="380" width="240" height="420" rx="30" style="fill:var(${c})"/><path d="M1060 690h240v80a30 30 0 0 1-30 30h-180a30 30 0 0 1-30-30z" style="fill:var(--wx-sw-strip)"/><rect x="1088" y="716" width="${110-i*8}" height="14" rx="7" style="fill:var(--wx-sw-ink)" opacity=".75"/><rect x="1088" y="744" width="70" height="10" rx="5" style="fill:var(--wx-sw-ink)" opacity=".35"/></g>`).join('')}</g></svg>`}
 };
 const VIVID=[]; // every wallpaper now follows light and dark, so the icon names keep the theme's own colour
 const WALL_ALIAS={gemininight:'gemini'}; // older choice: Gemini night is now Gemini in dark mode
