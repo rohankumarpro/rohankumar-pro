@@ -365,3 +365,38 @@ select.wd-in{appearance:auto}
 .wp-sep{display:grid;place-items:center;color:var(--ink3)}
 .wh-mail{display:flex;flex-direction:column;gap:1px;padding:7px 8px;border-radius:12px;color:var(--ink);text-decoration:none}
 .wh-mail:hover{background:var(--bd-state)}.wh-mail b{font-size:13px}.wh-mail span{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- To-do view: a plain checklist ---------- */
+.wd[data-vt="todo"] [data-a="props"],.wd[data-vt="todo"] [data-a="new"]{display:none}
+.wd-todo{max-width:720px;margin:0 auto;padding:calc(6 * var(--u)) 0 calc(28 * var(--u))}
+.td-add{display:flex;align-items:center;gap:calc(10 * var(--u));height:48px;padding:0 calc(16 * var(--u));margin:0 0 calc(10 * var(--u));border:1.5px solid var(--line);border-radius:var(--r-pill);background:var(--surface);color:var(--primary);transition:border-color var(--d-1,.14s),box-shadow var(--d-1,.14s)}
+.td-add:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 16%,transparent)}
+.td-add input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:var(--fs-4);color:var(--ink)}
+.td-add input::placeholder{color:var(--ink2)}
+.td-h{display:flex;align-items:center;gap:calc(8 * var(--u));margin:calc(14 * var(--u)) calc(8 * var(--u)) calc(4 * var(--u));font-size:var(--fs-2);font-weight:var(--fw-m);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.td-h b{font-weight:var(--fw-m);min-width:20px;padding:1px 7px;border-radius:var(--r-pill);background:var(--wd-hover);text-align:center;letter-spacing:0}
+.td-dh{width:calc(100% - 16px);border:0;background:none;font-family:inherit;cursor:pointer;text-align:left;border-radius:var(--r-2)}
+.td-dh:hover{color:var(--ink)}.td-dh svg{margin-left:auto}
+.td-list{display:flex;flex-direction:column}
+.td-row{display:flex;align-items:center;gap:calc(12 * var(--u));min-height:46px;padding:calc(4 * var(--u)) calc(8 * var(--u)) calc(4 * var(--u)) calc(6 * var(--u));border-radius:var(--r-3);transition:background var(--d-1,.14s)}
+.td-row:hover,.td-row:focus-within{background:var(--wd-hover)}
+.td-cb{position:relative;width:22px;height:22px;flex:none;padding:0;border-radius:50%;border:2px solid color-mix(in srgb,var(--ink2) 60%,transparent);background:none;cursor:pointer;transition:background .16s,border-color .16s,transform .16s cubic-bezier(.3,1.6,.5,1)}
+.td-cb:hover{border-color:var(--primary);transform:scale(1.08)}
+.td-cb::after{content:"";position:absolute;left:6px;top:2.5px;width:5px;height:10px;border:solid var(--on-primary);border-width:0 2px 2px 0;rotate:45deg;opacity:0;transform:scale(.4);transition:opacity .14s,transform .2s cubic-bezier(.3,1.6,.5,1)}
+.td-row.done .td-cb{background:var(--primary);border-color:var(--primary)}
+.td-row.done .td-cb::after{opacity:1;transform:none}
+.td-cb:focus-visible,.td-more:focus-visible,.td-t:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.td-t{flex:1;min-width:0;cursor:text;color:var(--ink);font-size:var(--fs-4);line-height:1.4;overflow-wrap:anywhere;transition:color .16s}
+.td-t.un{color:var(--ink2)}
+.td-row.done .td-t{color:var(--ink2);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--ink2) 60%,transparent)}
+.td-m{display:flex;align-items:center;gap:calc(6 * var(--u));flex:none}
+.td-due{font-size:var(--fs-2);color:var(--ink2);padding:2px calc(9 * var(--u));border-radius:var(--r-pill);background:var(--wd-hover);white-space:nowrap}
+.td-due.today{color:var(--primary);background:color-mix(in srgb,var(--primary) 12%,transparent);font-weight:var(--fw-m)}
+.td-due.over{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent);font-weight:var(--fw-m)}
+.td-pri{font-size:var(--fs-2);color:var(--danger);font-weight:var(--fw-m)}
+.td-more{width:30px;height:30px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:none;color:var(--ink2);cursor:pointer;opacity:0;transition:opacity .12s,background .12s}
+.td-row:hover .td-more,.td-row:focus-within .td-more{opacity:1}
+.td-more:hover{background:var(--wd-hover);color:var(--ink)}
+@media (hover:none){.td-more{opacity:.7}}
+.td-empty{margin:calc(40 * var(--u)) 0;text-align:center;color:var(--ink2);line-height:1.6;font-size:var(--fs-4)}
+@media (prefers-reduced-motion:reduce){.td-cb,.td-cb::after{transition:none}}

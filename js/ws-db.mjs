@@ -9,7 +9,7 @@ import { WS, DB, TYPES, OPT_COLORS, ICO, fmtNum, fmtDate, dateOf, today, ymd, pa
 
 if (!document.querySelector('link[href="/css/workspace.css"]')) document.head.append(h("link", { rel: "stylesheet", href: "/css/workspace.css" }));
 export const WI = (n, s = 16) => (ICO[n] ? `<svg class="ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[n]}</svg>` : BI(n, s));
-const VIEWS = { table: ["Table", "db"], board: ["Board", "board"], calendar: ["Calendar", "calendar"], gallery: ["Gallery", "gallery"], list: ["List", "list"] };
+const VIEWS = { table: ["Table", "db"], board: ["Board", "board"], calendar: ["Calendar", "calendar"], gallery: ["Gallery", "gallery"], list: ["List", "list"], todo: ["To-do", "checkbox"] };
 const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const optOf = (p, id) => (p.opts || []).find((o) => o.id === id);
 const chip = (o) => (o ? `<span class="wd-opt" data-c="${o.color || "grey"}">${esc(o.name)}</span>` : "");
@@ -65,7 +65,7 @@ export function mountDatabase(host, ctx) {
 
   const off = DB.on(id, () => { doc = DB.get(id); if (S.editing) { S.redraw = true; return; } draw(); });
   const offList = WS.on(() => { if (doc && !S.editing) drawHead(); });
-  DB.open(id).then((d) => { if (!d) { root.innerHTML = `<p class="wd-empty">This database could not be opened. Check your connection and try again.</p>`; return; } doc = d; draw(); });
+  DB.open(id).then((d) => { if (!d) { root.innerHTML = `<p class="wd-empty">This database could not be opened. Check your connection and try again.</p>`; return; } doc = d; setup(); draw(); });
   const syncT = setInterval(() => { if (document.visibilityState === "visible" && host.isConnected) DB.sync(id); }, 20000);
 
   /* ----- header and toolbar ----- */
@@ -74,10 +74,18 @@ export function mountDatabase(host, ctx) {
     hd.querySelector(".wd-ico").innerHTML = WI(m.icon && ICONS[m.icon] ? m.icon : "db", ctx.compact ? 22 : 30);
     const t = hd.querySelector(".wd-title"); if (document.activeElement !== t) t.value = m.title || "";
   }
+  // an app can ask for a kind of view to be there, first and open by default (Tasks does, for its To-do list). Only ever adds one view.
+  function setup() {
+    const want = ctx.view; if (!want) return;
+    let t = doc.views.find((x) => x.type === want.type);
+    if (!t) { t = { id: rid(), name: want.name, type: want.type }; ops([{ op: "view", view: t }, { op: "vorder", ids: [t.id, ...doc.views.filter((x) => x.id !== t.id).map((x) => x.id)] }]); doc = DB.get(id) || doc; }
+    S.view = t.id;
+  }
   function draw() {
     if (!doc) return;
+    S.tdFocus = !!root.querySelector(".td-add input:focus");
     if (!doc.views.find((v) => v.id === S.view)) S.view = doc.views[0].id;
-    const v = view(), m = meta();
+    const v = view(), m = meta(); root.dataset.vt = v.type;
     const sc = root.querySelector(".wd-body")?.scrollLeft || 0, st = root.querySelector(".wd-body")?.scrollTop || 0;
     root.innerHTML = `
       <header class="wd-head">${m.cover && !ctx.compact ? `<div class="wd-cover" style="background:${m.cover.k ? coverCss(m.cover) : `url('${esc(m.cover.src)}') center/cover`}"></div>` : ""}
@@ -102,6 +110,7 @@ export function mountDatabase(host, ctx) {
     else if (v.type === "board") body.append(board(v, rows));
     else if (v.type === "calendar") body.append(calendar(v, rows));
     else if (v.type === "gallery") body.append(gallery(v, rows));
+    else if (v.type === "todo") body.append(todo(v, rows));
     else body.append(list(v, rows));
     body.scrollLeft = sc; body.scrollTop = st;
     wireBar();
@@ -295,7 +304,7 @@ export function mountDatabase(host, ctx) {
     const v = view(), rows = rowsFor(doc, v, "");
     const order = (rows.length ? Math.max(...rows.map((r) => r.order ?? r.created ?? 0)) : 0) + 1;
     const r = DB.newRow(id, { v: seed(v, extra.v || {}), order, ...(extra.title ? { title: extra.title } : {}) });
-    const go = open ?? !["table", "board"].includes(v.type);
+    const go = open ?? !["table", "board", "todo"].includes(v.type);
     if (go) ctx.openRow && ctx.openRow(r.id);
     else setTimeout(() => { const el = root.querySelector(`[data-row="${r.id}"] [data-title]`); if (el) editTitle(r, el, true); }, 40);
     return r;
@@ -478,6 +487,50 @@ export function mountDatabase(host, ctx) {
     const wrap = h("div", { class: "wd-gal s-" + (v.size || "m") }), props = shown(v);
     wrap.innerHTML = rows.map((r) => card(r, props, true)).join("") + `<button class="wd-gnew" data-a="gnew">${WI("plus", 18)}<span>New</span></button>`;
     wrap.addEventListener("click", (e) => { const t = e.target; if (t.closest("a")) return; if (t.closest('[data-a="gnew"]')) return newRow({}, { open: true }); const cd = t.closest("[data-row]"); if (!cd) return; if (t.closest("[data-more]")) return rowMenu(t.closest("[data-more]"), doc.rows[cd.dataset.row]); ctx.openRow && ctx.openRow(cd.dataset.row); });
+    return wrap;
+  }
+  /* ----- to-do: a plain checklist (tick it off, add one at the top, done ones tuck away below) ----- */
+  function todo(v, rows) {
+    const st = doc.props.find((p) => p.type === "status"), cb = !st && doc.props.find((p) => p.type === "checkbox");
+    const due = doc.props.find((p) => p.type === "date" && /due|deadline/i.test(p.name)) || doc.props.find((p) => p.type === "date");
+    const pri = doc.props.find((p) => p.type === "select" && /priorit/i.test(p.name));
+    const doneOf = (r) => (st ? optOf(st, r.v[st.id])?.group === "done" : cb ? !!r.v[cb.id] : false);
+    const ord = (r) => r.order ?? r.created ?? 0, day = (r) => (due ? dateOf(r.v[due.id]).slice(0, 10) : "");
+    let open = rows.filter((r) => !doneOf(r)); const done = rows.filter(doneOf).sort((a, b) => (b.updated || 0) - (a.updated || 0));
+    if (!(v.sort || []).length && due) open = open.slice().sort((a, b) => (day(a) || "9999").localeCompare(day(b) || "9999") || ord(a) - ord(b));   // soonest first, no date last
+    const td = today();
+    const rowHtml = (r, isDone) => {
+      const dd = day(r), po = pri && optOf(pri, r.v[pri.id]);
+      const dueHtml = dd ? `<span class="td-due${!isDone && dd < td ? " over" : !isDone && dd === td ? " today" : ""}">${esc(fmtDate(r.v[due.id], { rel: true }))}</span>` : "";
+      const priHtml = po && !isDone && /^(high|urgent|p1)/i.test(po.name) ? `<span class="td-pri">${esc(po.name)}</span>` : "";
+      return `<div class="td-row${isDone ? " done" : ""}" data-row="${r.id}"><button type="button" class="td-cb" role="checkbox" aria-checked="${isDone}" aria-label="${isDone ? "Mark as not done" : "Mark as done"}" data-a="tick"></button><span class="td-t${r.title ? "" : " un"}" data-title tabindex="0">${esc(r.title || "Untitled")}</span><span class="td-m">${priHtml}${dueHtml}</span><button type="button" class="td-more" data-a="more" aria-label="More">${WI("more", 16)}</button></div>`;
+    };
+    const wrap = h("div", { class: "wd-todo" });
+    wrap.innerHTML = `<form class="td-add">${WI("plus", 18)}<input placeholder="Add a task" aria-label="Add a task" maxlength="300" autocomplete="off"></form>
+      ${open.length ? `<div class="td-h"><span>To do</span><b>${open.length}</b></div><div class="td-list">${open.map((r) => rowHtml(r, false)).join("")}</div>` : done.length ? `<p class="td-empty">All done. Nice work.</p>` : `<p class="td-empty">Nothing to do yet.<br>Add your first task above.</p>`}
+      ${done.length ? `<button type="button" class="td-h td-dh" data-a="doneh" aria-expanded="${!!S.tdDone}"><span>Completed</span><b>${done.length}</b>${WI(S.tdDone ? "chevron-up" : "chevron-down", 14)}</button>${S.tdDone ? `<div class="td-list">${done.map((r) => rowHtml(r, true)).join("")}</div>` : ""}` : ""}`;
+    const form = wrap.querySelector(".td-add"), inp = form.querySelector("input");
+    inp.value = S.tdText || ""; inp.addEventListener("input", () => (S.tdText = inp.value));
+    form.onsubmit = (e) => {
+      e.preventDefault(); const t = inp.value.trim(); if (!t) return;
+      S.tdText = ""; inp.value = ""; const all = Object.values(doc.rows);
+      DB.newRow(id, { title: t, v: seed(v), order: (all.length ? Math.max(...all.map(ord)) : 0) + 1 });
+    };
+    if (S.tdFocus) setTimeout(() => inp.isConnected && inp.focus(), 0);
+    const tick = (r, row) => {
+      const now = !doneOf(r); row.classList.toggle("done", now); row.querySelector(".td-cb").setAttribute("aria-checked", String(now));
+      setTimeout(() => { if (st) { const o = (st.opts || []).find((x) => (x.group || "todo") === (now ? "done" : "todo")); if (o) setVal(r, st, o.id); } else if (cb) setVal(r, cb, now); }, 200);   // a beat, so the tick is seen
+    };
+    wrap.addEventListener("click", (e) => {
+      const t = e.target;
+      if (t.closest('[data-a="doneh"]')) { S.tdDone = !S.tdDone; return draw(); }
+      const row = t.closest("[data-row]"), r = row && doc.rows[row.dataset.row]; if (!r) return;
+      if (t.closest('[data-a="tick"]')) return tick(r, row);
+      if (t.closest('[data-a="more"]')) return rowMenu(t.closest('[data-a="more"]'), r);
+      const ti = t.closest("[data-title]"); if (ti) editTitle(r, ti, false);
+    });
+    wrap.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.matches("[data-title]")) { e.preventDefault(); const r = doc.rows[e.target.closest("[data-row]").dataset.row]; if (r) editTitle(r, e.target, false); } });
+    wrap.addEventListener("contextmenu", (e) => { const row = e.target.closest("[data-row]"); if (!row || !doc.rows[row.dataset.row]) return; e.preventDefault(); rowMenu(row, doc.rows[row.dataset.row], { left: e.clientX, right: e.clientX, top: e.clientY, bottom: e.clientY }); });
     return wrap;
   }
   function list(v, rows) {

@@ -96,7 +96,7 @@ export function cleanRow(r, props, prev) {
   o.updated = Date.now();
   return o;
 }
-const VIEW_TYPES = ["table", "board", "calendar", "gallery", "list"];
+const VIEW_TYPES = ["table", "board", "calendar", "gallery", "list", "todo"];
 export function cleanView(v, props) {
   const has = (id) => props.some((p) => p.id === id);
   const o = { id: okId(v.id) ? v.id : rid(), name: str(v.name, 40).trim() || "View", type: VIEW_TYPES.includes(v.type) ? v.type : "table" };
@@ -123,7 +123,7 @@ export const TEMPLATES = {
   tasks: { title: "Tasks", icon: "checkbox", role: "tasks", make() {
     const status = P("Status", "status", { opts: [O("To do", "grey", "todo"), O("Doing", "blue", "doing"), O("Done", "green", "done")] });
     const due = P("Due", "date"), pri = P("Priority", "select", { opts: [O("High", "red"), O("Medium", "yellow"), O("Low", "grey")] }), area = P("Area", "select", { opts: [O("Work", "blue"), O("Content", "purple"), O("Personal", "green")] });
-    return { props: [status, due, pri, area], views: [{ id: rid(), name: "Board", type: "board", group: status.id }, { id: rid(), name: "All tasks", type: "table", sort: [{ p: due.id, d: "asc" }] }, { id: rid(), name: "Calendar", type: "calendar", date: due.id }] };
+    return { props: [status, due, pri, area], views: [{ id: rid(), name: "To-do", type: "todo" }, { id: rid(), name: "Board", type: "board", group: status.id }, { id: rid(), name: "All tasks", type: "table", sort: [{ p: due.id, d: "asc" }] }, { id: rid(), name: "Calendar", type: "calendar", date: due.id }] };
   } },
   projects: { title: "Projects", icon: "rocket", make() {
     const status = P("Status", "status", { opts: [O("Planned", "grey", "todo"), O("In progress", "blue", "doing"), O("Done", "green", "done")] });

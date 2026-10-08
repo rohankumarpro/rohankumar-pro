@@ -11,7 +11,7 @@ export async function tasksApp(body) {
   const d = await WS.ensure("tasks");
   const host = body.querySelector(".tk");
   if (!d) { host.innerHTML = '<p class="hint">Could not open your tasks. Check your connection and try again.</p>'; return; }
-  let db = mountDatabase(host, { id: d.id, compact: true, openRow: (rowId) => { window.openApp("boards"); setTimeout(() => R.apply(`/boards/db/${d.id}/${rowId}`), 60); } });
+  let db = mountDatabase(host, { id: d.id, compact: true, view: { type: "todo", name: "To-do" }, openRow: (rowId) => { window.openApp("boards"); setTimeout(() => R.apply(`/boards/db/${d.id}/${rowId}`), 60); } });
   body.__flush = async () => { db && db.destroy(); db = null; };
   R.handlers.tasks = () => {};
 }
