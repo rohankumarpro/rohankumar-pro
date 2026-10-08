@@ -2839,7 +2839,7 @@ const SET_CATS=[
   ['sound','Sound','music','Sounds and haptics',['sounds']],
   ['profile','Profile','user','Name, photo, what you are up to',['about you','on repeat','your photo']],
   ['inbox','Messages & guestbook','mail','Messages, guestbook, OGGY’s inbox',['messages','guestbook',"oggy's inbox"]],
-  ['sync','Sync','refresh','Google Docs and Google Keep',['google']],
+  ['sync','Sync','refresh','Google Docs, Keep, Calendar and Gmail',['google']],
   ['website','Website','globe','Search, sharing, how the site opens',['website','live check','opening the site']],
   ['backup','Backup','shield','Download, restore, safety copies',['backup','automatic safety copies']],
   ['device','This device','laptop','Install the app, keyboard shortcuts',['this site as an app','keyboard']],
@@ -3334,7 +3334,7 @@ function ownerPanel(body){
   sec.innerHTML=`<h2>System settings</h2><p class="ow-top"><small>Owner only. Changes save automatically and show for every visitor.</small><span class="ow-st">${esc(SITE.status)}</span></p><div class="ow-fix" hidden></div>
   <h3>About you</h3>${f('name','Name',P.name,60)}${f('role','Role',P.role,80)}${f('status','Status (desktop widget and Links)',P.status,80)}${f('now','What you are up to now',P.now,300)}
   <h3>On repeat</h3>${f('song','Song',P.music.song,80)}${f('artist','Artist',P.music.artist,80)}
-  <h3>Where each app lives</h3><p class="hint">Desktop shows the app on the desktop and in the app drawer. Drawer keeps it only in the drawer. Hidden removes it for visitors (you still see it, dimmed).</p>
+  <h3>Where each app lives</h3><p class="hint">Desktop shows the app on the desktop and in the app drawer. Drawer keeps it only in the drawer. Hidden removes it for visitors (you still see it, with a small Hidden tag).</p>
   <div class="ow-places">${APPS.map(a=>{const hide=hid.has(a.id),can=!NEVER_HIDE.includes(a.id),pl=hide?'hidden':appPlace(a);return `<div class="ow-pl" data-app="${a.id}"><span class="ow-pln">${icon(a)}<b>${esc(a.title)}</b></span><div class="seg" role="group" aria-label="${esc(a.title)} placement">${['desktop','drawer'].concat(can?['hidden']:[]).map(k=>`<button data-pl="${k}" class="${pl===k?'on':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`}).join('')}</div>
   <h3>Guestbook</h3><label class="ow-app"><input type="checkbox" id="gbAuto" ${SITE.s&&SITE.s.gbAuto?'checked':''}><span>Publish notes right away (otherwise each note waits for your approval)</span></label>
   <h3>Opening the site</h3><label class="ow-app"><input type="checkbox" id="noLock" ${SITE.s&&SITE.s.noLock?'checked':''}><span>Open the website straight to the desktop (skip the lock screen for visitors)</span></label>
@@ -3342,6 +3342,7 @@ function ownerPanel(body){
   <h3>Messages</h3><p class="hint">What visitors send from the Messages app: name, email, what it is about and where they came from.</p><div class="ow-row"><button class="btn tonal ow-msgs">Open messages</button></div>
   <h3>OGGY's inbox</h3><p class="hint">What visitors tell OGGY: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
   <h3>Google Docs and Keep</h3><div class="gs-box"><p class="hint">Checking…</p></div>
+  <h3>Google accounts: Calendar and Gmail</h3><div class="gs-box ga-box"><p class="hint">Checking…</p></div>
   <h3>Account</h3><p class="hint">You are signed in as the owner on this device.</p><div class="ow-row"><button class="btn tonal ow-out">Sign out</button></div>`;
   body.appendChild(sec);
   const cur=()=>{if(!SITE.s)SITE.s={hiddenApps:[]};return SITE.s};
@@ -3350,7 +3351,8 @@ function ownerPanel(body){
     s.place=s.place||{};if(k==='hidden')set.add(id);else{set.delete(id);s.place[id]=k}s.hiddenApps=[...set];
     row.querySelectorAll('[data-pl]').forEach(x=>x.classList.toggle('on',x===b));applyHidden();siteSave();SFX.play('toggle')});
   sec.querySelector('#gbAuto').onchange=e=>{cur().gbAuto=e.target.checked;siteSave()};
-  gsyncPanel(sec.querySelector('.gs-box'));
+  gsyncPanel(sec.querySelector('.gs-box:not(.ga-box)'));
+  {const gaBox=sec.querySelector('.ga-box');import('/js/google-accounts.mjs').then(m=>m.accountsPanel(gaBox)).catch(e=>console.error('google accounts',e))}
   sec.querySelector('#noLock').onchange=e=>{if(e.target.checked)cur().noLock=true;else delete cur().noLock;try{localStorage.setItem('rkNoLock',e.target.checked?'1':'0')}catch(x){}siteSave()};
   sec.querySelector('.ow-msgs').onclick=()=>openApp('messages');
   const ib=sec.querySelector('.ow-inbox');ib.onclick=()=>mochiInbox(body);

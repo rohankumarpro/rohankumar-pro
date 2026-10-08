@@ -177,6 +177,8 @@ setTimeout(() => import("/js/os-more.mjs").catch((e) => console.error("os-more",
 import("/js/ctx-apps.mjs").catch((e) => console.error("ctx-apps", e));
 // the site's own visitor counts (owner only sees them, in the Analytics app)
 import("/js/track.mjs").then((m) => m.startTracking()).catch(() => {});
+// back from connecting a Google account
+if (/[?&]google=/.test(location.search)) import("/js/google-accounts.mjs").then((m) => m.cameBack()).catch(() => {});
 
 /* ---------- visitor analytics: Microsoft Clarity (recordings and heatmaps) ---------- */
 // Visitors on the live site only. Never the owner (signed in now, or ever before on this browser), the desktop app,

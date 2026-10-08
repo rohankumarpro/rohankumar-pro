@@ -129,11 +129,18 @@ export const TEMPLATES = {
     const status = P("Status", "status", { opts: [O("Planned", "grey", "todo"), O("In progress", "blue", "doing"), O("Done", "green", "done")] });
     return { props: [status, P("Client", "text"), P("Start", "date"), P("Deadline", "date"), P("Budget", "number", { fmt: "inr" }), P("Link", "url")], views: [{ id: rid(), name: "Board", type: "board", group: status.id }, { id: rid(), name: "Table", type: "table" }] };
   } },
-  reading: { title: "Reading list", icon: "book", make() {
+  reading: { title: "Reading list", icon: "bookmark", make() {
     const st = P("Status", "status", { opts: [O("To read", "grey", "todo"), O("Reading", "blue", "doing"), O("Finished", "green", "done")] });
     return { props: [P("Author", "text"), st, P("Rating", "select", { opts: [O("5", "green"), O("4", "blue"), O("3", "yellow"), O("2", "orange"), O("1", "red")] }), P("Finished", "date")], views: [{ id: rid(), name: "Shelf", type: "gallery", cover: "page" }, { id: rid(), name: "By status", type: "board", group: st.id }] };
   } },
-  content: { title: "Content calendar", icon: "video", make() {
+  subs: { title: "Subscriptions", icon: "wallet", role: "subs", make() {
+    const st = P("Status", "status", { opts: [O("Trial", "yellow", "todo"), O("Active", "green", "doing"), O("Cancelled", "grey", "done")] });
+    const cyc = P("Cycle", "select", { opts: [O("Monthly", "blue"), O("Yearly", "purple"), O("Quarterly", "orange"), O("Half-yearly", "pink"), O("Weekly", "green")] });
+    const cur = P("Currency", "select", { opts: [O("INR", "orange"), O("USD", "green"), O("EUR", "blue"), O("GBP", "purple")] });
+    const next = P("Next charge", "date"), cat = P("Category", "select", { opts: [O("Design tools", "purple"), O("Software", "blue"), O("Entertainment", "red"), O("Cloud and storage", "grey"), O("Learning", "green"), O("Utilities", "brown")] });
+    return { props: [P("Amount", "number"), cur, cyc, next, st, cat, P("Paid with", "text"), P("Manage or cancel", "url"), P("Found in", "text")], views: [{ id: rid(), name: "All", type: "table", sort: [{ p: next.id, d: "asc" }] }, { id: rid(), name: "Renewals", type: "calendar", date: next.id }] };
+  } },
+  content: { title: "Content calendar", icon: "video", role: "content", make() {
     const st = P("Stage", "status", { opts: [O("Idea", "grey", "todo"), O("Scripting", "yellow", "doing"), O("Filming", "orange", "doing"), O("Editing", "purple", "doing"), O("Published", "green", "done")] });
     const pub = P("Publish", "date");
     return { props: [st, P("Platform", "multi", { opts: [O("YouTube", "red"), O("Instagram", "pink"), O("LinkedIn", "blue")] }), pub, P("Link", "url")], views: [{ id: rid(), name: "Pipeline", type: "board", group: st.id }, { id: rid(), name: "Calendar", type: "calendar", date: pub.id }] };

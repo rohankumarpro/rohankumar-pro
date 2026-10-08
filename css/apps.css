@@ -466,3 +466,18 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .kn-card.k-coral,.kn-edit.k-coral,.kn-compose-card.k-coral,.kn-sw.k-coral{background:var(--keep-coral)}.kn-card.k-peach,.kn-edit.k-peach,.kn-compose-card.k-peach,.kn-sw.k-peach{background:var(--keep-peach)}.kn-card.k-sand,.kn-edit.k-sand,.kn-compose-card.k-sand,.kn-sw.k-sand{background:var(--keep-sand)}.kn-card.k-mint,.kn-edit.k-mint,.kn-compose-card.k-mint,.kn-sw.k-mint{background:var(--keep-mint)}.kn-card.k-sage,.kn-edit.k-sage,.kn-compose-card.k-sage,.kn-sw.k-sage{background:var(--keep-sage)}.kn-card.k-fog,.kn-edit.k-fog,.kn-compose-card.k-fog,.kn-sw.k-fog{background:var(--keep-fog)}.kn-card.k-storm,.kn-edit.k-storm,.kn-compose-card.k-storm,.kn-sw.k-storm{background:var(--keep-storm)}.kn-card.k-dusk,.kn-edit.k-dusk,.kn-compose-card.k-dusk,.kn-sw.k-dusk{background:var(--keep-dusk)}.kn-card.k-blossom,.kn-edit.k-blossom,.kn-compose-card.k-blossom,.kn-sw.k-blossom{background:var(--keep-blossom)}.kn-card.k-clay,.kn-edit.k-clay,.kn-compose-card.k-clay,.kn-sw.k-clay{background:var(--keep-clay)}.kn-card.k-chalk,.kn-edit.k-chalk,.kn-compose-card.k-chalk,.kn-sw.k-chalk{background:var(--keep-chalk)}
 .kn-pop12{display:grid;grid-template-columns:repeat(6,auto);gap:6px}
 .kn-row.sub{margin-left:28px}.kn-li li.sub{padding-left:22px}
+
+/* Settings → Sync: Google accounts for the Planner */
+.ga-list{display:flex;flex-direction:column;gap:calc(8 * var(--u));margin:calc(10 * var(--u)) 0}
+.ga-acc{display:flex;align-items:center;flex-wrap:wrap;gap:calc(8 * var(--u)) calc(12 * var(--u));padding:calc(12 * var(--u)) calc(14 * var(--u));border-radius:var(--r-5);background:var(--surface2)}
+.ga-dot{width:12px;height:12px;border-radius:50%;flex:none}
+.ga-who{flex:1;min-width:180px;display:flex;flex-direction:column}.ga-who b{font-size:var(--fs-4);overflow-wrap:anywhere}.ga-who small{color:var(--ink2);font-size:var(--fs-2)}
+.ga-res p{margin:calc(4 * var(--u)) 0 0;font-size:var(--fs-3)}
+.ga-ok{display:flex;align-items:center;gap:4px;color:var(--ink)}.ga-ok svg{color:var(--ok)}
+.ga-acc .ow-app{margin:0}
+.ga-acc .btn.sm,.btn.sm{padding:calc(7 * var(--u)) calc(12 * var(--u));font-size:var(--fs-3)}
+.ga-h{margin:calc(18 * var(--u)) 0 calc(4 * var(--u));font-size:var(--fs-5)}
+.ga-days{width:56px;display:inline-block;padding:calc(3 * var(--u)) calc(6 * var(--u));margin:0 2px}
+.ga-vip{width:100%;box-sizing:border-box;resize:vertical;font:inherit}
+.ga-setup{margin-top:calc(14 * var(--u))}.ga-setup summary{cursor:pointer;font-weight:var(--fw-m)}
+a.btn[aria-disabled="true"]{opacity:.6}

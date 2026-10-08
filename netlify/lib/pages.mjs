@@ -20,7 +20,7 @@ export const APP_PAGES = {
   messages: { path: "/messages", title: "Messages", index: false }, documents: { path: "/wallet", title: "Wallet", index: false }, settings: { path: "/settings", title: "Settings", index: false },
   calculator: { path: "/calculator", title: "Calculator", index: false }, palette: { path: "/palette", title: "Palette", index: false }, sketch: { path: "/sketch", title: "Sketch", index: false },
   focus: { path: "/focus", title: "Focus timer", index: false }, search: { path: "/search", title: "Search", index: false },
-  boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false }, analytics: { path: "/analytics", title: "Analytics", index: false }, music: { path: "/music", title: "Music", index: false },
+  boards: { path: "/boards", title: "Boards", index: false }, design: { path: "/design", title: "Design", index: false }, analytics: { path: "/analytics", title: "Analytics", index: false }, planner: { path: "/planner", title: "Planner", index: false }, tasks: { path: "/tasks", title: "Tasks", index: false }, subs: { path: "/subs", title: "Subscriptions", index: false }, music: { path: "/music", title: "Music", index: false },
 };
 const BY_PATH = Object.fromEntries(Object.entries(APP_PAGES).map(([id, v]) => [v.path, id]));
 const tagSlug = (t) => slugify(t);

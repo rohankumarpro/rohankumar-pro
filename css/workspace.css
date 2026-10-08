@@ -363,3 +363,5 @@ select.wd-in{appearance:auto}
 @media (max-width:760px){.ba .wd-tb span{display:none}}
 .wp-ed .rte-doc>.rb:only-child .rb-e:empty::before{opacity:.45}
 .wp-sep{display:grid;place-items:center;color:var(--ink3)}
+.wh-mail{display:flex;flex-direction:column;gap:1px;padding:7px 8px;border-radius:12px;color:var(--ink);text-decoration:none}
+.wh-mail:hover{background:var(--bd-state)}.wh-mail b{font-size:13px}.wh-mail span{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

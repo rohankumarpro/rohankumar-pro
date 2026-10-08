@@ -11,7 +11,7 @@ import { WS, DB, fmtDate } from "/js/ws-core.mjs";
 import { mountDatabase, WI, choose, askText, iconPick } from "/js/ws-db.mjs";
 import { openDoc } from "/js/ws-page.mjs";
 
-const DB_TPL = { blank: ["Empty database", "table", "Your own columns"], tasks: ["Tasks", "checkbox", "To do, doing, done, with due dates"], content: ["Content calendar", "video", "Ideas to published, by date"], projects: ["Projects", "rocket", "Clients, deadlines and budgets"], reading: ["Reading list", "book", "Books with covers and notes"] };
+const DB_TPL = { blank: ["Empty database", "table", "Your own columns"], tasks: ["Tasks", "checkbox", "To do, doing, done, with due dates"], content: ["Content calendar", "video", "Ideas to published, by date"], projects: ["Projects", "rocket", "Clients, deadlines and budgets"], reading: ["Reading list", "bookmark", "Books with covers and notes"] };
 
 if (!document.querySelector('link[href="/css/boards.css"]')) document.head.append(h("link", { rel: "stylesheet", href: "/css/boards.css" }));
 
@@ -211,6 +211,9 @@ export async function boardsApp(body, key) {
     const tasks = WS.dbByRole("tasks"); let due = [];
     if (tasks) { const doc = DB.get(tasks.id) || (await DB.open(tasks.id)); if (doc) { const st = doc.props.find((p) => p.type === "status"), dp = doc.props.find((p) => p.type === "date"), lim = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10); due = Object.values(doc.rows).filter((r) => { const o = st && (st.opts || []).find((x) => x.id === r.v[st.id]); if (o && o.group === "done") return false; const d = dp && String(r.v[dp.id] || "").slice(0, 10); return d && d <= lim; }).sort((a, b) => String(a.v[dp.id]).localeCompare(String(b.v[dp.id]))).slice(0, 6).map((r) => ({ r, d: r.v[dp.id] })); } }
     if (!$(".wh-ws", main)) return;
+    if (!A.gAsked) { A.gAsked = true; api("/api/gdata").then((r) => { if (r.ok) { A.gdata = r.data; drawHomeWs(); } }); }
+    const mails = []; for (const a of Object.values((A.gdata && A.gdata.mail && A.gdata.mail.accounts) || {})) for (const m of a.msgs || []) mails.push({ ...m, acctEmail: a.email });
+    mails.sort((a, b) => (b.vip - a.vip) || (b.ts - a.ts));
     if (!(window.LIVE && LIVE.notes) && !A.notesAsked) { A.notesAsked = true; api("/api/notes").then((r) => { if (r.ok && Array.isArray(r.data.notes) && window.LIVE && !LIVE.notes) { LIVE.notes = r.data.notes; drawHomeWs(); } }); }
     const notes = (window.LIVE && LIVE.notes ? LIVE.notes : []).filter((n) => !n.trashed && !n.archived).sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || (b.ts || 0) - (a.ts || 0)).slice(0, 6);
     el.innerHTML = `
@@ -218,6 +221,8 @@ export async function boardsApp(body, key) {
       <div class="wh-two">
         <section class="wh-card"><header><h3>${WI("checkbox", 17)}Due this week</h3>${tasks ? `<button class="wh-lk" data-go="db:${tasks.id}">Open ${esc(tasks.title || "Tasks")}</button>` : ""}</header>
           ${tasks ? (due.length ? `<ul class="wh-due">${due.map(({ r, d }) => `<li><button data-go="row:${r.id}:${tasks.id}"><span class="wh-dd${String(d).slice(0, 10) < new Date().toISOString().slice(0, 10) ? " over" : ""}">${esc(fmtDate(d, { rel: true }))}</span><span>${esc(r.title || "Untitled")}</span></button></li>`).join("")}</ul>` : `<p class="wh-empty">Nothing due in the next 7 days.</p>`) : `<p class="wh-empty">Make a Tasks database to see what's due here.</p><button class="btn tonal" data-mk="tasks">Make Tasks</button>`}</section>
+        <section class="wh-card"><header><h3>${WI("mail", 17)}Important email</h3><button class="wh-lk" data-planner>Open Planner</button></header>
+          ${mails.length ? `<ul class="wh-due">${mails.slice(0, 5).map((m) => `<li><a class="wh-mail" href="https://mail.google.com/mail/u/${encodeURIComponent(m.acctEmail)}/#inbox/${encodeURIComponent(m.thread)}" target="_blank" rel="noopener"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span></a></li>`).join("")}</ul>` : `<p class="wh-empty">${A.gdata && (A.gdata.accounts || []).some((a) => a.mail) ? "Nothing important waiting." : "Connect Gmail in Settings → Sync to see important email here."}</p>`}</section>
         <section class="wh-card"><header><h3>${WI("pin", 17)}Notes</h3><button class="wh-lk" data-notes2>All notes</button></header>
           ${notes.length ? `<div class="wh-notes">${notes.map((n) => `<button class="wh-note" data-note="${n.id}" style="background:var(--${String(n.color || "c0").startsWith("k-") ? "keep-" + n.color.slice(2) : n.color === "c0" || !n.color ? "surface" : n.color},var(--surface))">${n.title ? `<b>${esc(n.title)}</b>` : ""}<span>${esc(String(n.kind === "list" ? (n.items || []).map((i) => (i.d ? "✓ " : "· ") + i.t).join("\n") : n.text || "").slice(0, 160))}</span></button>`).join("")}</div>` : `<p class="wh-empty">No notes yet.</p>`}</section>
       </div>
@@ -227,6 +232,7 @@ export async function boardsApp(body, key) {
     el.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => { const [k, id, x] = b.dataset.go.split(":"); if (k === "page") openPage(id); else if (k === "db") openDbView(id); else if (k === "row") openRow(x, id); else if (k === "bpage") openBPage(x, id); }));
     el.querySelectorAll("[data-mk]").forEach((b) => (b.onclick = () => newDb(b.dataset.mk)));
     el.querySelector("[data-notes2]")?.addEventListener("click", () => openNotes());
+    el.querySelector("[data-planner]")?.addEventListener("click", () => window.openApp("planner"));
     el.querySelectorAll("[data-note]").forEach((b) => (b.onclick = () => openNotes(b.dataset.note)));
   }
 

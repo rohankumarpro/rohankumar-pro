@@ -260,3 +260,7 @@ export async function setOptions(store, o) {
   if (typeof o.keepOn === "boolean") st.keepOn = o.keepOn;
   await store.setJSON(STATE, st);
 }
+
+/* ---------- for Calendar and Gmail (netlify/lib/gapi.mjs): the same service account, other scopes ---------- */
+export const saUser = () => (configured() ? user() : "");
+export const saToken = (scope) => token(scope);

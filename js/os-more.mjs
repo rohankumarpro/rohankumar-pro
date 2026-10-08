@@ -307,6 +307,9 @@ const ART_ADD = {
   documents: `<rect class="l1" x="20" y="30" width="60" height="44" rx="11" fill="${IG}"/><path class="up" d="M24 34 62 21a4 4 0 0 1 5.4 3.8V32z" fill="#fff"/><rect x="54" y="46" width="28" height="18" rx="9" fill="#fff"/><circle class="rise" cx="65" cy="55" r="3.6" fill="${IK}"/>`,
   services: `<rect class="l1" x="26" y="38" width="48" height="34" rx="8" fill="${IG}"/><path class="up" d="M41 38v-5a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v5" fill="none" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect x="26" y="52" width="48" height="4" fill="#2a8a45"/><circle class="rise" cx="50" cy="56" r="5" fill="#fff"/>`,
   analytics: `<rect class="l1" x="20" y="20" width="60" height="60" rx="16" fill="${IB}"/><rect class="rise" x="31" y="50" width="9" height="19" rx="4.5" fill="#fff"/><rect class="up" x="45.5" y="34" width="9" height="35" rx="4.5" fill="${IY}"/><rect x="60" y="43" width="9" height="26" rx="4.5" fill="#fff"/>`,
+  planner: `<rect class="l1" x="20" y="24" width="60" height="54" rx="14" fill="${IB}"/><rect x="20" y="24" width="60" height="16" rx="8" fill="#1558C0"/><path class="up" d="M34 18v12M66 18v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><rect class="rise" x="30" y="48" width="18" height="10" rx="4" fill="#fff"/><rect x="52" y="48" width="18" height="10" rx="4" fill="${IY}"/><rect x="30" y="62" width="18" height="8" rx="4" fill="#fff" opacity=".7"/>`,
+  tasks: `<rect class="l1" x="22" y="20" width="56" height="60" rx="14" fill="${IG}"/><path class="up" d="m32 40 6 6 10-12" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="54" y="36" width="16" height="6" rx="3" fill="#fff"/><path class="rise" d="m32 62 6 6 10-12" fill="none" stroke="${IY}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="54" y="58" width="16" height="6" rx="3" fill="#fff" opacity=".75"/>`,
+  subs: `<rect class="l1" x="18" y="28" width="64" height="44" rx="12" fill="${IY}"/><rect x="18" y="38" width="64" height="9" fill="#C77C02"/><rect class="up" x="26" y="55" width="22" height="7" rx="3.5" fill="#fff"/><circle class="rise" cx="66" cy="60" r="9" fill="${IR}"/><path d="M66 55v10M63 58h6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`,
   book: `<rect class="l1" x="24" y="30" width="52" height="46" rx="8" fill="${IR}"/><rect x="24" y="44" width="52" height="32" rx="7" fill="#fff"/><path class="up" d="M36 24v12M64 24v12" stroke="${IK}" stroke-width="5" stroke-linecap="round"/><g class="dots" fill="${IR}"><circle cx="38" cy="56" r="3.5"/><circle cx="50" cy="56" r="3.5"/><circle cx="62" cy="56" r="3.5"/><circle cx="38" cy="67" r="3.5"/><circle cx="50" cy="67" r="3.5"/></g>`,
 };
 function newApps() {
@@ -316,10 +319,14 @@ function newApps() {
   const BD = { id: "boards", title: "Workspace", shape: "squircle", color: "c5", glyph: G.docs || G.folder, w: 1320, h: 840, ownerOnly: true, render: () => "" };
   const DZ = { id: "design", title: "Design", shape: "squircle", color: "c1", glyph: G.palette || G.docs || G.folder, w: 1380, h: 860, ownerOnly: true, render: () => "" };
   const AN = { id: "analytics", title: "Analytics", shape: "squircle", color: "c4", glyph: G.chart || G.spark, w: 1040, h: 780, ownerOnly: true, render: () => "" };
-  registerApp(BD); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);
+  const PL = { id: "planner", title: "Planner", shape: "squircle", color: "c4", glyph: G.cal || G.spark, w: 1180, h: 820, ownerOnly: true, render: () => "" };
+  const TK = { id: "tasks", title: "Tasks", shape: "squircle", color: "c3", glyph: G.check || G.spark, w: 980, h: 720, ownerOnly: true, render: () => "" };
+  const SB = { id: "subs", title: "Subscriptions", shape: "squircle", color: "c2", glyph: G.spark, w: 760, h: 760, ownerOnly: true, render: () => "" };
+  registerApp(PL); registerApp(TK); registerApp(BD); registerApp(SB); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);
   lazyApp("boards", "/js/app-boards.mjs", "boardsApp");
   lazyApp("design", "/js/app-design.mjs", "designApp");
   lazyApp("analytics", "/js/app-analytics.mjs", "analyticsApp");
+  lazyApp("planner", "/js/app-planner.mjs", "plannerApp"); lazyApp("tasks", "/js/app-tasks.mjs", "tasksApp"); lazyApp("subs", "/js/app-subs.mjs", "subsApp");
   lazyApp("services", "/js/app-services.mjs", "servicesApp"); window.enrichApp && enrichApp("services", "services"); lazyApp("book", "/js/app-book.mjs", "bookApp");
   if (!EDITABLE.includes("services")) EDITABLE.push("services");
   renderIcons();
@@ -333,5 +340,5 @@ function init() {
   if (isAdmin()) setInterval(() => Notif.gather().catch(() => {}), 120000);
   document.addEventListener("owner-changed", () => Notif.gather().catch(() => {}));
 }
-const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined") for (const k of ["boards", "design", "analytics"]) if (open[k]) { try { closeWin(open[k], k, true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); Notif.gather().catch(() => {}); }, 50); return r; };
+const _oc = window.ownerChanged; window.ownerChanged = function () { if (!isAdmin() && typeof open !== "undefined") for (const k of ["boards", "design", "analytics", "planner", "tasks", "subs"]) if (open[k]) { try { closeWin(open[k], k, true); } catch {} } const r = _oc.apply(this, arguments); setTimeout(() => { widgets(); Notif.gather().catch(() => {}); }, 50); return r; };
 if (document.readyState === "complete") init(); else addEventListener("load", init);

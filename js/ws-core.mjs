@@ -56,6 +56,12 @@ export const WS = {
   page: (id) => WS.pages.find((p) => p.id === id),
   db: (id) => WS.dbs.find((d) => d.id === id),
   dbByRole: (role) => WS.dbs.find((d) => d.role === role && !d.trashed),
+  // the database with a job (tasks, subs, content…): found, or made from its template the first time
+  async ensure(role) {
+    if (!WS.loaded) await WS.load();
+    let d = WS.dbByRole(role); if (!d) d = await WS.newDb({ tpl: role });
+    if (!d) return null; await DB.open(d.id); return d;
+  },
   async newPage(b = {}) { const r = await api("/api/ws?a=page", { method: "POST", body: b }); if (!r.ok) { toast(r.data.error || "Could not make the page"); return null; } WS.pages.unshift(r.data.page); ls.set("wsPages", WS.pages); WS.emit("list"); return r.data.page; },
   async setPage(id, b) {
     const p = WS.page(id); if (p) { Object.assign(p, b, { updated: Date.now() }); ls.set("wsPages", WS.pages); WS.emit("list"); }
