@@ -47,6 +47,11 @@ const ITEMS = [
   { id: "toc", g: "Layout", label: "Table of contents", desc: "Links to your headings", ico: "menu", kw: "toc contents outline headings" },
   { id: "button", g: "Layout", label: "Button", desc: "A call-to-action link", ico: "button", kw: "button cta link action" },
 ];
+// the handle and the heading entries use drawn icons, like everything else in the menus
+const PLUS_ICO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+const GRIP_ICO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+const HEAD_ICO = (n) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6v12M12 6v12M4 12h8"/>${n === 1 ? '<path d="M17 10l2.5-2V18"/>' : n === 2 ? '<path d="M16.5 10a2.5 2.5 0 1 1 4.2 1.8L16.5 18H21"/>' : '<path d="M16.5 8.5h4l-2.5 3.2a2.6 2.6 0 1 1-1.8 4.6"/>'}</svg>`;
+const ITEM_ICO = (ico) => (ico === "H1" ? HEAD_ICO(1) : ico === "H2" ? HEAD_ICO(2) : ico === "H3" ? HEAD_ICO(3) : ICONS[ico] ? I(ico, 18) : ico);
 const TURN = ["p", "h1", "h2", "h3", "ul", "ol", "todo", "toggle", "quote", "callout"];
 const label = (t) => (ITEMS.find((i) => i.id === t) || {}).label || t;
 const LANGS = ["", "html", "css", "js", "ts", "json", "python", "bash", "sql", "php", "go", "rust", "java", "c", "cpp", "swift", "md"];
@@ -91,8 +96,8 @@ export function createEditor(host, opts = {}) {
     el.__b = { ...b }; delete el.__b.h; delete el.__b.k; delete el.__b.t; delete el.__b.id;
     el.style.setProperty("--d", b.d || 0);
     const side = h("div", { class: "rb-side rte-ui", contenteditable: "false" },
-      h("button", { type: "button", class: "rb-plus", tabindex: "-1", title: "Add a block below", "aria-label": "Add a block below" }, "+"),
-      h("button", { type: "button", class: "rb-grip", tabindex: "-1", title: "Drag to move, click for options", "aria-label": "Block options" }, "⋮⋮"));
+      h("button", { type: "button", class: "rb-plus", tabindex: "-1", title: "Add a block below", "aria-label": "Add a block below", html: PLUS_ICO }),
+      h("button", { type: "button", class: "rb-grip", tabindex: "-1", title: "Drag to move, click for options", "aria-label": "Block options", html: GRIP_ICO }));
     const body = h("div", { class: "rb-body" });
     el.append(side, body);
     build(el, body, b);
@@ -497,7 +502,9 @@ export function createEditor(host, opts = {}) {
 
   /* ---------- popups ---------- */
   function closePop() {
-    if (E.pop) { E.pop.remove(); E.pop = null; }
+    // a "/" menu closed without picking anything stays closed for that "/" (typing on never brings it back)
+    if (E.slash) E.slashOff = { ed: E.slash.ed, at: E.slash.at };
+    if (E.pop) { const p = E.pop; E.pop = null; p.classList.add("out"); p.style.pointerEvents = "none"; setTimeout(() => p.remove(), 110); }
     if (E.popOut) { document.removeEventListener("pointerdown", E.popOut, true); E.popOut = null; }
     E.slash = null;
   }
@@ -533,24 +540,26 @@ export function createEditor(host, opts = {}) {
 
   /* ---------- the "/" menu ---------- */
   const filterItems = (q) => { const t = q.toLowerCase().trim().split(/\s+/).filter(Boolean); return ITEMS.filter((i) => !t.length || t.every((w) => (i.label + " " + i.kw).toLowerCase().includes(w))); };
-  function openSlash(ed, el) {
+  function openSlash(ed, el, at) {
     const list = h("div", { class: "rte-slash", role: "listbox" });
-    popup(list, caretRect(ed), "rte-slashp");
-    E.slash = { ed, el, query: "", idx: 0, list, items: [] };
+    popup(h("div", {}, list, h("div", { class: "rte-shint" }, h("span", {}, h("kbd", {}, "↑"), h("kbd", {}, "↓"), " to move"), h("span", {}, h("kbd", {}, "Enter"), " to pick"), h("span", {}, h("kbd", {}, "Esc"), " to close"))), caretRect(ed), "rte-slashp");
+    E.slash = { ed, el, at, query: "", idx: 0, list, items: [], miss: 0 };
     renderSlash();
   }
   function renderSlash() {
     const S = E.slash; if (!S) return;
     S.items = filterItems(S.query);
-    if (!S.items.length) { if (S.query.length > 2) { closePop(); return; } S.list.innerHTML = '<div class="rte-none">No results</div>'; return; }
+    // nothing matches: say so once, then get out of the way (straight away after a space)
+    if (!S.items.length) { S.miss++; if (S.miss > 1 || / $/.test(S.query)) { closePop(); return; } S.list.innerHTML = '<div class="rte-none">No results</div>'; return; }
+    S.miss = 0;
     S.idx = Math.min(S.idx, S.items.length - 1);
     let g = "", out = [];
     S.items.forEach((it, i) => {
       if (it.g !== g) { g = it.g; out.push(h("div", { class: "rte-sg" }, g)); }
-      out.push(h("button", { type: "button", class: "rte-si" + (i === S.idx ? " on" : ""), role: "option", "data-i": i, onclick: () => slashPick(it) }, h("span", { class: "rte-sic", html: ICONS[it.ico] ? I(it.ico, 18) : it.ico }), h("span", { class: "rte-sit" }, h("b", {}, it.label), h("small", {}, it.desc))));
+      out.push(h("button", { type: "button", class: "rte-si" + (i === S.idx ? " on" : ""), role: "option", "data-i": i, onclick: () => slashPick(it) }, h("span", { class: "rte-sic", html: ITEM_ICO(it.ico) }), h("span", { class: "rte-sit" }, h("b", {}, it.label), h("small", {}, it.desc))));
     });
     S.list.textContent = ""; S.list.append(...out);
-    $(".rte-si.on", S.list)?.scrollIntoView({ block: "nearest" });
+    if (S.idx === 0) S.list.scrollTop = 0; else $(".rte-si.on", S.list)?.scrollIntoView({ block: "nearest" });
     placePop(E.pop, caretRect(S.ed));
   }
   function deleteBefore(ed, n) {
@@ -566,7 +575,7 @@ export function createEditor(host, opts = {}) {
   function slashPick(item) {
     const S = E.slash; if (!S) return;
     const { ed, el } = S; const n = S.query.length + 1;
-    closePop(); ed.focus(); deleteBefore(ed, n);
+    E.slash = null; closePop(); ed.focus(); deleteBefore(ed, n);
     applyItem(item.id, el);
   }
   function applyItem(id, el) {
@@ -848,9 +857,12 @@ export function createEditor(host, opts = {}) {
   }
   function slashDetect(ed, el) {
     if (!el || ed !== edOf(el) || !["p", "h1", "h2", "h3", "ul", "ol", "todo", "quote", "callout", "toggle"].includes(el.dataset.t)) { if (E.slash) closePop(); return; }
-    const m = /(^|\s)\/([\w -]{0,24})$/.exec(preText(ed).replace(/\u00a0/g, " "));
-    if (!m) { if (E.slash) closePop(); return; }
-    if (!E.slash) openSlash(ed, el);
+    const pre = preText(ed).replace(/\u00a0/g, " "), m = /(^|\s)\/([\w -]{0,24})$/.exec(pre);
+    if (!m) { E.slashOff = null; if (E.slash) closePop(); E.slashOff = null; return; }
+    const at = pre.length - m[2].length - 1;
+    if (E.slashOff && E.slashOff.ed === ed && E.slashOff.at === at) return;
+    if (E.slash && E.slash.at !== at) { closePop(); E.slashOff = null; }
+    if (!E.slash) openSlash(ed, el, at);
     if (E.slash.query !== m[2]) { E.slash.query = m[2]; E.slash.idx = 0; }
     renderSlash();
   }
@@ -1185,6 +1197,11 @@ export function createEditor(host, opts = {}) {
     if (t.matches(".rb-e")) keyText(e, t);
   }
   root.addEventListener("keydown", onKey);
+  // while typing, the block handles step aside; moving the mouse brings them back
+  root.addEventListener("keydown", (e) => { if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key.length === 1 || e.key === "Enter" || e.key === "Backspace" || e.key === "Delete" || e.key === "Tab")) host.classList.add("typing"); });
+  let mx = 0, my = 0;
+  host.addEventListener("pointermove", (e) => { if (!host.classList.contains("typing")) return; if (Math.abs(e.clientX - mx) + Math.abs(e.clientY - my) > 6 || e.pointerType !== "mouse") host.classList.remove("typing"); mx = e.clientX; my = e.clientY; });
+  host.addEventListener("pointerdown", () => host.classList.remove("typing"));
   root.addEventListener("mousedown", (e) => {
     if (E.cross && !e.shiftKey) exitCross(); // a new click starts over, in the block clicked
     E.drag = e.button === 0 && !e.shiftKey && edAt(e.target) && !e.target.closest(".rte-ui") ? { ed: edAt(e.target), an: null, ao: 0 } : null;

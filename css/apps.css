@@ -113,7 +113,7 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .hb-list{display:flex;flex-direction:column;gap:calc(12 * var(--u))}
 .hub[data-layout="grid"] .hb-list{display:grid;grid-template-columns:1fr 1fr;gap:calc(12 * var(--u))}.hub[data-layout="grid"] .hb-row:has(.hb-h),.hub[data-layout="grid"] .hb-row:has(.hb-emb),.hub[data-layout="grid"] .hb-row:has(.hb-sub),.hub[data-layout="grid"] .hb-row:has(.hb-hr),.hub[data-layout="grid"] .hb-row:has(.hb-p),.hub[data-layout="grid"] .hb-row:has(.hb-img),.hub[data-layout="grid"] .hb-row:has(.hb-feat){grid-column:1/-1}
 .hub[data-layout="grid"] .hb-it:not(.hb-feat){flex-direction:column;text-align:center;padding:calc(16 * var(--u)) calc(10 * var(--u))}.hub[data-layout="grid"] .hb-it:not(.hb-feat) .hb-ar,.hub[data-layout="grid"] .hb-it:not(.hb-feat) small{display:none}
-.hb-row.shut{display:none}.hb-row[data-dim]{opacity:.5;position:relative}.hb-row[data-dim]::after{content:attr(data-dim);position:absolute;right:8px;top:-8px;font-size:var(--fs-1);font-weight:var(--fw-x);background:#F5A524;color:#2b1d00;border-radius:var(--r-pill);padding:2px calc(8 * var(--u))}
+.hb-row.shut{display:none}.hb-row[data-dim]{position:relative}.hb-row[data-dim]::after{content:attr(data-dim);position:absolute;right:8px;top:-8px;font-size:var(--fs-1);font-weight:var(--fw-x);background:#F5A524;color:#2b1d00;border-radius:var(--r-pill);padding:2px calc(8 * var(--u))}
 .hb-it{position:relative;display:flex;align-items:center;gap:calc(12 * var(--u));width:100%;padding:calc(12 * var(--u)) calc(16 * var(--u)) calc(12 * var(--u)) calc(12 * var(--u));border-radius:var(--hb-r);text-decoration:none;color:var(--hb-fg);font:inherit;text-align:left;cursor:pointer;border:1px solid transparent;transition:transform var(--d-3) var(--ease-spring),box-shadow var(--d-2),background var(--d-2);overflow:hidden}
 .hub[data-fill="soft"] .hb-it{background:var(--hb-card);border-color:var(--hb-line)}
 .hub[data-fill="solid"] .hb-it{background:var(--hb-ac);color:var(--hb-on)}.hub[data-fill="solid"] .hb-it small{color:inherit;opacity:.8}
@@ -155,7 +155,7 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .hbe-add{display:flex;gap:calc(12 * var(--u));align-items:center;margin-bottom:calc(10 * var(--u));flex-wrap:wrap}.hbe-add .btn{border:0;cursor:pointer}
 .hbe-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:calc(8 * var(--u));margin-bottom:calc(12 * var(--u))}.hbe-types button{display:flex;flex-direction:column;align-items:center;gap:calc(6 * var(--u));border:1px solid var(--line);border-radius:var(--r-5);background:var(--surface);color:var(--ink);padding:calc(12 * var(--u)) calc(6 * var(--u));font:inherit;font-size:var(--fs-3);font-weight:var(--fw-m);cursor:pointer}.hbe-types button:hover{background:var(--surface2)}
 .hbe-list{display:flex;flex-direction:column;gap:calc(8 * var(--u))}
-.hbe-card{border:1px solid var(--line);border-radius:var(--r-6);background:var(--surface)}.hbe-card.off{opacity:.55}.hbe-card.drag{opacity:.35}
+.hbe-card{border:1px solid var(--line);border-radius:var(--r-6);background:var(--surface)}.hbe-card.off .hbe-sum b::after{content:"Hidden";margin-left:calc(6 * var(--u));font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(7 * var(--u));border-radius:var(--r-pill);background:var(--ink);color:var(--surface);vertical-align:middle}.hbe-card.drag{opacity:.35}
 .hbe-ch{display:flex;align-items:center;gap:calc(8 * var(--u));padding:calc(8 * var(--u)) calc(10 * var(--u))}.hbe-grip{border:0;background:none;cursor:grab;color:var(--ink2);letter-spacing:-3px;font-size:var(--fs-4);width:26px;height:32px;touch-action:none;border-radius:var(--r-3)}.hbe-grip:hover{background:var(--surface2)}
 .hbe-ti{flex:none;width:34px;height:34px;border-radius:var(--r-4);background:var(--surface2);display:grid;place-items:center;color:var(--ink)}
 .hbe-sum{flex:1;min-width:0;cursor:pointer;display:flex;flex-direction:column}.hbe-sum b{font-size:var(--fs-5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hbe-sum small{color:var(--ink2);font-size:var(--fs-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -217,11 +217,6 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 @media print{#desk,#boot,.topbar,.spot-ov,#toast,.rte-ui{display:none!important}body{overflow:visible!important;height:auto!important;background:#fff!important}html{height:auto!important}#seo{position:static!important;width:auto!important;height:auto!important;clip:auto!important;clip-path:none!important;white-space:normal!important;overflow:visible!important;color:#000;font:12pt/1.55 Georgia,serif;max-width:none;padding:0}#seo img{max-width:100%}#seo a{color:#000;text-decoration:underline}#seo nav{display:none}}
 #print-one{display:none}
 @media print{body.print-one>*:not(#print-one){display:none!important}body.print-one #print-one{display:block!important;position:static;color:#000;font:12pt/1.55 Georgia,serif;padding:0}body.print-one #print-one .chip{border:1px solid #999;border-radius:var(--r-pill);padding:2px calc(10 * var(--u));margin:2px;display:inline-block}body.print-one #print-one .row{display:flex;justify-content:space-between;gap:calc(16 * var(--u));border-bottom:1px solid #ccc;padding:calc(8 * var(--u)) 0}}
-/* phones: OGGY and his jar step aside while an app is open, so they never cover what you are reading */
-@media (max-width:760px){
-  #desk:has(.win:not(.min):not(.closing)) .cat:not(.chatting),#desk:has(.win:not(.min):not(.closing)) .jar{opacity:0;pointer-events:none;transition:opacity var(--d-3)}
-  .cat,.jar{transition:opacity var(--d-3)}
-}
 
 @media (max-width:760px){
   .ownpill{font-size:0!important;padding:0 calc(12 * var(--u))!important;gap:0}.ownpill i{margin:0}
@@ -447,18 +442,6 @@ a.je:hover .jt{text-decoration:underline;text-underline-offset:4px;text-decorati
 .ws-tools{display:flex;flex-wrap:wrap;gap:6px 14px}
 .ws-tools a{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:var(--fw-m);color:var(--primary);text-decoration:none}
 .ws-tools a:hover{text-decoration:underline}
-/* OGGY's own life (owner mode): what he leaves on screen, and the friends who visit. Clicking a thing tidies it away. */
-.oggy-layer{position:fixed;inset:0;z-index:904;pointer-events:none;overflow:hidden}
-.oggy-thing{position:absolute;width:38px;height:38px;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 3px 4px rgba(0,0,0,.22));transition:opacity .4s,scale .4s;-webkit-user-select:none;user-select:none}
-.oggy-thing svg{width:100%;height:100%;display:block}
-.oggy-thing.mug{width:44px;height:40px;transform-origin:50% 100%}
-.oggy-thing.puddle{width:120px;height:30px;filter:none;transform-origin:50% 60%}
-.oggy-thing.keys{width:auto;height:auto;font:700 15px/1 var(--font);color:var(--ink2);letter-spacing:.06em;filter:none;white-space:nowrap}
-.oggy-thing:hover{scale:1.08}
-.oggy-thing.bye{opacity:0;scale:.6}
-.oggy-friend{position:absolute;pointer-events:none;z-index:1}
-.oggy-friend .cat-bubble{pointer-events:none}
-@media (prefers-reduced-motion:reduce){.oggy-thing{transition:none}}
 /* share panel: the link, a copy button and places to post it */
 .shr-dlg{position:fixed;inset:0;z-index:99990;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.32);animation:shrIn var(--d-2,.18s) ease-out}
 .shr-card{width:min(440px,100%);background:var(--surface);color:var(--ink);border-radius:var(--r-8);padding:calc(18 * var(--u)) calc(20 * var(--u)) calc(20 * var(--u));box-shadow:0 24px 64px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:calc(12 * var(--u))}

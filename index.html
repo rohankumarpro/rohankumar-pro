@@ -608,7 +608,9 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 .nt-del{margin-left:auto;border:0;background:none;font:inherit;font-size:var(--fs-2);color:var(--glyph);opacity:.75;cursor:pointer}
 .nt-hint{opacity:.6}
 .ownpill{display:inline-flex;align-items:center;gap:calc(7 * var(--u));cursor:pointer;font:inherit;font-weight:var(--fw-m);border:0;color:inherit}.ownpill i{width:9px;height:9px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 3px rgba(46,204,113,.28)}
-.dicon.hid{opacity:.5}.dicon.hid .lb::after{content:" · hidden";opacity:.8}
+/* hidden from visitors: the owner sees it at full strength, with a small "Hidden" tag */
+.hid-tag{display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-1);font-weight:var(--fw-b);line-height:1;padding:3px calc(7 * var(--u));border-radius:var(--r-pill);background:var(--ink);color:var(--surface);white-space:nowrap;vertical-align:middle}.hid-tag svg{width:11px;height:11px}
+.dicon{position:relative}.dicon .hid-tag{position:absolute;top:-2px;left:50%;transform:translateX(-50%);z-index:1;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 /* Settings: sections on the left, one at a time on the right; on a phone, the list first, then a section with a back button */
 .win[data-app="settings"] .body:has(> .st2){padding:0;overflow:hidden;display:flex}
 .st2{flex:1;min-width:0;min-height:0;display:grid;grid-template-columns:minmax(220px,260px) 1fr}
@@ -670,7 +672,7 @@ select[data-enh]{position:absolute!important;opacity:0!important;pointer-events:
 .ed textarea,.ed select{font:inherit;font-size:var(--fs-5);padding:calc(9 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;width:100%}
 .ph-st{font-size:var(--fs-3);opacity:.75}.ph-add{cursor:pointer;padding:calc(9 * var(--u)) calc(16 * var(--u));font-size:var(--fs-4)}.ph-own{gap:calc(8 * var(--u));padding-top:0}.ph-own .ph-cap{flex:1;min-width:0;font:inherit;font-size:var(--fs-5);padding:calc(8 * var(--u)) calc(12 * var(--u));border-radius:var(--r-4);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 .ph-own button{font:inherit;padding:calc(8 * var(--u)) calc(12 * var(--u));border-radius:var(--r-pill);border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;cursor:pointer}.ph-own button:disabled{opacity:.35;cursor:default}.ph-own .ed-del{color:#d33}
-.pcard.hid,.dc-card.hid{opacity:.55}
+.pcard.hid,.dc-card.hid{position:relative}.pcard>.hid-tag,.dc-card>.hid-tag{position:absolute;top:10px;right:10px}
 .mi-card{border:1px solid rgba(127,127,127,.35);border-radius:var(--r-6);padding:calc(12 * var(--u)) calc(14 * var(--u));margin:calc(10 * var(--u)) 0}.mi-card.new{border-color:#2ecc71}.mi-h{display:flex;align-items:baseline;gap:calc(8 * var(--u))}.mi-h small{margin-left:auto;opacity:.65}.mi-new{background:#2ecc71;color:#06361a;border-radius:var(--r-pill);font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(8 * var(--u))}
 .mi-m,.mi-o{margin:calc(6 * var(--u)) 0}.mi-m small,.mi-o small{display:block;opacity:.6;font-size:var(--fs-2)}.mi-o{opacity:.85;font-size:var(--fs-4)}.mi-e{margin:calc(4 * var(--u)) 0}.mi-card summary{cursor:pointer;opacity:.75;font-size:var(--fs-4);margin-top:calc(6 * var(--u))}
 .ow-fix{margin:0 0 14px;padding:14px 16px;border-radius:var(--r-6);background:color-mix(in srgb,var(--primary) 12%,var(--surface));display:flex;flex-direction:column;gap:6px}.ow-fix ul{margin:0;padding-left:18px;color:var(--ink2);font-size:var(--fs-3)}.ow-fix .btn{align-self:flex-start}
@@ -994,207 +996,6 @@ button.lk:hover .lk-c{transform:translateX(3px)}
   .body h1{font-size:var(--fs-10)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-/* ===== OGGY the cat ===== */
-.cat .b-line,.cat .h-line,.cat .leg-line,.cat .t-o,.cat .whisk,.cat .stripe{display:none}
-.cat .ear-o,.cat .paw,.cat .leg,.cat .eye-w{stroke:none}
-.cat .b-fill,.cat .h-fill,.cat .ear-o,.cat .paw,.cat .leg,.cat .gray,.cat .leg.far{fill:#A9AFB9}.cat .t-b,.cat .t-s{stroke:#A9AFB9}
-.cat .ear-i{fill:#F5A3B5}.cat .eye-w{fill:#2B2D33}
-#catGL{position:absolute;left:0;bottom:0;width:100%;height:380px;pointer-events:none;z-index:800;display:none}
-.gl-on #catGL{display:block}
-#desk[data-cat="off"] #catGL{display:none!important}
-.cat.gl .cat-svg,.cat.gl .zzz{visibility:hidden}
-.cat.gl.p-sleep .zzz{visibility:visible}
-.cat{position:absolute;left:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:158px;height:158px;z-index:905;touch-action:none;cursor:pointer;will-change:transform;-webkit-tap-highlight-color:transparent}
-.cat.up{z-index:905}
-.cat.chatting{z-index:970}
-#desk[data-cat="off"] .cat,#desk[data-cat="off"] .jar{display:none}
-.cat-svg{width:100%;height:100%;overflow:visible;display:block}
-.cat-svg *{transform-box:view-box}
-.cat .spr-side{display:none}
-.cat.side .spr-sit{display:none}.cat.side .spr-side{display:inline}
-.cat .spr-side{transform-origin:100px 100px}
-.cat.face-l .spr-side{transform:scaleX(-1)}
-.cat .c-all{transform-origin:100px 190px}
-.cat .c-head{transform-origin:100px 112px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .c-look{transform-origin:100px 100px;transform:rotate(var(--hr,0deg));transition:transform var(--d-3) ease-out}
-.cat .c-body{transform-origin:100px 188px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .c-tail{transform-origin:142px 180px;transition:transform .5s var(--ease-spring)}
-.cat .s-tail{transform-origin:52px 122px}
-.cat .s-all{transform-origin:100px 186px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .s-head{transform-origin:150px 110px;transition:transform var(--d-3)}
-.cat .lg{transition:transform var(--d-3)}
-.cat .bf{transform-origin:66px 136px}.cat .ff{transform-origin:130px 136px}.cat .bn{transform-origin:75px 138px}.cat .fn{transform-origin:139px 138px}
-.cat .c-paws{transition:opacity var(--d-3)}
-.cat .el{transform-origin:78px 58px;transition:transform var(--d-3)}.cat .er{transform-origin:124px 56px;transition:transform var(--d-3)}
-.cat .pupil{transform-origin:100px 75px;transform:translate(var(--px,0px),var(--py,0px));transition:transform var(--d-2) ease-out}
-.cat .b-fill,.cat .h-fill,.cat .ear-o,.cat .paw,.cat .leg{fill:#F6F1E8}
-.cat .leg.far{fill:#DCD4C7}
-.cat .b-line,.cat .h-line{fill:none;stroke:#1f1c1a;stroke-width:3}
-.cat .ear-o,.cat .paw,.cat .leg{stroke:#1f1c1a;stroke-width:3;stroke-linejoin:round}
-.cat .leg-line,.cat .toe{fill:none;stroke:#1f1c1a;stroke-width:2.4;stroke-linecap:round}
-.cat .ear-i{fill:#EE5B4B}
-.cat .gray{fill:#BEB8AF}
-.cat .stripe{fill:none;stroke:#5E5952;stroke-width:5;stroke-linecap:round}
-.cat .blush{fill:#F3A69C;opacity:.65;transition:opacity var(--d-3)}
-.cat .eye-w{fill:#fff;stroke:#1f1c1a;stroke-width:2.6}
-.cat .pupil circle{fill:#1f1c1a}.cat .pupil .hl{fill:#fff}
-.cat .eyes path{fill:none;stroke:#1f1c1a;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.cat .nose{fill:#E8574A;transform-origin:100px 89px}
-.cat .mo-w{fill:none;stroke:#1f1c1a;stroke-width:2;stroke-linecap:round}
-.cat .mo-o{fill:#7A2B2B;stroke:#1f1c1a;stroke-width:2;transform-origin:100px 96px}
-.cat .tongue{fill:#E8574A;display:none}
-.cat .whisk path{stroke:#1f1c1a;stroke-width:1.2;fill:none;opacity:.75}
-.cat .c-shadow{fill:#000;opacity:.13;transform-origin:100px 189px;transition:transform var(--d-3),opacity var(--d-3)}
-.cat.up .c-shadow{opacity:.07}
-.cat .t-o,.cat .t-b,.cat .t-s{fill:none;stroke-linecap:round;transition:stroke-width var(--d-3)}
-.cat .t-o{stroke:#1f1c1a;stroke-width:21}.cat .t-b{stroke:#BEB8AF;stroke-width:15}.cat .t-s{stroke:#2f2b28;stroke-width:15;stroke-dasharray:7 9;stroke-linecap:butt}
-.cat .e-closed,.cat .e-angry,.cat .e-happy,.cat .mo-o,.cat .gpaw{display:none}
-.cat .gpaw{transform-origin:100px 120px}
-/* sitting poses */
-.cat.p-sit .c-tail,.cat.p-peek .c-tail,.cat.p-groom .c-tail{animation:cat-sway 3.2s ease-in-out infinite}
-.cat.p-sleep .c-head{transform:translate(0,22px) rotate(-4deg)}
-.cat.p-sleep .c-body{transform:scale(1.1,.8);animation:cat-breathe 3s ease-in-out infinite}
-.cat.p-sleep .c-paws,.cat.p-sleep .leg-line{opacity:0}
-.cat.p-sleep .c-tail{transform:rotate(52deg)}
-.cat.p-sleep .c-look{transform:none}
-.cat.p-sleep .e-open{display:none}.cat.p-sleep .e-closed{display:inline}
-.cat.p-peek .c-head{transform:rotate(-9deg) translate(-6px,2px)}
-.cat.p-reach .c-body{transform:scale(.95,1.08)}
-.cat.p-reach .c-head{transform:translate(0,-14px)}
-.cat.p-eat .c-head{transform:translate(0,20px) rotate(6deg)}
-.cat.p-eat .mo-o{display:inline;animation:cat-munch var(--d-3) ease-in-out infinite}.cat.p-eat .mo-w{display:none}
-.cat.p-eat .e-open{display:none}.cat.p-eat .e-happy{display:inline}
-.cat.p-eat .c-look,.cat.p-groom .c-look{transform:none}
-.cat.p-groom .c-head{transform:translate(4px,8px) rotate(10deg)}
-.cat.p-groom .gpaw{display:inline;animation:cat-lick .5s ease-in-out infinite}
-.cat.p-groom .p2{opacity:0}
-.cat.p-groom .e-open{display:none}.cat.p-groom .e-closed{display:inline}
-.cat.p-groom .tongue{display:inline;animation:cat-lick .5s ease-in-out infinite}.cat.p-groom .mo-w{display:none}
-/* side poses */
-.cat.p-walk .fn,.cat.p-walk .bf,.cat.p-run .fn,.cat.p-run .bf,.cat.p-sneak .fn,.cat.p-sneak .bf{animation:cat-leg var(--d-3) ease-in-out infinite}
-.cat.p-walk .ff,.cat.p-walk .bn,.cat.p-run .ff,.cat.p-run .bn,.cat.p-sneak .ff,.cat.p-sneak .bn{animation:cat-leg var(--d-3) ease-in-out -.22s infinite}
-.cat.p-walk .s-all{animation:cat-bob var(--d-2) ease-in-out infinite}
-.cat.p-walk .s-tail{animation:cat-sway 1s ease-in-out infinite}
-.cat.p-run .lg{animation-duration:var(--d-2)!important}
-.cat.p-run .s-all{transform:translateY(-2px) rotate(-3deg)}
-.cat.p-run .s-tail{transform:rotate(-40deg)}
-.cat.p-sneak .lg{animation-duration:.8s!important}
-.cat.p-sneak .s-all,.cat.p-crouch .s-all{transform:translateY(12px) scaleY(.9)}
-.cat.p-sneak .s-head,.cat.p-crouch .s-head{transform:translateY(8px)}
-.cat.p-crouch .s-tail{animation:cat-wag .5s ease-in-out infinite}
-.cat.p-crouch.m-wiggle .s-all{animation:cat-wiggle-b var(--d-2) ease-in-out infinite}
-.cat.p-stretch .s-all{transform:rotate(12deg)}
-.cat.p-stretch .fn,.cat.p-stretch .ff{transform:rotate(-58deg)}
-.cat.p-stretch .s-head{transform:translate(4px,10px)}
-.cat.p-stretch .s-tail{transform:rotate(-30deg)}
-.cat.p-scratch .s-all{transform:rotate(-56deg)}
-.cat.p-scratch .fn{animation:cat-scr var(--d-3) ease-in-out infinite}.cat.p-scratch .ff{animation:cat-scr var(--d-3) ease-in-out -.15s infinite}
-.cat.p-scratch .s-head{transform:rotate(40deg)}
-.cat.p-scratch .s-all{transform-origin:75px 186px}
-.cat.p-jumpup .s-all{transform:rotate(-20deg)}
-.cat.p-jumpup .fn,.cat.p-jumpup .ff{transform:rotate(-50deg)}.cat.p-jumpup .bn,.cat.p-jumpup .bf{transform:rotate(45deg)}
-.cat.p-jumpdn .s-all{transform:rotate(14deg)}
-.cat.p-jumpdn .fn,.cat.p-jumpdn .ff{transform:rotate(-24deg)}.cat.p-jumpdn .bn,.cat.p-jumpdn .bf{transform:rotate(18deg)}
-.cat.p-jumpup .s-tail,.cat.p-jumpdn .s-tail{transform:rotate(-25deg)}
-.cat.side .c-look{transform:none}
-/* moods */
-.cat.m-blink .e-open,.cat.m-slow .e-open,.cat.m-yawn .e-open{display:none}
-.cat.m-blink .e-closed,.cat.m-slow .e-closed,.cat.m-yawn .e-closed{display:inline}
-.cat.m-yawn .mo-o{display:inline;transform:scale(1.35)}.cat.m-yawn .mo-w{display:none}
-.cat.m-yawn .c-head{transform:translate(0,-4px) rotate(-6deg)}
-.cat.m-angry .e-open,.cat.m-angry .e-closed{display:none}.cat.m-angry .e-angry{display:inline}
-.cat.m-angry .el{transform:rotate(-28deg)}.cat.m-angry .er{transform:rotate(28deg)}
-.cat.m-angry .c-tail{transform:rotate(-38deg);animation:none}
-.cat.m-angry .t-o{stroke-width:28}.cat.m-angry .t-b,.cat.m-angry .t-s{stroke-width:22}
-.cat.m-angry .mo-o{display:inline;transform:scale(.8,.6)}.cat.m-angry .mo-w{display:none}
-.cat.m-happy .e-open,.cat.m-happy .e-closed{display:none}.cat.m-happy .e-happy{display:inline}
-.cat.m-happy .blush{opacity:1}
-.cat.m-happy .c-all{animation:cat-wiggle .5s ease-in-out 2}
-.cat.m-startle .c-all{animation:cat-hop .5s ease-out}
-.cat.m-startle .e-open{display:inline}.cat.m-startle .e-closed{display:none}
-.cat.m-sniff .nose{animation:cat-sniff var(--d-2) ease-in-out 5}
-.cat.m-sniff .e-open{display:inline}.cat.m-sniff .e-closed{display:none}
-.cat.m-twitch .er{animation:cat-twitch var(--d-3) ease-in-out}
-.cat.m-duck .c-head{transform:translate(6px,18px) rotate(-4deg)}
-.cat.m-away .c-head{transform:rotate(-14deg) translate(-4px,0)}
-.cat.m-away .e-open{display:none}.cat.m-away .e-closed{display:inline}
-/* zzz, bubble, hearts */
-.cat .zzz{position:absolute;left:62%;top:14%;pointer-events:none;display:none}
-.cat.p-sleep .zzz{display:block}
-.cat .zzz span{position:absolute;font-weight:var(--fw-x);color:var(--ink2);opacity:0;animation:cat-zz 2.7s ease-in-out infinite}
-.cat .zzz span:nth-child(2){animation-delay:.9s;font-size:var(--fs-7)}.cat .zzz span:nth-child(3){animation-delay:1.8s;font-size:var(--fs-9)}
-.cat-bubble{position:absolute;left:50%;bottom:90%;transform:translate(-50%,6px) scale(.8);opacity:0;pointer-events:none;background:var(--surface);color:var(--ink);font-weight:var(--fw-b);font-size:var(--fs-3);padding:calc(6 * var(--u)) calc(11 * var(--u));border-radius:var(--r-5) var(--r-5) var(--r-2) var(--r-5);box-shadow:0 6px 18px rgba(0,0,0,.15);white-space:nowrap;transition:opacity var(--d-2),transform var(--d-3) var(--ease-spring)}
-.cat-bubble.show{opacity:1;transform:translate(-50%,0) scale(1)}
-.cat.p-peek .cat-bubble{left:auto;right:60%;transform:translate(0,6px) scale(.8)}
-.cat.p-peek .cat-bubble.show{transform:none}
-.cat .heart{position:absolute;left:50%;top:22%;color:#E8574A;font-size:var(--fs-7);pointer-events:none;animation:cat-heart 1.3s ease-out forwards}
-/* chat */
-/* phone chat sheet */
-.cat-chat.sheet,.cat-chat.sheet.left{position:fixed;left:10px;right:10px;width:auto;bottom:calc(var(--kb,0px) + 96px + env(safe-area-inset-bottom,0px));z-index:2400;max-height:min(44vh,330px);overflow:auto;padding:calc(12 * var(--u)) calc(12 * var(--u)) calc(10 * var(--u));border-radius:var(--r-7);box-shadow:0 8px 30px rgba(0,0,0,.22);overscroll-behavior:contain}
-.cat-chat.sheet .cc-msg{font-size:var(--fs-4);margin-right:calc(30 * var(--u))}
-.cat-chat.sheet .cc-ui{gap:calc(6 * var(--u));margin-top:calc(8 * var(--u))}
-.cat-chat.sheet .cc-chip{padding:calc(6 * var(--u)) calc(11 * var(--u));font-size:var(--fs-3);text-align:left}
-.cat-chat.sheet .cc-form{position:sticky;bottom:0}
-.cat-chat.sheet .cc-form input{font-size:var(--fs-6)}
-.cat-chat.sheet .cc-x{width:30px;height:30px}
-html.dock-auto .cat-chat.sheet{bottom:calc(var(--kb,0px) + 40px + env(safe-area-inset-bottom,0px))}
-
-.cat-chat{position:absolute;right:30%;bottom:96%;width:min(280px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border-radius:var(--r-7) var(--r-7) var(--r-3) var(--r-7);box-shadow:var(--shadow);padding:calc(16 * var(--u)) calc(16 * var(--u)) calc(14 * var(--u));cursor:default;text-align:left;animation:pop var(--d-3) var(--ease-spring)}
-.cat-chat.left{right:auto;left:30%;border-radius:var(--r-7) var(--r-7) var(--r-7) var(--r-3)}
-.cat-chat[hidden]{display:none}
-.cc-msg{margin:0 calc(22 * var(--u)) 0 0;font-size:var(--fs-5);line-height:1.45;font-weight:500}
-.cc-msg b{font-weight:var(--fw-b)}
-.cc-x{position:absolute;top:8px;right:8px;width:26px;height:26px;border:0;border-radius:50%;background:var(--surface2);color:var(--ink2);font-size:var(--fs-6);line-height:1}
-.cc-ui{display:flex;flex-wrap:wrap;gap:calc(6 * var(--u));margin-top:calc(12 * var(--u))}
-.cc-ui:empty{display:none}
-.cc-chip{border:1px solid var(--line);background:none;border-radius:var(--r-pill);padding:calc(7 * var(--u)) calc(12 * var(--u));font-size:var(--fs-3);font-weight:var(--fw-m);color:var(--ink)}
-.cc-chip:hover{background:var(--surface2)}
-.cc-chip.pri{background:var(--primary);color:var(--on-primary);border-color:transparent}
-.cc-form{display:flex;gap:calc(6 * var(--u));width:100%}
-.cc-form input{flex:1;min-width:0;border:0;border-radius:var(--r-pill);background:var(--surface2);padding:calc(9 * var(--u)) calc(14 * var(--u));font:inherit;font-size:var(--fs-4);color:var(--ink)}
-.cc-form button{border:0;border-radius:var(--r-pill);background:var(--primary);color:var(--on-primary);font-weight:var(--fw-b);padding:0 calc(14 * var(--u))}
-.cat-talk{position:absolute;top:14%;right:2%;width:30px;height:30px;border:0;border-radius:50%;background:var(--surface);color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.18);display:grid;place-items:center;opacity:0;transform:scale(.6);pointer-events:none;transition:opacity var(--d-2),transform var(--d-3) var(--ease-spring)}
-.cat-talk svg{width:15px;height:15px}
-.cat.can-talk:hover .cat-talk,.cat.can-talk .cat-talk:focus-visible{opacity:1;transform:none;pointer-events:auto}
-
-/* corners and carrying */
-#desk[data-catpos="right"] .jar{right:calc(130px + 18px)}
-#desk[data-catpos="left"] .jar{right:auto;left:calc(130px + 18px)}
-@media (max-width:760px){#desk[data-catpos="right"] .jar{right:calc(96px + 12px)}#desk[data-catpos="left"] .jar{left:calc(96px + 12px)}}
-.cat.carried{transition:none;filter:drop-shadow(0 14px 16px rgba(0,0,0,.28));cursor:grabbing;z-index:2600}
-.cat.carried .bc,.cat.carried svg{transform:scale(1.06)}
-.jar.carried{transform:rotate(-8deg) scale(1.12);cursor:grabbing;z-index:2600;filter:drop-shadow(0 12px 14px rgba(0,0,0,.28));transition:none}
-.cat,.jar{-webkit-user-select:none;user-select:none}
-/* treat jar and treat */
-.jar{position:absolute;right:212px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:46px;height:56px;border:0;background:none;padding:0;z-index:800;cursor:grab;touch-action:none;transition:transform var(--d-3) var(--ease-spring),opacity var(--d-3)}
-.jar:hover{transform:rotate(8deg) translateY(-2px)}
-.jar.open{transform:rotate(14deg) translateY(-4px)}
-.jar.full{opacity:.55}
-.jar svg{width:100%;height:100%;display:block;overflow:visible}
-.jar .lid{transition:transform var(--d-3) var(--ease-spring);transform-origin:36px 10px;transform-box:view-box}
-.jar.open .lid,.jar:hover .lid{transform:rotate(18deg) translateY(-3px)}
-.jar .tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--surface);font-size:var(--fs-2);font-weight:var(--fw-m);padding:calc(4 * var(--u)) calc(10 * var(--u));border-radius:var(--r-pill);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--d-2)}
-.jar:hover .tip{opacity:1}.jar.open .tip{opacity:0}
-.treat{position:fixed;left:0;top:0;width:34px;height:22px;z-index:2600;pointer-events:none;transform:translate(-50%,-50%) rotate(-12deg);filter:drop-shadow(0 3px 4px rgba(0,0,0,.2))}
-.treat.fall{transition:top var(--d-3) var(--ease),transform var(--d-3),opacity .6s;transform:translate(-50%,-50%) rotate(0)}
-.treat.bite{transition:transform 1.4s ease-in,opacity 1.4s ease-in;transform:translate(-50%,-50%) scale(.2);opacity:0}
-.treat.fade{opacity:0}
-.treat svg{width:100%;height:100%;display:block}
-@keyframes cat-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(-13deg)}}
-@keyframes cat-wag{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
-@keyframes cat-breathe{0%,100%{transform:scale(1.1,.8)}50%{transform:scale(1.13,.83)}}
-@keyframes cat-bob{50%{transform:translateY(-2.5px)}}
-@keyframes cat-leg{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-22deg)}}
-@keyframes cat-scr{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(10deg)}}
-@keyframes cat-lick{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@keyframes cat-munch{0%,100%{transform:scale(1,.35)}50%{transform:scale(1,1)}}
-@keyframes cat-wiggle{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
-@keyframes cat-wiggle-b{50%{transform:translate(-2px,12px) scaleY(.9)}}
-@keyframes cat-hop{30%{transform:translateY(-18px) scale(1.04,.96)}60%{transform:translateY(0) scale(1.05,.95)}}
-@keyframes cat-sniff{50%{transform:scale(1.35)}}
-@keyframes cat-twitch{40%{transform:rotate(14deg)}}
-@keyframes cat-zz{0%{opacity:0;transform:translate(0,0)}25%{opacity:.8}100%{opacity:0;transform:translate(-18px,-38px)}}
-@keyframes cat-heart{0%{opacity:0;transform:translate(-50%,0) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--hx,0px)),-54px) scale(1.2)}}
 @media (max-width:760px){.cat{width:112px;height:112px;bottom:92px}.jar{right:140px;bottom:96px;width:36px;height:44px}}
 @media (prefers-reduced-motion:reduce){.cat *{animation:none!important}}
 .avwrap.pop{height:auto!important;aspect-ratio:1555/2128}
@@ -1265,7 +1066,7 @@ button.dc-qr{position:relative;border:0;padding:0;cursor:zoom-in;box-shadow:0 0 
 .ct-play{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:var(--fs-1);padding-left:2px}
 .ct-card b{font-size:var(--fs-5);line-height:1.3;padding:0 calc(4 * var(--u))}.ct-card small{color:var(--ink2);padding:0 calc(4 * var(--u))}.ct-w{font-size:var(--fs-3);font-weight:var(--fw-b);color:var(--primary);padding:0 calc(4 * var(--u))}
 .ct-ch{margin-top:calc(16 * var(--u))}
-/* phone: auto-hiding dock + touch-friendly OGGY chat */
+/* phone: auto-hiding dock */
 @media (max-width:760px){
   .launcher{display:flex;flex-direction:column;max-height:calc(100% - 160px);overflow:hidden}
   .launcher .lgrid{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;-webkit-overflow-scrolling:touch}
@@ -1276,7 +1077,6 @@ button.dc-qr{position:relative;border:0;padding:0;cursor:zoom-in;box-shadow:0 0 
 }
 .launcher[hidden]{display:none!important}
 
-.cat .cat-talk,.cat .cat-chat,.cat .cat-bubble{z-index:6}
 .dock-handle{display:none}
 @media (max-width:760px){
   .shelf{transition:transform var(--d-3) var(--ease),opacity var(--d-3),padding var(--d-3)}
@@ -1285,14 +1085,6 @@ button.dc-qr{position:relative;border:0;padding:0;cursor:zoom-in;box-shadow:0 0 
   .dock-handle{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:160px;height:calc(32px + env(safe-area-inset-bottom,0px));padding:0 0 env(safe-area-inset-bottom,0px);border:0;background:none;z-index:960;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none}
   html.dock-auto .dock-handle{display:block}
   .dock-handle span{display:block;width:72px;height:5px;margin:0 auto;border-radius:var(--r-pill);background:var(--ink);opacity:.4}
-  html.dock-auto .cat,html.dock-peek .cat{bottom:calc(36px + env(safe-area-inset-bottom,0px))}
-  html.dock-auto .jar,html.dock-peek .jar{bottom:calc(40px + env(safe-area-inset-bottom,0px))}
-}
-@media (hover:none){
-  .cat-talk{width:38px;height:38px;top:4%;right:-4%}
-  .cat-talk svg{width:18px;height:18px}
-  .cat.can-talk .cat-talk{opacity:1;transform:none;pointer-events:auto}
-  .cat.can-talk .cat-bubble.show{pointer-events:auto}
 }
 
 /* palette */
@@ -1397,126 +1189,6 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
 @keyframes bt-up{from{transform:translateY(14px);opacity:0}}
 @keyframes bt-load{to{width:100%}}
 @media (prefers-reduced-motion:reduce){#boot{display:none}}
-/* ===== OGGY: black cat (flat) ===== */
-/* OGGY: a round grey tabby (lighter belly and muzzle, darker stripes) */
-.cat .bc{--k:#8B9099;--k2:#E3E5E9;--k3:#6A6F78;--pu:#24272D;--eye:#F7C21B}
-:root[data-theme="dark"] .cat .bc{--k:#9297A0;--k2:#D9DCE1;--k3:#70757E}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc{--k:#9297A0;--k2:#D9DCE1;--k3:#70757E}}
-.cat .bc .k-belly,.cat .bc .k-muz{fill:var(--k2)}
-.cat .bc .k-stripe{fill:none;stroke:var(--k3);stroke-width:4.5;stroke-linecap:round}
-.cat .bc .k-earin{fill:#F2B8C0;opacity:.85}
-.cat .bc .k-paw{fill:none;stroke:var(--k3);stroke-width:2.5;stroke-linecap:round;opacity:.6}
-.cat .bc .k-tailr{fill:none;stroke:var(--k3);stroke-width:4;stroke-linecap:round}
-.cat .bc .k-nose{fill:#E8828F;stroke:#E8828F;stroke-width:2;stroke-linejoin:round}
-.cat .bc .k-whisk{fill:none;stroke:#FFFFFF;stroke-width:1.6;stroke-linecap:round;opacity:.75}
-.cat .bc .k-arm .k-fill{stroke:var(--k3);stroke-width:2.2;stroke-opacity:.45}
-.cat.p-sleep .bc .k-belly{transform:scale(.7,.5);transform-origin:100px 160px;opacity:.7}
-:root[data-theme="dark"] .cat .bc .k-all{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08))}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat .bc .k-all{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08))}}
-.cat .bc *{transform-box:view-box}
-.cat .bc .k-fill{fill:var(--k)}
-.cat .bc .k-tailp{fill:none;stroke:var(--k);stroke-width:16;stroke-linecap:round}
-.cat .bc .k-shadow{fill:rgba(0,0,0,.2);transform-origin:100px 192px;transition:transform var(--d-3),opacity var(--d-3)}
-.cat .bc .k-iris{fill:var(--eye)}.cat .bc .k-pupil{fill:var(--pu)}.cat .bc .k-hl{fill:#FFE8A0;opacity:.8}
-.cat .bc .k-lid{fill:var(--k);transform:translateY(-34px);transition:transform var(--d-2)}
-.cat .bc .k-shut path,.cat .bc .k-joy path{fill:none;stroke:var(--pu);stroke-width:5;stroke-linecap:round}
-.cat .bc .k-shut,.cat .bc .k-joy,.cat .bc .k-mouth,.cat .bc .k-tongue{display:none}
-.cat .bc .k-mouth{fill:#FF7C8C;transform-origin:101px 107px}.cat .bc .k-tongue{fill:#FFB3BE}
-.cat .bc .k-all{transform-origin:100px 190px}
-.cat .bc .k-head{transform-origin:100px 118px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .bc .k-body{transform-origin:100px 170px;transition:transform var(--d-3)}
-.cat .bc .k-arml{transform-origin:68px 116px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .bc .k-armr{transform-origin:132px 116px;transition:transform var(--d-3) var(--ease-spring)}
-.cat .bc .k-legl{transform-origin:82px 160px;transition:transform var(--d-3)}.cat .bc .k-legr{transform-origin:118px 160px;transition:transform var(--d-3)}
-.cat .bc .k-tail{transform-origin:140px 170px;transition:transform var(--d-3)}
-.cat .bc .k-earl{transform-origin:76px 42px;transition:transform var(--d-3)}.cat .bc .k-earr{transform-origin:130px 38px;transition:transform var(--d-3)}
-.cat .bc .k-eyes{transform-origin:100px 76px;transition:transform var(--d-1)}
-.cat .bc .k-pupil,.cat .bc .k-hl{transform:translate(var(--px,0px),var(--py,0px));transition:transform var(--d-2) ease-out}
-.cat .bc .k-pupil{transform-box:fill-box;transform-origin:center}
-.cat.face-l .bc{transform:scaleX(-1)}
-/* idle life */
-.cat.p-sit .bc .k-body,.cat.p-peek .bc .k-body{animation:k-breathe 3.2s ease-in-out infinite}
-.cat.p-sit .bc .k-tail,.cat.p-peek .bc .k-tail,.cat.p-groom .bc .k-tail,.cat.p-crouch .bc .k-tail{animation:k-tail 3s ease-in-out infinite}
-@keyframes k-breathe{50%{transform:scale(1.02,.985)}}
-@keyframes k-tail{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
-/* sleep: curled loaf */
-.cat.p-sleep .bc .k-all{transform:translateY(18px) scale(1.08,.84)}
-.cat.p-sleep .bc .k-head{transform:translate(0,14px) rotate(-6deg)}
-.cat.p-sleep .bc .k-legl,.cat.p-sleep .bc .k-legr{transform:scaleY(.25)}
-.cat.p-sleep .bc .k-arml{transform:rotate(-12deg) translate(6px,4px)}.cat.p-sleep .bc .k-armr{transform:rotate(12deg) translate(-6px,4px)}
-.cat.p-sleep .bc .k-tail{transform:rotate(58deg)}
-.cat.p-sleep .bc .k-body{animation:k-sleep 3.4s ease-in-out infinite}
-@keyframes k-sleep{50%{transform:scale(1.03,1.05)}}
-.cat.p-sleep .bc .k-eyes,.cat.m-blink .bc .k-eyes,.cat.m-slow .bc .k-eyes,.cat.m-yawn .bc .k-eyes,.cat.p-groom .bc .k-eyes,.cat.p-stretch .bc .k-eyes,.cat.m-away .bc .k-eyes{display:none}
-.cat.p-sleep .bc .k-shut,.cat.m-blink .bc .k-shut,.cat.m-slow .bc .k-shut,.cat.m-yawn .bc .k-shut,.cat.p-groom .bc .k-shut,.cat.p-stretch .bc .k-shut,.cat.m-away .bc .k-shut{display:inline}
-/* walking */
-.cat.p-walk .bc .k-all{animation:k-bob var(--d-3) ease-in-out infinite}
-.cat.p-run .bc .k-all{animation:k-bob var(--d-2) ease-in-out infinite;transform:rotate(-5deg)}
-.cat.p-sneak .bc .k-all{animation:k-bob .7s ease-in-out infinite}
-.cat.p-walk .bc .k-legl,.cat.p-run .bc .k-legl,.cat.p-sneak .bc .k-legl{animation:k-step var(--d-3) ease-in-out infinite}
-.cat.p-walk .bc .k-legr,.cat.p-run .bc .k-legr,.cat.p-sneak .bc .k-legr{animation:k-step var(--d-3) ease-in-out -.18s infinite}
-.cat.p-run .bc .k-leg{animation-duration:var(--d-2)!important}.cat.p-sneak .bc .k-leg{animation-duration:.7s!important}
-.cat.p-walk .bc .k-arml,.cat.p-run .bc .k-arml{animation:k-swing var(--d-3) ease-in-out infinite}
-.cat.p-walk .bc .k-armr,.cat.p-run .bc .k-armr{animation:k-swing var(--d-3) ease-in-out -.18s infinite}
-.cat.p-run .bc .k-arm{animation-duration:var(--d-2)!important}
-.cat.p-walk .bc .k-tail,.cat.p-run .bc .k-tail{animation:k-tail .7s ease-in-out infinite}
-.cat.p-walk .bc .k-pupil,.cat.p-run .bc .k-pupil,.cat.p-sneak .bc .k-pupil{--px:-5px}
-@keyframes k-bob{50%{transform:translateY(-4px)}}
-@keyframes k-step{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px) scaleY(.92)}}
-@keyframes k-swing{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-12deg)}}
-/* sneak / crouch */
-.cat.p-sneak .bc .k-body,.cat.p-crouch .bc .k-body{transform:scaleY(.9)}
-.cat.p-sneak .bc .k-head,.cat.p-crouch .bc .k-head{transform:translateY(14px)}
-.cat.p-crouch .bc .k-all{transform:scale(1.04,.88)}
-.cat.p-crouch .bc .k-arml{transform:rotate(22deg)}.cat.p-crouch .bc .k-armr{transform:rotate(-22deg)}
-.cat.p-crouch.m-wiggle .bc .k-all{animation:k-wig var(--d-2) ease-in-out infinite}
-@keyframes k-wig{0%,100%{transform:scale(1.04,.88) rotate(-2deg)}50%{transform:scale(1.04,.88) rotate(2deg)}}
-/* stretch, scratch, groom, reach, eat, peek, jump */
-.cat.p-stretch .bc .k-arml{transform:rotate(128deg)}.cat.p-stretch .bc .k-armr{transform:rotate(-128deg)}
-.cat.p-stretch .bc .k-all{transform:scale(.96,1.08)}
-.cat.p-scratch .bc .k-arml{animation:k-scrL var(--d-3) ease-in-out infinite}.cat.p-scratch .bc .k-armr{animation:k-scrR var(--d-3) ease-in-out -.14s infinite}
-.cat.p-scratch .bc .k-all{transform:rotate(-6deg)}
-@keyframes k-scrL{0%,100%{transform:rotate(132deg)}50%{transform:rotate(100deg)}}
-@keyframes k-scrR{0%,100%{transform:rotate(-132deg)}50%{transform:rotate(-100deg)}}
-.cat.p-groom .bc .k-armr{animation:k-lick var(--d-3) ease-in-out infinite}
-.cat.p-groom .bc .k-head{transform:rotate(8deg)}
-.cat.p-groom .bc .k-mouth{display:inline;transform:scale(.8)}.cat.p-groom .bc .k-tongue{display:inline;animation:k-munch var(--d-3) ease-in-out infinite}
-@keyframes k-lick{0%,100%{transform:rotate(-128deg)}50%{transform:rotate(-112deg)}}
-.cat.p-reach .bc .k-arml{transform:rotate(138deg)}.cat.p-reach .bc .k-armr{transform:rotate(-138deg)}
-.cat.p-reach .bc .k-all{transform:scale(.97,1.07)}.cat.p-reach .bc .k-head{transform:translateY(-6px)}
-.cat.p-reach .bc .k-pupil{--py:-7px}
-.cat.p-eat .bc .k-head{transform:translateY(12px) rotate(4deg)}
-.cat.p-eat .bc .k-eyes{display:none}.cat.p-eat .bc .k-joy{display:inline}
-.cat.p-eat .bc .k-mouth{display:inline;animation:k-munch var(--d-3) ease-in-out infinite}
-.cat.p-eat .bc .k-arml{transform:rotate(-24deg)}.cat.p-eat .bc .k-armr{transform:rotate(24deg)}
-@keyframes k-munch{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
-.cat.p-peek .bc .k-all{transform:rotate(-8deg)}.cat.p-peek .bc .k-head{transform:translateX(-4px)}
-.cat.p-jumpup .bc .k-legl,.cat.p-jumpup .bc .k-legr{transform:scaleY(.55)}.cat.p-jumpup .bc .k-arml{transform:rotate(130deg)}.cat.p-jumpup .bc .k-armr{transform:rotate(-130deg)}
-.cat.p-jumpdn .bc .k-legl,.cat.p-jumpdn .bc .k-legr{transform:scaleY(1.08)}.cat.p-jumpdn .bc .k-arml{transform:rotate(55deg)}.cat.p-jumpdn .bc .k-armr{transform:rotate(-55deg)}
-.cat.p-jumpup .bc .k-shadow,.cat.p-jumpdn .bc .k-shadow,.cat.up .bc .k-shadow{opacity:.5;transform:scale(.7)}
-/* moods */
-.cat.m-angry .bc .k-lid{transform:translateY(0)}
-.cat.m-angry .bc .k-pupil{transform:translate(var(--px,0px),var(--py,0px)) scale(.7,.8)}
-.cat.m-angry .bc .k-earl{transform:rotate(-32deg)}.cat.m-angry .bc .k-earr{transform:rotate(32deg)}
-.cat.m-angry .bc .k-tail{transform:rotate(-40deg);animation:none}.cat.m-angry .bc .k-tailp{stroke-width:18}
-.cat.m-angry .bc .k-all{animation:k-shake var(--d-1) linear 5}
-.cat.m-angry .bc .k-arml{transform:rotate(40deg)}.cat.m-angry .bc .k-armr{transform:rotate(-40deg)}
-@keyframes k-shake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
-.cat.m-happy .bc .k-eyes{display:none}.cat.m-happy .bc .k-joy{display:inline}
-.cat.m-happy .bc .k-all{animation:k-happy var(--d-3) ease-in-out 2}
-@keyframes k-happy{50%{transform:translateY(-8px) rotate(3deg)}}
-.cat.m-startle .bc .k-all{animation:k-hop .5s ease-out}
-.cat.m-startle .bc .k-eyes{transform:scale(1.12)}.cat.m-startle .bc .k-pupil{transform:scale(.45)}
-.cat.m-startle .bc .k-arml{transform:rotate(100deg)}.cat.m-startle .bc .k-armr{transform:rotate(-100deg)}
-@keyframes k-hop{35%{transform:translateY(-22px)}65%{transform:translateY(0) scale(1.06,.94)}}
-.cat.m-yawn .bc .k-mouth{display:inline;transform:scale(1.6,2)}.cat.m-yawn .bc .k-head{transform:rotate(-6deg)}
-.cat.m-sniff .bc .k-head{animation:k-sniff var(--d-2) ease-in-out 5}
-@keyframes k-sniff{50%{transform:translateY(-2px) rotate(2deg)}}
-.cat.m-twitch .bc .k-earr{animation:k-twitch var(--d-3) ease-in-out}
-@keyframes k-twitch{40%{transform:rotate(16deg)}}
-.cat.m-duck .bc .k-head{transform:translateY(20px)}
-.cat.m-away .bc .k-head{transform:rotate(-10deg) translateX(-6px)}
-.cat.m-blink .bc .k-eyes{display:inline;transform:scaleY(.08)}.cat.m-blink .bc .k-shut{display:none}
 </style>
 <link rel="stylesheet" href="/css/core.css"><link id="uiCss" rel="stylesheet" href="/css/material.css"><script src="/shared/icon-set-material.js"></script><link rel="stylesheet" href="/css/app-icons.css"><script src="/shared/app-icons.js"></script>
 <script>try{localStorage.removeItem("siteUi")}catch(e){}</script>
@@ -1557,52 +1229,6 @@ kbd{font:inherit;font-size:var(--fs-1);font-weight:var(--fw-b);padding:2px calc(
     <div class="lgrid" id="lGrid"></div>
   </div>
   <nav class="shelf" id="shelf" aria-label="Shelf"></nav>
-  <div class="cat p-sleep" id="cat" aria-label="OGGY the cat" role="img">
-    <div class="cat-bubble" id="catBub"></div>
-    <div class="cat-chat" id="catChat" hidden><button class="cc-x" aria-label="Close chat">×</button><p class="cc-msg"></p><div class="cc-ui"></div></div>
-    <button class="cat-talk" id="catTalk" aria-label="Talk to OGGY"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
-    <svg class="cat-svg bc" viewBox="0 0 200 200" aria-hidden="true"><defs><clipPath id="kEyeClip"><ellipse cx="77" cy="75" rx="20" ry="22"/><ellipse cx="124" cy="76" rx="21" ry="23"/></clipPath></defs>
-      <ellipse class="k-shadow" cx="100" cy="192" rx="64" ry="6"/>
-      <g class="k-all">
-        <g class="k-tail"><path class="k-tailp" d="M140 170c26 2 42-9 44-27 1-9-4-16-10-16"/><path class="k-tailr" d="M171 136l6 3M176 148l6 1"/></g>
-        <g class="k-leg k-legl"><path class="k-fill" d="M68 158h28v26a7 7 0 0 1-7 7H75a7 7 0 0 1-7-7z"/><path class="k-paw" d="M70 186h24"/></g>
-        <g class="k-leg k-legr"><path class="k-fill" d="M104 158h28v26a7 7 0 0 1-7 7h-14a7 7 0 0 1-7-7z"/><path class="k-paw" d="M106 186h24"/></g>
-        <g class="k-body"><path class="k-fill" d="M54 118c0-13 19-20 46-20s46 7 46 20l6 34c3 22-19 32-52 32s-55-10-52-32z"/><ellipse class="k-belly" cx="100" cy="150" rx="27" ry="23"/><path class="k-stripe" d="M57 136q8 2 13 8M143 136q-8 2-13 8M55 152q8 1 12 6M145 152q-8 1-12 6"/></g>
-        <g class="k-head">
-          <g class="k-ear k-earl"><path class="k-fill" d="M54 60c-3-18 3-38 11-48 3-4 8-3 11 1l19 25z"/><path class="k-earin" d="M62 46c0-10 3-20 7-26l11 16z"/></g>
-          <g class="k-ear k-earr"><path class="k-fill" d="M110 32l27-20c4-3 9-1 10 4 3 14 3 32-3 47z"/><path class="k-earin" d="M122 33l15-11c2 8 2 17-1 25z"/></g>
-          <path class="k-fill" d="M100 26c38 0 61 21 61 51 0 31-24 47-61 47S39 108 39 77c0-30 23-51 61-51z"/>
-          <path class="k-stripe" d="M88 31l3 12M100 29v13M112 31l-3 12"/>
-          <ellipse class="k-muz" cx="101" cy="103" rx="22" ry="14"/>
-          <g class="k-eyes">
-            <g class="k-eye k-eyel"><ellipse class="k-iris" cx="77" cy="75" rx="20" ry="22"/><ellipse class="k-pupil" cx="79" cy="76" rx="6" ry="14"/><ellipse class="k-hl" cx="70" cy="65" rx="4.5" ry="3.5"/></g>
-            <g class="k-eye k-eyer"><ellipse class="k-iris" cx="124" cy="76" rx="21" ry="23"/><ellipse class="k-pupil" cx="126" cy="77" rx="6.2" ry="14.5"/><ellipse class="k-hl" cx="116" cy="66" rx="4.5" ry="3.5"/></g>
-            <g clip-path="url(#kEyeClip)"><path class="k-lid" d="M52 44h98v30c-12-10-30-14-48-8-18-6-36-2-50 8z"/></g>
-          </g>
-          <g class="k-shut"><path d="M60 80q17 11 34 0M106 81q18 11 36 0"/></g>
-          <g class="k-joy"><path d="M60 86q17-17 34 0M106 87q18-17 36 0"/></g>
-          <path class="k-nose" d="M96 96h10l-5 5z"/>
-          <path class="k-whisk" d="M76 101l-24-4M76 106l-24 3M126 101l24-4M126 106l24 3"/>
-          <ellipse class="k-mouth" cx="101" cy="107" rx="7" ry="6"/>
-          <ellipse class="k-tongue" cx="101" cy="108" rx="4" ry="3"/>
-        </g>
-        <g class="k-arm k-arml"><path class="k-fill" d="M68 116c-9 2-14 10-16 22l-2 18c-1 8 3 12 8 12s9-4 10-11l5-24z"/></g>
-        <g class="k-arm k-armr"><path class="k-fill" d="M132 116c9 2 14 10 16 22l2 18c1 8-3 12-8 12s-9-4-10-11l-5-24z"/></g>
-      </g>
-    </svg>
-    <div class="zzz"><span>z</span><span>z</span><span>Z</span></div>
-  </div>
-  <button class="jar" id="catJar" aria-label="Cat treats. Drag a treat out to feed OGGY.">
-    <span class="tip" id="jarTip">Drag a treat to OGGY</span>
-    <svg viewBox="0 0 46 56" aria-hidden="true">
-      <ellipse cx="23" cy="54" rx="17" ry="2.5" fill="rgba(0,0,0,.12)"/>
-      <rect x="6" y="14" width="34" height="40" rx="10" fill="#DDEBF2" fill-opacity=".85"/>
-      <rect x="6" y="40" width="34" height="14" rx="8" fill="#C6DAE4" fill-opacity=".9"/>
-      <g><path d="M12 44q6-5 12 0q-6 5-12 0z" fill="#EE9A58"/><path d="M24 44l5-4v8z" fill="#E0823D"/><path d="M19 34q6-5 12 0q-6 5-12 0z" fill="#F2A969"/><path d="M31 34l5-4v8z" fill="#E0823D"/><path d="M10 37q5-4 10 0q-5 4-10 0z" fill="#E0823D"/></g>
-      <rect x="10" y="17" width="5" height="26" rx="2.5" fill="#fff" fill-opacity=".7"/>
-      <g class="lid"><rect x="4" y="7" width="38" height="10" rx="5" fill="#2E6B57"/><rect x="4" y="12" width="38" height="5" rx="2.5" fill="#24574A"/><rect x="17" y="2" width="12" height="7" rx="3.5" fill="#3F8A71"/></g>
-    </svg>
-  </button>
   <div class="qs" id="qs" hidden></div>
   <div class="ctx" id="ctx" role="menu" hidden></div>
   <div class="lock" id="lock" aria-hidden="false" tabindex="0"><div class="lk-art" aria-hidden="true"><i></i><i></i><i></i></div><button type="button" class="lfs" id="lkFs" aria-label="Enter full screen"></button><div class="lk-card"><div class="lg" id="lkG"></div><div class="lt" id="lkT"></div><div class="ld" id="lkD"></div><div class="lk-who"><span class="lav"><img id="lkImg" alt=""></span><div class="ln" id="lkN"></div></div><button type="button" class="lh" id="lkGo">Tap to unlock</button><div class="lmsg" id="lkMsg" role="status"></div></div></div>
@@ -2565,7 +2191,7 @@ function documents(body){
   const home=()=>{vault=null;clearTimeout(idle);body.onkeydown=null;body.onclick=null;
     const qv=QV();
     const cards=qv.map((it,i)=>{const q=qrOf(it.url),br={...brandOf(it.brand)};if(it.name)br.name=it.name;
-      return `<div class="dc-card${it.hidden?' hid':''}"><div class="dc-badge" style="background:${br.bg}"><span class="dc-bi">${br.ico}</span>${esc(br.name)}${it.hidden?' · hidden':''}</div><button class="dc-qr" data-k="${i}" aria-label="Enlarge ${esc(br.name)} QR code">${qrSvg(q)}<span class="dc-zoom">Tap to enlarge</span></button><div class="dc-meta"><b>${esc(it.sub||'')}</b><small>${esc(P.name)} on ${esc(br.name)}</small><a class="dc-open" href="${esc(it.url)}" target="_blank" rel="noopener">Open profile</a></div></div>`}).join('');
+      return `<div class="dc-card${it.hidden?' hid':''}"><div class="dc-badge" style="background:${br.bg}"><span class="dc-bi">${br.ico}</span>${esc(br.name)}</div>${it.hidden?HID_TAG:''}<button class="dc-qr" data-k="${i}" aria-label="Enlarge ${esc(br.name)} QR code">${qrSvg(q)}<span class="dc-zoom">Tap to enlarge</span></button><div class="dc-meta"><b>${esc(it.sub||'')}</b><small>${esc(P.name)} on ${esc(br.name)}</small><a class="dc-open" href="${esc(it.url)}" target="_blank" rel="noopener">Open profile</a></div></div>`}).join('');
     body.innerHTML=`<div class="dc"><h1>Wallet</h1><p class="dc-sub">Tap a code to enlarge it, then scan it with your phone camera.</p><h3 class="lk-g">QR codes</h3><div class="dc-grid">${cards}</div><h3 class="lk-g">Private</h3><button class="dc-vault" id="dcV"><span class="dc-vi">${glyphSvg(G.lock,22)}</span><span class="lk-t"><b>Personal vault</b><small>Owner only. Opens with a passphrase</small></span></button></div>`;
     body.querySelector('#dcV').onclick=openVault;
     body.querySelectorAll('.dc-qr').forEach(b=>b.onclick=()=>qrBig(qv,+b.dataset.k));if(LIVE.admin)edBtn(body)};
@@ -2692,7 +2318,7 @@ function projects(body,filter="All"){
   const cats=["All",...new Set(all.map(x=>x.p.cat).filter(Boolean))];
   const list=all.filter(x=>filter==="All"||x.p.cat===filter);
   body.innerHTML=`<div class="fm"><div class="side">${cats.map(c=>`<button class="${c===filter?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-  <div class="pgrid">${list.length?list.map(({p,i})=>`<button class="pcard${p.hidden?' hid':''}" data-p="${i}"><div class="thumb" style="background:var(--${p.color||'c2'})">${glyphSvg(G.spark,44)}</div><b>${esc(p.title)}</b><small>${esc(p.cat||'')} · ${esc(p.year||'')}${p.hidden?' · hidden':''}</small></button>`).join(''):'<p class="nt-hint">No projects yet.</p>'}</div></div>`;
+  <div class="pgrid">${list.length?list.map(({p,i})=>`<button class="pcard${p.hidden?' hid':''}" data-p="${i}"><div class="thumb" style="background:var(--${p.color||'c2'})">${glyphSvg(G.spark,44)}</div><b>${esc(p.title)}</b><small>${esc(p.cat||'')} · ${esc(p.year||'')}</small>${p.hidden?HID_TAG:''}</button>`).join(''):'<p class="nt-hint">No projects yet.</p>'}</div></div>`;
   body.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>projects(body,b.dataset.cat));
   body.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
     const p=PR()[b.dataset.p];
@@ -2765,7 +2391,7 @@ const TIMELINE=[
   {status:"now",title:"Taking on new brand projects",detail:"Brand identity, logo design, packaging and brand strategy. Book a free intro call to start.",tag:"Branding",date:"Oct 2026"},
   {status:"next",title:"More case studies on this site",detail:"Bringing more of my Dribbble and Behance work into Projects.",tag:"Portfolio",date:"Soon"},
   {status:"next",title:"Next journal article",detail:"More thoughts on branding, design and working with AI.",tag:"Writing",date:"Oct 2026"},
-  {status:"done",title:"Launched rohankumar.pro",detail:"My portfolio as an interactive desktop: projects, journal, music, photos and OGGY the cat.",tag:"Website",date:"Oct 2026"},
+  {status:"done",title:"Launched rohankumar.pro",detail:"My portfolio as an interactive desktop: projects, journal, music and photos.",tag:"Website",date:"Oct 2026"},
   {status:"done",title:"Periodic®: naming, identity and packaging",detail:"A single-ingredient supplement brand built around the element tile.",tag:"Packaging",date:"2026"},
   {status:"done",title:"Apex Adaptogen Complex packaging",detail:"Packaging design for Gruite.",tag:"Packaging",date:"2026"},
   {status:"done",title:"Wuttaday brand identity",detail:"Make every day a good day.",tag:"Branding",date:"2026"},
@@ -3180,14 +2806,12 @@ function settings(body){
   <h3>Desktop icons</h3><p class="hint">Drag icons to move them. Auto keeps a tidy grid, Snap to grid lets an icon sit in any cell, Free lets it sit anywhere.${innerWidth<=760?' On a phone icons always stay in a tidy grid.':''}</p>
   <div class="seg">${[['auto','Auto'],['snap','Snap to grid'],['free','Free']].map(([k,n])=>`<button data-il="${k}" class="${(desk.dataset.ilayout||'auto')===k?'on':''}">${n}</button>`).join('')}</div>
   <h3>Icon size</h3>${segs('is',desk.dataset.isize||'medium',["small","medium","large"])}<p><button class="btn tonal" id="icTidy">Tidy up icons</button></p>
-  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}${desk.dataset.catlock?'':`<h3>OGGY the cat</h3>${segs('ct',desk.dataset.cat,["on","off"])}<h3>OGGY's place</h3>${segs('cp',desk.dataset.catpos||'roam',["roam","right","left"])}<p class="hint">Roam lets her wander. Right or left parks her (and the treats) in that corner. You can also press and hold OGGY or the treat jar, then drag them anywhere.</p>`}<h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
+  <h3>Animation</h3>${segs('mo',desk.dataset.motion,["on","off"])}<h3>Grain</h3>${segs('gr',gr,["off","soft","strong"])}<h3>Status widget</h3>${segs('sw',desk.dataset.status,["on","off"])}<h3>Sounds &amp; haptics</h3>${segs('sf',SFX.on?'on':'off',["on","off"])}<h3>Music widget</h3>${segs('mu',desk.dataset.music,["on","off"])} <button class="btn tonal" id="mwReset" style="margin-left:8px;padding:8px 14px">Reset position</button><h3>Tap an empty desktop to minimise all windows</h3>${segs('tm',localStorage.getItem('rkTapMin')==='1'?'on':'off',["on","off"])}<h3>Theme</h3>${segs('th',th,["auto","light","dark"])}`;
   if(!LIVE.authd){LIVE.authd=true;liveAuth().then(()=>{if(LIVE.admin)settings(body)})}
   body.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{const t=b.dataset.th;if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;save();settings(body)});
   body.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('rkTapMin',b.dataset.tm==='on'?'1':'0')}catch(e){}settings(body)});
   body.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{desk.dataset.motion=b.dataset.mo;save();settings(body)});
   body.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{desk.dataset.status=b.dataset.sw;save();settings(body)});
-  body.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{desk.dataset.cat=b.dataset.ct;save();settings(body)});
-  body.querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>{window.MOCHI&&MOCHI.setPos(b.dataset.cp);settings(body)});
   body.querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{SFX.set(b.dataset.sf==='on');SFX.play('toggle');settings(body)});
   body.querySelectorAll('[data-mu]').forEach(b=>b.onclick=()=>{desk.dataset.music=b.dataset.mu;save();settings(body)});
   body.querySelector('#mwReset').onclick=()=>{desk.dataset.music='on';save();window.resetMusicW&&resetMusicW();settings(body)};
@@ -3208,7 +2832,6 @@ var SETCAT={cur:null,q:'',scroll:0};
 const SET_CATS=[
   ['appearance','Appearance','palette','Wallpaper, theme, lock screen',['wallpaper','lock screen','animation','grain','theme','text size']],
   ['desktop','Desktop & apps','grid','Icons, widgets, where apps live',['desktop icons','icon size','tap an empty desktop','status widget','music widget','where each app lives']],
-  ['oggy','OGGY','cat','The cat on your desktop',['oggy']],
   ['sound','Sound','music','Sounds and haptics',['sounds']],
   ['profile','Profile','user','Name, photo, what you are up to',['about you','on repeat','your photo']],
   ['inbox','Messages & guestbook','mail','Messages, guestbook, OGGY’s inbox',['messages','guestbook',"oggy's inbox"]],
@@ -3637,13 +3260,9 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(
 /* ===== Owner mode (stage 1): site settings the owner edits live; visitors see them read-only ===== */
 var HIDDEN=new Set();
 var SITE={s:null,saveT:null,status:''};
-/* The owner can hide OGGY from every visitor (System settings). The owner still sees him. A visitor's own on/off choice is kept underneath. */
-var CAT_PREF=null;
-function catLock(off){if(off){if(!desk.dataset.catlock){CAT_PREF=desk.dataset.cat;desk.dataset.catlock='1'}desk.dataset.cat='off'}else if(desk.dataset.catlock){delete desk.dataset.catlock;desk.dataset.cat=CAT_PREF||'on'}}
-function applyCatSite(){if(SITE.s)try{localStorage.setItem('rkCatOff',SITE.s.oggyHidden?'1':'0')}catch(e){}
-  const off=SITE.s?!!SITE.s.oggyHidden:(()=>{try{return localStorage.getItem('rkCatOff')==='1'}catch(e){return false}})();catLock(off&&!LIVE.admin)}
 const P0={name:P.name,role:P.role,status:P.status,now:P.now,song:P.music.song,artist:P.music.artist,bio:P.bio,email:P.email,booking:P.booking,skills:JSON.parse(JSON.stringify(P.skills)),experience:JSON.parse(JSON.stringify(P.experience)),links:JSON.parse(JSON.stringify(P.links)),linkpage:JSON.parse(JSON.stringify(P.linkpage)),projects:JSON.parse(JSON.stringify(PROJECTS)),timeline:JSON.parse(JSON.stringify(TIMELINE)),qrs:Object.keys(DOC_QR).map(k=>({brand:k,name:'',sub:DOC_QR[k].sub,url:DOC_QR[k].url}))};
 const NEVER_HIDE=['settings'];
+var HID_TAG='<span class="hid-tag" title="Hidden from visitors. Only you can see it."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6 0 9.5 7 9.5 7a17 17 0 0 1-2.9 3.7M6.6 6.6C3.9 8.4 2.5 12 2.5 12s3.5 7 9.5 7c1.8 0 3.4-.6 4.7-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>Hidden</span>';
 function appVisible(id){const a=APPS.find(x=>x.id===id);if(a&&a.ownerOnly)return !!LIVE.admin;return !HIDDEN.has(id)||!!LIVE.admin}
 function applyText(){const s=SITE.s||{};
   P.name=s.name||P0.name;P.role=s.role||P0.role;P.status=s.status||P0.status;P.now=(s.now&&!/Tell visitors what you/.test(s.now)&&s.now)||P0.now;P.music.song=s.song||P0.song;P.music.artist=s.artist||P0.artist;
@@ -3662,9 +3281,6 @@ function applyNoLock(){if(SITE.s)try{localStorage.setItem('rkNoLock',SITE.s.noLo
 async function siteInit(){applyNoLock();await Promise.all([liveAuth(),siteLoad()]);applyNoLock();applyText();applyHidden();ownerChanged();window.__musicRefresh&&__musicRefresh()}
 /* Runs whenever the owner signs in or out: pill in the top bar, hidden apps shown dimmed or removed. */
 function ownerChanged(){
-  /* OGGY's own life (antics) runs only for the owner; visitors keep the calm cat and never download it */
-  if(LIVE.admin)import('/js/oggy.mjs').then(m=>m.start()).catch(()=>{});else if(window.OGGY_LIFE)OGGY_LIFE.stop();
-  applyCatSite();
   window.__ownerEditUI&&__ownerEditUI();
   let p=document.getElementById('ownPill');
   if(LIVE.admin){if(!p){p=document.createElement('button');p.id='ownPill';p.className='pill topbtn ownpill';p.innerHTML='<i></i>Owner mode';p.title='Open System Settings';p.onclick=()=>openApp('settings');const w=document.getElementById('who');w?w.after(p):document.querySelector('.topbar').prepend(p)}}
@@ -3711,7 +3327,7 @@ function ownerPanel(body){
   <div class="ow-places">${APPS.map(a=>{const hide=hid.has(a.id),can=!NEVER_HIDE.includes(a.id),pl=hide?'hidden':appPlace(a);return `<div class="ow-pl" data-app="${a.id}"><span class="ow-pln">${icon(a)}<b>${esc(a.title)}</b></span><div class="seg" role="group" aria-label="${esc(a.title)} placement">${['desktop','drawer'].concat(can?['hidden']:[]).map(k=>`<button data-pl="${k}" class="${pl===k?'on':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`}).join('')}</div>
   <h3>Guestbook</h3><label class="ow-app"><input type="checkbox" id="gbAuto" ${SITE.s&&SITE.s.gbAuto?'checked':''}><span>Publish notes right away (otherwise each note waits for your approval)</span></label>
   <h3>Opening the site</h3><label class="ow-app"><input type="checkbox" id="noLock" ${SITE.s&&SITE.s.noLock?'checked':''}><span>Open the website straight to the desktop (skip the lock screen for visitors)</span></label>
-  <h3>OGGY</h3><label class="ow-app"><input type="checkbox" id="oggyHide" ${SITE.s&&SITE.s.oggyHidden?'checked':''}><span>Hide OGGY from visitors (you still see him while signed in)</span></label>
+  
   <h3>Messages</h3><p class="hint">What visitors send from the Messages app: name, email, what it is about and where they came from.</p><div class="ow-row"><button class="btn tonal ow-msgs">Open messages</button></div>
   <h3>OGGY's inbox</h3><p class="hint">What visitors tell OGGY: names, emails and messages. Only you can read it.</p><div class="ow-row"><button class="btn tonal ow-inbox">Open inbox</button></div>
   <h3>Google Docs and Keep</h3><div class="gs-box"><p class="hint">Checking…</p></div>
@@ -3725,7 +3341,6 @@ function ownerPanel(body){
   sec.querySelector('#gbAuto').onchange=e=>{cur().gbAuto=e.target.checked;siteSave()};
   gsyncPanel(sec.querySelector('.gs-box'));
   sec.querySelector('#noLock').onchange=e=>{if(e.target.checked)cur().noLock=true;else delete cur().noLock;try{localStorage.setItem('rkNoLock',e.target.checked?'1':'0')}catch(x){}siteSave()};
-  sec.querySelector('#oggyHide').onchange=e=>{if(e.target.checked)cur().oggyHidden=true;else delete cur().oggyHidden;applyCatSite();siteSave()};
   sec.querySelector('.ow-msgs').onclick=()=>openApp('messages');
   const ib=sec.querySelector('.ow-inbox');ib.onclick=()=>mochiInbox(body);
   fetch('/api/mochi',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(!d)return;let seen=0;try{seen=+localStorage.getItem('mochiSeen')||0}catch(e){}const n=d.visitors.filter(v=>(v.updated||0)>seen).length;if(n)ib.textContent=`Open inbox (${n} new)`}).catch(()=>{});
@@ -4099,7 +3714,6 @@ function showCtx(x,y,custom){SFX.play('tap');
     [desk.dataset.isize==='large'?"Smaller icons":"Bigger icons",()=>ICL.size(desk.dataset.isize==='large'||desk.dataset.isize==='small'?'medium':'large')],["Tidy up icons",()=>ICL.tidy()],["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],
     [isDark()?"Switch to light mode":"Switch to dark mode",()=>{document.documentElement.dataset.theme=isDark()?"light":"dark";save()}],
     ...(appVisible('guestbook')?[["Sign the guestbook",()=>openApp('guestbook')]]:[]),...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[]),["Lock screen",lock],
-    ...(desk.dataset.catlock?[]:desk.dataset.cat==="off"?[["Bring OGGY back",()=>{desk.dataset.cat="on";save()}]]:window.MOCHI&&MOCHI.asleep()?[["Wake OGGY gently",()=>MOCHI.wake()]]:[["Talk to OGGY",()=>MOCHI.talk()],["Let OGGY nap",()=>MOCHI.sleep()]]),
     ...(desk.dataset.status==="off"?[["Show status widget",()=>{desk.dataset.status="on";save()}]]:[]),
     ...(desk.dataset.music==="off"?[["Show music widget",()=>{desk.dataset.music="on";save()}]]:[]),
     ...(Object.keys(open).length?[["Minimise all apps",minimizeAll],["Close all apps",closeAll]]:[]),...(window.__tileDesktop?__tileDesktop():[]),
@@ -4124,7 +3738,7 @@ function ownerPlaceItems(id){
   if(!LIVE.admin)return[];const a=APPS.find(x=>x.id===id);if(!a)return[];const s=SITE.s||(SITE.s={hiddenApps:[]});
   const set=(k)=>{const hid=new Set(s.hiddenApps||[]);s.place=s.place||{};if(k==='hidden')hid.add(id);else{hid.delete(id);s.place[id]=k}s.hiddenApps=[...hid];applyHidden();siteSave();SFX.play('pop')};
   const here=appPlace(a);
-  return[null,["Rename or change icon…",()=>window.__editApp&&__editApp(id)],here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(NEVER_HIDE.includes(id)?[]:[["Hide from visitors",()=>set('hidden')]])]}
+  return[null,["Rename or change icon…",()=>window.__editApp&&__editApp(id)],here==='desktop'?["Move to the app drawer",()=>set('drawer')]:["Put on the desktop",()=>set('desktop')],...(NEVER_HIDE.includes(id)?[]:HIDDEN.has(id)?[["Show to visitors",()=>set(here)]]:[["Hide from visitors",()=>set('hidden')]])]}
 function ctxItemsFor(e){
   const t=e.target,el=t.closest?t:t.parentElement,out=[],sel=String(getSelection()||'').trim();
   const fld=el.closest('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea,[contenteditable="true"],[contenteditable=""]');
@@ -4163,7 +3777,6 @@ function ctxItemsFor(e){
   if(el.closest('.topbar')){const clickBtn=sel=>()=>{const b=document.querySelector(sel);b&&b.click()};
     return[["Quick settings",()=>stBtn.click()],["Open apps",toggleLauncher],...(document.getElementById('tabsBtn')?[["All open windows",clickBtn('#tabsBtn')]]:[]),["Search",clickBtn('.topbar [aria-label="Search"], .topbar [aria-label^="Search"]')],null,["Lock screen",lock],...(canFull()?[[(document.fullscreenElement||document.webkitFullscreenElement)?"Exit full screen":"Full screen",osFullToggle]]:[])]}
   if(el.closest('#shelf,.shelf,.dock-handle'))return dockMenu();
-  if(el.closest('.cat,#cat'))return window.MOCHI?[window.MOCHI.asleep()?["Wake OGGY gently",()=>MOCHI.wake()]:["Talk to OGGY",()=>MOCHI.talk()],...(window.MOCHI.asleep()?[]:[["Let OGGY nap",()=>MOCHI.sleep()]]),...(LIVE.admin&&window.OGGY_LIFE?[[OGGY_LIFE.quiet()?"Let OGGY be himself again":"Shoo OGGY for an hour",()=>OGGY_LIFE.toggleQuiet()]]:[]),["Hide OGGY",()=>{desk.dataset.cat="off";save()}]]:[];
   if(el.closest('.mw,#musicW'))return(window.musicCtx&&window.musicCtx())||[["Hide the music widget",()=>{desk.dataset.music="off";save()}]];
   if(el.closest('#wStatus,.statusw,.wstatus,[data-w=status]'))return[["Hide the status widget",()=>{desk.dataset.status="off";save()}],...(LIVE.admin?[["Edit status in Settings",()=>openApp('settings')]]:[])];
   if(el.closest('.widgets'))return[...(LIVE.admin&&el.closest('.wcard.st')?[["Edit this card…",()=>window.__editStatus&&__editStatus()],null]:[]),["Next wallpaper",()=>{const k=Object.keys(WALLS);setWall(k[(k.indexOf(desk.dataset.wall)+1)%k.length]);save()}],["Settings",()=>openApp('settings')]];
@@ -4375,7 +3988,7 @@ function magnify(s){
 const L=document.getElementById('launcher'),LS=document.getElementById('lSearch');
 function drawLauncher(q=""){
   window.__winBar&&__winBar();
-  document.getElementById('lGrid').innerHTML=APPS.filter(a=>appVisible(a.id)&&a.title.toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="dicon" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('')||'<p class="sub">No apps match that. Try "projects".</p>';
+  document.getElementById('lGrid').innerHTML=APPS.filter(a=>appVisible(a.id)&&a.title.toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="dicon" data-app="${a.id}">${HIDDEN.has(a.id)?HID_TAG:''}${icon(a)}<span class="lb">${a.title}</span></button>`).join('')||'<p class="sub">No apps match that. Try "projects".</p>';
   L.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app,{toggle:true}));
 }
 function lOrigin(){const b=document.getElementById('lBtn');if(!b)return;const br=b.getBoundingClientRect(),lr=L.getBoundingClientRect(),k=lr.width?1:1;
@@ -4389,7 +4002,7 @@ desk.addEventListener('pointerdown',e=>{if(!L.hidden&&!e.target.closest('#launch
 
 function save(){try{localStorage.setItem('desk',JSON.stringify({theme:document.documentElement.dataset.theme||"auto",wall:desk.dataset.wall,grain:desk.dataset.grain,motion:desk.dataset.motion,status:desk.dataset.status,cat:desk.dataset.catlock?(CAT_PREF||'on'):desk.dataset.cat,music:desk.dataset.music,ilayout:desk.dataset.ilayout||'auto',isize:desk.dataset.isize||'medium',lock:desk.dataset.lock||'classic'}))}catch(e){}}
 function load(){try{const s=JSON.parse(localStorage.getItem('desk')||"null");if(s){if(s.theme&&s.theme!=="auto")document.documentElement.dataset.theme=s.theme;if(s.wall)desk.dataset.wall=s.wall;if(s.grain)desk.dataset.grain=s.grain;if(s.motion)desk.dataset.motion=s.motion;if(s.status)desk.dataset.status=s.status;if(s.cat)desk.dataset.cat=s.cat;if(s.music)desk.dataset.music=s.music;if(s.ilayout)desk.dataset.ilayout=s.ilayout;if(s.isize)desk.dataset.isize=s.isize;if(s.lock)desk.dataset.lock=s.lock;}}catch(e){}
-  {const l=document.getElementById('lock');if(l)l.dataset.ls=desk.dataset.lock||'classic'}applyCatSite()}
+  {const l=document.getElementById('lock');if(l)l.dataset.ls=desk.dataset.lock||'classic'}}
 
 function tick(){
   const d=new Date();
@@ -4431,7 +4044,7 @@ document.getElementById('clockShape').setAttribute('d',shape('cookie'));
 function appPlace(a){const o=SITE.s&&SITE.s.place&&SITE.s.place[a.id];return o==='desktop'||o==='drawer'?o:(a.drawer?'drawer':'desktop')}
 function renderIcons(){let ord=[];try{ord=JSON.parse(localStorage.getItem('iconOrder')||'[]')}catch(e){}
   const list=APPS.filter(a=>appPlace(a)==='desktop'&&appVisible(a.id)).sort((a,b)=>{const i=ord.indexOf(a.id),j=ord.indexOf(b.id);return(i<0?999:i)-(j<0?999:j)});
-  const g=document.getElementById('icons');g.innerHTML=list.map(a=>`<button class="dicon${HIDDEN.has(a.id)?' hid':''}" data-app="${a.id}">${icon(a)}<span class="lb">${a.title}</span></button>`).join('');
+  const g=document.getElementById('icons');g.innerHTML=list.map(a=>`<button class="dicon${HIDDEN.has(a.id)?' hid':''}" data-app="${a.id}">${HIDDEN.has(a.id)?HID_TAG:''}${icon(a)}<span class="lb">${a.title}</span></button>`).join('');
   g.querySelectorAll('.dicon').forEach(b=>b.onclick=e=>{if(iconDrag.suppress){iconDrag.suppress=false;return}openApp(b.dataset.app,{toggle:true})});
   if(ICL)ICL.apply()}
 const iconDrag={suppress:false};
@@ -4510,382 +4123,6 @@ addEventListener('resize',()=>{clearTimeout(ICL.rt);ICL.rt=setTimeout(()=>ICL.ap
   g.addEventListener('contextmenu',e=>{if(st&&st.touch)e.preventDefault()});
 })();
 renderIcons();
-/* ============ OGGY the cat ============ */
-/* Edit OGGY's answers about Rohan here. */
-const MOCHI_TALK={
-  who:"That's Rohan Kumar, a brand designer. Also my personal chef. Top human.",
-  boss:"Honestly? Great boss. Feeds me on time, never rushes good work, and actually listens. I'd nap on his keyboard again.",
-  what:"Logos, visual identities, brand strategy, and naming. He thinks before he draws. I think before I nap.",
-  available:"He's open to new projects right now! Want to book a call with him?",
-  contact:"Easiest way is to book a call. Or leave your email with me and I'll make sure he sees it.",
-  price:"Depends on the project, so he'll give you a straight answer on a call. No bullsh*t, that's his rule.",
-  ai:"He uses AI as a tool, not a replacement. His words. I mostly use it to find treats.",
-  cat:"Me? I'm OGGY. I guard the dock, judge fonts, and accept treats.",
-  unknown:"Hmm, I'm just a cat. But Rohan would know! Want me to pass your question to him?"
-};
-(()=>{
-const cat=document.getElementById('cat'),bub=document.getElementById('catBub'),jar=document.getElementById('catJar'),jarTip=document.getElementById('jarTip');
-const chatEl=document.getElementById('catChat'),chatMsg=chatEl.querySelector('.cc-msg'),chatUI=chatEl.querySelector('.cc-ui'),talkBtn=document.getElementById('catTalk');
-const FISH='<svg viewBox="0 0 34 22"><path d="M25 11l7-6v12z" fill="#D9793A"/><path d="M4 11q11-10 22 0q-11 10-22 0z" fill="#EE9A58"/><path d="M4 11q11 10 22 0z" fill="#E0823D"/><circle cx="9.5" cy="9.5" r="1.4" fill="#4A2A14"/><ellipse cx="15" cy="8" rx="4" ry="1.4" fill="#fff" fill-opacity=".45"/></svg>';
-const SIDE=new Set(['walk','run','sneak','crouch','stretch','scratch','jumpup','jumpdn']);
-const MOVING=new Set(['walk','run','sneak']);
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-const now=()=>Date.now();
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const rand=(a,b)=>a+Math.random()*(b-a);
-const C={x:0,y:0,tx:0,sp:0,dir:-1,pose:'sleep',mood:'',cb:null,jump:null,trust:0,busy:false,lastPoke:0,lastAct:now(),lastMove:0,lastFast:0,lastSlow:0,
-  px:-9999,py:-9999,fed:[],fullUntil:0,drag:false,treat:null,treatX:0,handT:0,strokes:[],moodT:0,awakeSince:0,sleepUntil:now()+rand(25000,45000),nextAct:0,chat:false,fullSaid:0};
-try{const s=JSON.parse(localStorage.getItem('catState')||'null');if(s){if(typeof s.trust==='number')C.trust=s.trust;if(s.fullUntil)C.fullUntil=s.fullUntil;if(s.fed)C.fed=s.fed}}catch(e){}
-const saveC=()=>{try{localStorage.setItem('catState',JSON.stringify({trust:C.trust,fullUntil:C.fullUntil,fed:C.fed}))}catch(e){}};
-const W=()=>cat.offsetWidth||130;
-const small=()=>innerWidth<=760;
-const TOUCH=matchMedia('(hover:none)').matches;
-const catPos=()=>desk.dataset.catpos||'roam';
-const home=()=>catPos()==='left'?(small()?6:10):catPos()==='right'?innerWidth-W()-(small()?4:8):innerWidth-W()-(small()?36:52);
-const peekX=()=>innerWidth-W()*0.45;
-/* on phones he keeps to his half of the bottom edge, beside the app drawer button, unless he is carried or placed somewhere */
-const clampX=v=>{if(small()&&!C.free&&!C.carry){const mid=innerWidth/2,gap=40;return catPos()==='left'?clamp(v,0,Math.max(0,mid-gap-W())):clamp(v,Math.min(mid+gap,innerWidth-W()),innerWidth-W()*0.4)}return clamp(v,0,innerWidth-W()*0.4)};
-const awake=()=>C.pose!=='sleep';
-const full=()=>now()<C.fullUntil;
-const dockR=()=>document.getElementById('shelf').getBoundingClientRect();
-const baseB=()=>parseFloat(getComputedStyle(cat).bottom)||8;
-const dockElev=()=>innerHeight-dockR().top-baseB()-3;
-function paint(){if(typeof GL!=='undefined'&&GL)GL.z(C.chat?969:904);cat.className=`cat${typeof GL!=='undefined'&&GL?' gl':''} p-${C.pose}${SIDE.has(C.pose)?' side':''}${C.mood?' m-'+C.mood:''}${C.dir<0?' face-l':''}${C.y>2||C.jump?' up':''}${C.chat?' chatting':''}${(C.trust>=1||TOUCH)&&awake()&&!C.chat&&!C.busy?' can-talk':''}`}
-function pose(p){C.pose=p;paint()}
-function mood(m,ms){clearTimeout(C.moodT);C.mood=m;paint();if(ms)C.moodT=setTimeout(()=>{C.mood='';paint()},ms)}
-function say(t,ms=1600){bub.textContent=t;bub.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>bub.classList.remove('show'),ms)}
-function hearts(n){for(let i=0;i<n;i++)setTimeout(()=>{const h=document.createElement('span');h.className='heart';h.innerHTML=LI_('heart',18,true);h.style.setProperty('--hx',(Math.random()*40-20)+'px');cat.appendChild(h);setTimeout(()=>h.remove(),1400)},i*180)}
-function trust(v){C.trust=clamp(C.trust+v,0,6);saveC()}
-function walkTo(tx,sp,p,cb){C.jump=null;C.tx=clampX(tx);C.sp=sp;C.cb=cb||null;if(Math.abs(C.tx-C.x)>1)C.dir=C.tx>C.x?1:-1;pose(p)}
-function jumpTo(x1,y1,cb,h){C.cb=null;const x0=C.x,y0=C.y;C.dir=x1>=x0?1:-1;C.jump={t0:performance.now(),dur:Math.max(420,Math.min(700,Math.abs(x1-x0)*2+380)),x0,y0,x1:clampX(x1),y1,h:h??Math.max(40,Math.abs(y1-y0)*0.6+40),cb};pose('jumpup')}
-function head(){const r=cat.getBoundingClientRect();return{x:r.left+r.width*.5,y:r.top+r.height*.4,mx:r.left+r.width*.5,my:r.top+r.height*.5,r}}
-function dist(){const h=head();return Math.hypot(C.px-h.x,C.py-h.y)}
-const later=(fn,ms)=>setTimeout(fn,ms);
-
-/* ---------- movement loop ---------- */
-let last=performance.now();
-function frame(t){const dt=Math.min(.1,(t-last)/1000);last=t;if(C.drag&&(t-(C.chT||0))>180){C.chT=t;chase()}
-  if(C.jump){const J=C.jump,k=Math.min(1,(t-J.t0)/J.dur);C.x=J.x0+(J.x1-J.x0)*k;C.y=J.y0+(J.y1-J.y0)*k+J.h*4*k*(1-k);
-    const want=k<.5?'jumpup':'jumpdn';if(C.pose!==want)pose(want);
-    if(k>=1){C.y=J.y1;C.jump=null;pose('sit');J.cb&&J.cb()}}
-  else if(MOVING.has(C.pose)){const d=C.tx-C.x,st=C.sp*dt;
-    if(Math.abs(d)<=st){C.x=C.tx;const cb=C.cb;C.cb=null;if(cb)cb();else if(MOVING.has(C.pose))pose('sit')}
-    else C.x+=Math.sign(d)*st}
-  cat.style.transform=`translate(${C.x}px,${-C.y}px)`;
-  if(GL)GL.draw(dt);
-  requestAnimationFrame(frame)}
-/* 3D renderer */
-const GL=(()=>{try{return null;const cv=document.getElementById('catGL');
-  const ren=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});ren.setPixelRatio(Math.min(2,devicePixelRatio||1));
-  const sc=new THREE.Scene(),cam=new THREE.OrthographicCamera(0,1,1,0,-3000,3000);cam.position.z=1500;
-  sc.add(new THREE.AmbientLight(0xffffff,.46));const dl=new THREE.DirectionalLight(0xffffff,.56);dl.position.set(-300,600,800);sc.add(dl);
-  const R=MochiRig(THREE);sc.add(R.root);
-  let w=0,h=0;const size=()=>{const W2=cv.clientWidth,H2=cv.clientHeight;if(W2!==w||H2!==h){w=W2;h=H2;ren.setSize(w,h,false);cam.right=w;cam.top=h;cam.updateProjectionMatrix()}};
-  desk.classList.add('gl-on');cat.classList.add('gl');
-  return{draw(dt){if(desk.dataset.cat==='off'||document.hidden)return;size();const sc2=W()/130;R.root.scale.setScalar(sc2);
-    R.update(dt,{x:C.x+W()/2,ground:baseB()+C.y,elev:C.y,pose:C.pose,mood:C.mood,dir:C.dir,lookX:C.lx||0,lookY:C.ly||0});ren.render(sc,cam)},
-    z(v){cv.style.zIndex=v}}}catch(e){return null}})();
-try{const cp=localStorage.getItem('catPos');if(cp==='left'||cp==='right')desk.dataset.catpos=cp}catch(e){}
-C.x=home();paint();requestAnimationFrame(frame);
-
-/* ---------- eyes follow the cursor ---------- */
-function look(){
-  if(SIDE.has(C.pose)||!['sit','peek','reach'].includes(C.pose)||C.px<-999){C.lx=0;C.ly=0;cat.style.setProperty('--px','0px');cat.style.setProperty('--py','0px');cat.style.setProperty('--hr','0deg');return}
-  const h=head(),dx=C.px-h.x,dy=C.py-h.y,d=Math.max(1,Math.hypot(dx,dy)),k=Math.min(1,d/90);C.lx=dx/d*k;C.ly=dy/d*k;
-  cat.style.setProperty('--px',(dx/d*7*k).toFixed(2)+'px');cat.style.setProperty('--py',(dy/d*6*k).toFixed(2)+'px');cat.style.setProperty('--hr',clamp(dx/70,-7,7).toFixed(2)+'deg');
-}
-
-/* ---------- reactions ---------- */
-function goHide(){C.busy=false;C.hideAt=now()+99999;const go=()=>walkTo(peekX(),480,'run',()=>{C.dir=-1;pose('peek');C.hideAt=now()});C.y>2?jumpTo(Math.min(innerWidth-W(),dockR().right+10),0,go,30):go()}
-function flee(){C.busy=true;closeChat(true);mood('angry');SFX.play('hiss');say(pick(['hmph!','hsss!','don’t touch!','rude.','nope.']),1300);later(()=>{mood('',0);goHide();later(()=>C.busy=false,50)},650)}
-function pet(){C.busy=true;mood('happy');SFX.play('purr');say(pick(['purrr…','prrrp','mrrr']),1500);hearts(3);trust(.2);later(()=>{mood('',0);C.busy=false;paint()},1600)}
-function wake(reason){if(C.pose!=='sleep')return;C.awakeSince=now();pose('sit');C.lastAct=now();
-  if(reason==='natural'){pose('stretch');mood('blink',0);say(pick(['*streeetch*','mrrrp…']),1400);later(()=>{if(C.pose==='stretch'){mood('',0);pose('sit')}},1700)}
-  else{mood('blink',250);say(pick(['mrrp?','…hm?']),1300)}}
-function goSleep(){closeChat(true);mood('yawn',1400);say('*yawn*',1400);
-  later(()=>{if(C.drag||C.busy)return;mood('',0);const settle=()=>{C.dir=-1;pose('sleep');C.sleepUntil=now()+(LIVE.admin?rand(90000,260000):rand(45000,90000))};
-    if(C.free){settle();return}
-    if(C.y>2)jumpTo(dockR().right+10,0,()=>walkTo(home(),80,'walk',settle));else if(Math.abs(C.x-home())>6)walkTo(home(),80,'walk',settle);else settle()},1500)}
-function poke(){C.lastPoke=now();C.lastAct=now();if(C.busy||C.drag||C.jump)return;
-  if(C.pose==='sleep'){C.busy=true;pose('sit');mood('startle',950);SFX.play('meow');say('!!',900);C.awakeSince=now();
-    later(()=>{if(C.trust>=3){mood('',0);say(pick(['mrrp… oh, it’s you'+(V.name?', '+V.name:''),'…you again']),1900);C.busy=false;paint()}else flee()},900);return}
-  if(['peek','crouch','sneak'].includes(C.pose)){mood('duck',900);say(pick(['…!','go away','hmph']),1100);if(C.pose!=='peek')goHide();return}
-  if(C.pose==='eat'){say('mine!',1000);return}
-  if(C.chat){pet();return}
-  C.trust>=3?pet():flee();
-}
-cat.addEventListener('pointerdown',e=>{if(e.target.closest('.cat-chat,.cat-talk'))return;if(e.target.closest('.cat-bubble')&&cat.classList.contains('can-talk')){e.stopPropagation();return}e.stopPropagation();e.preventDefault()});
-talkBtn.addEventListener('pointerdown',e=>e.stopPropagation());
-talkBtn.addEventListener('click',e=>{e.stopPropagation();askMenu()});
-bub.addEventListener('click',e=>{e.stopPropagation();if(cat.classList.contains('can-talk'))askMenu()});
-
-desk.addEventListener('scroll',()=>{if(desk.scrollLeft||desk.scrollTop){desk.scrollLeft=0;desk.scrollTop=0}});
-
-/* ---------- phone: launcher search sheet that always fits the visible screen ---------- */
-(function(){
-  const L=document.getElementById('launcher'),LS=document.getElementById('lSearch'),vv=window.visualViewport;
-  const on=()=>innerWidth<=760&&!L.hidden&&document.activeElement===LS;
-  const fit=()=>{
-    if(!on()){L.classList.remove('kb');L.style.top='';L.style.height='';return}
-    const top=(vv?vv.offsetTop:0)+8,h=(vv?vv.height:innerHeight)-16;
-    L.classList.add('kb');L.style.top=top+'px';L.style.height=Math.max(160,h)+'px'};
-  if(vv){vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
-  addEventListener('resize',fit);
-  LS.addEventListener('focus',()=>{fit();setTimeout(fit,250);setTimeout(fit,600)});
-  LS.addEventListener('blur',()=>setTimeout(()=>{fit();if(scrollY)scrollTo(0,0);document.body.scrollTop=0},120));
-  new MutationObserver(fit).observe(L,{attributes:true,attributeFilter:['hidden']});
-})();
-/* ---------- phone: auto-hiding dock ---------- */
-(function(){
-  const R=document.documentElement,sh=document.getElementById('shelf'),LL=document.getElementById('launcher'),WS=document.getElementById('wins');
-  const h=document.createElement('button');h.className='dock-handle';h.type='button';h.setAttribute('aria-label','Show dock');h.innerHTML='<span></span>';sh.after(h);
-  let peek=false,t;
-  const anyOpen=()=>[...WS.querySelectorAll('.win')].some(w=>!/\b(min|closing|minimizing)\b/.test(w.className));
-  const upd=()=>{const on=small()&&anyOpen();R.classList.toggle('dock-auto',on&&LL.hidden&&!peek);R.classList.toggle('dock-peek',on&&(peek||!LL.hidden));if(!on)peek=false};
-  const hide=()=>{peek=false;clearTimeout(t);upd()};
-  const show=()=>{peek=true;upd();clearTimeout(t);t=setTimeout(hide,4000)};
-  h.addEventListener('pointerdown',e=>e.stopPropagation());h.addEventListener('click',e=>{e.stopPropagation();show()});
-  sh.addEventListener('pointerdown',()=>{if(peek){clearTimeout(t);t=setTimeout(hide,4000)}});
-  WS.addEventListener('pointerdown',()=>{if(peek)hide()});
-  let sy=null;
-  addEventListener('touchstart',e=>{const y=e.touches[0].clientY;sy=innerHeight-y<44?y:null},{passive:true});
-  addEventListener('touchmove',e=>{if(sy!=null&&sy-e.touches[0].clientY>20){sy=null;if(R.classList.contains('dock-auto'))show()}},{passive:true});
-  new MutationObserver(upd).observe(WS,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
-  new MutationObserver(upd).observe(LL,{attributes:true,attributeFilter:['hidden']});
-  addEventListener('resize',upd);upd();
-})();
-
-
-/* ---------- cat things he does on his own ---------- */
-function activity(){
-  if(desk.dataset.cat==='off'||C.drag||C.busy||C.chat||C.jump||!awake()||!['sit'].includes(C.pose))return;
-  const n=now(),r=dockR(),canDock=!small()&&r.width>0,canSit=canDock&&r.width>W()+30;
-  if(C.free)return;
-  if(C.y>2){C.busy=true;const down=r.right+8<innerWidth-W()?r.right+8:r.left-W()-8;say(pick(['hup!','*thud*']),900);jumpTo(down,0,()=>{C.busy=false},36);return}
-  if(n-C.lastAct>30000&&n-C.awakeSince>60000){goSleep();return}
-  if(window.OGGY_LIFE&&OGGY_LIFE.turn())return; /* owner mode: now and then he does something of his own */
-  const roll=Math.random();C.busy=true;const done=()=>{C.busy=false;if(!C.jump&&!MOVING.has(C.pose))pose('sit');paint()};
-  if(catPos()!=='roam'&&(roll<.28||roll>.54)){done();return} /* parked in a corner: he only grooms and stretches */
-  if(roll<.28){walkTo(rand(innerWidth*(small()?.55:.3),home()),rand(70,95),'walk',()=>{pose('sit');done()})}
-  else if(roll<.44){pose('groom');if(Math.random()<.5)say('*lick lick*',1200);later(()=>{pose('sit');done()},rand(2600,4200))}
-  else if(roll<.54){pose('stretch');mood('blink',0);later(()=>{mood('',0);done()},1700)}
-  else if(roll<.68&&canDock){const tx=r.right-W()*0.40;walkTo(tx,90,'walk',()=>{C.dir=-1;pose('scratch');say('*scritch scratch*',1800);later(()=>{pose('sit');done()},2600)})}
-  else if(roll<.82&&canSit){const start=Math.min(innerWidth-W(),r.right+6);walkTo(start,95,'walk',()=>{C.dir=-1;pose('crouch');mood('wiggle',0);
-      later(()=>{mood('',0);jumpTo(r.right-W()-10,dockElev(),()=>{C.dir=-1;pose('sit');say(pick(['*sits on dock*','my dock.','comfy.']),1400);done()})},700)})}
-  else if(roll<.92){pose('crouch');C.dir=Math.random()<.5?-1:1;mood('wiggle',0);later(()=>{mood('',0);jumpTo(C.x+C.dir*rand(50,90),0,()=>{say(pick(['gotcha!','…missed.','*pounce*']),1100);done()},34)},800)}
-  else{done()}
-}
-(function sched(){setTimeout(()=>{activity();sched()},rand(7000,12000))})();
-
-/* ---------- treats (and getting full) ---------- */
-function groundY(){return innerHeight-baseB()-12}
-function moveTreat(x,y){if(C.treat){C.treat.style.left=x+'px';C.treat.style.top=y+'px'}}
-function updJar(){jar.classList.toggle('full',full());jarTip.textContent=full()?'OGGY is full for now':'Drag a treat to OGGY. Hold to move me.'}
-updJar();setInterval(updJar,5000);
-function jarDown(e){if(C.free){C.free=false;saveFree()}if(C.treat||desk.dataset.cat==='off')return;
-  C.drag=true;C.handT=0;C.lastTreat=now();closeChat(true);jar.classList.add('open');
-  const t=document.createElement('div');t.className='treat';t.innerHTML=FISH;document.body.appendChild(t);C.treat=t;C.px=e.clientX;C.py=e.clientY;moveTreat(e.clientX,e.clientY);
-  if(full()){if(awake()){mood('away',1500);say(pick(['I’m stuffed…','no more, thank you','*turns away*']),1500)}return}
-  if(!C.jump){C.busy=false;C.cb=null}
-  if(C.pose==='sleep')later(()=>{if(C.drag&&C.pose==='sleep'){C.awakeSince=now();pose('sit');mood('sniff',1100);say('*sniff sniff*',1300)}},700);
-  else if(['peek','crouch','sneak'].includes(C.pose)){say(pick(['!!','treat?!','is that… for me?']),1200);pose('sit')}
-  else if(C.y>2){say('!!',900);C.busy=true;jumpTo(dockR().right+8,0,()=>C.busy=false,34)}
-  else{mood('',0);say(pick(['!!','treat?','mrrp!']),1000)}
-}
-function chase(){
-  if(!C.drag||full()||C.busy||C.jump||['sleep','eat'].includes(C.pose)||C.mood==='sniff')return;
-  const w=W(),target=clampX(C.px-w/2),d=target-C.x;
-  if(Math.abs(d)>26){if(C.pose!=='walk')walkTo(target,C.trust>=2?250:200,'walk',()=>pose('sit'));else{C.tx=target;C.dir=d>0?1:-1}}
-  else{if(C.pose==='walk'){C.cb=null;pose('sit')}const h=head(),up=h.y-C.py;pose(up>50&&up<190?'reach':'sit')}
-  const h=head(),dm=Math.hypot(C.px-h.mx,C.py-h.my);
-  if(dm<46){if(!C.handT)C.handT=now();else if(now()-C.handT>750)feed(true)}else C.handT=0;
-}
-function endDrag(){if(!C.drag)return;C.drag=false;jar.classList.remove('open');const t=C.treat;if(!t)return;
-  C.treatX=clamp(C.px,20,innerWidth-20);t.style.left=C.treatX+'px';t.classList.add('fall');t.style.top=groundY()+'px';
-  if(full()){later(()=>{t.classList.add('fade');later(()=>{t.remove();if(C.treat===t)C.treat=null},700)},1800);if(['reach','walk'].includes(C.pose))pose('sit');return}
-  later(()=>{if(C.treat!==t)return;const go=()=>{const target=C.treatX-W()/2;walkTo(target,Math.abs(target-C.x)>300?300:210,'walk',()=>{pose('sit');feed(false)})};
-    if(C.pose==='sleep'){C.awakeSince=now();pose('sit');mood('sniff',900);say('*sniff*',1000);later(go,950)}else if(C.y>2)jumpTo(dockR().right+8,0,go,30);else go()},470);
-}
-function feed(fromHand){const t=C.treat;if(!t)return;C.drag=false;jar.classList.remove('open');C.cb=null;C.busy=true;C.treat=null;
-  if(fromHand){const h=head();t.style.left=h.mx+'px';t.style.top=(h.my+6)+'px'}
-  pose('eat');mood('',0);say(pick(['nom nom','*munch munch*','mmm!']),1500);SFX.play('crunch');
-  requestAnimationFrame(()=>t.classList.add('bite'));later(()=>t.remove(),1500);
-  later(()=>{C.busy=false;trust(fromHand?1.5:1);C.fed=C.fed.filter(x=>now()-x<300000);C.fed.push(now());
-    pose('sit');mood('happy',1400);hearts(fromHand?4:2);C.lastAct=now();
-    if(C.fed.length>=3){C.fullUntil=now()+240000;C.fed=[];saveC();updJar();say('so full…',1600);later(goSleep,1800)}
-    else{saveC();say(fromHand?'mrrp!':pick(['mrrp','thank you','one more?']),1400)}},1600);
-}
-
-/* ---------- pointer tracking ---------- */
-let lastT=0,lastX=0,lastY=0;
-document.addEventListener('pointermove',e=>{
-  const t=performance.now(),v=Math.hypot(e.clientX-lastX,e.clientY-lastY)/Math.max(1,t-lastT);lastT=t;lastX=e.clientX;lastY=e.clientY;
-  C.px=e.clientX;C.py=e.clientY;C.lastMove=now();if(v>1.6)C.lastFast=now();
-  if(desk.dataset.cat==='off')return;
-  if(C.drag){moveTreat(e.clientX,e.clientY);chase();look();return}
-  const d=dist();if(d<180)C.lastAct=now();
-  if(C.pose==='sleep'){if(d<90&&!C.mood&&Math.random()<.04)mood('twitch',360);return}
-  if((C.pose==='sneak'||C.pose==='crouch')&&C.mood!=='wiggle'&&d<160&&!C.busy&&n0()){say(pick(['!','eep']),800);goHide();return}
-  if(C.pose==='peek'&&d<110&&C.mood!=='duck')mood('duck',1000);
-  if(C.pose==='sit'&&!C.busy&&!C.chat){const r=head().r;if(e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom){C.strokes=C.strokes.filter(x=>now()-x<1200);C.strokes.push(now());if(C.strokes.length>26){C.strokes=[];poke()}}}
-  look();
-});
-const n0=()=>C.hiding;
-document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
-
-/* ---------- slow life: blinks, hiding, naps ---------- */
-setInterval(()=>{
-  if(desk.dataset.cat==='off'||C.drag)return;
-  const d=dist(),n=now();
-  C.hiding=['peek','crouch','sneak'].includes(C.pose)&&C.x>home()+4;
-  if(C.pose==='sleep'){if(n>C.sleepUntil&&n-C.lastAct>4000)wake('natural');return}
-  if(C.busy||C.jump)return;
-  if(C.hiding&&['peek','crouch'].includes(C.pose)){
-    const calm=n-C.lastPoke>4500&&n-(C.hideAt||0)>7000&&d>230&&n-C.lastFast>1400;
-    if(calm&&!C.mood){const nx=Math.max(home(),C.x-(C.pose==='peek'?34:24));
-      walkTo(nx,55,'sneak',()=>{if(C.x<=home()+1){C.dir=-1;pose('sit');C.hiding=false;C.cameOut=now();say(pick(['mrrp?','…hi','*sniff*']),1400);C.lastAct=now()}else pose('crouch')})}
-    else if(C.pose==='peek'&&Math.random()<.25)mood('blink',170);
-    return}
-  if(C.pose==='sit'&&!C.mood&&!C.chat){
-    if(d<120&&n-C.lastMove>1800&&n-C.lastSlow>9000){C.lastSlow=n;mood('slow',1400);say(pick(['…','*slow blink*']),1300);trust(.5);return}
-    const r=Math.random();if(r<.2)mood('blink',170);else if(r<.26)mood('twitch',360);
-  }
-},1100);
-
-/* ---------- conversation ---------- */
-const V=(()=>{try{return JSON.parse(localStorage.getItem('mochiVisitor')||'null')||{}}catch(e){return{}}})();
-V.answers=V.answers||[];V.stage=V.stage||0;V.name=V.name||'';
-if(!V.id){V.id=Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{localStorage.setItem('mochiVisitor',JSON.stringify(V))}catch(e){}}
-const saveV=()=>{try{localStorage.setItem('mochiVisitor',JSON.stringify(V))}catch(e){}};
-let lastTalk=0;
-async function record(q,a){V.answers.push({q,a,t:now()});saveV();
-  try{await fetch('/api/mochi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:V.id,name:V.name||'',q:String(q).slice(0,40),a:String(a).slice(0,500)})})}catch(e){}}
-function nm(){return V.name?`, <b>${esc(V.name)}</b>`:''}
-function typeInto(el,html,cb){el.innerHTML='';const tmp=document.createElement('div');tmp.innerHTML=html;const txt=tmp.textContent;let i=0;
-  const step=()=>{i+=2;if(i>=txt.length){el.innerHTML=html;cb&&cb();return}el.textContent=txt.slice(0,i);type.t=setTimeout(step,16)};clearTimeout(type.t);step()}
-function type(){}
-function openChat(html,ui){if(!C.chat)SFX.play('softmeow');C.chat=true;C.busy=true;C.cb=null;if(!['sit','peek'].includes(C.pose))pose('sit');bub.classList.remove('show');
-  chatEl.hidden=false;chatEl.classList.toggle('left',C.x<300);sheetChat();chatUI.innerHTML='';paint();lastTalk=now();
-  clearTimeout(openChat.idle);const arm=()=>{clearTimeout(openChat.idle);openChat.idle=setTimeout(()=>{if(C.chat&&!chatEl.contains(document.activeElement))closeChat(true)},30000)};arm();chatEl.oninput=arm;chatEl.onpointerdown=e=>{e.stopPropagation();arm()};
-  typeInto(chatMsg,html,()=>renderUI(ui))}
-function closeChat(silent){if(!C.chat)return;C.chat=false;C.busy=false;chatEl.hidden=true;lastTalk=now();paint();if(!silent)say(pick(['mrrp.','ok!','*flicks tail*']),1000)}
-chatEl.querySelector('.cc-x').onclick=()=>closeChat();
-/* On phones the chat is a bottom sheet pinned to the screen (the cat moves around and sits near the right edge, which cut it off). */
-function sheetChat(){const ph=matchMedia('(max-width:760px)').matches,desk=document.getElementById('desk');
-  if(ph&&chatEl.parentNode!==desk)desk.appendChild(chatEl);else if(!ph&&chatEl.parentNode!==cat)cat.appendChild(chatEl);
-  chatEl.classList.toggle('sheet',ph)}
-(()=>{const vv=window.visualViewport;if(!vv)return;const f=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);chatEl.style.setProperty('--kb',kb+'px')};vv.addEventListener('resize',f);vv.addEventListener('scroll',f)})();
-function renderUI(ui){chatUI.innerHTML='';if(!ui)return;
-  const addChips=()=>(ui.chips||[]).forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cc-chip'+(c.pri?' pri':'');b.textContent=c.t;b.onclick=c.fn;chatUI.appendChild(b)});
-  if(ui.inputLast)addChips();
-  if(ui.input){const f=document.createElement('form');f.className='cc-form';f.innerHTML=`<input type="${ui.input.type||'text'}" maxlength="${ui.input.max||120}" placeholder="${esc(ui.input.ph||'')}" aria-label="${esc(ui.input.ph||'Your answer')}"><button type="submit">Send</button>`;
-    f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return;ui.input.done(v)};chatUI.appendChild(f);if(!ui.inputLast&&!TOUCH)setTimeout(()=>{const ae=document.activeElement;if(!ae||ae===document.body||chatEl.contains(ae)||cat.contains(ae))f.querySelector('input').focus({preventScroll:true})},30)}
-  if(!ui.inputLast)addChips();
-}
-const moreChip={t:'Ask me about Rohan',fn:()=>askMenu()};
-const byeChip={t:'Bye, OGGY',fn:()=>closeChat()};
-function book(){openBook();record('action','opened booking link')}
-function askEmail(q){openChat(`Leave your email and I’ll make sure Rohan sees it${nm()}. Only he will read it.`,{input:{type:'email',ph:'you@example.com',max:120,done:v=>{record(q||'email',v);V.email=v;saveV();trust(.5);openChat('Got it! I’ll put it right on his keyboard. Where he can’t miss it.',{chips:[moreChip,byeChip]})}},chips:[{t:'Never mind',fn:()=>closeChat()}]})}
-/* OGGY never starts a conversation by himself: he only talks when a visitor taps him or picks “Talk to OGGY”. */
-
-/* ---------- move OGGY and the treat jar: press and hold for half a second, then drag anywhere ---------- */
-const HOLD=450;
-const saveFree=()=>{try{if(C.free)localStorage.setItem('catFree',JSON.stringify({fx:C.fx,fy:C.fy}));else localStorage.removeItem('catFree')}catch(e){}};
-const saveJar=p=>{try{p?localStorage.setItem('jarPos',JSON.stringify(p)):localStorage.removeItem('jarPos')}catch(e){}};
-function placeJar(){let p=null;try{p=JSON.parse(localStorage.getItem('jarPos')||'null')}catch(e){}
-  if(!p){jar.style.left=jar.style.top=jar.style.right=jar.style.bottom='';jar.style.position='';return}
-  const w=jar.offsetWidth||46,h=jar.offsetHeight||56;jar.style.position='fixed';jar.style.right='auto';jar.style.bottom='auto';
-  jar.style.left=clamp(p.fx*innerWidth,0,innerWidth-w)+'px';jar.style.top=clamp(p.fy*innerHeight,50,innerHeight-h)+'px'}
-function holdToCarry(el,{onStart,onMove,onEnd,onTap,shouldIgnore}){
-  let st=null;
-  el.addEventListener('pointerdown',e=>{if(e.button!==0||(shouldIgnore&&shouldIgnore(e)))return;
-    st={id:e.pointerId,x:e.clientX,y:e.clientY,carry:false,moved:false,e0:e};
-    st.t=setTimeout(()=>{if(!st||st.moved)return;st.carry=true;try{el.setPointerCapture(st.id)}catch(x){}onStart(st.e0);if(navigator.vibrate)try{navigator.vibrate(12)}catch(x){}},HOLD)},true);
-  el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
-    if(!st.carry){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8){st.moved=true;clearTimeout(st.t)}return}
-    e.preventDefault();onMove(e)},true);
-  const up=e=>{if(!st||e.pointerId!==st.id)return;clearTimeout(st.t);const s2=st;st=null;if(s2.carry){onEnd(e);e.stopPropagation()}else if(!s2.moved)onTap&&onTap(e,s2)};
-  el.addEventListener('pointerup',up,true);el.addEventListener('pointercancel',up,true);
-  el.addEventListener('contextmenu',e=>{if(st&&st.carry)e.preventDefault()});
-  return ()=>st&&st.carry}
-/* OGGY */
-const carryingCat=holdToCarry(cat,{
-  shouldIgnore:e=>!!e.target.closest('.cat-chat,.cat-talk'),
-  onTap(){poke()},
-  onStart(){C.carry=true;C.busy=true;C.jump=null;C.cb=null;C.free=false;closeChat(true);mood('',0);pose('sit');cat.classList.add('carried');say('wheee!',900);try{SFX.play('softmeow')}catch(x){}},
-  onMove(e){C.x=clampX(e.clientX-W()/2);C.y=clamp(innerHeight-e.clientY-baseB()-W()*0.3,0,innerHeight-160);C.tx=C.x},
-  onEnd(){C.carry=false;cat.classList.remove('carried');C.busy=false;
-    if(C.y<26){C.y=0;C.free=false;C.lastAct=now();say('*lands*',900)}
-    else{C.free=true;C.fx=C.x/innerWidth;C.fy=C.y/innerHeight;C.lastAct=now();say(pick(['my spot now.','hm. nice view.','*sits*']),1300)}
-    saveFree();pose('sit');paint()}});
-cat.addEventListener('dblclick',e=>{if(C.free){C.free=false;saveFree();C.busy=true;say('back to roaming',1000);jumpTo(clampX(home()),0,()=>{C.busy=false;pose('sit')},40)}});
-cat.style.webkitTouchCallout='none';cat.style.userSelect='none';
-/* the treat jar */
-let jarSt=null;
-const jarCarrying=holdToCarry(jar,{
-  onStart(e){jarSt={dx:e.clientX-jar.getBoundingClientRect().left,dy:e.clientY-jar.getBoundingClientRect().top};jar.classList.add('carried');jar.style.position='fixed';jar.style.right='auto';jar.style.bottom='auto'},
-  onMove(e){const w=jar.offsetWidth,h=jar.offsetHeight;jar.style.left=clamp(e.clientX-jarSt.dx,0,innerWidth-w)+'px';jar.style.top=clamp(e.clientY-jarSt.dy,50,innerHeight-h)+'px'},
-  onEnd(){jar.classList.remove('carried');const r=jar.getBoundingClientRect();saveJar({fx:r.left/innerWidth,fy:r.top/innerHeight});say('treats go here now.',1100)}});
-/* a quick press-and-drag on the jar still pulls a treat out, exactly as before */
-jar.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(e.button!==0)return;
-  const x0=e.clientX,y0=e.clientY,id=e.pointerId;let started=false;
-  const mv=ev=>{if(ev.pointerId!==id||started||jarCarrying())return;if(Math.hypot(ev.clientX-x0,ev.clientY-y0)>6){started=true;cleanup();jarDown(ev)}};
-  const up=ev=>{if(ev.pointerId===id)cleanup()};
-  const cleanup=()=>{removeEventListener('pointermove',mv,true);removeEventListener('pointerup',up,true);removeEventListener('pointercancel',up,true)};
-  addEventListener('pointermove',mv,true);addEventListener('pointerup',up,true);addEventListener('pointercancel',up,true)});
-jar.style.webkitTouchCallout='none';
-/* restore where they were left */
-try{const f=JSON.parse(localStorage.getItem('catFree')||'null');if(f&&typeof f.fx==='number'){C.free=true;C.fx=f.fx;C.fy=f.fy;C.x=clampX(f.fx*innerWidth);C.tx=C.x;C.y=clamp(f.fy*innerHeight,0,innerHeight-160);paint()}}catch(e){}
-placeJar();
-function setCatPos(v){desk.dataset.catpos=v;try{localStorage.setItem('catPos',v)}catch(e){}C.free=false;saveFree();C.busy=false;C.jump=null;C.cb=null;if(C.y>0){C.y=0}C.x=home();C.tx=C.x;saveJar(null);placeJar();C.dir=v==='left'?1:-1;pose(C.pose==='sleep'?'sleep':'sit');paint()}
-function resetPlaces(){setCatPos('roam')}
-/* visitors asking about Rohan */
-function answer(k){return MOCHI_TALK[k]}
-function reply(k,q){record('asked',q);const extra={available:[{t:'Book a call',pri:1,fn:()=>{book();closeChat(true)}}],contact:[{t:'Book a call',pri:1,fn:()=>{book();closeChat(true)}},{t:'Leave my email',fn:()=>askEmail('contact-email')}],price:[{t:'Book a call',pri:1,fn:()=>{book();closeChat(true)}}],
-    unknown:[{t:'Yes, pass it on',pri:1,fn:()=>{record('question-for-rohan',q);openChat('Done! I’ll meow it to him.',{chips:[moreChip,byeChip]})}}]}[k]||[];
-  openChat(answer(k),{chips:extra.concat([{t:'Ask something else',fn:()=>askMenu()},byeChip])})}
-function classify(q){const s=q.toLowerCase();
-  if(/boss|manager|work(ing)? (with|for)|kind|nice|friendly|how is/.test(s))return'boss';
-  if(/price|cost|rate|budget|charge|expensive|fee|how much/.test(s))return'price';
-  if(/available|free|busy|open to|taking|hire|project/.test(s))return'available';
-  if(/contact|email|reach|call|talk to|meet/.test(s))return'contact';
-  if(/\bai\b|chatgpt|claude|midjourney|artificial/.test(s))return'ai';
-  if(/logo|brand|identity|design|name|naming|what does|service|do you do|does he do/.test(s))return'what';
-  if(/who|rohan|about him/.test(s))return'who';
-  if(/cat|mochi|oggy|you\b|your name/.test(s))return'cat';
-  return'unknown'}
-/* OGGY's brain (js/oggy-brain.mjs) answers from the live site: services, prices, process, FAQ, journal. Loaded on the first question. */
-let BRAIN=null;const brain=()=>BRAIN||(BRAIN=import('/js/oggy-brain.mjs').catch(e=>{BRAIN=null;throw e}));
-const bctx=()=>({P,S:(typeof SITE!=='undefined'&&SITE&&SITE.s)||{},journal:(typeof JOURNAL!=='undefined'?JOURNAL:[]),name:V.name||''});
-function act(c,q){const d=String(c.do||'');
-  if(d.startsWith('open:')){record('action','opened '+d.slice(5));openApp(d.slice(5));closeChat(true);say(pick(['here you go!','right this way!','*points paw*']),1400);return}
-  if(d.startsWith('url:')){record('action','opened '+d.slice(4));window.open(d.slice(4),'_blank','noopener');return}
-  if(d.startsWith('say:'))return brainSay(d.slice(4));
-  if(d==='menu-who')return brainSay('who');
-  if(d==='book'){book();closeChat(true);return}
-  if(d==='email'){record('action','email link');location.href='mailto:'+(P.email||'');return}
-  if(d==='leave-email')return askEmail('contact-email');
-  if(d==='pass'){record('question-for-rohan',q||'(no question)');hearts(2);openChat(`Done! I’ll make sure ${esc(String(P.name||'Rohan').split(' ')[0])} sees it. ${V.email?'He’ll reply to your email.':'Want him to reply by email?'}`,{chips:(V.email?[]:[{t:'Leave my email',pri:1,fn:()=>askEmail('reply-email')}]).concat([moreChip,byeChip])});return}
-  if(d==='bye')return closeChat();
-  askMenu()}
-function show(r,q){const chips=(r.chips||[]).slice(0,3).map((c,i)=>({t:c.t,pri:c.pri||i===0,fn:()=>act(c,q)}));
-  openChat(r.html,{chips:chips.concat([{t:'Ask something else',fn:()=>askMenu()}]),inputLast:true,input:{ph:'Ask me anything…',max:200,done:v=>brainReply(v)}})}
-async function brainReply(q){record('asked',q);try{const m=await brain();show(m.think(q,bctx()),q)}catch(e){reply(classify(q),q)}}
-async function brainSay(id){try{const m=await brain();const r=m.say(id,bctx());if(r)return show(r,id)}catch(e){}askMenu()}
-function askMenu(){if(!awake())wake();brain().catch(()=>{});
-  openChat(`What would you like to know${nm()}?`,{chips:[
-    {t:'Who is Rohan?',fn:()=>{record('asked','Who is Rohan?');brainSay('who')}},{t:'What does he do?',fn:()=>{record('asked','What does he do?');brainSay('services')}},
-    {t:'How much does it cost?',fn:()=>{record('asked','How much does it cost?');brainSay('price')}},{t:'Is he available?',fn:()=>{record('asked','Is he available?');brainSay('available')}},
-    {t:'How do I contact him?',fn:()=>{record('asked','How do I contact him?');brainSay('contact')}},{t:'Show me his work',fn:()=>{record('asked','Show me his work');openApp('projects');closeChat(true);say('here you go!',1400)}}],
-    inputLast:true,input:{ph:'Or ask anything…',max:200,done:v=>brainReply(v)}})}
-
-/* ---------- hooks ---------- */
-window.MOCHI={setPos:v=>setCatPos(v),reset:()=>resetPlaces(),wake:()=>wake(),sleep:()=>{if(C.pose!=='sleep')goSleep()},asleep:()=>C.pose==='sleep',talk:askMenu,
-  /* what OGGY's own life (js/oggy.mjs, owner mode only) uses to move him */
-  rig:{C,pose,mood,say,hearts,walkTo,jumpTo,goSleep,wake,paint,W,home,dockR,clampX,baseB,head,awake,cat,jar}};
-addEventListener('resize',()=>{if(C.free&&C.fx!=null){C.x=clampX(C.fx*innerWidth);C.y=clamp(C.fy*innerHeight,0,innerHeight-160);C.tx=C.x;placeJar();return}C.x=clampX(C.x);C.tx=clampX(C.tx);if(C.y>2){C.y=0;pose('sit')}if(catPos()!=='roam'&&!C.jump&&!MOVING.has(C.pose)){C.x=home();C.tx=C.x}placeJar()});
-})();
-
 plantShelf();ftPill();
 shelf();tick();setInterval(tick,15000);
 

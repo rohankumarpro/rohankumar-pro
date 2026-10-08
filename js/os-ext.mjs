@@ -175,6 +175,8 @@ window.addEventListener("online", () => toast("Back online"));
 window.__extReady = true;
 setTimeout(() => import("/js/os-more.mjs").catch((e) => console.error("os-more", e)), 400);
 import("/js/ctx-apps.mjs").catch((e) => console.error("ctx-apps", e));
+// the site's own visitor counts (owner only sees them, in the Analytics app)
+import("/js/track.mjs").then((m) => m.startTracking()).catch(() => {});
 
 /* ---------- visitor analytics: Microsoft Clarity (recordings and heatmaps) ---------- */
 // Visitors on the live site only. Never the owner (signed in now, or ever before on this browser), the desktop app,
