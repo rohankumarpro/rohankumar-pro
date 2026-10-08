@@ -15,7 +15,7 @@ export const CODE_POSTS = [
     excerpt: "Dribbble has featured me in Client-Approved Branding Agencies in 2026, a list of branding studios and independent designers recommended for the work their clients approved.",
     seoTitle: "Featured by Dribbble: Client-Approved Branding Agencies 2026",
     seoDesc: "Rohan Kumar is featured in Dribbble's Client-Approved Branding Agencies in 2026, alongside 17 branding studios and designers.",
-    img: "/api/u?f=c3e80e68bb.png",
+    img: "/img/journal/dribbble-select-2026.webp", // shipped with the code so it shows on previews too
     imgAlt: "Selected by Dribbble: the Dribbble Select Top Branding Agency badge for @rohankumarpro",
     body: `I'm happy to share that Dribbble has featured me in **[Client-Approved Branding Agencies in 2026](https://dribbble.com/stories/2026/08/01/client-approved-branding-agencies-in-2026#rohan-kumar)**.
 
