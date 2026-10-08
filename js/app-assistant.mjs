@@ -121,11 +121,20 @@ function web(body) {
   const ta = $("textarea", body), log = $(".as-log", body), top = $(".as-top", body), hero = $(".as-hero", body), cards = $(".as-cards", body), form = $(".as-ask", body), go = $(".as-go", body);
   let contents = [], busy = false;
   // which Gemini model answers: the list comes from the key itself, the choice is remembered on this device
-  const pick = $(".as-model select", body), saved = (() => { try { return localStorage.getItem("rkAsModel") || ""; } catch { return ""; } })();
-  const fill = (list, def) => { const ids = list.map((m) => m.id), want = saved && (ids.includes(saved) || !ids.length) ? saved : def; if (want && !ids.includes(want)) list = [{ id: want, name: want }, ...list]; pick.replaceChildren(...list.map((m) => h("option", { value: m.id }, m.name === m.id ? m.id : `${m.name} (${m.id})`))); if (want) pick.value = want; };
-  fill([], "gemini-flash-latest");
-  pick.onchange = () => { try { localStorage.setItem("rkAsModel", pick.value); } catch {} toast("Model: " + pick.value); };
-  api("/api/assistant?a=models").then((r) => { if (r.ok && r.data.models) fill(r.data.models, r.data.default || "gemini-flash-latest"); });
+  const pick = $(".as-model select", body), DEF = "gemini-flash-latest";
+  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) || ""; localStorage.setItem(k, v); } catch {} return ""; };
+  const bad = () => { try { return JSON.parse(store("rkAsBad") || "[]"); } catch { return []; } };
+  let known = [], dflt = DEF;
+  // models Gemini refused ("not available to your key") are hidden on this device
+  const fill = (list = known, def = dflt) => {
+    known = list; dflt = def; const hide = bad(), saved = store("rkAsModel");
+    let shown = list.filter((m) => !hide.includes(m.id)); if (!shown.length) shown = [{ id: def, name: def }];
+    const ids = shown.map((m) => m.id), want = ids.includes(saved) ? saved : ids.includes(def) ? def : ids[0];
+    pick.replaceChildren(...shown.map((m) => h("option", { value: m.id }, m.name === m.id ? m.id : `${m.name} (${m.id})`))); pick.value = want;
+  };
+  fill([], DEF);
+  pick.onchange = () => { store("rkAsModel", pick.value); toast("Model: " + pick.value); };
+  api("/api/assistant?a=models").then((r) => { if (r.ok && r.data.models) fill(r.data.models, r.data.default || DEF); });
 
   const scroll = () => requestAnimationFrame(() => { const w = $(".as-w", body); w.scrollTop = w.scrollHeight; });
   const say = (who, node) => { const m = h("div", { class: "as-msg " + who }, node); log.append(m); scroll(); return m; };
@@ -138,6 +147,7 @@ function web(body) {
   const steps = (from, all) => { const names = []; for (const t of all.slice(from)) if (t.role === "model") for (const p of t.parts) if (p.functionCall) names.push(human(p.functionCall.name)); if (names.length) say("step", h("small", {}, "Looked at: " + [...new Set(names)].join(", "))); };
 
   const problem = (d, retry) => {
+    if (d && d.code === "bad_model") { const dead = pick.value; store("rkAsBad", JSON.stringify([...new Set([...bad(), dead])])); fill(); toast(`${dead} is not available to your key. Hidden. Using ${pick.value}.`); }
     const setup = d && (d.code === "no_key" || d.code === "bad_key");
     const node = h("div", { class: "as-card as-err" }, h("p", {}, (d && d.error) || "Something went wrong."),
       d && d.detail ? h("p", { class: "as-mut" }, "Gemini said: " + d.detail) : null,

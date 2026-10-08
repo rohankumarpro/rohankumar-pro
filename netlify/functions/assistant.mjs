@@ -116,7 +116,10 @@ async function models() {
     if (!r.ok) return modelsList;
     const list = ((await r.json()).models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent") && /^models\/gemini-/.test(m.name) && !/image|tts|embed|live|audio|robot|computer|aqa|learnlm|-exp-/.test(m.name))
       .map((m) => ({ id: m.name.slice(7), name: m.displayName || m.name.slice(7) })).sort((a, b) => a.id.localeCompare(b.id));
-    modelsList = list; modelsAt = Date.now();
+    // Google keeps older models in the list that new keys can no longer use: show the newest generation and the "-latest" shortcuts
+    const major = Math.max(0, ...list.map((m) => +(m.id.match(/^gemini-(\d+)/) || [])[1] || 0));
+    const fresh = list.filter((m) => /-latest$/.test(m.id) || (+(m.id.match(/^gemini-(\d+)/) || [])[1] || 0) === major);
+    modelsList = fresh.length ? fresh : list; modelsAt = Date.now();
   } catch {}
   return modelsList;
 }
