@@ -53,7 +53,9 @@ export default async (req) => {
   const u = new URL(req.url), q = Object.fromEntries(u.searchParams), m = req.method, event = { headers: Object.fromEntries(req.headers) };
   if (m === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   const store = getStore({ name: isPreviewHost(event) ? "site-content-dev" : "site-content", consistency: "strong" });
-  const base = origin(req), r = q.r || "";
+  const base = origin(req), path = u.pathname;
+  // Netlify hands this function the address that was asked for (not the rewritten one), so the step comes from the path
+  const r = q.r || (path.startsWith("/.well-known/oauth-protected-resource") ? "resource" : path.startsWith("/.well-known/oauth-authorization-server") ? "as" : (path.match(/^\/oauth\/(register|authorize|token)\/?$/) || [])[1] || "");
   try {
     if (r === "resource") return J({ resource: base + "/api/mcp", authorization_servers: [base], bearer_methods_supported: ["header"], resource_name: "Rohan's workspace" });
     if (r === "as") return J({ issuer: base, authorization_endpoint: base + "/oauth/authorize", token_endpoint: base + "/oauth/token", registration_endpoint: base + "/oauth/register", response_types_supported: ["code"], grant_types_supported: ["authorization_code", "refresh_token"], code_challenge_methods_supported: ["S256"], token_endpoint_auth_methods_supported: ["none"], scopes_supported: ["workspace"] });
