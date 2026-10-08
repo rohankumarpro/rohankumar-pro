@@ -138,8 +138,9 @@ function web(body) {
   const steps = (from, all) => { const names = []; for (const t of all.slice(from)) if (t.role === "model") for (const p of t.parts) if (p.functionCall) names.push(human(p.functionCall.name)); if (names.length) say("step", h("small", {}, "Looked at: " + [...new Set(names)].join(", "))); };
 
   const problem = (d, retry) => {
-    const setup = d && (d.code === "no_key" || d.code === "bad_key" || d.code === "bad_model");
+    const setup = d && (d.code === "no_key" || d.code === "bad_key");
     const node = h("div", { class: "as-card as-err" }, h("p", {}, (d && d.error) || "Something went wrong."),
+      d && d.detail ? h("p", { class: "as-mut" }, "Gemini said: " + d.detail) : null,
       setup ? h("p", { class: "as-mut" }, "Get a free key at aistudio.google.com, then in Netlify open Site configuration, Environment variables and add GEMINI_API_KEY with it. Redeploy once and this chat starts working.") : null,
       retry ? h("button", { class: "btn tonal", type: "button", onclick: () => { node.closest(".as-msg")?.remove(); post(); } }, "Try again") : null);
     say("bot", node);

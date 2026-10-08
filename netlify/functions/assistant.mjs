@@ -63,7 +63,7 @@ function system() {
     "Anything that changes data waits for Rohan's Apply button, so just call the tool; do not ask for permission in words first. Only say something is done after the tool has succeeded. Prefer appending to pages over replacing them. " +
     "Keep answers short and plain. No emoji. Use short lists only when they help.";
 }
-class Soft extends Error { constructor(code, message) { super(message); this.code = code; } }
+class Soft extends Error { constructor(code, message, detail) { super(message); this.code = code; this.detail = detail; } }
 const DEFAULT_MODEL = () => (process.env.GEMINI_MODEL || "gemini-flash-latest").replace(/[^\w.-]/g, "");
 const okModel = (m) => typeof m === "string" && /^gemini-[\w.-]{1,50}$/.test(m);
 async function gemini(contents, pick) {
@@ -76,11 +76,12 @@ async function gemini(contents, pick) {
   if (!r.ok) {
     let msg = ""; try { msg = (await r.json())?.error?.message || ""; } catch {}
     console.error("assistant gemini", r.status, msg.slice(0, 200));
-    if (r.status === 429) throw new Soft("rate", "Gemini's free limit is reached for now. Try again in a little while.");
-    if (r.status === 400 && /api key/i.test(msg)) throw new Soft("bad_key", "Gemini did not accept the key.");
-    if (r.status === 403 || r.status === 401) throw new Soft("bad_key", "Gemini did not accept the key.");
-    if (r.status === 404) throw new Soft("bad_model", "Gemini does not know that model. Set GEMINI_MODEL to one your key can use.");
-    throw new Soft("busy", "Gemini had a problem (" + r.status + "). Try again.");
+    const why = `${r.status}: ${msg}`.slice(0, 300);
+    if (r.status === 429) throw new Soft("rate", "Gemini's free limit is reached for now. Try again in a little while.", why);
+    if (r.status === 400 && /api key/i.test(msg)) throw new Soft("bad_key", "Gemini did not accept the key.", why);
+    if (r.status === 403 || r.status === 401) throw new Soft("bad_key", "Gemini did not accept the key.", why);
+    if (r.status === 404) throw new Soft("bad_model", "Gemini could not use that model. Try another one in the Model list.", why);
+    throw new Soft("busy", "Gemini had a problem (" + r.status + "). Try again.", why);
   }
   const data = await r.json(), cand = data.candidates?.[0], parts = cand?.content?.parts;
   if (!parts?.length) throw new Soft("empty", data.promptFeedback?.blockReason ? "Gemini would not answer that." : "Gemini sent an empty answer. Try again.");
@@ -155,7 +156,7 @@ export default async (req) => {
     return J({ contents, more: true });
   } catch (e) {
     if (wrote) await snap(store, preview);
-    if (e instanceof Soft) return J({ error: e.message, code: e.code }, e.code === "no_key" ? 503 : 502);
+    if (e instanceof Soft) return J({ error: e.message, code: e.code, detail: e.detail }, e.code === "no_key" ? 503 : 502);
     console.error("assistant", e); return J({ error: "Something went wrong. Try again.", code: "error" }, 500);
   }
 };
