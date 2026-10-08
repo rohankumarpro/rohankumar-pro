@@ -313,7 +313,7 @@ function newApps() {
   if (typeof ART !== "undefined") Object.assign(ART, ART_ADD);
   const SV = { id: "services", title: "Services", shape: "clover", color: "c1", glyph: G.work || G.folder, w: 640, h: 640, render: () => "" };
   const BK = { id: "book", title: "Book a call", shape: "cookie", color: "c2", glyph: G.mail, w: 560, h: 680, render: () => "" };
-  const BD = { id: "boards", title: "Boards", shape: "squircle", color: "c5", glyph: G.docs || G.folder, w: 1320, h: 840, ownerOnly: true, render: () => "" };
+  const BD = { id: "boards", title: "Workspace", shape: "squircle", color: "c5", glyph: G.docs || G.folder, w: 1320, h: 840, ownerOnly: true, render: () => "" };
   const DZ = { id: "design", title: "Design", shape: "squircle", color: "c1", glyph: G.palette || G.docs || G.folder, w: 1380, h: 860, ownerOnly: true, render: () => "" };
   const AN = { id: "analytics", title: "Analytics", shape: "squircle", color: "c4", glyph: G.chart || G.spark, w: 1040, h: 780, ownerOnly: true, render: () => "" };
   registerApp(BD); registerApp(DZ); registerApp(AN); registerApp(SV); registerApp(BK);

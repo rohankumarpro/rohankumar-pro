@@ -1,12 +1,15 @@
 // Safety copies. A snapshot is the same thing the Download backup button gives you, kept on the server.
 // The last SNAP_KEEP are kept; older ones are removed from the backup store only (never from the live content).
 const BINARY = /^(photo-|up-|vault-file-)/;
+// single analytics hits (one tiny record per page view) and rate-limit counters are left out; the day summaries (an-day-) are kept
+const SKIP = /^(an-h-|rl-)/;
 export const SNAP_KEEP = 10, SNAP_EVERY = 24 * 3600_000;
 
 export async function collect(store) {
   const { blobs } = await store.list();
   const data = {}, files = [];
   await Promise.all(blobs.map(async ({ key }) => {
+    if (SKIP.test(key)) return;
     if (BINARY.test(key)) { files.push(key); return; }
     try { const v = await store.get(key, { type: "json" }); if (v != null) data[key] = v; } catch {}
   }));

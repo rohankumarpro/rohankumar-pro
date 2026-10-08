@@ -7,6 +7,11 @@ import { createCanvas, menu, closeMenu, I, shortcuts } from "/js/board-canvas.mj
 import { pageWindows, download, Bodies } from "/js/board-page.mjs";
 import { mountDb } from "/js/board-db.mjs";
 import { COVERS, coverCss, COLORS } from "/js/board-covers.mjs";
+import { WS, DB, fmtDate } from "/js/ws-core.mjs";
+import { mountDatabase, WI, choose, askText, iconPick } from "/js/ws-db.mjs";
+import { openDoc } from "/js/ws-page.mjs";
+
+const DB_TPL = { blank: ["Empty database", "table", "Your own columns"], tasks: ["Tasks", "checkbox", "To do, doing, done, with due dates"], content: ["Content calendar", "video", "Ideas to published, by date"], projects: ["Projects", "rocket", "Clients, deadlines and budgets"], reading: ["Reading list", "book", "Books with covers and notes"] };
 
 if (!document.querySelector('link[href="/css/boards.css"]')) document.head.append(h("link", { rel: "stylesheet", href: "/css/boards.css" }));
 
@@ -75,7 +80,8 @@ export async function boardsApp(body, key) {
   }
   body.innerHTML = `<div class="ba bdc" data-side="${ls.get("baSide", !mobile()) ? "on" : "off"}"><aside class="ba-side" aria-label="Boards"></aside><section class="ba-main"></section><div class="ba-scrim"></div></div>`;
   const root = $(".ba", body), side = $(".ba-side", root), main = $(".ba-main", root);
-  const A = { boards: [], cur: null, cv: null, pw: null, view: "home", status: "saved", q: "", openB: new Set(ls.get("baOpenB", [])), fetching: new Set() };
+  const A = { boards: [], cur: null, cv: null, pw: null, view: "home", status: "saved", q: "", openB: new Set(ls.get("baOpenB", [])), openP: new Set(ls.get("baOpenP", [])), fetching: new Set(), hist: [] };
+  const offWs = WS.on(() => { if (body.isConnected) { drawSide(); if (A.view === "home") drawHomeWs(); } });
   let sideT = 0; const sideSoon = () => { clearTimeout(sideT); sideT = setTimeout(() => { if (!side.contains(document.activeElement) || !document.activeElement.matches("input")) drawSide(); }, 250); };
   // the pages on a board, for the sidebar: from the open board, the copy kept on this device, or the server
   function pagesOf(bid) {
@@ -85,7 +91,16 @@ export async function boardsApp(body, key) {
     if (!items && !A.fetching.has(bid)) { A.fetching.add(bid); api("/api/boards?id=" + bid).then((r) => { A.fetching.delete(bid); if (r.ok) { try { ls.set("bdDoc:" + bid, r.data.doc); } catch {} drawSide(); } }); }
     return (items || []).filter((x) => x.t === "page").sort((a, b) => a.y - b.y || a.x - b.x);
   }
-  R.handlers.boards = (b, k) => (k ? openBoard(k, "replace") : home("replace"));
+  R.handlers.boards = (b, k) => route(k, "replace");
+  function route(k, mode) {
+    const s = String(k || "").split("/");
+    if (!k) return home(mode);
+    if (s[0] === "page" && s[1]) return openPage(s[1], mode);
+    if (s[0] === "db" && s[1]) return s[2] ? openRow(s[1], s[2], { mode }) : openDbView(s[1], { mode });
+    if (s[0] === "bp" && s[1] && s[2]) return openBPage(s[1], s[2], { mode });
+    if (s[0] === "notes") return openNotes();
+    return openBoard(s[0], mode);
+  }
 
   async function load() { const r = await api("/api/boards"); if (r.ok) A.boards = r.data.boards; else if (!A.boards.length) A.boards = ls.get("baList", []); if (r.ok) ls.set("baList", A.boards.map((b) => ({ ...b, preview: b.preview }))); return r.ok; }
   const live = () => A.boards.filter((b) => !b.trashed).sort((a, b) => (b.fav - a.fav) || (b.updated - a.updated));
@@ -96,26 +111,46 @@ export async function boardsApp(body, key) {
 
   /* ----- sidebar ----- */
   function drawSide() {
-    const list = arranged(found()), bin = A.boards.filter((b) => b.trashed).length;
-    side.innerHTML = `<div class="ba-sh"><button class="ba-new" data-new>${I("plus", 20)}<span>New board</span></button><button class="ba-ib" data-tg title="Hide the sidebar" aria-label="Hide the sidebar">${I("panel-left", 18)}</button></div>
-      <label class="ba-search">${I("search", 18)}<input type="search" placeholder="Search boards" aria-label="Search boards" autocomplete="off" value="${esc(A.q)}"></label>
-      <nav class="ba-nav"><button class="ba-nv${A.view === "home" ? " on" : ""}" data-home>${I("home", 18)}<span>Home</span></button></nav>
+    const list = arranged(found()), bin = A.boards.filter((b) => b.trashed).length + WS.pages.filter((p) => p.trashed).length + WS.dbs.filter((d) => d.trashed).length;
+    const q = A.q.trim().toLowerCase(), hit = (t) => !q || String(t || "").toLowerCase().includes(q);
+    const pages = WS.pages.filter((p) => !p.trashed), dbs = WS.dbs.filter((d) => !d.trashed && hit(d.title));
+    const favs = [...pages.filter((p) => p.fav).map((p) => ({ k: "page", id: p.id, t: p.title || "Untitled", i: p.icon || "file-text" })), ...WS.dbs.filter((d) => d.fav && !d.trashed).map((d) => ({ k: "db", id: d.id, t: d.title || "Untitled database", i: d.icon || "db" })), ...live().filter((b) => b.fav).map((b) => ({ k: "board", id: b.id, t: name(b), i: b.icon || "grid" }))];
+    const kids = (pid) => pages.filter((p) => (p.parent || null) === pid).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const pageRow = (p, d = 0) => { const ch = kids(p.id), open = A.openP.has(p.id), on = A.view === "page" && A.curPage === p.id;
+      if (q && !hit(p.title) && !ch.some((c) => hit(c.title))) return "";
+      return `<button class="ba-row ba-pg${on ? " on" : ""}" style="--d:${d}" data-pg="${p.id}"><span class="ba-tw${open ? " open" : ""}" role="button" data-ptw="${p.id}" aria-label="${open ? "Hide" : "Show"} pages inside"${ch.length ? "" : " hidden"}>${I("chevron-right", 15)}</span><span class="ba-pi">${WI(p.icon && ICONS[p.icon] ? p.icon : "file-text", 16)}</span><span class="ba-rt">${esc(p.title || "Untitled")}</span></button>${open || q ? ch.map((c) => pageRow(c, d + 1)).join("") : ""}`; };
+    side.innerHTML = `<div class="ba-sh"><button class="ba-new" data-new>${I("plus", 20)}<span>New</span></button><button class="ba-ib" data-tg title="Hide the sidebar" aria-label="Hide the sidebar">${I("panel-left", 18)}</button></div>
+      <label class="ba-search">${I("search", 18)}<input type="search" placeholder="Search" aria-label="Search the workspace" autocomplete="off" value="${esc(A.q)}"></label>
+      <nav class="ba-nav"><button class="ba-nv${A.view === "home" ? " on" : ""}" data-home>${I("home", 18)}<span>Home</span></button><button class="ba-nv${A.view === "notes" ? " on" : ""}" data-notes>${I("pin", 18)}<span>Notes</span></button></nav>
+      <div class="ba-scroll">
+      ${favs.length && !q ? `<div class="ba-sec"><span>Favourites</span></div><div class="ba-list">${favs.map((f) => `<button class="ba-row" data-fav="${f.k}:${f.id}"><span class="ba-pi">${WI(ICONS[f.i] || f.i === "db" ? f.i : "file-text", 16)}</span><span class="ba-rt">${esc(f.t)}</span></button>`).join("")}</div>` : ""}
+      <div class="ba-sec"><span>Pages</span><button class="ba-sadd" data-newpage title="New page" aria-label="New page">${I("plus", 15)}</button></div>
+      <div class="ba-list">${kids(null).map((p) => pageRow(p)).join("") || `<p class="ba-none">${q ? "No page matches." : "No pages yet."}</p>`}</div>
+      <div class="ba-sec"><span>Databases</span><button class="ba-sadd" data-newdb title="New database" aria-label="New database">${I("plus", 15)}</button></div>
+      <div class="ba-list">${dbs.map((d) => `<button class="ba-row${A.view === "db" && A.curDb === d.id ? " on" : ""}" data-db="${d.id}"><span class="ba-pi">${WI(d.icon && ICONS[d.icon] ? d.icon : "db", 16)}</span><span class="ba-rt">${esc(d.title || "Untitled database")}</span>${d.count ? `<em class="ba-n">${d.count}</em>` : ""}</button>`).join("") || `<p class="ba-none">${q ? "No database matches." : "No databases yet."}</p>`}</div>
       <div class="ba-sec"><span>Your boards</span>${live().length ? `<em>${live().length}</em>` : ""}</div>
       <div class="ba-list" role="list">${list.map((b) => `<button class="ba-row${A.cur && A.cur.id === b.id ? " on" : ""}" role="listitem" data-open="${b.id}" draggable="${A.q ? "false" : "true"}"><span class="ba-th" style="${b.cover ? `background:${coverCss(b.cover) || `url('${esc(b.cover.src || "")}') center/cover`}` : ""}">${b.icon && ICONS[b.icon] ? I(b.icon, 14) : ""}</span><span class="ba-rt">${esc(name(b))}</span>${b.fav ? `<span class="ba-fav">${I("star", 13)}</span>` : ""}<span class="ba-tw${A.openB.has(b.id) ? " open" : ""}" role="button" data-tw="${b.id}" aria-label="${A.openB.has(b.id) ? "Hide pages" : "Show pages"}" title="${A.openB.has(b.id) ? "Hide pages" : "Show pages"}">${I("chevron-right", 15)}</span></button>${A.openB.has(b.id) ? subPages(b) : ""}`).join("") || `<p class="ba-none">${A.q ? "No board matches." : "No boards yet."}</p>`}</div>
+      </div>
       <nav class="ba-nav ba-nav2"><button class="ba-nv${A.view === "bin" ? " on" : ""}" data-bin>${I("trash", 18)}<span>Bin</span>${bin ? `<em>${bin}</em>` : ""}</button></nav>`;
     $("[data-tg]", side).onclick = () => toggleSide();
     const sq = $(".ba-search input", side);
     sq.oninput = () => { A.q = sq.value; const pos = sq.selectionStart; drawSide(); const n = $(".ba-search input", side); n.focus(); try { n.setSelectionRange(pos, pos); } catch {} if (A.view === "home") drawGrid(); };
     sq.onkeydown = (e) => { if (e.key === "Escape" && sq.value) { e.preventDefault(); sq.value = ""; sq.oninput(); } if (e.key === "Enter") { const f = found()[0]; if (f) openBoard(f.id); } };
-    $("[data-new]", side).onclick = (e) => newBoardMenu(e.currentTarget);
+    $("[data-new]", side).onclick = (e) => newMenu(e.currentTarget);
     $("[data-home]", side).onclick = () => home();
+    $("[data-notes]", side).onclick = () => { openNotes(); if (mobile()) setSide(false); };
+    $("[data-newpage]", side).onclick = () => newPage();
+    $("[data-newdb]", side).onclick = (e) => newDbMenu(e.currentTarget);
+    $$("[data-pg]", side).forEach((b) => (b.onclick = (e) => { const tw = e.target.closest("[data-ptw]"); if (tw) { e.stopPropagation(); const id = tw.dataset.ptw; A.openP.has(id) ? A.openP.delete(id) : A.openP.add(id); ls.set("baOpenP", [...A.openP]); drawSide(); return; } openPage(b.dataset.pg); if (mobile()) setSide(false); }));
+    $$("[data-db]", side).forEach((b) => (b.onclick = () => { openDbView(b.dataset.db); if (mobile()) setSide(false); }));
+    $$("[data-fav]", side).forEach((b) => (b.onclick = () => { const [k, id] = b.dataset.fav.split(":"); if (k === "page") openPage(id); else if (k === "db") openDbView(id); else openBoard(id); if (mobile()) setSide(false); }));
     $("[data-bin]", side).onclick = () => showBin();
     $$("[data-open]", side).forEach((b) => (b.onclick = (e) => {
       const tw = e.target.closest("[data-tw]");
       if (tw) { e.stopPropagation(); const id = tw.dataset.tw; A.openB.has(id) ? A.openB.delete(id) : A.openB.add(id); ls.set("baOpenB", [...A.openB]); drawSide(); return; }
       openBoard(b.dataset.open); if (mobile()) setSide(false);
     }));
-    $$("[data-sub]", side).forEach((x) => (x.onclick = () => { openBoard(x.dataset.board, "push", { page: x.dataset.sub }); if (mobile()) setSide(false); }));
+    $$("[data-sub]", side).forEach((x) => (x.onclick = () => { openBPage(x.dataset.board, x.dataset.sub); if (mobile()) setSide(false); }));
     wireArrange();
   }
   function subPages(b) {
@@ -147,19 +182,134 @@ export async function boardsApp(body, key) {
   /* ----- home: all boards ----- */
   async function home(mode = "push") {
     await leaveBoard();
-    A.view = "home"; A.cur = null; drawSide();
+    A.view = "home"; A.cur = null; A.where = { k: "home" }; A.hist = []; drawSide();
     const hr = new Date().getHours(), hi = hr < 5 ? "Working late" : hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
-    main.innerHTML = `<div class="ba-home"><header class="ba-hh"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><div><h1>${hi}</h1><p>Your boards for ideas, notes, scripts and moodboards.</p></div></header>
+    main.innerHTML = `<div class="ba-home"><header class="ba-hh"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><div><h1>${hi}</h1><p>${new Date().toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}. Your pages, databases, notes and boards in one place.</p></div></header>
+      <form class="wh-cap" autocomplete="off"><span class="wh-ci">${I("plus", 20)}</span><input name="t" maxlength="200" placeholder="Capture something: a page title, a task…" aria-label="Capture something"><div class="wh-cb"><button type="submit" data-to="page">${WI("file-text", 15)}<span>Page</span></button><button type="button" data-to="task">${WI("checkbox", 15)}<span>Task</span></button></div></form>
+      <div class="wh-ws"></div>
+      <div class="ba-gh"><h2>Start a board</h2></div>
       <section class="ba-tpl" aria-label="Start a board">${Object.entries(T).map(([k, t]) => `<button class="ba-tc" data-tpl="${k}"><span class="ba-tcv" style="background:${coverCss({ k: t.cover })}"><span class="ba-tci">${I(k === "blank" ? "plus" : t.icon, 22)}</span></span><b>${t.name}</b><small>${t.desc}</small></button>`).join("")}</section>
       <div class="ba-docs" hidden></div>
       <div class="ba-gh"><h2>Recent boards</h2><span class="ba-cnt"></span></div>
       <section class="ba-grid"></section></div>`;
-    drawGrid();
+    drawGrid(); drawHomeWs();
     $("[data-tg]", main).onclick = () => toggleSide();
     $$("[data-tpl]", main).forEach((b) => (b.onclick = () => newBoard(b.dataset.tpl)));
+    const cap = $(".wh-cap", main), ci = cap.querySelector("input");
+    cap.onsubmit = async (e) => { e.preventDefault(); const t = ci.value.trim(); if (!t) return ci.focus(); ci.value = ""; const p = await WS.newPage({ title: t }); if (p) { toast("Page made"); openPage(p.id); } };
+    cap.querySelector('[data-to="task"]').onclick = async () => { const t = ci.value.trim(); if (!t) return ci.focus(); ci.value = ""; let d = WS.dbByRole("tasks"); if (!d) d = await WS.newDb({ tpl: "tasks" }); if (!d) return; await DB.open(d.id); DB.newRow(d.id, { title: t }); toast(`Added to ${d.title || "Tasks"}`); drawHomeWs(); };
     offerDocs();
     R.item(body, "", "Boards", mode);
   }
+  /* ----- the workspace part of home: recent pages, databases, what is due, notes ----- */
+  async function drawHomeWs() {
+    const el = $(".wh-ws", main); if (!el || A.view !== "home") return;
+    const pages = WS.pages.filter((p) => !p.trashed), dbs = WS.dbs.filter((d) => !d.trashed);
+    // board pages, from the copies of boards kept on this device
+    const bpages = []; for (const b of live()) { const d = ls.get("bdDoc:" + b.id, null); if (d) for (const it of Object.values(d.items || {})) if (it.t === "page") bpages.push({ k: "bpage", id: it.id, board: b.id, t: it.title || "Untitled", i: it.icon, ts: Math.max(it.edited || 0, it.ts || 0), sub: name(b) }); }
+    const recent = [...pages.map((p) => ({ k: "page", id: p.id, t: p.title || "Untitled", i: p.icon, ts: p.updated || 0, cover: p.cover, sub: p.snip || "" })), ...bpages, ...dbs.map((d) => ({ k: "db", id: d.id, t: d.title || "Untitled database", i: d.icon || "db", ts: d.updated || 0, cover: d.cover, sub: `${d.count || 0} ${d.count === 1 ? "row" : "rows"}` }))].sort((a, b) => b.ts - a.ts).slice(0, 8);
+    const tasks = WS.dbByRole("tasks"); let due = [];
+    if (tasks) { const doc = DB.get(tasks.id) || (await DB.open(tasks.id)); if (doc) { const st = doc.props.find((p) => p.type === "status"), dp = doc.props.find((p) => p.type === "date"), lim = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10); due = Object.values(doc.rows).filter((r) => { const o = st && (st.opts || []).find((x) => x.id === r.v[st.id]); if (o && o.group === "done") return false; const d = dp && String(r.v[dp.id] || "").slice(0, 10); return d && d <= lim; }).sort((a, b) => String(a.v[dp.id]).localeCompare(String(b.v[dp.id]))).slice(0, 6).map((r) => ({ r, d: r.v[dp.id] })); } }
+    if (!$(".wh-ws", main)) return;
+    if (!(window.LIVE && LIVE.notes) && !A.notesAsked) { A.notesAsked = true; api("/api/notes").then((r) => { if (r.ok && Array.isArray(r.data.notes) && window.LIVE && !LIVE.notes) { LIVE.notes = r.data.notes; drawHomeWs(); } }); }
+    const notes = (window.LIVE && LIVE.notes ? LIVE.notes : []).filter((n) => !n.trashed && !n.archived).sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || (b.ts || 0) - (a.ts || 0)).slice(0, 6);
+    el.innerHTML = `
+      ${recent.length ? `<div class="ba-gh"><h2>Jump back in</h2></div><div class="wh-rec">${recent.map((x) => `<button class="wh-rc" data-go="${x.k}:${x.id}${x.board ? ":" + x.board : ""}"><span class="wh-rcv"${x.cover ? ` style="background:${x.cover.k ? coverCss(x.cover) : `url('${esc(x.cover.src)}') center/cover`}"` : ""}><span class="wh-rci">${WI(x.i && ICONS[x.i] ? x.i : x.k === "db" ? "db" : "file-text", 18)}</span></span><b>${esc(x.t)}</b><small>${esc(x.sub ? String(x.sub).slice(0, 80) : "")}</small><em>${ago(x.ts)}</em></button>`).join("")}</div>` : ""}
+      <div class="wh-two">
+        <section class="wh-card"><header><h3>${WI("checkbox", 17)}Due this week</h3>${tasks ? `<button class="wh-lk" data-go="db:${tasks.id}">Open ${esc(tasks.title || "Tasks")}</button>` : ""}</header>
+          ${tasks ? (due.length ? `<ul class="wh-due">${due.map(({ r, d }) => `<li><button data-go="row:${r.id}:${tasks.id}"><span class="wh-dd${String(d).slice(0, 10) < new Date().toISOString().slice(0, 10) ? " over" : ""}">${esc(fmtDate(d, { rel: true }))}</span><span>${esc(r.title || "Untitled")}</span></button></li>`).join("")}</ul>` : `<p class="wh-empty">Nothing due in the next 7 days.</p>`) : `<p class="wh-empty">Make a Tasks database to see what's due here.</p><button class="btn tonal" data-mk="tasks">Make Tasks</button>`}</section>
+        <section class="wh-card"><header><h3>${WI("pin", 17)}Notes</h3><button class="wh-lk" data-notes2>All notes</button></header>
+          ${notes.length ? `<div class="wh-notes">${notes.map((n) => `<button class="wh-note" data-note="${n.id}" style="background:var(--${String(n.color || "c0").startsWith("k-") ? "keep-" + n.color.slice(2) : n.color === "c0" || !n.color ? "surface" : n.color},var(--surface))">${n.title ? `<b>${esc(n.title)}</b>` : ""}<span>${esc(String(n.kind === "list" ? (n.items || []).map((i) => (i.d ? "✓ " : "· ") + i.t).join("\n") : n.text || "").slice(0, 160))}</span></button>`).join("")}</div>` : `<p class="wh-empty">No notes yet.</p>`}</section>
+      </div>
+      <div class="ba-gh"><h2>Databases</h2></div>
+      <div class="wh-dbs">${dbs.map((d) => `<button class="wh-db" data-go="db:${d.id}"><span class="wh-dbi">${WI(d.icon && ICONS[d.icon] ? d.icon : "db", 20)}</span><span><b>${esc(d.title || "Untitled database")}</b><small>${d.count || 0} ${d.count === 1 ? "row" : "rows"} · ${ago(d.updated)}</small></span></button>`).join("")}
+        ${Object.entries(DB_TPL).filter(([k]) => !dbs.some((d) => d.role && d.role === k)).map(([k, [t, ic, sub]]) => `<button class="wh-db tpl" data-mk="${k}"><span class="wh-dbi">${WI(k === "blank" ? "plus" : ic, 20)}</span><span><b>${t}</b><small>${sub}</small></span></button>`).join("")}</div>`;
+    el.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => { const [k, id, x] = b.dataset.go.split(":"); if (k === "page") openPage(id); else if (k === "db") openDbView(id); else if (k === "row") openRow(x, id); else if (k === "bpage") openBPage(x, id); }));
+    el.querySelectorAll("[data-mk]").forEach((b) => (b.onclick = () => newDb(b.dataset.mk)));
+    el.querySelector("[data-notes2]")?.addEventListener("click", () => openNotes());
+    el.querySelectorAll("[data-note]").forEach((b) => (b.onclick = () => openNotes(b.dataset.note)));
+  }
+
+  /* ----- pages, databases and rows, each on their own ----- */
+  const docCtx = () => ({ back: () => goBack(), home: () => home(), openPage: (id, o) => openPage(id, "push", o), openDb: (id) => openDbView(id), openRow: (db, id) => openRow(db, id), openBoard: (id, item) => (item ? openBoard(id, "push", { page: item }) : openBoard(id)), newDb: (anchor, parent) => newDbMenu(anchor, parent) });
+  function remember() { if (A.view !== "home" || A.hist.length) A.hist.push(A.where || { k: "home" }); A.hist = A.hist.slice(-30); }
+  function goBack() { const w = A.hist.pop(); if (!w || w.k === "home") return home(); if (w.k === "page") return openPage(w.id, "push", { noHist: true }); if (w.k === "db") return openDbView(w.id, { noHist: true }); if (w.k === "row") return openRow(w.db, w.id, { noHist: true }); if (w.k === "board") return openBoard(w.id); return home(); }
+  async function openPage(id, mode = "push", o = {}) {
+    if (!o.noHist) remember();
+    await leaveBoard(); if (!WS.page(id)) await WS.load();
+    const p = WS.page(id); if (!p) { toast("That page isn't here any more."); return home("replace"); }
+    A.view = "page"; A.curPage = id; A.cur = null; A.where = { k: "page", id }; drawSide();
+    main.innerHTML = `<div class="ba-doc"></div>`;
+    A.docv = openDoc($(".ba-doc", main), { kind: "page", id, fresh: o.fresh }, docCtx());
+    R.item(body, "page/" + id, `${p.title || "Untitled"} — Workspace`, mode);
+  }
+  async function openDbView(id, o = {}) {
+    if (!o.noHist) remember();
+    await leaveBoard(); if (!WS.db(id)) await WS.load();
+    const d = WS.db(id); if (!d) { toast("That database isn't here any more."); return home("replace"); }
+    A.view = "db"; A.curDb = id; A.cur = null; A.where = { k: "db", id }; drawSide();
+    main.innerHTML = `<div class="ba-wdb"><div class="ba-wtop"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><button class="ba-ib" data-back aria-label="Back" title="Back">${WI("arrow-left", 18)}</button><span class="ba-sp"></span><button class="ba-ib" data-dbm aria-label="Database options" title="Database options">${I("more", 18)}</button></div><div class="ba-wdbh"></div></div>`;
+    $("[data-tg]", main).onclick = () => toggleSide(); $("[data-back]", main).onclick = () => goBack();
+    $("[data-dbm]", main).onclick = (e) => dbMenu(e.currentTarget, d);
+    A.wdb = mountDatabase($(".ba-wdbh", main), { id, openRow: (rid2) => openRow(id, rid2) });
+    R.item(body, "db/" + id, `${d.title || "Untitled database"} — Workspace`, o.mode || "push");
+  }
+  async function openRow(dbId, rowId, o = {}) {
+    if (!o.noHist) remember();
+    await leaveBoard(); await DB.open(dbId);
+    A.view = "row"; A.cur = null; A.where = { k: "row", db: dbId, id: rowId }; drawSide();
+    main.innerHTML = `<div class="ba-doc"></div>`;
+    A.docv = openDoc($(".ba-doc", main), { kind: "row", db: dbId, id: rowId }, docCtx());
+    const r = DB.get(dbId)?.rows[rowId];
+    R.item(body, `db/${dbId}/${rowId}`, `${(r && r.title) || "Untitled"} — Workspace`, o.mode || "push");
+  }
+  async function openBPage(boardId, itemId, o = {}) {
+    if (!o.noHist) remember();
+    await leaveBoard();
+    A.view = "bpage"; A.cur = null; A.where = { k: "bpage", board: boardId, id: itemId }; drawSide();
+    main.innerHTML = `<div class="ba-doc"></div>`;
+    A.docv = openDoc($(".ba-doc", main), { kind: "bpage", board: boardId, id: itemId }, docCtx());
+    R.item(body, `bp/${boardId}/${itemId}`, "Page — Workspace", o.mode || "push");
+  }
+  async function openNotes(noteId) {
+    remember(); await leaveBoard();
+    A.view = "notes"; A.cur = null; A.where = { k: "notes" }; drawSide();
+    main.innerHTML = `<div class="ba-notes"><div class="ba-wtop"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button></div><div class="ba-nh win-body"></div></div>`;
+    $("[data-tg]", main).onclick = () => toggleSide();
+    const host = $(".ba-nh", main);
+    const m = await import("/js/app-notes.mjs");
+    await m.notesApp(host, noteId ? "" : "");
+    A.notes = async () => { try { host.__flush && (await host.__flush()); } catch {} };
+    if (noteId) setTimeout(() => host.querySelector(`.kn-card[data-id="${noteId}"]`)?.click(), 300);
+    R.item(body, "notes", "Notes — Workspace", "push");
+  }
+  // the notes app inside the workspace says where it is with addresses of its own; keep them under /boards/notes
+  if (!R.__wsNotes) { R.__wsNotes = true; const orig = R.item.bind(R); R.item = (b, slug, title, mode) => { const host = b && b.closest && b.closest(".ba-nh"); if (host) { const w = host.closest(".win"); return orig(w ? w.querySelector(".body") : b, "notes" + (slug ? "/" + slug : ""), title, mode); } return orig(b, slug, title, mode); }; }
+  function dbMenu(anchor, d) {
+    choose(anchor, [
+      { t: "Rename", i: "pencil", run: () => askText(anchor, "Database name", d.title, (v) => v && WS.setDb(d.id, { title: v })) },
+      { t: "Change icon", i: "smile", run: () => iconPick(anchor, d.icon, (ic) => WS.setDb(d.id, { icon: ic })) },
+      { t: d.fav ? "Remove from favourites" : "Add to favourites", i: "star", run: () => WS.setDb(d.id, { fav: !d.fav }) },
+      { t: "Describe it", i: "text", run: () => askText(anchor, "A short description", d.desc || "", (v) => WS.setDb(d.id, { desc: v })) },
+      { t: "Download as CSV", i: "download", run: () => csv(d) },
+      "-", { t: "Move to the bin", i: "trash", danger: true, run: async () => { if (await confirmBox(`Move “${d.title || "this database"}” to the bin? You can bring it back from the bin.`, "Move to bin")) { await WS.setDb(d.id, { trashed: true }); home(); } } },
+    ], { w: 240 });
+  }
+  function csv(d) {
+    const doc = DB.get(d.id); if (!doc) return;
+    const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const name2 = (p, r) => { const v = r.v[p.id]; if (v == null) return ""; if (["select", "status"].includes(p.type)) return (p.opts.find((o) => o.id === v) || {}).name || ""; if (p.type === "multi") return v.map((x) => (p.opts.find((o) => o.id === x) || {}).name).filter(Boolean).join("; "); if (p.type === "date") return typeof v === "object" ? v.s + " → " + v.e : v; return v === true ? "yes" : v; };
+    const lines = [["Name", ...doc.props.map((p) => p.name)].map(q).join(","), ...Object.values(doc.rows).map((r) => [r.title, ...doc.props.map((p) => name2(p, r))].map(q).join(","))];
+    const a = h("a", { href: URL.createObjectURL(new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv" })), download: (d.title || "database").replace(/[^\w -]+/g, "") + ".csv" }); a.click();
+  }
+  async function newPage(parent) { const p = await WS.newPage(parent ? { parent } : {}); if (p) openPage(p.id, "push", { fresh: true }); }
+  async function newDb(tpl, parent) { const m = await WS.newDb({ tpl, ...(parent ? { parent } : {}) }); if (m) openDbView(m.id); }
+  function newDbMenu(anchor, parent) { choose(anchor, [{ head: "New database" }, ...Object.entries(DB_TPL).map(([k, [t, ic]]) => ({ t, i: k === "blank" ? "table" : ic, run: () => newDb(k, parent) }))], { w: 240 }); }
+  function newMenu(anchor) {
+    const r = anchor.getBoundingClientRect();
+    menu(r.left, r.bottom + 6, [{ t: "Page", i: "page", run: () => newPage() }, { t: "Database", i: "table", sub: Object.entries(DB_TPL).map(([k, [t, ic]]) => ({ t, i: k === "blank" ? "table" : ic, run: () => newDb(k) })) }, { t: "Board", i: "frame", sub: Object.entries(T).map(([k, t]) => ({ t: t.name, i: k === "blank" ? "plus" : t.icon, run: () => newBoard(k) })) }]);
+  }
+
   // Docs was retired: its pages are still stored, and can be copied onto a board in one go
   async function offerDocs() {
     const r = await api("/api/boards?a=docs"); const el = $(".ba-docs", main);
@@ -267,10 +417,13 @@ export async function boardsApp(body, key) {
   async function showBin() {
     await leaveBoard(); A.view = "bin"; A.cur = null; drawSide();
     const list = A.boards.filter((b) => b.trashed).sort((a, b) => b.trashed - a.trashed);
-    main.innerHTML = `<div class="ba-home"><header class="ba-hh"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><div><h1>Bin</h1><p>Boards you moved here. Put them back, or delete them for good.</p></div></header>
+    const tp = WS.pages.filter((p) => p.trashed), td = WS.dbs.filter((d) => d.trashed);
+    main.innerHTML = `<div class="ba-home"><header class="ba-hh"><button class="ba-ib ba-tg2" data-tg aria-label="Show the sidebar">${I("panel-left", 18)}</button><div><h1>Bin</h1><p>What you moved here. Put it back any time.</p></div></header>
+      ${tp.length || td.length ? `<section class="ba-binl">${[...tp.map((p) => ({ k: "page", id: p.id, t: p.title || "Untitled", i: p.icon || "file-text" })), ...td.map((d) => ({ k: "db", id: d.id, t: d.title || "Untitled database", i: d.icon || "db" }))].map((x) => `<div class="ba-binr"><span class="ba-th">${WI(x.i, 15)}</span><b>${esc(x.t)}</b><small>${x.k === "db" ? "Database" : "Page"}</small><button class="btn tonal" data-wrs="${x.k}:${x.id}">Put back</button></div>`).join("")}</section>` : ""}
       <section class="ba-binl">${list.map((b) => `<div class="ba-binr"><span class="ba-th" style="${b.cover && b.cover.k ? `background:${coverCss(b.cover)}` : ""}"></span><b>${esc(name(b))}</b><small>${b.count || 0} items · binned ${ago(b.trashed)}</small><button class="btn tonal" data-rs="${b.id}">Restore</button><button class="btn tonal danger" data-rm="${b.id}">Delete for good</button></div>`).join("") || '<div class="ba-empty"><b>The bin is empty</b></div>'}</section></div>`;
     $("[data-tg]", main).onclick = () => toggleSide();
     $$("[data-rs]", main).forEach((b) => (b.onclick = async () => { await setMeta(byId(b.dataset.rs), { trashed: false }); showBin(); }));
+    $$("[data-wrs]", main).forEach((b) => (b.onclick = async () => { const [k, id] = b.dataset.wrs.split(":"); if (k === "page") await WS.setPage(id, { trashed: false }); else await WS.setDb(id, { trashed: false }); showBin(); }));
     $$("[data-rm]", main).forEach((b) => (b.onclick = async () => {
       const bd = byId(b.dataset.rm); if (!(await confirmBox(`Delete “${name(bd)}” for good? Its pages go too. A last copy is kept in the backup store.`, "Delete"))) return;
       const r = await api("/api/boards?id=" + bd.id, { method: "DELETE" }); if (!r.ok) { toast("Could not delete"); return; }
@@ -281,6 +434,9 @@ export async function boardsApp(body, key) {
 
   /* ----- one board ----- */
   async function leaveBoard() {
+    if (A.docv) { await A.docv.flush(); A.docv.destroy(); A.docv = null; }
+    if (A.wdb) { A.wdb.destroy(); A.wdb = null; }
+    if (A.notes) { try { await A.notes(); } catch {} A.notes = null; }
     if (A.stopLive) { A.stopLive(); A.stopLive = null; }
     if (!A.cv) return;
     await flushBoard();
@@ -295,7 +451,7 @@ export async function boardsApp(body, key) {
     let b = byId(id);
     if (!b) { await load(); b = byId(id); }
     if (!b) { toast("That board isn't here any more."); return home("replace"); }
-    A.view = "board"; A.cur = b; drawSide();
+    A.view = "board"; A.cur = b; A.where = { k: "board", id }; drawSide();
     main.innerHTML = `<div class="ba-board"><div class="ba-canvas"></div><div class="ba-dbv"></div><div class="ba-pages"></div>
       <div class="ba-top"><button class="ba-ib" data-tg title="Show the sidebar" aria-label="Show the sidebar">${I("panel-left", 18)}</button><button class="ba-bi" data-bi title="Cover and icon" aria-label="Cover and icon"></button><input class="ba-title" maxlength="120" aria-label="Board name" placeholder="Untitled board"><span class="ba-st" role="status" tabindex="-1"></span>
         <div class="ba-seg" role="tablist" aria-label="View"><button role="tab" data-v="board" title="Board view (B)">${I("frame", 17)}<span>Board</span></button><button role="tab" data-v="db" title="Database view (D)">${I("table", 17)}<span>Database</span></button></div>
@@ -433,6 +589,8 @@ export async function boardsApp(body, key) {
     const out = []; out.handled = true;
     if (el.closest(".bd-stage") && A.cv) { if (A.cv.menuAt(e) === false) { out.handled = false; return []; } return out; }
     if (el.closest(".db") && A.db) { if (A.db.menuAt(e)) return out; out.handled = false; return []; }
+    const pg = el.closest("[data-pg]"); if (pg) { const p = WS.page(pg.dataset.pg); if (p) menu(e.clientX, e.clientY, [{ t: "Open", i: "open", run: () => openPage(p.id) }, { t: "Page inside", i: "plus", run: () => newPage(p.id) }, { t: p.fav ? "Remove from favourites" : "Add to favourites", i: "star", run: () => WS.setPage(p.id, { fav: !p.fav }) }, { t: "Move out to the top", i: "arrow-up", disabled: !p.parent, run: () => WS.setPage(p.id, { parent: null }) }, "-", { t: "Move to the bin", i: "trash", danger: true, run: () => { WS.setPage(p.id, { trashed: true }); if (A.curPage === p.id) home(); } }]); return out; }
+    const dbr = el.closest("[data-db]"); if (dbr) { const d = WS.db(dbr.dataset.db); if (d) { const r = { getBoundingClientRect: () => ({ left: e.clientX, right: e.clientX, top: e.clientY, bottom: e.clientY }) }; dbMenu(r, d); } return out; }
     const sub = el.closest("[data-sub]"); if (sub) { menu(e.clientX, e.clientY, [{ t: "Open as a page", i: "open", run: () => openBoard(sub.dataset.board, "push", { page: sub.dataset.sub }) }]); return out; }
     const c = el.closest("[data-card],[data-open]");
     if (c) { const b = byId(c.dataset.card || c.dataset.open); if (b) { menu(e.clientX, e.clientY, boardMenu(b)); return out; } }
@@ -458,6 +616,7 @@ export async function boardsApp(body, key) {
 
   /* ----- go ----- */
   const cachedList = ls.get("baList", null); if (cachedList) A.boards = cachedList;
-  if (key) { drawSide(); openBoard(key, "replace"); load().then(drawSide); }
+  WS.load();
+  if (key) { drawSide(); route(key, "replace"); load().then(drawSide); }
   else { if (cachedList) home("replace"); await load(); if (A.view === "home") home("replace"); else drawSide(); }
 }
