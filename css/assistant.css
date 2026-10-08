@@ -115,3 +115,6 @@ html.focus-mode .as-buddy{display:none}
 .as-btns small{color:var(--ink2)}
 .as-err p:last-of-type{margin-bottom:0}
 .as-err .btn{margin-top:10px}
+.as-model{width:100%;max-width:720px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:12px;color:var(--ink2);margin-top:-12px}
+.as-model select{max-width:min(100%,320px);border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;cursor:pointer}
+.as-model select:focus-visible{outline:2px solid var(--primary);outline-offset:1px}

@@ -6,7 +6,9 @@
 //                              ->  {contents, more:true}              out of time for one request: POST again to carry on
 //   `contents` is the conversation in Gemini's own format; the browser keeps it and sends it back each time.
 // Nothing is stored here: no new keys. Reading is free; every change waits for the owner's Apply.
-// Needs the GEMINI_API_KEY environment variable (optional GEMINI_MODEL, default gemini-flash-latest).
+//   GET ?a=models             ->  {models:[{id,name}], default}     the Gemini models this key can chat with (for the picker)
+//   POST {model}               which model to use for this chat (default: GEMINI_MODEL, else gemini-flash-latest)
+// Needs the GEMINI_API_KEY environment variable.
 import { getStore } from "@netlify/blobs";
 import { isAdmin } from "../lib/session.mjs";
 import { isPreviewHost } from "../lib/store.mjs";
@@ -62,9 +64,11 @@ function system() {
     "Keep answers short and plain. No emoji. Use short lists only when they help.";
 }
 class Soft extends Error { constructor(code, message) { super(message); this.code = code; } }
-async function gemini(contents) {
+const DEFAULT_MODEL = () => (process.env.GEMINI_MODEL || "gemini-flash-latest").replace(/[^\w.-]/g, "");
+const okModel = (m) => typeof m === "string" && /^gemini-[\w.-]{1,50}$/.test(m);
+async function gemini(contents, pick) {
   const key = process.env.GEMINI_API_KEY; if (!key) throw new Soft("no_key", "The assistant needs a Gemini key.");
-  const model = (process.env.GEMINI_MODEL || "gemini-flash-latest").replace(/[^\w.-]/g, "");
+  const model = okModel(pick) ? pick : DEFAULT_MODEL();
   let r;
   try {
     r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": key }, body: JSON.stringify({ systemInstruction: { parts: [{ text: system() }] }, contents, tools: [{ functionDeclarations: DECLS }], generationConfig: { temperature: 0.4 } }), signal: AbortSignal.timeout(25_000) });
@@ -96,6 +100,21 @@ async function run(store, name, raw) {
   }
 }
 
+// the models this key can chat with that also understand tools (no image, voice, embedding or live-audio models)
+let modelsAt = 0, modelsList = [];
+async function models() {
+  const key = process.env.GEMINI_API_KEY; if (!key) return [];
+  if (Date.now() - modelsAt < 10 * 60e3 && modelsList.length) return modelsList;
+  try {
+    const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": key }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return modelsList;
+    const list = ((await r.json()).models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent") && /^models\/gemini-/.test(m.name) && !/image|tts|embed|live|audio|robot|computer|aqa|learnlm|-exp-/.test(m.name))
+      .map((m) => ({ id: m.name.slice(7), name: m.displayName || m.name.slice(7) })).sort((a, b) => a.id.localeCompare(b.id));
+    modelsList = list; modelsAt = Date.now();
+  } catch {}
+  return modelsList;
+}
+
 function valid(c) {
   if (!Array.isArray(c) || !c.length || c.length > MAX_TURNS) return false;
   return c.every((x) => x && (x.role === "user" || x.role === "model") && Array.isArray(x.parts) && x.parts.length && x.parts.every((p) => p && typeof p === "object"));
@@ -104,6 +123,7 @@ function valid(c) {
 export default async (req) => {
   const event = { headers: Object.fromEntries(req.headers) };
   if (!isAdmin(event)) return J({ error: "Not signed in" }, 401);
+  if (req.method === "GET" && new URL(req.url).searchParams.get("a") === "models") return J({ models: await models(), default: DEFAULT_MODEL() });
   if (req.method !== "POST") return J({ error: "Method not allowed" }, 405);
   const preview = isPreviewHost(event), store = sStore(preview ? "site-content-dev" : "site-content");
   let body; try { const t = await req.text(); if (t.length > MAX_BODY) return J({ error: "This chat got long. Start a new one.", code: "long" }, 413); body = JSON.parse(t); } catch { return J({ error: "Bad request" }, 400); }
@@ -123,7 +143,7 @@ export default async (req) => {
     }
     for (let round = 0; round < MAX_ROUNDS; round++) {
       if (round && Date.now() - t0 > BUDGET_MS) { if (wrote) await snap(store, preview); return J({ contents, more: true }); }
-      const turn = await gemini(contents); contents.push(turn);
+      const turn = await gemini(contents, body.model); contents.push(turn);
       const calls = callsOf(turn);
       if (!calls.length) { if (wrote) await snap(store, preview); return J({ contents, text: turn.parts.map((p) => (p.thought ? "" : p.text || "")).join("").trim() || "Done." }); }
       if (calls.some((c) => isWrite(c.name))) {

@@ -115,10 +115,17 @@ function web(body) {
       <div class="as-chips"></div></div>
     <div class="as-log" role="log" aria-live="polite" hidden></div>
     <form class="as-ask"><textarea rows="1" placeholder="Ask anything…" aria-label="Message"></textarea><button class="as-go" type="submit" aria-label="Send">${ic("send", 20)}</button></form>
+    <label class="as-model"><span>Model</span><select aria-label="Model"></select></label>
     <div class="as-cards"></div></div>`;
   lively($(".as-hero .asf", body)); lively($(".as-top .asf", body));
   const ta = $("textarea", body), log = $(".as-log", body), top = $(".as-top", body), hero = $(".as-hero", body), cards = $(".as-cards", body), form = $(".as-ask", body), go = $(".as-go", body);
   let contents = [], busy = false;
+  // which Gemini model answers: the list comes from the key itself, the choice is remembered on this device
+  const pick = $(".as-model select", body), saved = (() => { try { return localStorage.getItem("rkAsModel") || ""; } catch { return ""; } })();
+  const fill = (list, def) => { const ids = list.map((m) => m.id), want = saved && (ids.includes(saved) || !ids.length) ? saved : def; if (want && !ids.includes(want)) list = [{ id: want, name: want }, ...list]; pick.replaceChildren(...list.map((m) => h("option", { value: m.id }, m.name === m.id ? m.id : `${m.name} (${m.id})`))); if (want) pick.value = want; };
+  fill([], "gemini-flash-latest");
+  pick.onchange = () => { try { localStorage.setItem("rkAsModel", pick.value); } catch {} toast("Model: " + pick.value); };
+  api("/api/assistant?a=models").then((r) => { if (r.ok && r.data.models) fill(r.data.models, r.data.default || "gemini-flash-latest"); });
 
   const scroll = () => requestAnimationFrame(() => { const w = $(".as-w", body); w.scrollTop = w.scrollHeight; });
   const say = (who, node) => { const m = h("div", { class: "as-msg " + who }, node); log.append(m); scroll(); return m; };
@@ -153,7 +160,7 @@ function web(body) {
     try {
       for (let i = 0; i < 6; i++) {
         const before = contents.length;
-        const r = await api("/api/assistant", { method: "POST", body: { contents, ...(i ? {} : extra) } });
+        const r = await api("/api/assistant", { method: "POST", body: { contents, model: pick.value, ...(i ? {} : extra) } });
         if (!r.ok) { wait.remove(); lock(false); if (r.status === 401) return say("bot", h("p", {}, "Sign in as the owner to use this.")); return problem(r.data, true); }
         contents = r.data.contents; steps(before, contents); wait.remove();
         if (r.data.pending) { pendingCard(r.data.pending); lock(false); return; }
