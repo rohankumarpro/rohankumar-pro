@@ -2,7 +2,7 @@
 // The last SNAP_KEEP are kept; older ones are removed from the backup store only (never from the live content).
 const BINARY = /^(photo-|up-|vault-file-)/;
 // single analytics hits (one tiny record per page view) and rate-limit counters are left out; the day summaries (an-day-) are kept
-const SKIP = /^(an-h-|rl-|gacct-tok-)/; // and Google logins (encrypted, but a backup file is no place for them)
+const SKIP = /^(an-h-|rl-|gacct-tok-|mcp-)/; // and Google logins and Claude connector sign-ins (encrypted, but a backup file is no place for them)
 export const SNAP_KEEP = 10, SNAP_EVERY = 24 * 3600_000;
 
 export async function collect(store) {

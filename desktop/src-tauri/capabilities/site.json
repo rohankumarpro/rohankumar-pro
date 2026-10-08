@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "site-window-controls",
-  "description": "Lets rohankumar.pro (and only it) move, minimise, maximise and close its own window, and save the daily backup to Documents.",
+  "description": "Lets rohankumar.pro (and only it) move, minimise, maximise and close its own window, save the daily backup to Documents, and show Claude over its Assistant window.",
   "windows": [
     "main"
   ],
@@ -19,6 +19,10 @@
     "core:window:allow-start-dragging",
     "core:event:allow-listen",
     "core:event:allow-unlisten",
-    "allow-save-backup"
+    "allow-save-backup",
+    "allow-claude-show",
+    "allow-claude-place",
+    "allow-claude-hide",
+    "allow-claude-close"
   ]
 }

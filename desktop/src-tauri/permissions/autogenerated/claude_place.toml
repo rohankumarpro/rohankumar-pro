@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-claude-place"
+description = "Enables the claude_place command without any pre-configured scope."
+commands.allow = ["claude_place"]
+
+[[permission]]
+identifier = "deny-claude-place"
+description = "Denies the claude_place command without any pre-configured scope."
+commands.deny = ["claude_place"]

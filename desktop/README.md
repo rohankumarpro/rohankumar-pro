@@ -10,6 +10,9 @@ rohankumar.pro in its own window with no browser or Windows title bar. For the o
 - Sign in to Owner mode once inside the app (it keeps its own cookies, separate from Chrome).
 - Daily backup: while you're signed in, the app saves the same backup Settings offers to `Documents\Rohan Kumar backups`,
   one file per day, the newest 14 kept. Pictures are not inside it (same as the Settings backup). It only reads from the site.
+- Assistant: Claude opens inside the Assistant app's window (a borderless Claude window the app keeps exactly over it, hidden
+  whenever a menu or another window is on top). Sign in to Claude once there; if Google sign-in is refused inside the app, use
+  "Continue with email". This needs a rebuilt installer (version with the `claude_*` commands).
 
 ## Get the installer
 

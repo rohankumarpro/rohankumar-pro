@@ -5,6 +5,33 @@
 [functions]
   included_files = ["index.html", "netlify/lib/**", "shared/**"]
 
+# The owner's private Claude connector: its sign-in (OAuth) and where Claude finds it
+[[redirects]]
+  from = "/.well-known/oauth-protected-resource/*"
+  to = "/.netlify/functions/oauth?r=resource"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/.well-known/oauth-protected-resource"
+  to = "/.netlify/functions/oauth?r=resource"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/.well-known/oauth-authorization-server"
+  to = "/.netlify/functions/oauth?r=as"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/.well-known/oauth-authorization-server/*"
+  to = "/.netlify/functions/oauth?r=as"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/oauth/:step"
+  to = "/.netlify/functions/oauth?r=:step"
+  status = 200
+  force = true
+
 # ---- Functions behind friendly addresses ----
 [[redirects]]
   from = "/api/*"

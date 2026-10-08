@@ -3,8 +3,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::fs;
+use std::sync::Mutex;
 use tauri::webview::NewWindowResponse;
-use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 use tauri_plugin_opener::OpenerExt;
 
 const SITE: &str = "https://rohankumar.pro/";
@@ -38,6 +39,86 @@ fn save_backup(app: tauri::AppHandle, day: String, json: String) -> Result<Strin
     Ok(file.to_string_lossy().to_string())
 }
 
+/* ---------- Claude inside the desktop (owner's Assistant app) ----------
+   claude.ai can't be shown inside a web page, so the app opens it in a borderless window of its own that belongs to
+   the main window, and keeps it exactly over the site's Assistant window: the site says where (in page pixels), and
+   the app follows whenever either window moves or changes size. The Claude window keeps its own sign-in. */
+#[derive(Default)]
+struct ClaudeRect(Mutex<Option<(f64, f64, f64, f64)>>);
+
+fn is_claude(url: &url::Url) -> bool {
+    url.scheme() == "https"
+        && url.host_str().map_or(false, |h| {
+            h == "claude.ai" || h.ends_with(".claude.ai") || h == "anthropic.com" || h.ends_with(".anthropic.com") || h.ends_with(".claudeusercontent.com")
+        })
+}
+
+// put the Claude window where the site's Assistant window shows its contents
+fn place_claude(app: &tauri::AppHandle) {
+    let (Some(main), Some(claude)) = (app.get_webview_window("main"), app.get_webview_window("claude")) else { return };
+    let Some((x, y, w, h)) = *app.state::<ClaudeRect>().0.lock().unwrap() else { return };
+    let (Ok(at), Ok(scale)) = (main.inner_position(), main.scale_factor()) else { return };
+    let _ = claude.set_position(PhysicalPosition::new(at.x + (x * scale).round() as i32, at.y + (y * scale).round() as i32));
+    let _ = claude.set_size(PhysicalSize::new((w * scale).round().max(80.0) as u32, (h * scale).round().max(80.0) as u32));
+}
+
+#[tauri::command]
+fn claude_show(app: tauri::AppHandle, x: f64, y: f64, w: f64, h: f64, url: Option<String>) -> Result<(), String> {
+    *app.state::<ClaudeRect>().0.lock().unwrap() = Some((x, y, w, h));
+    let start = url.and_then(|u| u.parse::<url::Url>().ok()).filter(is_claude);
+    if let Some(c) = app.get_webview_window("claude") {
+        if let Some(u) = start { let _ = c.navigate(u); }
+        place_claude(&app);
+        c.show().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+    let main = app.get_webview_window("main").ok_or("no main window")?;
+    let nav = app.clone();
+    let pop = app.clone();
+    let first = start.unwrap_or_else(|| "https://claude.ai/new".parse().unwrap());
+    WebviewWindowBuilder::new(&app, "claude", WebviewUrl::External(first))
+        .title("Claude")
+        .parent(&main).map_err(|e| e.to_string())?
+        .decorations(false)
+        .resizable(false)
+        .skip_taskbar(true)
+        .shadow(false)
+        .visible(false)
+        .on_navigation(move |url| {
+            if is_claude(url) || url.scheme() == "about" || url.scheme() == "data" || url.scheme() == "blob" {
+                return true;
+            }
+            let _ = nav.opener().open_url(url.as_str(), None::<&str>);
+            false
+        })
+        .on_new_window(move |url, _| {
+            let _ = pop.opener().open_url(url.as_str(), None::<&str>);
+            NewWindowResponse::Deny
+        })
+        .build()
+        .map_err(|e| e.to_string())?;
+    place_claude(&app);
+    if let Some(c) = app.get_webview_window("claude") { c.show().map_err(|e| e.to_string())?; }
+    Ok(())
+}
+
+#[tauri::command]
+fn claude_place(app: tauri::AppHandle, x: f64, y: f64, w: f64, h: f64) {
+    *app.state::<ClaudeRect>().0.lock().unwrap() = Some((x, y, w, h));
+    place_claude(&app);
+}
+
+#[tauri::command]
+fn claude_hide(app: tauri::AppHandle) {
+    if let Some(c) = app.get_webview_window("claude") { let _ = c.hide(); }
+}
+
+#[tauri::command]
+fn claude_close(app: tauri::AppHandle) {
+    *app.state::<ClaudeRect>().0.lock().unwrap() = None;
+    if let Some(c) = app.get_webview_window("claude") { let _ = c.close(); }
+}
+
 fn main() {
     tauri::Builder::default()
         // a second launch brings the open window forward instead of opening another
@@ -50,7 +131,17 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         // reopens at the size and place it was closed
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![save_backup])
+        .manage(ClaudeRect::default())
+        .invoke_handler(tauri::generate_handler![save_backup, claude_show, claude_place, claude_hide, claude_close])
+        // the Claude window follows the main window when it moves, changes size or goes to another screen
+        .on_window_event(|window, event| {
+            if window.label() != "main" { return; }
+            match event {
+                WindowEvent::Moved(_) | WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => place_claude(window.app_handle()),
+                WindowEvent::Destroyed => { if let Some(c) = window.app_handle().get_webview_window("claude") { let _ = c.close(); } }
+                _ => {}
+            }
+        })
         .setup(|app| {
             let nav = app.handle().clone();
             let pop = app.handle().clone();

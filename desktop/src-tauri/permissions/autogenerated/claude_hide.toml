@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-claude-hide"
+description = "Enables the claude_hide command without any pre-configured scope."
+commands.allow = ["claude_hide"]
+
+[[permission]]
+identifier = "deny-claude-hide"
+description = "Denies the claude_hide command without any pre-configured scope."
+commands.deny = ["claude_hide"]
