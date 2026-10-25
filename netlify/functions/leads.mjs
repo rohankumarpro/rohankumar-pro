@@ -63,6 +63,18 @@ ${(L.bonus || []).map((r) => `<p><b>Bonus:</b> <a href="${esc(r.href)}" style="c
   } catch { return false; }
 }
 
+// GDPR (EU, EEA) and UK GDPR: a pre-ticked box is not consent there, so the newsletter box starts unticked.
+// Anywhere else it starts ticked. When the country is unknown it starts unticked.
+const CONSENT_FIRST = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB".split(" "));
+function country(h) {
+  try {
+    const g = JSON.parse(Buffer.from(String(h["x-nf-geo"] || ""), "base64").toString("utf8"));
+    if (g?.country?.code) return clean(g.country.code, 4).toUpperCase();
+  } catch {}
+  return clean(h["x-country"], 4).toUpperCase();
+}
+const newsDefault = (h) => { const c = country(h); return !!c && !CONSENT_FIRST.has(c); };
+
 const csvCell = (v) => { const s = String(v ?? ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
 export const handler = async (event) => {
@@ -73,7 +85,7 @@ export const handler = async (event) => {
 
     if (m === "GET" && q.list) {
       const L = publicList(String(q.list));
-      return L ? json(L, 200, { "cache-control": "public, max-age=300" }) : json({ error: "Not found" }, 404);
+      return L ? json({ ...L, newsDefault: newsDefault(event.headers || {}) }) : json({ error: "Not found" }, 404); // per visitor, so never cached
     }
 
     if (m === "POST") {
@@ -91,7 +103,7 @@ export const handler = async (event) => {
       const old = await store.get(key, { type: "json" }).catch(() => null);
       const entry = old
         ? { ...old, news: old.news || news, newsTs: old.news ? old.newsTs : news ? now : undefined, last: now, times: (old.times || 1) + 1 }
-        : { list: b.list, email, news, ts: now, ...(news ? { newsTs: now } : {}), src: clean(b.src, 60) || L.from, ref: clean(b.ref, 200), tz: clean(b.tz, 60), lang: clean(b.lang, 20), country: clean(h["x-country"], 4), ip };
+        : { list: b.list, email, news, ts: now, ...(news ? { newsTs: now, preticked: b.pre === true } : {}), src: clean(b.src, 60) || L.from, ref: clean(b.ref, 200), tz: clean(b.tz, 60), lang: clean(b.lang, 20), country: country(h), ip };
       for (const k of Object.keys(entry)) if (entry[k] === "" || entry[k] === undefined) delete entry[k];
       await store.setJSON(key, entry);
       const emailed = await sendLinks(email, L, entry.news);
@@ -103,8 +115,8 @@ export const handler = async (event) => {
     if (m === "GET") {
       const list = (await all(store)).sort((a, b) => b.ts - a.ts);
       if (q.format === "csv") {
-        const cols = ["email", "news", "list", "src", "ts", "newsTs", "times", "country", "ref"];
-        const rows = list.map((e) => cols.map((c) => csvCell(c === "ts" || c === "newsTs" ? (e[c] ? new Date(e[c]).toISOString() : "") : c === "news" ? (e.news ? "yes" : "no") : e[c])).join(","));
+        const cols = ["email", "news", "preticked", "list", "src", "ts", "newsTs", "times", "country", "ref"];
+        const rows = list.map((e) => cols.map((c) => csvCell(c === "ts" || c === "newsTs" ? (e[c] ? new Date(e[c]).toISOString() : "") : c === "news" || c === "preticked" ? (e[c] ? "yes" : "no") : e[c])).join(","));
         return { statusCode: 200, headers: { "content-type": "text/csv; charset=utf-8", "cache-control": "no-store", "content-disposition": `attachment; filename="signups-${new Date().toISOString().slice(0, 10)}.csv"` }, body: [cols.join(","), ...rows].join("\n") };
       }
       return json({ leads: list, total: list.length, news: list.filter((e) => e.news).length });

@@ -61,7 +61,14 @@ document.addEventListener("click", async (e) => {
 
 const saved = store.get();
 if (saved?.items?.length && saved.items.some((it) => it.guide)) unlocked(saved, "Unlocked. Tap a repo to open it, or How to install for the steps.");
-else fetch("/api/leads?list=" + LIST).then((r) => (r.ok ? r.json() : null)).then((d) => d && !$("card").classList.contains("unlocked") && draw(d)).catch(() => {});
+// The server says whether the newsletter box may start ticked where this visitor is (never in the EU, EEA or UK)
+let pre = false, touched = false;
+$("news").addEventListener("change", () => { touched = true; });
+fetch("/api/leads?list=" + LIST, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+  if (!d) return;
+  if (d.newsDefault && !touched) { pre = true; $("news").checked = true; }
+  if (!$("card").classList.contains("unlocked")) draw(d);
+}).catch(() => {});
 
 $("f").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -72,7 +79,7 @@ $("f").addEventListener("submit", async (e) => {
   try {
     const r = await fetch("/api/leads", {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ list: LIST, email, news: $("news").checked, website: e.target.website.value, src: new URLSearchParams(location.search).get("src") || "", ref: document.referrer || "", tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "", lang: navigator.language || "" }),
+      body: JSON.stringify({ list: LIST, email, news: $("news").checked, pre: pre && !touched, website: e.target.website.value, src: new URLSearchParams(location.search).get("src") || "", ref: document.referrer || "", tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "", lang: navigator.language || "" }),
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !d.ok) throw new Error(d.error || "Something went wrong. Please try again.");
