@@ -6,7 +6,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const store = { get() { try { return JSON.parse(localStorage.getItem(SAVE) || "null"); } catch { return null; } }, set(v) { try { localStorage.setItem(SAVE, JSON.stringify(v)); } catch {} } };
 
-$("from").innerHTML = icon("sparkles", { size: 16 }) + "<span>Shared by Sansser</span>";
+$("from").innerHTML = `<picture><source srcset="/img/sansser/logo-dark.png" media="(prefers-color-scheme: dark)"><img src="/img/sansser/logo.png" alt="Sansser" width="54" height="28"></picture><span>Shared by <b>Sansser</b></span>`;
 $("tick").innerHTML = icon("check", { size: 16, sw: 3 });
 $("okIco").innerHTML = icon("unlock", { size: 20 });
 $("go").innerHTML = icon("lock", { size: 18 }) + "<span>Unlock the links</span>";
