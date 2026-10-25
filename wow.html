@@ -62,10 +62,16 @@ input[type=email]:focus{border-color:var(--primary)}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 /* after sign-up */
 #got{display:none}.unlocked #got{display:block}
+.block + .block{margin-top:calc(40 * var(--u));padding-top:calc(32 * var(--u));border-top:1px solid var(--line)}
+.label{font-size:var(--fs-3);font-weight:var(--fw-b);text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin:0 0 calc(6 * var(--u))}
 #got h2{font-size:var(--fs-10);line-height:1.2;margin:0 0 calc(4 * var(--u))}
 #got .host{color:var(--ink2);margin:0 0 calc(20 * var(--u))}
-#got h3{font-size:var(--fs-6);margin:calc(32 * var(--u)) 0 calc(10 * var(--u))}
+#got h3{font-size:var(--fs-6);margin:calc(28 * var(--u)) 0 calc(10 * var(--u))}
 ol{margin:0;padding-left:calc(22 * var(--u));display:grid;gap:calc(8 * var(--u))}
+ol li{min-width:0}
+.cmd{position:relative;margin-top:calc(8 * var(--u))}
+.cmd pre{margin:0;background:var(--surface2);border-radius:var(--r-4);padding:calc(12 * var(--u)) calc(14 * var(--u)) calc(40 * var(--u));white-space:pre-wrap;word-break:break-word;font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:var(--fs-2);line-height:1.6}
+.copy{position:absolute;right:calc(8 * var(--u));bottom:calc(8 * var(--u));border:0;border-radius:var(--r-pill);padding:calc(4 * var(--u)) calc(12 * var(--u));background:var(--surface);color:var(--ink);font:inherit;font-size:var(--fs-2);font-weight:var(--fw-m);cursor:pointer}
 .tip{color:var(--ink2);font-size:var(--fs-4);margin:calc(16 * var(--u)) 0 0}
 </style>
 </head>
@@ -88,14 +94,7 @@ ol{margin:0;padding-left:calc(22 * var(--u));display:grid;gap:calc(8 * var(--u))
     </form>
   </div>
 
-  <section class="page" id="got" aria-live="polite">
-    <h2 id="name"></h2>
-    <p class="host" id="host"></p>
-    <a class="btn" id="open" target="_blank" rel="noopener">Open the website</a>
-    <h3>How to use it</h3>
-    <ol id="steps"></ol>
-    <p class="tip" id="tip"></p>
-  </section>
+  <section class="page" id="got" aria-live="polite"></section>
 </main>
 <script type="module" src="/js/lead-offer.mjs"></script>
 </body>

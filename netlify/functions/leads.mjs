@@ -39,14 +39,14 @@ async function sendLinks(to, L, news) {
   if (!key || !from) return false;
   const rows = [...L.items, ...(L.bonus || [])];
   const text = [
-    `Here ${L.items.length > 1 ? "are the links" : "is the link"} you asked for: ${L.title}.`, "",
-    ...rows.map((r, i) => `${L.items.length > 1 ? (i < L.items.length ? i + 1 + ". " : "Bonus: ") : ""}${r.name}${r.replaces ? ` (replaces ${r.replaces})` : ""}\n   ${r.href}`), "",
+    `Here ${rows.length > 1 ? "are the links" : "is the link"} you asked for: ${L.title}.`, "",
+    ...rows.map((r, i) => `${i >= L.items.length ? "Bonus: " : L.items.length > 1 ? i + 1 + ". " : ""}${r.name}${r.replaces ? ` (replaces ${r.replaces})` : ""}\n   ${r.href}`), "",
     `${L.guideText}: ${L.page}`, "",
     news ? "You're on the newsletter list too. Reply with \"unsubscribe\" any time to leave." : "That's all. You won't get other emails from me unless you ask.",
     "", "Rohan (Sansser)",
   ].join("\n");
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.5;color:#1A1C20;max-width:560px">
-<p>Here ${L.items.length > 1 ? "are the links" : "is the link"} you asked for: <b>${esc(L.title)}</b>.</p><ol style="padding-left:20px">${L.items.map((r) => `<li style="margin:0 0 10px"><a href="${esc(r.href)}" style="color:#0B57D0;font-weight:600">${esc(r.name)}</a>${r.replaces ? ` replaces ${esc(r.replaces)}` : ""}<br><span style="color:#454A55">${esc(r.note)}</span></li>`).join("")}</ol>
+<p>Here ${rows.length > 1 ? "are the links" : "is the link"} you asked for: <b>${esc(L.title)}</b>.</p><ol style="padding-left:20px">${L.items.map((r) => `<li style="margin:0 0 10px"><a href="${esc(r.href)}" style="color:#0B57D0;font-weight:600">${esc(r.name)}</a>${r.replaces ? ` replaces ${esc(r.replaces)}` : ""}<br><span style="color:#454A55">${esc(r.note)}</span></li>`).join("")}</ol>
 ${(L.bonus || []).map((r) => `<p><b>Bonus:</b> <a href="${esc(r.href)}" style="color:#0B57D0;font-weight:600">${esc(r.name)}</a> replaces ${esc(r.replaces)}. ${esc(r.note)}.</p>`).join("")}
 <p>${esc(L.guideText)}: <a href="${esc(L.page)}" style="color:#0B57D0;font-weight:600">${esc(L.page.replace("https://", ""))}</a></p>
 <p style="color:#454A55">${news ? "You're on the newsletter list too. Reply with &ldquo;unsubscribe&rdquo; any time to leave." : "That's all. You won't get other emails from me unless you ask."}</p><p>Rohan (Sansser)</p></div>`;
@@ -55,7 +55,7 @@ ${(L.bonus || []).map((r) => `<p><b>Bonus:</b> <a href="${esc(r.href)}" style="c
       fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify({ from, to: [to], subject: `Your ${L.items.length > 1 ? "links" : "link"}: ${L.title}`, text, html }),
+        body: JSON.stringify({ from, to: [to], subject: `Your ${rows.length > 1 ? "links" : "link"}: ${L.title}`, text, html }),
       }),
       new Promise((res) => setTimeout(() => res(null), 4000)),
     ]);

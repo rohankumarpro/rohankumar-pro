@@ -1,22 +1,34 @@
-// A one-link page unlocked with an email (/wow): a popup over a blurred stand-in page. The list id comes from <main data-list>;
-// the link and steps arrive from /api/leads only after sign-up.
+// Link pages unlocked with an email (/wow, /sound): a popup over a blurred stand-in page. The list id comes from <main data-list>;
+// the links and steps arrive from /api/leads only after sign-up.
 import { icon } from "/shared/icons.mjs";
 
 const $ = (id) => document.getElementById(id);
 const LIST = $("app").dataset.list, SAVE = "rk-unlocked-" + LIST;
 const store = { get() { try { return JSON.parse(localStorage.getItem(SAVE) || "null"); } catch { return null; } }, set(v) { try { localStorage.setItem(SAVE, JSON.stringify(v)); } catch {} } };
-const li = (t) => { const e = document.createElement("li"); e.textContent = t; return e; };
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
-$("tick").innerHTML = icon("check", { size: 14, sw: 3 });
+function block(it, bonus) {
+  const b = el("div", "block");
+  if (bonus) b.append(el("p", "label", "Bonus tool"));
+  b.append(el("h2", "", it.name), el("p", "host", new URL(it.href).host.replace(/^www\./, "")));
+  const a = el("a", "btn"); a.href = it.href; a.target = "_blank"; a.rel = "noopener"; a.innerHTML = "Open " + icon("external", { size: 16 }); b.append(a);
+  b.append(el("h3", "", "How to use it"));
+  const ol = el("ol");
+  for (const s of it.steps || []) {
+    if (typeof s === "string") { ol.append(el("li", "", s)); continue; }
+    const pre = el("pre"); pre.append(el("code", "", s.code));
+    const c = el("button", "copy", "Copy"); c.type = "button";
+    c.onclick = async () => { try { await navigator.clipboard.writeText(s.code); c.textContent = "Copied"; setTimeout(() => (c.textContent = "Copy"), 1500); } catch {} };
+    const wrap = el("div", "cmd"); wrap.append(pre, c);
+    (ol.lastElementChild || ol).append(wrap);
+  }
+  b.append(ol);
+  for (const t of it.tips || []) b.append(el("p", "tip", t));
+  return b;
+}
 
 function show(d) {
-  const it = d.items[0];
-  $("name").textContent = it.name;
-  $("host").textContent = new URL(it.href).host.replace(/^www\./, "");
-  $("open").href = it.href;
-  $("open").innerHTML = "Open the website " + icon("external", { size: 16 });
-  $("steps").replaceChildren(...(it.steps || []).map(li));
-  $("tip").textContent = (it.tips || [])[0] || "";
+  $("got").replaceChildren(...d.items.map((it) => block(it)), ...(d.bonus || []).map((it) => block(it, true)));
   $("app").classList.add("unlocked");
 }
 
@@ -44,7 +56,7 @@ $("f").addEventListener("submit", async (e) => {
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !d.ok) throw new Error(d.error || "Something went wrong. Please try again.");
     if (!d.items?.length) throw new Error("Something went wrong. Please try again.");
-    store.set({ items: d.items });
+    store.set({ items: d.items, bonus: d.bonus || [] });
     show(d);
     scrollTo(0, 0);
   } catch (err) {

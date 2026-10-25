@@ -193,9 +193,43 @@ LISTS.wow = {
   ],
 };
 
+LISTS.sound = {
+  title: "Free sound effects your AI finds and places for you",
+  hideNames: true,
+  from: "Sansser", page: "https://rohankumar.pro/sound", guideText: "How to use them, step by step",
+  // Openverse: about 5.2 million openly licensed audio files (Wikimedia, Jamendo, Freesound), searchable with no key.
+  // HyperFrames pulls its sound effects from Openverse since heygen-com/hyperframes#5753 (Oct 2026).
+  items: [
+    {
+      name: "Openverse", note: "5 million+ free sounds your AI can search and use", logo: "", href: "https://openverse.org",
+      steps: [
+        "Open openverse.org, switch to Audio and search a sound: whoosh, click, pop, swoosh.",
+        "Use sounds marked CC0 (no credit needed) or CC BY (add a credit line).",
+        "To let your AI do it, tell Claude Code:",
+        { code: "Use the Openverse API (https://api.openverse.org/v1/audio/, no key needed) to find a CC0 sound effect for each cue in my video, download them and place each one on its beat." },
+        "It searches, downloads and lines up each sound for you. Nothing to install.",
+      ],
+      tips: ["Without an account the API allows 20 searches a minute and 200 a day. Plenty for a video."],
+    },
+  ],
+  bonus: [
+    {
+      name: "HyperFrames", note: "HeyGen's free video tool for AI agents. It picks Openverse sounds and places them for you.", logo: "", href: "https://github.com/heygen-com/hyperframes",
+      steps: [
+        "Add it to Claude Code (in your terminal):",
+        { code: "claude plugin marketplace add heygen-com/hyperframes\nclaude plugin install hyperframes@hyperframes" },
+        "Open Claude Code in your video folder and ask for a video with sound, for example:",
+        { code: "Using /hyperframes, make a 15-second promo with a sound effect on every cut." },
+        "It writes the video, adds free Openverse sound effects on the right beats and renders the MP4.",
+      ],
+      tips: ["Sounds that need a credit are listed in assets/sfx/CREDITS.md. Using Codex or Cursor? Run npx hyperframes skills update instead."],
+    },
+  ],
+};
+
 export const publicList = (id) => {
   const L = LISTS[id];
   if (!L) return null;
-  const strip = ({ href, guide, steps, tips, name, ...rest }) => ({ ...rest, ...(L.hideNames ? {} : { name }), level: guide?.level });
+  const strip = ({ href, guide, steps, tips, name, note, ...rest }) => ({ ...rest, ...(L.hideNames ? {} : { name, note }), level: guide?.level });
   return { id, title: L.title, from: L.from, items: L.items.map(strip), bonus: (L.bonus || []).map(strip) };
 };
