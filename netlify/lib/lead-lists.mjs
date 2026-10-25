@@ -5,7 +5,7 @@
 export const LISTS = {
   repos: {
     title: "9 free GitHub repos that replace paid software",
-    from: "Sansser",
+    from: "Sansser", page: "https://rohankumar.pro/repos", guideText: "Step-by-step install guides for each one",
     items: [
       {
         name: "Open Higgsfield", replaces: "Higgsfield", note: "AI image and video studio", logo: "/img/repos/openhiggsfield.svg", href: "https://github.com/wide-trace/open-higgsfield",
@@ -168,9 +168,34 @@ export const LISTS = {
   },
 };
 
+LISTS.wow = {
+  title: "The free website that turns text into match-cut videos",
+  hideNames: true, // the name gives the site away, so it stays hidden until sign-up
+  from: "Sansser", page: "https://rohankumar.pro/wow", guideText: "How to use it, step by step",
+  items: [
+    {
+      name: "TextMatchCut", note: "Type a phrase, highlight a word, download a match-cut video", logo: "", href: "https://www.textmatchcut.app",
+      facts: ["Free", "No signup", "No watermark", "HD MP4"],
+      // from textmatchcut.app, checked October 2026
+      steps: [
+        "Open textmatchcut.app on your phone or computer.",
+        "Type your phrase. The highlighted part can be up to 23 characters.",
+        "Highlight the word you want to stand out. Every cut snaps to it.",
+        "Pick 9:16 for Reels, TikTok and Shorts, and a sound like paper shuffle or camera shutter (or none).",
+        "Tap Generate for Free, watch one short ad, then download your MP4.",
+      ],
+      tips: [
+        "Turn your ad blocker off for the site. The ad is what unlocks each video.",
+        "Advanced settings let you change cuts per second, zoom and blur.",
+        "Everything renders in your browser, nothing is uploaded, and the videos are yours to use, even for clients.",
+      ],
+    },
+  ],
+};
+
 export const publicList = (id) => {
   const L = LISTS[id];
   if (!L) return null;
-  const strip = ({ href, guide, ...rest }) => ({ ...rest, level: guide?.level });
+  const strip = ({ href, guide, steps, tips, name, ...rest }) => ({ ...rest, ...(L.hideNames ? {} : { name }), level: guide?.level });
   return { id, title: L.title, from: L.from, items: L.items.map(strip), bonus: (L.bonus || []).map(strip) };
 };

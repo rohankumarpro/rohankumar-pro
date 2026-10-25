@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The free website that turns text into match-cut videos</title>
+<meta name="description" content="Type a phrase, highlight a word, and download a viral text match-cut video. Free, no signup, no watermark. Enter your email to get the link and a how-to.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sansser">
+<meta property="og:title" content="The free website that turns text into match-cut videos">
+<meta property="og:description" content="Type a phrase, highlight a word, download the video. Free, no signup, no watermark.">
+<meta property="og:image" content="https://rohankumar.pro/img/wow/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The free website that turns text into match-cut videos">
+<meta property="og:url" content="https://rohankumar.pro/wow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The free website that turns text into match-cut videos">
+<meta name="twitter:description" content="Type a phrase, highlight a word, download the video. Free, no signup, no watermark.">
+<meta name="twitter:image" content="https://rohankumar.pro/img/wow/og.png">
+<meta name="theme-color" content="#FAFBFF" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1C1F26" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/sansser/icon-32.png"><link rel="icon" type="image/png" sizes="512x512" href="/img/sansser/icon-512.png"><link rel="apple-touch-icon" href="/img/sansser/icon-180.png">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap">
+<style>
+/* Plain: the site's Material palette, no cards or shadows, just type, one field and one button */
+:root{
+  --surface:#FAFBFF; --surface2:#E8EDF6; --line:#D3DAE8; --ink:#1A1C20; --ink2:#454A55; --primary:#0B57D0; --on-primary:#fff; --c1:#C4EED0;
+  --font:"Google Sans Flex","Google Sans","Product Sans",Figtree,Roboto,system-ui,-apple-system,"Segoe UI",sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --surface:#1C1F26; --surface2:#292D36; --line:#3A3F4A; --ink:#E4E6EE; --ink2:#C2C6D2; --primary:#A8C7FA; --on-primary:#062E6F; --c1:#2E6A44; color-scheme:dark;
+}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{min-height:100vh;background:var(--surface);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;line-height:1.5;
+  padding:calc(40 * var(--u)) calc(20 * var(--u)) calc(56 * var(--u))}
+main{max-width:520px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:calc(10 * var(--u));font-size:var(--fs-4);font-weight:var(--fw-m);color:var(--ink2)}
+.brand img{height:22px;width:auto;display:block}
+h1{font-size:clamp(28px,7vw,var(--fs-11));line-height:1.15;letter-spacing:-.015em;font-weight:var(--fw-b);margin:calc(28 * var(--u)) 0 calc(12 * var(--u))}
+.lede{color:var(--ink2);font-size:var(--fs-6);margin:0 0 calc(28 * var(--u))}
+label.field{display:block;font-size:var(--fs-3);font-weight:var(--fw-m);color:var(--ink2);margin:0 0 calc(6 * var(--u))}
+input[type=email]{width:100%;font:inherit;font-size:var(--fs-6);color:var(--ink);background:var(--surface2);border:2px solid transparent;border-radius:var(--r-4);padding:calc(13 * var(--u)) calc(14 * var(--u));outline:none}
+input[type=email]:focus{border-color:var(--primary)}
+.opt{display:flex;gap:calc(10 * var(--u));align-items:flex-start;margin:calc(14 * var(--u)) 0 calc(18 * var(--u));cursor:pointer;font-size:var(--fs-4)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.box{flex:none;width:22px;height:22px;border-radius:var(--r-2);border:2px solid var(--ink2);display:grid;place-items:center;color:transparent}
+.opt input:checked + .box{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.opt input:focus-visible + .box{outline:2px solid var(--primary);outline-offset:2px}
+.opt small{display:block;color:var(--ink2);font-size:var(--fs-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:calc(8 * var(--u));font:inherit;font-size:var(--fs-6);font-weight:var(--fw-m);border:0;border-radius:var(--r-pill);padding:calc(13 * var(--u)) calc(24 * var(--u));background:var(--primary);color:var(--on-primary);cursor:pointer;text-decoration:none}
+.btn[disabled]{opacity:.6;cursor:default}
+.note{font-size:var(--fs-3);color:var(--ink2);margin:calc(14 * var(--u)) 0 0}
+.err{color:var(--danger);font-size:var(--fs-4);margin:calc(10 * var(--u)) 0 0}
+.err:empty{display:none}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#got{display:none}
+.unlocked #f{display:none}.unlocked #got{display:block}
+.site{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:calc(12 * var(--u));padding:calc(16 * var(--u)) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.site b{display:block;font-size:var(--fs-8)}
+.site span{color:var(--ink2);font-size:var(--fs-4)}
+.facts{color:var(--ink2);font-size:var(--fs-4);margin:calc(12 * var(--u)) 0 0}
+h2{font-size:var(--fs-7);font-weight:var(--fw-b);margin:calc(32 * var(--u)) 0 calc(10 * var(--u))}
+ol,ul{margin:0;padding-left:calc(22 * var(--u));display:grid;gap:calc(8 * var(--u))}
+li::marker{color:var(--ink2);font-weight:var(--fw-m)}
+.sent{margin:0 0 calc(20 * var(--u));color:var(--ink2);font-size:var(--fs-4)}
+footer{margin-top:calc(48 * var(--u));font-size:var(--fs-3);color:var(--ink2)}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<main id="app" data-list="wow">
+  <div class="brand" id="brand"><picture><source srcset="/img/sansser/logo-dark.png" media="(prefers-color-scheme: dark)"><img src="/img/sansser/logo.png" alt="" width="42" height="22"></picture><span>Sansser</span></div>
+  <h1>The free website that turns text into match-cut videos</h1>
+  <p class="lede">Type a phrase, highlight a word, download the video. Enter your email and I'll show you the link and how to use it.</p>
+
+  <form id="f" novalidate>
+    <label class="field" for="em">Your email</label>
+    <input id="em" type="email" name="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+    <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+    <label class="opt"><input type="checkbox" id="news"><span class="box" id="tick"></span>
+      <span>Also send me the newsletter<small>Free tools and AI workflows like this one. Unsubscribe any time.</small></span></label>
+    <button class="btn" id="go" type="submit">Show me the link</button>
+    <p class="err" id="err" role="alert"></p>
+    <p class="note">Your email is used to send you this link, and the newsletter if the box is ticked.</p>
+  </form>
+
+  <section id="got" aria-live="polite">
+    <p class="sent" id="sent"></p>
+    <div class="site"><div><b id="name"></b><span id="host"></span></div><a class="btn" id="open" target="_blank" rel="noopener">Open the website</a></div>
+    <p class="facts" id="facts"></p>
+    <h2>How to use it</h2>
+    <ol id="steps"></ol>
+    <h2>Good to know</h2>
+    <ul id="tips"></ul>
+  </section>
+
+  <footer>Shared by Sansser · <a href="/">rohankumar.pro</a></footer>
+</main>
+<script type="module" src="/js/lead-offer.mjs"></script>
+</body>
+</html>

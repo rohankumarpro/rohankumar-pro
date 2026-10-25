@@ -12,7 +12,7 @@ import { isAdmin, body, json } from "../lib/session.mjs";
 import { contentStore } from "../lib/store.mjs";
 import { LISTS, publicList } from "../lib/lead-lists.mjs";
 
-const PREFIX = "lead/", RATE = "lead-rate", PER_IP_DAY = 12, GUIDES = "https://rohankumar.pro/repos";
+const PREFIX = "lead/", RATE = "lead-rate", PER_IP_DAY = 12;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const KEY = /^lead\/[a-z0-9-]{1,30}\/[a-f0-9]{20}$/;
 const clean = (s, n) => String(s ?? "").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").trim().slice(0, n);
@@ -39,23 +39,23 @@ async function sendLinks(to, L, news) {
   if (!key || !from) return false;
   const rows = [...L.items, ...(L.bonus || [])];
   const text = [
-    `Here are the links you asked for: ${L.title}.`, "",
-    ...rows.map((r, i) => `${i < L.items.length ? i + 1 + "." : "Bonus:"} ${r.name} (replaces ${r.replaces})\n   ${r.href}`), "",
-    `Step-by-step install guides for each one: ${GUIDES}`, "",
+    `Here ${L.items.length > 1 ? "are the links" : "is the link"} you asked for: ${L.title}.`, "",
+    ...rows.map((r, i) => `${L.items.length > 1 ? (i < L.items.length ? i + 1 + ". " : "Bonus: ") : ""}${r.name}${r.replaces ? ` (replaces ${r.replaces})` : ""}\n   ${r.href}`), "",
+    `${L.guideText}: ${L.page}`, "",
     news ? "You're on the newsletter list too. Reply with \"unsubscribe\" any time to leave." : "That's all. You won't get other emails from me unless you ask.",
     "", "Rohan (Sansser)",
   ].join("\n");
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.5;color:#1A1C20;max-width:560px">
-<p>Here are the links you asked for: <b>${esc(L.title)}</b>.</p><ol style="padding-left:20px">${L.items.map((r) => `<li style="margin:0 0 10px"><a href="${esc(r.href)}" style="color:#0B57D0;font-weight:600">${esc(r.name)}</a> replaces ${esc(r.replaces)}<br><span style="color:#454A55">${esc(r.note)}</span></li>`).join("")}</ol>
+<p>Here ${L.items.length > 1 ? "are the links" : "is the link"} you asked for: <b>${esc(L.title)}</b>.</p><ol style="padding-left:20px">${L.items.map((r) => `<li style="margin:0 0 10px"><a href="${esc(r.href)}" style="color:#0B57D0;font-weight:600">${esc(r.name)}</a>${r.replaces ? ` replaces ${esc(r.replaces)}` : ""}<br><span style="color:#454A55">${esc(r.note)}</span></li>`).join("")}</ol>
 ${(L.bonus || []).map((r) => `<p><b>Bonus:</b> <a href="${esc(r.href)}" style="color:#0B57D0;font-weight:600">${esc(r.name)}</a> replaces ${esc(r.replaces)}. ${esc(r.note)}.</p>`).join("")}
-<p>Step-by-step install guides for each one: <a href="${GUIDES}" style="color:#0B57D0;font-weight:600">rohankumar.pro/repos</a></p>
+<p>${esc(L.guideText)}: <a href="${esc(L.page)}" style="color:#0B57D0;font-weight:600">${esc(L.page.replace("https://", ""))}</a></p>
 <p style="color:#454A55">${news ? "You're on the newsletter list too. Reply with &ldquo;unsubscribe&rdquo; any time to leave." : "That's all. You won't get other emails from me unless you ask."}</p><p>Rohan (Sansser)</p></div>`;
   try {
     const r = await Promise.race([
       fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify({ from, to: [to], subject: `Your links: ${L.title}`, text, html }),
+        body: JSON.stringify({ from, to: [to], subject: `Your ${L.items.length > 1 ? "links" : "link"}: ${L.title}`, text, html }),
       }),
       new Promise((res) => setTimeout(() => res(null), 4000)),
     ]);

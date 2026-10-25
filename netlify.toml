@@ -110,6 +110,11 @@
   to = "/repos.html"
   status = 200
   force = true
+[[redirects]]
+  from = "/wow"
+  to = "/wow.html"
+  status = 200
+  force = true
 
 # Book a call and Messages are now tabs of Contact
 [[redirects]]
