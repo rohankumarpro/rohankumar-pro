@@ -278,10 +278,34 @@ window.settingsExtra = function (body) {
           const r = await api("/api/backup", { method: "POST", body: data }); toast(r.ok ? `Restored ${r.data.restored} items. Reloading…` : r.data.error || "Restore failed"); if (r.ok) setTimeout(() => location.reload(), 1200); };
         i.click();
       } }, "Restore from file")));
-    {
-      const st = h("p", { class: "hint" }, "People who unlocked a link list (rohankumar.pro/repos) with their email. Only those who ticked the newsletter box asked for more emails.");
-      sec.append(h("h3", {}, "Sign-ups"), st, h("div", { class: "ow-row" }, h("a", { class: "btn tonal", href: "/api/leads?a=all&format=csv", download: "" }, "Download sign-ups (CSV)")));
-      api("/api/leads?a=all").then((r) => { if (r.ok) st.textContent = `${r.data.total} ${r.data.total === 1 ? "person has" : "people have"} unlocked a link list, and ${r.data.news} asked for the newsletter. Page: rohankumar.pro/repos`; }).catch(() => {});
+    { // Sign-ups from link lists (rohankumar.pro/repos): who unlocked them, newest first, with search and a newsletter filter
+      const st = h("p", { class: "hint" }, "People who unlocked a link list (rohankumar.pro/repos) with their email.");
+      const list = h("div", { class: "su-list" }), more = h("button", { class: "btn tonal", style: "display:none" }, "Show more");
+      const search = h("input", { class: "su-search", type: "search", placeholder: "Search emails", "aria-label": "Search sign-ups" });
+      let all = [], only = false, shown = 50;
+      const seg = h("div", { class: "seg" }, ...[["All", false], ["Newsletter", true]].map(([t, v]) => h("button", { class: v === only ? "on" : "", onclick: (e) => { only = v; shown = 50; $$("button", seg).forEach((b) => b.classList.toggle("on", b === e.currentTarget)); draw(); } }, t)));
+      const when = (ts) => new Date(ts).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+      const draw = () => {
+        const q = search.value.trim().toLowerCase();
+        const rows = all.filter((e) => (!only || e.news) && (!q || e.email.includes(q)));
+        list.innerHTML = "";
+        if (!rows.length) list.append(h("p", { class: "hint" }, all.length ? "No one matches." : "No sign-ups yet. Share rohankumar.pro/repos."));
+        rows.slice(0, shown).forEach((e) => list.append(h("div", { class: "su-item" },
+          h("div", { class: "su-main" }, h("div", { class: "su-mail" }, e.email),
+            h("div", { class: "su-meta" }, [when(e.ts), e.src, e.country, e.times > 1 ? `unlocked ${e.times} times` : ""].filter(Boolean).join(" · "))),
+          e.news ? h("span", { class: "su-tag", title: e.preticked ? "Left the pre-ticked box ticked" : "Ticked the box" }, "Newsletter") : null,
+          h("button", { class: "su-del", title: "Remove this person", "aria-label": "Remove " + e.email, html: I("trash", 16), onclick: async () => {
+            if (!confirm(`Remove ${e.email} from your sign-ups for good?`)) return;
+            const x = await api("/api/leads?key=" + encodeURIComponent(e.key), { method: "DELETE" });
+            if (x.ok) { all = all.filter((y) => y.key !== e.key); count(); draw(); toast("Removed"); } else toast(x.data.error || "Could not remove");
+          } }))));
+        more.style.display = rows.length > shown ? "" : "none";
+      };
+      const count = () => { const n = all.filter((e) => e.news).length; st.textContent = `${all.length} ${all.length === 1 ? "person has" : "people have"} unlocked a link list, and ${n} asked for the newsletter. Page: rohankumar.pro/repos`; };
+      more.onclick = () => { shown += 50; draw(); };
+      search.oninput = () => { shown = 50; draw(); };
+      sec.append(h("h3", {}, "Sign-ups"), st, h("div", { class: "ow-row su-bar" }, seg, h("a", { class: "btn tonal", href: "/api/leads?a=all&format=csv", download: "" }, "Download CSV")), search, list, more);
+      api("/api/leads?a=all").then((r) => { if (r.ok) { all = r.data.leads || []; count(); } draw(); }).catch(() => draw());
     }
     {
       const list = h("div", { class: "ow-snaps" }), st = h("p", { class: "hint" }, "Safety copies are kept on the server automatically (about once a day while you work, and every week), the latest ten. Restoring one first saves what is there now.");
