@@ -279,6 +279,11 @@ window.settingsExtra = function (body) {
         i.click();
       } }, "Restore from file")));
     {
+      const st = h("p", { class: "hint" }, "People who unlocked a link list (rohankumar.pro/repos) with their email. Only those who ticked the newsletter box asked for more emails.");
+      sec.append(h("h3", {}, "Sign-ups"), st, h("div", { class: "ow-row" }, h("a", { class: "btn tonal", href: "/api/leads?a=all&format=csv", download: "" }, "Download sign-ups (CSV)")));
+      api("/api/leads?a=all").then((r) => { if (r.ok) st.textContent = `${r.data.total} ${r.data.total === 1 ? "person has" : "people have"} unlocked a link list, and ${r.data.news} asked for the newsletter. Page: rohankumar.pro/repos`; }).catch(() => {});
+    }
+    {
       const list = h("div", { class: "ow-snaps" }), st = h("p", { class: "hint" }, "Safety copies are kept on the server automatically (about once a day while you work, and every week), the latest ten. Restoring one first saves what is there now.");
       const when = (k) => { const m = k.match(/^snap-(\d{4})-(\d\d)-(\d\d)T(\d\d)-(\d\d)/); if (!m) return k; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])); return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); };
       const drawSnaps = async () => {

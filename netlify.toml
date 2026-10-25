@@ -104,6 +104,13 @@
   status = 200
   force = true
 
+# Link lists unlocked with an email (shared from Instagram): a static page that talks to /api/leads
+[[redirects]]
+  from = "/repos"
+  to = "/repos.html"
+  status = 200
+  force = true
+
 # Book a call and Messages are now tabs of Contact
 [[redirects]]
   from = "/book"

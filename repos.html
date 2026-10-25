@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>9 free GitHub repos that replace paid software</title>
+<meta name="description" content="Open-source alternatives to Higgsfield, ElevenLabs, Semrush, Notion, Wispr Flow, Asana, Calendly, Intercom and Loom. Enter your email to get all nine links.">
+<meta property="og:title" content="9 free GitHub repos that replace paid software">
+<meta property="og:description" content="Open-source alternatives to the tools you pay for every month. Get all nine links free.">
+<meta property="og:image" content="https://rohankumar.pro/img/og.png">
+<meta property="og:url" content="https://rohankumar.pro/repos">
+<meta name="theme-color" content="#E9EEF8" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1117" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png"><link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap">
+<style>
+/* The site's Material palette (same values as index.html), light and dark */
+:root{
+  --bg:#E9EEF8; --surface:#FAFBFF; --surface2:#E8EDF6; --line:#D3DAE8;
+  --ink:#1A1C20; --ink2:#454A55; --primary:#0B57D0; --on-primary:#fff;
+  --c1:#C4EED0; --c4:#FFEFB0; --c5:#C7E3FF;
+  --shadow:0 12px 40px rgba(20,35,80,.18), 0 2px 6px rgba(20,35,80,.10);
+  --font:"Google Sans Flex","Google Sans","Product Sans",Figtree,Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1117; --surface:#1C1F26; --surface2:#292D36; --line:#3A3F4A;
+  --ink:#E4E6EE; --ink2:#C2C6D2; --primary:#A8C7FA; --on-primary:#062E6F;
+  --c1:#2E6A44; --c4:#7C671E; --c5:#2E5E98;
+  --shadow:0 18px 50px rgba(0,0,0,.55); color-scheme:dark;
+}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  padding:calc(24 * var(--u)) calc(16 * var(--u)) calc(48 * var(--u))}
+.wrap{max-width:620px;margin:0 auto}
+.from{display:inline-flex;align-items:center;gap:calc(8 * var(--u));padding:calc(6 * var(--u)) calc(14 * var(--u));border-radius:var(--r-pill);background:var(--surface);color:var(--ink2);font-size:var(--fs-3);font-weight:var(--fw-m)}
+.from svg{color:var(--primary)}
+h1{font-size:clamp(30px,8vw,var(--fs-12));line-height:1.08;letter-spacing:-.02em;margin:calc(16 * var(--u)) 0 calc(10 * var(--u));font-weight:var(--fw-b)}
+h1 mark{background:var(--c4);color:inherit;border-radius:var(--r-3);padding:0 .12em}
+.lede{font-size:var(--fs-6);line-height:1.5;color:var(--ink2);margin:0 0 calc(20 * var(--u))}
+.card{background:var(--surface);border-radius:var(--r-8);box-shadow:var(--shadow);padding:calc(20 * var(--u))}
+form label.field{display:block;font-size:var(--fs-3);font-weight:var(--fw-m);color:var(--ink2);margin:0 0 calc(6 * var(--u)) calc(4 * var(--u))}
+input[type=email]{width:100%;font:inherit;font-size:var(--fs-7);color:var(--ink);background:var(--surface2);border:2px solid transparent;border-radius:var(--r-5);padding:calc(14 * var(--u)) calc(16 * var(--u));outline:none;transition:border-color var(--d-2) var(--ease)}
+input[type=email]:focus{border-color:var(--primary)}
+.opt{display:flex;gap:calc(12 * var(--u));align-items:flex-start;margin:calc(14 * var(--u)) 0 calc(16 * var(--u));cursor:pointer;font-size:var(--fs-5);line-height:1.4}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.box{flex:none;width:24px;height:24px;border-radius:var(--r-3);background:var(--surface2);display:grid;place-items:center;color:transparent;transition:background var(--d-2) var(--ease),color var(--d-2) var(--ease)}
+.opt input:checked + .box{background:var(--primary);color:var(--on-primary)}
+.opt input:focus-visible + .box{outline:2px solid var(--primary);outline-offset:2px}
+.opt small{display:block;color:var(--ink2);font-size:var(--fs-3);margin-top:calc(2 * var(--u))}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:calc(8 * var(--u));width:100%;font:inherit;font-size:var(--fs-7);font-weight:var(--fw-b);border:0;border-radius:var(--r-pill);padding:calc(15 * var(--u)) calc(20 * var(--u));background:var(--primary);color:var(--on-primary);cursor:pointer;transition:transform var(--d-2) var(--ease-spring),filter var(--d-2) var(--ease)}
+.btn:hover{filter:brightness(1.06)}.btn:active{transform:scale(.98)}.btn[disabled]{opacity:.6;cursor:default}
+.note{font-size:var(--fs-3);color:var(--ink2);margin:calc(12 * var(--u)) 0 0;text-align:center}
+.err{color:var(--danger);font-size:var(--fs-4);margin:calc(10 * var(--u)) 0 0;min-height:1em}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.done{display:none;align-items:center;gap:calc(12 * var(--u));font-size:var(--fs-5);line-height:1.4}
+.done .ok{flex:none;width:40px;height:40px;border-radius:50%;background:var(--c1);display:grid;place-items:center}
+.unlocked form{display:none}.unlocked .done{display:flex}
+h2{font-size:var(--fs-4);text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);margin:calc(28 * var(--u)) 0 calc(10 * var(--u)) calc(4 * var(--u));font-weight:var(--fw-b)}
+.list{display:grid;gap:calc(8 * var(--u))}
+.row{display:flex;align-items:center;gap:calc(14 * var(--u));background:var(--surface);border-radius:var(--r-6);padding:calc(12 * var(--u)) calc(14 * var(--u));color:inherit;text-decoration:none;transition:transform var(--d-2) var(--ease),background var(--d-2) var(--ease)}
+a.row:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--surface) 92%,var(--primary))}
+.logo{flex:none;width:52px;height:52px;border-radius:var(--r-4);background:var(--surface2);display:grid;place-items:center;overflow:hidden;color:var(--ink2)}
+.logo img{width:100%;height:100%;object-fit:cover}
+.meta{flex:1;min-width:0}
+.name{font-weight:var(--fw-b);font-size:var(--fs-6)}
+.rep{font-size:var(--fs-3);color:var(--ink2);margin-top:calc(2 * var(--u))}
+.rep s{text-decoration-thickness:2px}
+.desc{font-size:var(--fs-3);color:var(--ink2);margin-top:calc(2 * var(--u));line-height:1.35}
+.end{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--ink2)}
+a.row .end{background:var(--primary);color:var(--on-primary)}
+.num{font-size:var(--fs-2);font-weight:var(--fw-b);color:var(--ink2);width:18px;text-align:right;flex:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app">
+  <span class="from" id="from"></span>
+  <h1><mark>9 free GitHub repos</mark> that replace paid software</h1>
+  <p class="lede">Open-source twins of tools you might be paying for every month. Enter your email to unlock every link. A copy goes to your inbox too.</p>
+
+  <section class="card" id="card">
+    <form id="f" novalidate>
+      <label class="field" for="em">Your email</label>
+      <input id="em" type="email" name="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+      <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+      <label class="opt"><input type="checkbox" id="news"><span class="box" id="tick"></span>
+        <span>Also send me the newsletter<small>Free tools and AI workflows like this one. Unsubscribe any time.</small></span></label>
+      <button class="btn" id="go" type="submit"></button>
+      <p class="err" id="err" role="alert"></p>
+      <p class="note">Your email is only used to send you these links, and the newsletter if you tick the box.</p>
+    </form>
+    <div class="done" id="done" aria-live="polite"><span class="ok" id="okIco"></span><span id="doneTxt"></span></div>
+  </section>
+
+  <h2 id="h-list">The 9 repos</h2>
+  <div class="list" id="list"></div>
+  <h2 id="h-bonus" hidden>Bonus</h2>
+  <div class="list" id="bonus"></div>
+</main>
+<script type="module" src="/js/repos-page.mjs"></script>
+</body>
+</html>
