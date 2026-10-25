@@ -1,5 +1,5 @@
-// A plain one-link page unlocked with an email (/wow). The list id comes from <main data-list>; the link, steps and tips
-// arrive from /api/leads only after sign-up.
+// A one-link page unlocked with an email (/wow): a popup over a blurred stand-in page. The list id comes from <main data-list>;
+// the link and steps arrive from /api/leads only after sign-up.
 import { icon } from "/shared/icons.mjs";
 
 const $ = (id) => document.getElementById(id);
@@ -9,21 +9,19 @@ const li = (t) => { const e = document.createElement("li"); e.textContent = t; r
 
 $("tick").innerHTML = icon("check", { size: 14, sw: 3 });
 
-function show(d, msg) {
+function show(d) {
   const it = d.items[0];
   $("name").textContent = it.name;
   $("host").textContent = new URL(it.href).host.replace(/^www\./, "");
   $("open").href = it.href;
   $("open").innerHTML = "Open the website " + icon("external", { size: 16 });
-  $("facts").textContent = (it.facts || []).join(" · ");
   $("steps").replaceChildren(...(it.steps || []).map(li));
-  $("tips").replaceChildren(...(it.tips || []).map(li));
-  $("sent").textContent = msg;
+  $("tip").textContent = (it.tips || [])[0] || "";
   $("app").classList.add("unlocked");
 }
 
 const saved = store.get();
-if (saved?.items?.[0]?.href) show(saved, "Here it is.");
+if (saved?.items?.[0]?.href) show(saved);
 
 // The server says whether the newsletter box may start ticked where this visitor is (never in the EU, EEA or UK)
 let pre = false, touched = false;
@@ -37,7 +35,7 @@ $("f").addEventListener("submit", async (e) => {
   const email = $("em").value.trim();
   $("err").textContent = "";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $("err").textContent = "Please enter a valid email address."; $("em").focus(); return; }
-  const btn = $("go"); btn.disabled = true; btn.textContent = "One moment…";
+  const btn = $("go"); btn.disabled = true; btn.textContent = "Unlocking…";
   try {
     const r = await fetch("/api/leads", {
       method: "POST", headers: { "content-type": "application/json" },
@@ -47,10 +45,10 @@ $("f").addEventListener("submit", async (e) => {
     if (!r.ok || !d.ok) throw new Error(d.error || "Something went wrong. Please try again.");
     if (!d.items?.length) throw new Error("Something went wrong. Please try again.");
     store.set({ items: d.items });
-    show(d, d.emailed ? `Here it is. A copy is on its way to ${email}.` : "Here it is.");
-    $("got").scrollIntoView({ behavior: "smooth", block: "start" });
+    show(d);
+    scrollTo(0, 0);
   } catch (err) {
     $("err").textContent = err.message;
-    btn.disabled = false; btn.textContent = "Show me the link";
+    btn.disabled = false; btn.textContent = "Unlock";
   }
 });
