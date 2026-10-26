@@ -96,6 +96,11 @@
   to = "/404"
   status = 404
   force = true
+[[redirects]]
+  from = "/sites/*"
+  to = "/404"
+  status = 404
+  force = true
 
 # A deck shared from Design with a private link: a static page (no function runs to show it)
 [[redirects]]
@@ -104,21 +109,22 @@
   status = 200
   force = true
 
-# Link lists unlocked with an email (shared from Instagram): a static page that talks to /api/leads
+# The link pages moved to link.sansser.com (source in sites/sansser-links). Old links from DMs forward there;
+# Netlify keeps the query string, so ?src= tags still arrive. Sign-ups collected here stay in this site's store.
 [[redirects]]
   from = "/repos"
-  to = "/repos.html"
-  status = 200
+  to = "https://link.sansser.com/repos"
+  status = 301
   force = true
 [[redirects]]
   from = "/wow"
-  to = "/wow.html"
-  status = 200
+  to = "https://link.sansser.com/wow"
+  status = 301
   force = true
 [[redirects]]
   from = "/sound"
-  to = "/sound.html"
-  status = 200
+  to = "https://link.sansser.com/sound"
+  status = 301
   force = true
 
 # Book a call and Messages are now tabs of Contact

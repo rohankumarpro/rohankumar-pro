@@ -1,0 +1,9 @@
+{
+  "name": "sansser-links",
+  "private": true,
+  "type": "module",
+  "description": "link.sansser.com: link pages from the reels, unlocked with an email",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.6"
+  }
+}

@@ -1,0 +1,16 @@
+# link.sansser.com (Netlify site "sansser-links"). Deploy this folder, not the rohankumar.pro site.
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Every other address is a link page: page.html reads the slug from the address
+[[redirects]]
+  from = "/*"
+  to = "/page.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

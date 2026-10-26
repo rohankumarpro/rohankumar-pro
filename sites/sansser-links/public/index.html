@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Rohan · Sansser links</title>
+<meta name="description" content="Links from Rohan's reels on AI, automations and tech, plus the weekly Sansser newsletter.">
+<link rel="icon" href="/assets/avatar_photo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="shell">
+  <img class="logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights">
+  <img class="logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights">
+
+  <section class="card">
+    <div class="hero">
+      <div class="eyebrow">Links from my reels</div>
+      <div class="avatar-row"><img class="avatar" src="/assets/avatar_photo.png" alt="Rohan"><img class="sticker" src="/assets/sticker_g.png" alt=""></div>
+      <h1>Hey, I'm Rohan.</h1>
+      <p>I make short videos about AI and how it's changing the way we work and think. Every link from my reels lives here.</p>
+    </div>
+    <img class="wave wave-light" src="/assets/wave_g.png" alt="">
+    <img class="wave wave-dark" src="/assets/wave_dark_g.png" alt="">
+
+    <div class="paper pad">
+      <div id="join">
+        <h2 class="serif-h">The weekly Sansser newsletter</h2>
+        <p class="letter">Tools that replace things you're paying for, automations that save you hours, and honest takes on where all of this is heading, written by me, not by AI.</p>
+        <form id="form" novalidate>
+          <label class="field" for="email">Your email</label>
+          <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@gmail.com" required>
+          <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" tabindex="-1" autocomplete="off"></div>
+          <button class="btn" id="btn" type="submit">Join the newsletter</button>
+          <div class="msg" id="msg" role="alert"></div>
+          <p class="fine">One email a week. Unsubscribe anytime.</p>
+        </form>
+      </div>
+      <div id="joined" class="hidden"><div class="done">You're in. Check your inbox for a quick hello from me.</div></div>
+
+      <div class="list hidden" id="list">
+        <h2>Latest link pages</h2>
+        <div class="items" id="pages"></div>
+      </div>
+    </div>
+  </section>
+  <p class="foot">© 2026 Sansser</p>
+</main>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  fetch("/api/pages").then((r) => r.json()).then((d) => {
+    if (!d.pages || !d.pages.length) return;
+    $("pages").innerHTML = d.pages.map((p) =>
+      `<a class="item" href="/${esc(p.slug)}"><div class="t">${esc(p.title)}</div>${p.subtitle ? `<div class="d">${esc(p.subtitle)}</div>` : ""}<div class="go">${p.count} ${p.count === 1 ? "link" : "links"}${p.bonus ? " + bonus" : ""} →</div></a>`
+    ).join("");
+    $("list").classList.remove("hidden");
+  }).catch(() => {});
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("email").value.trim();
+    $("msg").textContent = "";
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) { $("msg").textContent = "That doesn't look like an email address."; return; }
+    $("btn").disabled = true; $("btn").textContent = "Joining…";
+    try {
+      const r = await fetch("/api/unlock", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug: "home", email, newsletter: true, website: $("website").value }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || (r.status === 429 ? "Too many tries, give it a minute." : "Something went wrong, please try again."));
+      $("join").classList.add("hidden"); $("joined").classList.remove("hidden");
+    } catch (err) {
+      $("msg").textContent = err.message;
+      $("btn").disabled = false; $("btn").textContent = "Join the newsletter";
+    }
+  });
+})();
+</script>
+</body>
+</html>
