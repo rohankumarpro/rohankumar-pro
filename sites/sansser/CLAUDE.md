@@ -27,5 +27,5 @@ Sign-ups, consent records, pages and links live in the database (Supabase Postgr
 ## 3. Process
 
 - Develop on `dev`, merge to `main` with a normal merge or fast-forward. Never force-push.
-- Netlify builds cost credits: batch changes, merge to `main` once per batch.
+- Netlify deploys are only made when the owner says it is ready. Netlify storage and build credits run out fast. Test locally and share screenshots or videos instead. This includes preview sites (e.g. `sansser-hub-preview`) and manual MCP/CLI deploys. Batch changes, merge to `main` once per batch.
 - Secrets live only in Netlify environment variables (see `.env.example`). Never commit them.

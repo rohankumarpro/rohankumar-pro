@@ -24,4 +24,4 @@ and the personal vault. A deploy replaces code only. It must never change that d
 - Develop on `dev`, merge to `main` with a normal merge or fast-forward. Never force-push.
 - The site has ONE design (Material). Do not add a second interface or an interface picker. Check every UI change in light and dark, on desktop and on a phone.
 - No emoji icons. Pictures are never filtered or greyscaled.
-- Netlify builds cost credits: batch changes, merge to `main` once per batch.
+- Netlify deploys are only made when the owner says it is ready. Netlify storage and build credits run out fast. Test locally and share screenshots or videos instead. This includes preview sites (e.g. `sansser-hub-preview`) and manual MCP/CLI deploys. Batch changes, merge to `main` once per batch.
