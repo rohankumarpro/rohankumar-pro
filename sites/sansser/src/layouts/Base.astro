@@ -1,0 +1,61 @@
+---
+// Every page: the grid column, header with search, footer, fonts and the interaction scripts.
+import "../styles/site.css";
+import Logo from "../components/Logo.astro";
+import Icon from "../components/Icon.astro";
+import { pages } from "../lib/data";
+import { prompts } from "../data/prompts";
+
+interface Props { title: string; description?: string; noindex?: boolean; image?: string }
+const { title, description = "Every tool, repo and prompt from Sansser's reels. Tested by us, free to use.", noindex = false, image } = Astro.props;
+const full = title === "Sansser" ? title : `${title} · Sansser`;
+
+// Search index for the command palette (names only; gated links stay behind the unlock)
+const palette = [
+  ...pages.map((p) => ({ g: "Reels", t: p.title, m: p.keyword, icon: "link", href: `/r/${p.slug}` })),
+  ...prompts.map((p, i) => ({ g: "Prompts", t: p.title, m: "Prompt " + String(i + 1).padStart(2, "0"), icon: "doc", href: "/r/guide" })),
+  ...pages.filter((p) => p.slug !== "guide").flatMap((p) => p.items.map((it) => ({ g: "Tools", t: it.name, m: it.tag || p.keyword, icon: "out", href: `/r/${p.slug}` }))),
+  { g: "Pages", t: "Newsletter", m: "Weekly email", icon: "mail", href: "/newsletter" },
+  { g: "Pages", t: "All links", m: "Home", icon: "book", href: "/" },
+];
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{full}</title>
+  <meta name="description" content={description}>
+  {noindex && <meta name="robots" content="noindex, nofollow">}
+  <meta property="og:site_name" content="Sansser">
+  <meta property="og:title" content={full}>
+  <meta property="og:description" content={description}>
+  {image && <meta property="og:image" content={new URL(image, Astro.site).href}>}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0A0A09" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://use.typekit.net" crossorigin>
+  <!-- Adobe Fonts kit through Rohan's Creative Cloud subscription; swap the id once the typeface is chosen -->
+  <link rel="stylesheet" href="https://use.typekit.net/fzr7bed.css">
+</head>
+<body>
+  <header><div class="hdr">
+    <a class="logo" href="/" aria-label="Sansser links home"><Logo /></a>
+    <nav>
+      <button class="kbtn" id="kopen" type="button" aria-label="Search"><Icon name="search" /><span>Search</span><kbd>⌘K</kbd></button>
+      <a class="nl hide" href="/">Links</a>
+      <a class="nl hide" href="/newsletter">Newsletter</a>
+      <a class="btn" href="/newsletter">Subscribe</a>
+    </nav>
+  </div></header>
+  <main class="col"><div class="view"><slot /></div></main>
+  <footer class="col"><div class="foot mono"><span>© 2026 Sansser</span><span>link.sansser.com</span></div></footer>
+  <script type="application/json" id="kp-data" set:html={JSON.stringify(palette)} />
+  <script>
+    import "../scripts/fx.js";
+    import "../scripts/kit.js";
+    import "../scripts/forms.js";
+  </script>
+</body>
+</html>

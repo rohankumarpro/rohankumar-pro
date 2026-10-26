@@ -1,0 +1,30 @@
+---
+// A reel page: cover, title and a locked list; the unlock popup opens on arrival.
+import Base from "../../layouts/Base.astro";
+import UnlockPopup from "../../components/UnlockPopup.astro";
+import Icon from "../../components/Icon.astro";
+import { pages, count, type Page } from "../../lib/data";
+
+export function getStaticPaths() {
+  return pages.map((p) => ({ params: { keyword: p.slug }, props: { p } }));
+}
+const { p } = Astro.props as { p: Page };
+const rows = p.slug === "guide" ? 9 : p.items.length;
+---
+<Base title={p.title} description={p.subtitle} image={p.cover}>
+  <section class="row lp">
+    <div><div class="thumb"><img src={p.cover} alt="" width="480" height="480"></div>
+      <a class="back" href="/"><Icon name="arrow" /><span>All links</span></a></div>
+    <div>
+      <div class="mono"><span style="color:var(--ink)">{p.keyword}</span> · {count(p)}</div>
+      <h1>{p.title}</h1>
+      <p class="lead">{p.subtitle}</p>
+      <div class="items" id="lp-items">
+        {Array.from({ length: rows }, (_, i) => (
+          <div class="it"><span class="mono">{String(i + 1).padStart(2, "0")}</span><div class="sk" style={`width:${38 + ((i * 17) % 30)}%`}></div><div class="sk" style="width:64px;height:22px"></div><span></span></div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <UnlockPopup keyword={p.slug} />
+</Base>

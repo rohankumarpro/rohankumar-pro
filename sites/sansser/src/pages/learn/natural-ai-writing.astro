@@ -1,0 +1,22 @@
+---
+// The prompt guide from the GUIDE reel. Unlisted: reached only through the unlock.
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+import { prompts } from "../../data/prompts";
+---
+<Base title="Make your AI writing sound like you" noindex>
+  <section class="row" style="padding:80px 48px 64px">
+    <div class="eyebrow mono"><i></i>Guide · 9 prompts</div>
+    <h1>Make your AI writing sound like you</h1>
+    <p class="lead">Copy these into ChatGPT, Claude or whatever you use. Start with the main prompt, then use the fix-it prompts on anything that still sounds off.</p>
+    <span class="plus l"></span><span class="plus r"></span>
+  </section>
+  {prompts.map((p, i) => (
+    <section class="row ph">
+      <div><div class="n">{String(i + 1).padStart(2, "0")}</div><h3>{p.title}</h3>{p.main && <span class="badge">Use every time</span>}</div>
+      <div><div class="cbox"><div class="chead"><span class="mono">Prompt</span><button class="copy" type="button"><Icon name="copy" /><span class="lbl">Copy</span></button></div><pre class="code">{p.text}</pre></div></div>
+      <span class="plus l"></span><span class="plus r"></span>
+    </section>
+  ))}
+  <p class="closing">These prompts get you most of the way. The last bit is you: read it once out loud before you post, and change anything you wouldn't say.</p>
+</Base>

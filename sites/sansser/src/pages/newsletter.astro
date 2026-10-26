@@ -1,0 +1,19 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+---
+<Base title="Newsletter" description="One email a week, written by people: tools that replace things you pay for, automations that save hours, and honest notes on where AI is heading.">
+  <section class="row news">
+    <div><div class="eyebrow mono"><i></i>Newsletter</div><h1>One email a week. Written by people.</h1>
+      <p class="lead">Tools that replace things you pay for, automations that save hours, and honest notes on where AI is heading.</p></div>
+    <div style="align-self:end">
+      <form class="field news-form" data-where="newsletter" novalidate>
+        <input class="in" type="email" placeholder="you@email.com" aria-label="Your email" autocomplete="email">
+        <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+        <button class="btn lg" type="submit">Subscribe<Icon name="arrow" /></button>
+      </form>
+      <div class="mono note">Free · Unsubscribe anytime</div>
+    </div>
+    <span class="plus l"></span><span class="plus r"></span>
+  </section>
+</Base>

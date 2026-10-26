@@ -1,0 +1,22 @@
+---
+// One-click unsubscribe. Links already sent from link.sansser.com use the same token, so they keep working.
+import Base from "../layouts/Base.astro";
+import { tokenOk, unsubscribe } from "../lib/server/mail";
+import { db } from "../lib/server/db";
+export const prerender = false;
+const email = (Astro.url.searchParams.get("e") || "").toLowerCase();
+const ok = !!email && tokenOk(email, Astro.url.searchParams.get("t"));
+if (ok) {
+  await unsubscribe(email);
+  const store = db(Astro.url);
+  try { if (store.ready) { const id = await store.person(email, {}); await store.consent(id, { given: false, where_: "unsubscribe link", wording: "Unsubscribe" }); } } catch (e) { console.error("unsubscribe: record failed", e); }
+}
+---
+<Base title={ok ? "You're unsubscribed" : "Link not valid"} noindex>
+  <section class="row" style="padding:96px 48px 120px">
+    <div class="eyebrow mono"><i></i>Newsletter</div>
+    <h1>{ok ? "You're unsubscribed." : "This link isn't valid."}</h1>
+    <p class="lead">{ok ? `${email} won't get the Sansser newsletter anymore. No hard feelings.` : "It may be old or cut short. Use the unsubscribe link in your latest email."}</p>
+    <a class="back" href="/"><span>All links</span></a>
+  </section>
+</Base>

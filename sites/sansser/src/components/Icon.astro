@@ -1,0 +1,6 @@
+---
+import { ICONS } from "./icons";
+interface Props { name: keyof typeof ICONS | string; size?: number; class?: string }
+const { name, size = 16, class: cls = "ico" } = Astro.props;
+---
+<svg class={cls} width={size} height={size} viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d={ICONS[name]} /></svg>

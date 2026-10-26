@@ -1,0 +1,41 @@
+---
+import Base from "../layouts/Base.astro";
+import ReelCard from "../components/ReelCard.astro";
+import Icon from "../components/Icon.astro";
+import { pages, totalLinks } from "../lib/data";
+---
+<Base title="Sansser" description="Every link from our reels. The tools, repos and prompts we show on Instagram. Tested by us, free to use.">
+  <section class="row hero" id="hero">
+    <canvas id="dots" aria-hidden="true"></canvas>
+    <div>
+      <div class="eyebrow mono"><i></i>link.sansser.com</div>
+      <h1>Every link from our reels.</h1>
+      <p class="lead">The tools, repos and prompts we show on Instagram. Tested by us, free to use.</p>
+    </div>
+    <div class="stats mono">
+      <div class="stat">Pages<b>{pages.length}</b></div>
+      <div class="stat">Links<b>{totalLinks}</b></div>
+      <div class="stat">New<b>Every week</b></div>
+    </div>
+    <span class="plus l"></span><span class="plus r"></span>
+  </section>
+  <div class="row lab mono"><span>Reels</span><span>Newest first</span><span class="plus l"></span><span class="plus r"></span></div>
+  <section class="row grid" aria-label="Reels">
+    {pages.map((p) => <ReelCard p={p} />)}
+    <span class="plus l"></span><span class="plus r"></span>
+  </section>
+  <section class="row news" id="news">
+    <div><div class="mono">Newsletter</div><h2>One email a week. Written by people.</h2>
+      <p>Tools that replace things you pay for, automations that save hours, and honest notes on where AI is heading.</p></div>
+    <div>
+      <form class="field news-form" data-where="home" novalidate>
+        <input class="in" type="email" placeholder="you@email.com" aria-label="Your email" autocomplete="email">
+        <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+        <button class="btn lg" type="submit">Subscribe<Icon name="arrow" /></button>
+      </form>
+      <div class="by"><img src="/covers/avatar.jpg" alt="" width="32" height="32"><div><b>Rohan Kumar</b><span>Sansser</span></div></div>
+      <div class="mono note">Free · Unsubscribe anytime</div>
+    </div>
+    <span class="plus l"></span><span class="plus r"></span>
+  </section>
+</Base>

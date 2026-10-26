@@ -1,0 +1,16 @@
+---
+import Icon from "./Icon.astro";
+import { count, type Page } from "../lib/data";
+interface Props { p: Page }
+const { p } = Astro.props;
+---
+<a class="cell" href={`/r/${p.slug}`} data-keyword={p.keyword}>
+  <div class="thumb">
+    <img src={p.cover} alt="" width="480" height="480" loading="lazy" decoding="async">
+    <canvas class="scan" aria-hidden="true"></canvas>
+    <div class="peek" aria-hidden="true"><span>{p.keyword} · {count(p)}</span>{p.subtitle}</div>
+  </div>
+  <div class="meta mono"><span class="kw">{p.keyword}</span><span>{count(p)}</span></div>
+  <h3>{p.title}</h3>
+  <div class="open"><span>Open</span><Icon name="arrow" /></div>
+</a>
