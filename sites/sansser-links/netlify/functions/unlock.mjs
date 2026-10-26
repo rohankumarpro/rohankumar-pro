@@ -1,9 +1,10 @@
 // POST /api/unlock {slug, email, newsletter, pre, website, src, ref}
 // Saves the unlock, adds newsletter opt-ins to the "Sansser Newsletter" list in Resend (welcome email the first time),
-// emails the links, and returns them. slug "home" is the newsletter form on the home page.
+// and returns the links. slug "home" is the newsletter form on the home page.
+// The "Your links" email is off to save the Resend daily quota (people see the links on the page); linksEmail() is kept.
 import { getStore } from "@netlify/blobs";
 import { PAGES } from "../lib/pages.mjs";
-import { json, clean, EMAIL, hashOf, subscribe, send, linksEmail, welcomeEmail } from "../lib/core.mjs";
+import { json, clean, EMAIL, hashOf, subscribe, send, welcomeEmail } from "../lib/core.mjs";
 
 export default async (req, context) => {
   let b;
@@ -26,10 +27,7 @@ export default async (req, context) => {
   await store.setJSON(key, entry);
 
   const isNew = newsletter ? await subscribe(email) : false;
-  const mails = [];
-  if (page) { const m = linksEmail(email, slug, page); mails.push(send(email, m.subject, m.html, m.text)); }
-  if (isNew) { const m = welcomeEmail(email, !!page); mails.push(send(email, m.subject, m.html, m.text)); }
-  await Promise.allSettled(mails);
+  if (isNew) { const m = welcomeEmail(email, !!page); await send(email, m.subject, m.html, m.text).catch(() => {}); }
 
   return json({ ok: true, subscribed: newsletter, items: page ? page.items : [] });
 };
