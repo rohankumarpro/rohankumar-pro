@@ -1,6 +1,7 @@
 // The link pages on link.sansser.com/<slug>. Links, guides and tips are only sent after an email unlock;
 // GET /api/pages/<slug> gives the title, subtitle and count. "hidden" pages keep item names out of the public data.
 // New pages go at the end: the home page shows them newest first. "cover" is the reel thumbnail.
+// "direct": a one-link page whose unlock goes straight to that link instead of showing the links page.
 // Content checked against each tool's own README or site (October 2026).
 export const PAGES = {
   "repos": {
@@ -316,6 +317,7 @@ export const PAGES = {
     ]
   },
   "guide": {
+    "direct": true,
     "cover": "/assets/covers/guide.webp",
     "title": "The full prompt guide for natural AI writing",
     "subtitle": "The prompts I use to make AI writing sound like a real person wrote it.",

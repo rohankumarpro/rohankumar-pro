@@ -14,7 +14,7 @@ export default async (req, context) => {
   }
   const p = PAGES[slug];
   if (!p) return json({ error: "not found" }, 404);
-  return json({ slug, title: p.title, subtitle: p.subtitle || "", count: main(p), bonus: p.items.length - main(p), cover: p.cover || "", newsDefault: newsDefault(context), items: levels(p) });
+  return json({ slug, title: p.title, subtitle: p.subtitle || "", count: main(p), bonus: p.items.length - main(p), cover: p.cover || "", direct: !!p.direct, newsDefault: newsDefault(context), items: levels(p) });
 };
 
 export const config = { path: ["/api/pages", "/api/pages/:slug"], method: "GET" };

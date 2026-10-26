@@ -86,7 +86,9 @@
     b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1500);
   });
 
-  let pre = false, touched = false;
+  let pre = false, touched = false, direct = false;
+  // one-link pages marked "direct" skip the links page and open the link itself
+  const go = (items) => { if (direct && items && items[0] && items[0].url) { location.replace(items[0].url); return true; } return false; };
   $("newsletter").addEventListener("change", () => { touched = true; });
 
   fetch("/api/pages/" + encodeURIComponent(slug), { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((p) => {
@@ -98,8 +100,9 @@
     $("count").classList.remove("hidden");
     // the newsletter box starts ticked except where consent must be asked for (EU, EEA, UK)
     if (p.newsDefault && !touched) { pre = true; $("newsletter").checked = true; }
+    direct = !!p.direct;
     const saved = store.get();
-    if (saved && saved.items) showItems(saved.items);
+    if (saved && saved.items && !go(saved.items)) showItems(saved.items);
   }).catch(() => {
     $("title").textContent = "Not found";
     $("pop-h").textContent = "This page doesn't exist";
@@ -118,7 +121,7 @@
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d.error || (r.status === 429 ? "Too many tries, give it a minute." : "Something went wrong, please try again."));
       store.set({ items: d.items });
-      showItems(d.items);
+      if (!go(d.items)) showItems(d.items);
     } catch (err) {
       $("msg").textContent = err.message;
       $("btn").disabled = false; $("btn").textContent = "Unlock";
