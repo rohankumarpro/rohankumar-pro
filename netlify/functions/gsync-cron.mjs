@@ -1,4 +1,4 @@
-// Every ten minutes on the live site: keeps Docs in step with Google Docs and Notes with Google Keep.
+// Every 30 minutes on the live site (fewer runs, fewer Netlify credits): keeps Docs in step with Google Docs and Notes with Google Keep.
 // Does nothing until the Google keys are set in Netlify (see Settings > Sync on the site).
 import { getStore } from "@netlify/blobs";
 import { runSync, configured } from "../lib/gsync.mjs";
@@ -10,4 +10,4 @@ export default async () => {
     return new Response(JSON.stringify(r), { status: 200 });
   } catch (e) { return new Response(String(e?.message || e), { status: 500 }); }
 };
-export const config = { schedule: "*/10 * * * *" };
+export const config = { schedule: "*/30 * * * *" };

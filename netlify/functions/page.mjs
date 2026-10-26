@@ -14,6 +14,11 @@ export const handler = async (event) => {
     const q = event.queryStringParameters || {};
     const store = contentStore(event);
     if (!q.p) q.p = reqPath(event); // the rule's ?p= does not always arrive: use the address that was asked for
+    // Bots probing for files that never exist here (/.env, /xmlrpc.php, /@fs/...) get a few bytes instead of the whole
+    // desktop, which saves bandwidth and function time. Real pages have no file extension except .md.
+    if (/^\/[._@]|\.(?!md$)[a-z0-9]{1,8}$/i.test(q.p || "/")) {
+      return { statusCode: 404, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" }, body: "Not found" };
+    }
     const P = await resolve(event, store, q.p || "/");
     const preview = isPreviewHost(event);
     const common = { "cache-control": "public, max-age=0, must-revalidate", "netlify-cdn-cache-control": "public, s-maxage=120, stale-while-revalidate=86400", ...(preview ? { "x-robots-tag": "noindex" } : {}) };

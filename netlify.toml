@@ -102,6 +102,89 @@
   status = 404
   force = true
 
+# Bots probing for other platforms' files get a tiny static 404 (no function runs); browsers asking for the
+# classic icon addresses get the real icons. Anything else file-like is answered small by the page function.
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/img/favicon-32.png"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/apple-touch-icon.png"
+  to = "/img/apple-touch-icon.png"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/apple-touch-icon-precomposed.png"
+  to = "/img/apple-touch-icon.png"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/.env"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/.env.local"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/.env.production"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/.git/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/@fs/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/xmlrpc.php"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/wp-login.php"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/wp-admin/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/wp-content/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/wp-includes/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/wp-json/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/vendor/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/cgi-bin/*"
+  to = "/notfound.txt"
+  status = 404
+  force = true
+
 # A deck shared from Design with a private link: a static page (no function runs to show it)
 [[redirects]]
   from = "/present/*"
