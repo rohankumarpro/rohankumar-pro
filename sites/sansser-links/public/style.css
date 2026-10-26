@@ -85,3 +85,17 @@ input[type=email]:focus{outline:none;border-color:#00674F;box-shadow:0 0 0 3px r
 .copy{position:absolute;right:8px;bottom:8px;border:0;border-radius:999px;padding:5px 12px;background:var(--mint-soft);color:var(--green);font:600 12px var(--sans);cursor:pointer}
 @media (prefers-color-scheme:dark){.copy{color:#9FF2D6}}
 .docs{display:inline-block;margin-top:10px;font:600 14px var(--sans)}
+
+/* the unlock popup over a blurred page */
+.ghost{height:96px}
+body:not(.unlocked) #page{filter:blur(6px);opacity:.75;pointer-events:none;user-select:none}
+.veil{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--bg) 40%,transparent)}
+.unlocked .veil{display:none}
+.pop{width:100%;max-width:380px;margin:0;background:var(--paper);border-radius:28px;padding:26px 24px 22px;box-shadow:0 18px 50px rgba(0,40,30,.22)}
+.pop-logo{display:block;width:150px;height:auto;margin:0 0 18px}
+.pop-logo.logo-dark{display:none}
+@media (prefers-color-scheme:dark){.pop-logo.logo-light{display:none}.pop-logo.logo-dark{display:block}.pop{box-shadow:0 18px 50px rgba(0,0,0,.55)}}
+.pop h2{margin:0 0 16px;font:800 28px/1.15 var(--sans);letter-spacing:-.5px;color:var(--ink)}
+.pop .check{margin:14px 0 0;align-items:center}
+.pop .msg:empty{display:none}
+.pop-note{margin:0;font:400 15px/1.5 var(--sans);color:var(--body)}

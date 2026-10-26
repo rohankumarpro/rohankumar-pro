@@ -17,45 +17,36 @@
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<main class="shell">
+<main class="shell" id="page">
   <a href="/"><img class="logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights"><img class="logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights"></a>
-
   <section class="card">
     <div class="hero">
       <div class="eyebrow">From the reel</div>
-      <h1 id="title">Loading…</h1>
-      <p id="subtitle"></p>
+      <h1 id="title">&nbsp;</h1>
       <span class="count hidden" id="count"></span>
     </div>
     <img class="wave wave-light" src="/assets/wave_g.png" alt="">
     <img class="wave wave-dark" src="/assets/wave_dark_g.png" alt="">
-
     <div class="paper pad">
-      <div id="gate">
-        <p class="letter" style="margin:0 0 16px">Pop your email in and the links open right here, and I'll send a copy to your inbox too so you don't lose them.</p>
-        <form id="form" novalidate>
-          <label class="field" for="email">Your email</label>
-          <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@gmail.com" required>
-          <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" tabindex="-1" autocomplete="off"></div>
-          <label class="check"><input id="newsletter" type="checkbox"> <span>Also send me the weekly Sansser newsletter, with AI tools, automations and honest takes. Unsubscribe anytime.</span></label>
-          <button class="btn" id="btn" type="submit">Unlock the links</button>
-          <div class="msg" id="msg" role="alert"></div>
-        </form>
-      </div>
-
-      <div id="unlocked" class="hidden">
-        <div class="done" id="done">Unlocked. A copy is on its way to your inbox.</div>
-        <div class="items" id="items"></div>
-      </div>
-
-      <div id="missing" class="hidden">
-        <h2 class="serif-h">This page doesn't exist</h2>
-        <p class="letter">The link might have a typo. <a href="/">See all my link pages</a>.</p>
-      </div>
+      <div class="items" id="items"><div class="item ghost"></div><div class="item ghost"></div><div class="item ghost"></div></div>
     </div>
   </section>
-  <p class="foot">Made by Rohan · <a href="/">link.sansser.com</a></p>
+  <p class="foot"><a href="/">link.sansser.com</a></p>
 </main>
+
+<div class="veil" id="veil">
+  <form class="pop" id="form" novalidate>
+    <img class="pop-logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights"><img class="pop-logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights">
+    <h2 id="pop-h">Unlock links</h2>
+    <div id="pop-body">
+      <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="Your email" aria-label="Your email" required>
+      <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" tabindex="-1" autocomplete="off"></div>
+      <label class="check"><input id="newsletter" type="checkbox"> <span>Subscribe to the newsletter</span></label>
+      <button class="btn" id="btn" type="submit">Unlock</button>
+      <div class="msg" id="msg" role="alert"></div>
+    </div>
+  </form>
+</div>
 
 <script>
 (function () {
@@ -82,13 +73,11 @@
       ${g.docs ? `<a class="docs" href="${esc(g.docs)}" target="_blank" rel="noopener">Official install guide →</a>` : ""}</details>`;
   }
 
-  function showItems(items, note) {
+  function showItems(items) {
     $("items").innerHTML = items.map((it) =>
       `<div class="item">${it.bonus ? `<div class="bonus">Bonus tool</div>` : ""}<div class="t">${esc(it.name)}${it.tag ? `<span class="tag">${esc(it.tag)}</span>` : ""}${lvl(it.level)}</div>${it.desc ? `<div class="d">${esc(it.desc)}</div>` : ""}<a class="go" href="${esc(it.url)}" target="_blank" rel="noopener">Open link →</a>${guide(it)}</div>`
     ).join("");
-    if (note) $("done").textContent = note;
-    $("gate").classList.add("hidden");
-    $("unlocked").classList.remove("hidden");
+    document.body.classList.add("unlocked");
   }
 
   document.addEventListener("click", async (e) => {
@@ -104,17 +93,16 @@
   fetch("/api/pages/" + encodeURIComponent(slug), { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((p) => {
     document.title = p.title + " · Sansser";
     $("title").textContent = p.title;
-    $("subtitle").textContent = p.subtitle || "";
     $("count").textContent = p.count + (p.count === 1 ? " link inside" : " links inside") + (p.bonus ? " + bonus" : "");
     $("count").classList.remove("hidden");
     // the newsletter box starts ticked except where consent must be asked for (EU, EEA, UK)
     if (p.newsDefault && !touched) { pre = true; $("newsletter").checked = true; }
     const saved = store.get();
-    if (saved && saved.items) showItems(saved.items, "Welcome back, here are your links.");
+    if (saved && saved.items) showItems(saved.items);
   }).catch(() => {
     $("title").textContent = "Not found";
-    $("gate").classList.add("hidden");
-    $("missing").classList.remove("hidden");
+    $("pop-h").textContent = "This page doesn't exist";
+    $("pop-body").innerHTML = '<p class="pop-note">The link might have a typo. <a href="/">See all my link pages</a></p>';
   });
 
   $("form").addEventListener("submit", async (e) => {
@@ -129,10 +117,10 @@
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d.error || (r.status === 429 ? "Too many tries, give it a minute." : "Something went wrong, please try again."));
       store.set({ items: d.items });
-      showItems(d.items, d.subscribed ? "Unlocked. A copy of the links and a quick hello from me are on their way to your inbox." : "Unlocked. A copy is on its way to your inbox.");
+      showItems(d.items);
     } catch (err) {
       $("msg").textContent = err.message;
-      $("btn").disabled = false; $("btn").textContent = "Unlock the links";
+      $("btn").disabled = false; $("btn").textContent = "Unlock";
     }
   });
 })();
