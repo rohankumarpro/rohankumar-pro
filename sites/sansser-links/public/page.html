@@ -11,10 +11,12 @@
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+<div class="backdrop" aria-hidden="true"></div>
 <main class="shell" id="page">
   <a href="/"><img class="logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights"><img class="logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights"></a>
   <section class="card">
     <div class="hero">
+      <img class="cover-img" id="coverImg" alt="" hidden>
       <div class="eyebrow">From the reel</div>
       <h1 id="title">&nbsp;</h1>
       <span class="count hidden" id="count"></span>
@@ -51,6 +53,9 @@
     set(v) { try { localStorage.setItem("sansser:" + slug, JSON.stringify(v)); } catch {} },
   };
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // the reel's thumbnail: blurred behind the popup, then shown at the top once unlocked
+  const cover = document.body.dataset.cover;
+  if (cover) { document.body.style.setProperty("--cover", `url("${cover}")`); $("coverImg").src = cover; $("coverImg").hidden = false; }
   const lvl = (l) => l ? `<span class="tag lvl lvl-${esc(l.toLowerCase())}">${esc(l)}</span>` : "";
 
   function guide(it) {

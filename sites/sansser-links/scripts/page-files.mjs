@@ -1,5 +1,5 @@
 // Writes public/<slug>.html for every page in netlify/lib/pages.mjs, from public/page.html, with that page's title and
-// share preview (public/assets/og/<slug>.png when it exists). Run after adding or renaming a page:  node scripts/page-files.mjs
+// share preview (public/assets/og/<slug>.png when it exists) and the reel thumbnail (public/assets/covers/<slug>.webp). Run after adding or renaming a page:  node scripts/page-files.mjs
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { PAGES } from "../netlify/lib/pages.mjs";
 
@@ -17,6 +17,9 @@ for (const [slug, p] of Object.entries(PAGES)) {
     `<meta name="twitter:card" content="${img ? "summary_large_image" : "summary"}"><meta name="twitter:title" content="${esc(p.title)}"><meta name="twitter:description" content="${esc(desc)}">`,
     img && `<meta name="twitter:image" content="${img}">`,
   ].filter(Boolean).join("\n");
-  writeFileSync(new URL(`../public/${slug}.html`, import.meta.url), tpl.replace("<title>Sansser links</title>", meta));
+  const cover = existsSync(new URL(`../public/assets/covers/${slug}.webp`, import.meta.url)) ? `/assets/covers/${slug}.webp` : "";
+  let html = tpl.replace("<title>Sansser links</title>", meta + (cover ? `\n<link rel="preload" as="image" href="${cover}">` : ""));
+  if (cover) html = html.replace("<body>", `<body class="has-cover" data-cover="${cover}">`);
+  writeFileSync(new URL(`../public/${slug}.html`, import.meta.url), html);
   console.log("wrote public/" + slug + ".html");
 }

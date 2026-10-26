@@ -99,3 +99,11 @@ body:not(.unlocked) #page{filter:blur(6px);opacity:.75;pointer-events:none;user-
 .pop .check{margin:14px 0 0;align-items:center}
 .pop .msg:empty{display:none}
 .pop-note{margin:0;font:400 15px/1.5 var(--sans);color:var(--body)}
+
+/* the reel thumbnail: blurred full screen behind the popup, then at the top of the page */
+.backdrop{display:none}
+body.has-cover:not(.unlocked) .backdrop{display:block;position:fixed;inset:-40px;background:var(--cover) center/cover no-repeat;filter:blur(7px);transform:scale(1.03)}
+body.has-cover:not(.unlocked) #page{visibility:hidden}
+body.has-cover .veil{background:rgba(0,0,0,.12)}
+.cover-img{display:block;width:180px;aspect-ratio:9/16;object-fit:cover;border-radius:22px;margin:0 auto 22px;box-shadow:0 14px 40px rgba(0,0,0,.28)}
+.cover-img[hidden]{display:none}
