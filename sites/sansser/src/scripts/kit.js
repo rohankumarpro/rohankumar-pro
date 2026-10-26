@@ -8,19 +8,22 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 
 // Decode: text resolves from machine characters into words
 const GLYPHS = "/\\|<>_-=+*#01:.";
+// Resolves once the final text is in place
 export function decode(el, text = el?.textContent || "", ms = 380) {
-  if (!el) return;
-  if (reduceMotion) { el.textContent = text; return; }
+  if (!el) return Promise.resolve();
+  if (reduceMotion) { el.textContent = text; return Promise.resolve(); }
   const t0 = performance.now(), n = text.length;
   cancelAnimationFrame(el._dec);
-  const step = (now) => {
-    const p = Math.min(1, (now - t0) / ms), fixed = Math.floor(p * n);
-    let s = text.slice(0, fixed);
-    for (let i = fixed; i < n; i++) s += text[i] === " " ? " " : GLYPHS[(Math.random() * GLYPHS.length) | 0];
-    el.textContent = s;
-    if (p < 1) el._dec = requestAnimationFrame(step); else el.textContent = text;
-  };
-  el._dec = requestAnimationFrame(step);
+  return new Promise((done) => {
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / ms), fixed = Math.floor(p * n);
+      let s = text.slice(0, fixed);
+      for (let i = fixed; i < n; i++) s += text[i] === " " ? " " : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      el.textContent = s;
+      if (p < 1) el._dec = requestAnimationFrame(step); else { el.textContent = text; done(); }
+    };
+    el._dec = requestAnimationFrame(step);
+  });
 }
 
 // System feedback: a short line in the corner after an action
@@ -69,10 +72,9 @@ document.querySelectorAll(".cell").forEach((cell) => {
   });
 });
 
-// Headlines decode once when you arrive from another Sansser page
-if (document.referrer && new URL(document.referrer).origin === location.origin) {
-  const h = document.querySelector("main h1"); if (h) decode(h, h.textContent, 520);
-}
+// Headlines decode once when you arrive from another Sansser page; living type waits for this to finish
+const arriving = document.referrer && new URL(document.referrer).origin === location.origin && document.querySelector("main h1");
+export const arrival = arriving ? decode(arriving, arriving.textContent, 520) : Promise.resolve();
 
 // Command palette: Cmd/Ctrl+K or "/" searches every reel, tool and prompt
 (() => {

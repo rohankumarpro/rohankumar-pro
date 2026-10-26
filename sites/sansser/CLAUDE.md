@@ -20,7 +20,7 @@ Sign-ups, consent records, pages and links live in the database (Supabase Postgr
 - Colour, motion and depth appear only on interaction: the living gradient (`src/scripts/fx.js`) and the interaction kit (`src/scripts/kit.js`).
 - The six brand colours come from the logo slash: Mint #55C4A9, Sansser #40AD92, Lagoon #3B8A7A, Depth #28645B, Deep #153F3D, Abyss #0A2B2C.
 - Square corners; the 7px cut corner on buttons, Copy and toasts. Phosphor icons only (`src/components/icons.ts`). Never emoji as icons.
-- Fonts come from Adobe Fonts through the owner's Creative Cloud subscription (kit link in `src/layouts/Base.astro`).
+- Fonts come only from Adobe Fonts through the owner's Creative Cloud subscription (kit `hik8dop` in `src/layouts/Base.astro`). Never propose buying fonts. Type is Sole Sans + Sole Serif; serif only on interaction or as `<em>` in a heading. A new domain must be added to the kit or the font will not load there.
 - Copy is first person plural ("our reels", "tested by us"), short and plain. No em dashes, no filler.
 - Check every UI change in light and dark, on desktop and on a phone. Respect reduced motion.
 
