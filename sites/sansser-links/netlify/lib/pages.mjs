@@ -1,8 +1,10 @@
 // The link pages on link.sansser.com/<slug>. Links, guides and tips are only sent after an email unlock;
 // GET /api/pages/<slug> gives the title, subtitle and count. "hidden" pages keep item names out of the public data.
+// New pages go at the end: the home page shows them newest first. "cover" is the reel thumbnail.
 // Content checked against each tool's own README or site (October 2026).
 export const PAGES = {
   "repos": {
+    "cover": "/assets/covers/repos.webp",
     "title": "9 free GitHub repos that replace paid software",
     "subtitle": "Open-source twins of tools you might be paying for every month, with a short install guide for each.",
     "items": [
@@ -235,6 +237,7 @@ export const PAGES = {
     ]
   },
   "wow": {
+    "cover": "/assets/covers/wow.webp",
     "title": "The free website that turns text into match-cut videos",
     "subtitle": "Type a phrase, highlight a word, download the video.",
     "hidden": true,
@@ -262,6 +265,7 @@ export const PAGES = {
     ]
   },
   "sound": {
+    "cover": "/assets/covers/sound.webp",
     "title": "Free sound effects your AI finds and places for you",
     "subtitle": "5 million+ free sounds for your AI, plus one bonus tool.",
     "hidden": true,

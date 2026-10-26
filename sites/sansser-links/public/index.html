@@ -12,20 +12,23 @@
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<main class="shell">
+<main class="shell home">
   <img class="logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights">
   <img class="logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights">
 
-  <section class="card">
+  <h1 class="home-h">Links from my reels</h1>
+  <div class="reels" id="pages">
+    <div class="reel ghost"></div><div class="reel ghost"></div><div class="reel ghost"></div>
+  </div>
+
+  <section class="card about">
     <div class="hero">
-      <div class="eyebrow">Links from my reels</div>
       <div class="avatar-row"><img class="avatar" src="/assets/avatar_photo.png" alt="Rohan"><img class="sticker" src="/assets/sticker_g.png" alt=""></div>
-      <h1>Hey, I'm Rohan.</h1>
+      <h2 class="about-h">Hey, I'm Rohan.</h2>
       <p>I make short videos about AI and how it's changing the way we work and think. Every link from my reels lives here.</p>
     </div>
     <img class="wave wave-light" src="/assets/wave_g.png" alt="">
     <img class="wave wave-dark" src="/assets/wave_dark_g.png" alt="">
-
     <div class="paper pad">
       <div id="join">
         <h2 class="serif-h">The weekly Sansser newsletter</h2>
@@ -40,11 +43,6 @@
         </form>
       </div>
       <div id="joined" class="hidden"><div class="done">You're in. Check your inbox for a quick hello from me.</div></div>
-
-      <div class="list hidden" id="list">
-        <h2>Latest link pages</h2>
-        <div class="items" id="pages"></div>
-      </div>
     </div>
   </section>
   <p class="foot">© 2026 Sansser</p>
@@ -56,12 +54,11 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   fetch("/api/pages").then((r) => r.json()).then((d) => {
-    if (!d.pages || !d.pages.length) return;
+    if (!d.pages || !d.pages.length) { $("pages").innerHTML = ""; return; }
     $("pages").innerHTML = d.pages.map((p) =>
-      `<a class="item" href="/${esc(p.slug)}"><div class="t">${esc(p.title)}</div>${p.subtitle ? `<div class="d">${esc(p.subtitle)}</div>` : ""}<div class="go">${p.count} ${p.count === 1 ? "link" : "links"}${p.bonus ? " + bonus" : ""} →</div></a>`
+      `<a class="reel" href="/${esc(p.slug)}"><span class="thumb"${p.cover ? ` style="background-image:url('${esc(p.cover)}')"` : ""}></span><span class="t">${esc(p.title)}</span><span class="go">${p.count} ${p.count === 1 ? "link" : "links"}${p.bonus ? " + bonus" : ""} →</span></a>`
     ).join("");
-    $("list").classList.remove("hidden");
-  }).catch(() => {});
+  }).catch(() => { $("pages").innerHTML = ""; });
 
   $("form").addEventListener("submit", async (e) => {
     e.preventDefault();
