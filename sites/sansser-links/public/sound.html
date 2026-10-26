@@ -98,6 +98,8 @@
 
   fetch("/api/pages/" + encodeURIComponent(slug), { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((p) => {
     document.title = p.title + " · Sansser";
+    // pages reached by another capitalisation (e.g. /GUIDE) are served by the template: take the thumbnail from the page data
+    if (!cover && p.cover) { document.body.classList.add("has-cover"); document.body.style.setProperty("--cover", `url("${p.cover}")`); $("coverImg").src = p.cover; $("coverImg").hidden = false; }
     $("title").textContent = p.title;
     $("count").textContent = p.count + (p.count === 1 ? " link inside" : " links inside") + (p.bonus ? " + bonus" : "");
     $("count").classList.remove("hidden");

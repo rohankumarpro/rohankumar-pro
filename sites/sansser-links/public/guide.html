@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>The full prompt guide for natural AI writing · Sansser</title>
+<meta name="description" content="The prompts I use to make AI writing sound like a real person wrote it.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Sansser">
+<meta property="og:title" content="The full prompt guide for natural AI writing"><meta property="og:description" content="The prompts I use to make AI writing sound like a real person wrote it."><meta property="og:url" content="https://link.sansser.com/guide">
+<meta property="og:image" content="https://link.sansser.com/assets/og/guide.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="The full prompt guide for natural AI writing"><meta name="twitter:description" content="The prompts I use to make AI writing sound like a real person wrote it.">
+<meta name="twitter:image" content="https://link.sansser.com/assets/og/guide.png">
+<link rel="preload" as="image" href="/assets/covers/guide.webp">
+<link rel="icon" href="/assets/avatar_photo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="has-cover" data-cover="/assets/covers/guide.webp">
+<div class="backdrop" aria-hidden="true"></div>
+<main class="shell" id="page">
+  <a href="/"><img class="logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights"><img class="logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights"></a>
+  <section class="card">
+    <div class="hero">
+      <img class="cover-img" id="coverImg" alt="" hidden>
+      <div class="eyebrow">From the reel</div>
+      <h1 id="title">&nbsp;</h1>
+      <span class="count hidden" id="count"></span>
+    </div>
+    <img class="wave wave-light" src="/assets/wave_g.png" alt="">
+    <img class="wave wave-dark" src="/assets/wave_dark_g.png" alt="">
+    <div class="paper pad">
+      <div class="items" id="items"><div class="item ghost"></div><div class="item ghost"></div><div class="item ghost"></div></div>
+    </div>
+  </section>
+  <p class="foot"><a href="/">link.sansser.com</a></p>
+</main>
+
+<div class="veil" id="veil">
+  <form class="pop" id="form" novalidate>
+    <img class="pop-logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights"><img class="pop-logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights">
+    <h2 id="pop-h">Unlock links</h2>
+    <div id="pop-body">
+      <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="Your email" aria-label="Your email" required>
+      <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" tabindex="-1" autocomplete="off"></div>
+      <label class="check"><input id="newsletter" type="checkbox"> <span>Subscribe to the newsletter</span></label>
+      <button class="btn" id="btn" type="submit">Unlock</button>
+      <div class="msg" id="msg" role="alert"></div>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  const slug = location.pathname.replace(/\.html$/, "").replace(/^\/+|\/+$/g, "").toLowerCase();
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem("sansser:" + slug) || "null"); } catch { return null; } },
+    set(v) { try { localStorage.setItem("sansser:" + slug, JSON.stringify(v)); } catch {} },
+  };
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // the reel's thumbnail: blurred behind the popup, then shown at the top once unlocked
+  const cover = document.body.dataset.cover;
+  if (cover) { document.body.style.setProperty("--cover", `url("${cover}")`); $("coverImg").src = cover; $("coverImg").hidden = false; }
+  const lvl = (l) => l ? `<span class="tag lvl lvl-${esc(l.toLowerCase())}">${esc(l)}</span>` : "";
+
+  function guide(it) {
+    const g = it.guide;
+    if (!g || !(g.steps || []).length) return "";
+    let steps = "";
+    for (const s of g.steps) {
+      if (typeof s === "string") { steps += `<li>${esc(s)}`; continue; }
+      steps += `<div class="cmd"><pre><code>${esc(s.code)}</code></pre><button type="button" class="copy">Copy</button></div>`;
+    }
+    return `<details class="guide"><summary>How to use it</summary>
+      ${g.easiest ? `<p><b>Easiest way:</b> ${esc(g.easiest)}</p>` : ""}${g.needs ? `<p class="needs"><b>You need:</b> ${esc(g.needs)}</p>` : ""}
+      <ol>${steps}</ol>${(it.tips || []).map((t) => `<p class="tip">${esc(t)}</p>`).join("")}
+      ${g.docs ? `<a class="docs" href="${esc(g.docs)}" target="_blank" rel="noopener">Official install guide →</a>` : ""}</details>`;
+  }
+
+  function showItems(items) {
+    $("items").innerHTML = items.map((it) =>
+      `<div class="item">${it.bonus ? `<div class="bonus">Bonus tool</div>` : ""}<div class="t">${esc(it.name)}${it.tag ? `<span class="tag">${esc(it.tag)}</span>` : ""}${lvl(it.level)}</div>${it.desc ? `<div class="d">${esc(it.desc)}</div>` : ""}<a class="go" href="${esc(it.url)}" target="_blank" rel="noopener">Open link →</a>${guide(it)}</div>`
+    ).join("");
+    document.body.classList.add("unlocked");
+  }
+
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest(".copy"); if (!b) return;
+    const code = b.parentElement.querySelector("code").textContent;
+    try { await navigator.clipboard.writeText(code); } catch { const t = document.createElement("textarea"); t.value = code; document.body.append(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
+    b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1500);
+  });
+
+  let pre = false, touched = false;
+  $("newsletter").addEventListener("change", () => { touched = true; });
+
+  fetch("/api/pages/" + encodeURIComponent(slug), { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject()).then((p) => {
+    document.title = p.title + " · Sansser";
+    // pages reached by another capitalisation (e.g. /GUIDE) are served by the template: take the thumbnail from the page data
+    if (!cover && p.cover) { document.body.classList.add("has-cover"); document.body.style.setProperty("--cover", `url("${p.cover}")`); $("coverImg").src = p.cover; $("coverImg").hidden = false; }
+    $("title").textContent = p.title;
+    $("count").textContent = p.count + (p.count === 1 ? " link inside" : " links inside") + (p.bonus ? " + bonus" : "");
+    $("count").classList.remove("hidden");
+    // the newsletter box starts ticked except where consent must be asked for (EU, EEA, UK)
+    if (p.newsDefault && !touched) { pre = true; $("newsletter").checked = true; }
+    const saved = store.get();
+    if (saved && saved.items) showItems(saved.items);
+  }).catch(() => {
+    $("title").textContent = "Not found";
+    $("pop-h").textContent = "This page doesn't exist";
+    $("pop-body").innerHTML = '<p class="pop-note">The link might have a typo. <a href="/">See all my link pages</a></p>';
+  });
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("email").value.trim();
+    $("msg").textContent = "";
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) { $("msg").textContent = "That doesn't look like an email address."; return; }
+    $("btn").disabled = true; $("btn").textContent = "Unlocking…";
+    try {
+      const r = await fetch("/api/unlock", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug, email, newsletter: $("newsletter").checked, pre: pre && !touched, website: $("website").value, src: new URLSearchParams(location.search).get("src") || "", ref: document.referrer || "" }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || (r.status === 429 ? "Too many tries, give it a minute." : "Something went wrong, please try again."));
+      store.set({ items: d.items });
+      showItems(d.items);
+    } catch (err) {
+      $("msg").textContent = err.message;
+      $("btn").disabled = false; $("btn").textContent = "Unlock";
+    }
+  });
+})();
+</script>
+</body>
+</html>

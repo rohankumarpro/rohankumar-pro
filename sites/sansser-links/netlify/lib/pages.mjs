@@ -314,5 +314,18 @@ export const PAGES = {
         "tag": "Free"
       }
     ]
+  },
+  "guide": {
+    "cover": "/assets/covers/guide.webp",
+    "title": "The full prompt guide for natural AI writing",
+    "subtitle": "The prompts I use to make AI writing sound like a real person wrote it.",
+    "items": [
+      {
+        "name": "Make your AI writing sound like you",
+        "url": "https://link.sansser.com/natural-ai-writing",
+        "desc": "9 copy-paste prompts, one main prompt and eight quick fixes.",
+        "tag": "Guide"
+      }
+    ]
   }
 };

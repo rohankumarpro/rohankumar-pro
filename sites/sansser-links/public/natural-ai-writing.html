@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Make your AI writing sound like you · Sansser</title>
+<link rel="icon" href="/assets/avatar_photo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- The prompt guide from the GUIDE reel (link.sansser.com/guide). Unlisted: only linked from that page and its email. -->
+<main class="shell">
+  <a href="/"><img class="logo logo-light" src="/assets/logo_wordmark.png" alt="sansser / insights"><img class="logo logo-dark" src="/assets/logo_wordmark_white.png" alt="sansser / insights"></a>
+  <section class="card">
+    <div class="hero">
+      <div class="eyebrow">Prompt guide</div>
+      <h1>Make your AI writing sound like you</h1>
+      <p>Copy these into ChatGPT, Claude or whatever you use. Start with the main prompt, then use the fix-it prompts on anything that still sounds off.</p>
+    </div>
+    <img class="wave wave-light" src="/assets/wave_g.png" alt="">
+    <img class="wave wave-dark" src="/assets/wave_dark_g.png" alt="">
+    <div class="paper pad">
+      <div class="prompts">
+
+        <article class="prompt main">
+          <div class="p-head"><span class="p-num">1</span><h2>The main prompt (use this every time)</h2></div>
+          <pre class="p-text">Write this in plain, natural English, the way a real person would explain it to a friend. Use punctuation normally and avoid em dashes unless one is genuinely needed. Don't set up points as contrasts like "it's not X, it's Y". Avoid filler phrases such as "delve into", "unlock the power of", "in today's fast-paced world", "game-changer" and "let's dive in". Don't repeat a point once it's made, and don't add a summary at the end. Only use lists or headings if they make the information easier to follow. If you're unsure of a detail, ask me instead of making it up.
+Here's what I want to say: [your topic, your opinion, any examples or experiences]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">2</span><h2>Teach it your voice</h2></div>
+          <pre class="p-text">Here are a few things I've written myself: [paste 2–3 samples]. Look at how I write: sentence length, word choice, how I open and close, how casual I am. Describe my style back to me in a few lines, then write [your task] in that style. Don't copy my sentences, just match the way I write.</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">3</span><h2>Give it something real to say</h2></div>
+          <pre class="p-text">Before you write anything, ask me 5 short questions about my experience, opinions and examples on [topic]. Wait for my answers, then write the piece using only what I tell you. Don't add generic advice or claims I didn't make.</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">4</span><h2>Fix the punctuation</h2></div>
+          <pre class="p-text">Go through this text and remove em dashes that interrupt the flow. Replace them with a comma, a full stop or a rewrite, whichever reads most naturally. Keep any that genuinely work. Don't change anything else.
+[paste text]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">5</span><h2>Break the patterns</h2></div>
+          <pre class="p-text">Find every sentence in this text built as a contrast or a formula, like "it's not X, it's Y" or "not just X, but Y". Rewrite each one to state the point directly. Leave the rest as it is.
+[paste text]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">6</span><h2>Remove AI vocabulary</h2></div>
+          <pre class="p-text">Highlight any words or phrases in this text that sound like typical AI writing or add polish without meaning. For each one, replace it with plain wording or delete it if the sentence works without it. Show me the edited version.
+[paste text]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">7</span><h2>Cut the repetition</h2></div>
+          <pre class="p-text">Edit this text so every sentence adds something new. Delete anything that repeats, rephrases or summarises a point already made. Don't add anything. Tell me roughly how much shorter it got.
+[paste text]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">8</span><h2>Loosen the structure</h2></div>
+          <pre class="p-text">Rewrite this so the structure fits the content instead of a template. Turn lists back into sentences unless the list genuinely helps, drop headings that aren't needed and remove the wrap-up conclusion if it just repeats things.
+[paste text]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+        <article class="prompt">
+          <div class="p-head"><span class="p-num">9</span><h2>The read-aloud check</h2></div>
+          <pre class="p-text">Read this as if you were saying it out loud. Point out any sentence that sounds stiff, too long or like something a person wouldn't actually say, and suggest a more natural version for each. Keep the meaning the same.
+[paste text]</pre>
+          <button type="button" class="p-copy">Copy</button>
+        </article>
+
+      </div>
+      <p class="letter closing">These prompts get you most of the way. The last bit is you: read it once out loud before you post, and change anything you wouldn't say.</p>
+    </div>
+  </section>
+  <p class="foot"><a href="/">link.sansser.com</a></p>
+</main>
+<script>
+// Each Copy button copies only its own prompt
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest(".p-copy"); if (!b) return;
+  const text = b.parentElement.querySelector(".p-text").textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch { const t = document.createElement("textarea"); t.value = text; document.body.append(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
+  b.textContent = "Copied"; b.classList.add("done");
+  setTimeout(() => { b.textContent = "Copy"; b.classList.remove("done"); }, 1500);
+});
+</script>
+</body>
+</html>
