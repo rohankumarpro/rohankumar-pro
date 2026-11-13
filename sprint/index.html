@@ -1079,6 +1079,18 @@ div.award{cursor:default}
 .b-foot::before{display:none!important}
 .b-foot .ar{background:var(--ink)!important;color:#fff!important}
 @media (hover:hover){.b-foot:hover{--y:-2px;box-shadow:0 16px 36px -10px rgba(123,92,255,.65),-10px 12px 26px -12px rgba(59,107,255,.55),10px 12px 26px -12px rgba(255,107,61,.55)!important}}
+/* Dribbble badge v3: the ball sits on top, one clean line of type */
+.award{position:relative;display:inline-flex;align-items:center;justify-content:center;margin-top:16px;padding:16px 20px 10px!important;overflow:visible!important;border-radius:999px}
+.award>svg:not(.aw-ball),.award .dball{display:none!important}
+.aw-ball{position:absolute;left:50%;top:-15px;width:30px;height:30px;margin-left:-15px;border-radius:50%;z-index:2;
+  box-shadow:0 0 0 3px #16171C,0 6px 14px -4px rgba(234,76,137,.7);animation:awspin 12s linear infinite}
+@keyframes awspin{to{transform:rotate(360deg)}}
+.aw-t{display:inline-flex;align-items:center;gap:9px;font:500 var(--fs-xs)/1 var(--body);color:rgba(255,255,255,.62);letter-spacing:.01em;white-space:nowrap}
+.aw-t b{font:500 var(--fs-s)/1 var(--display);color:#fff;letter-spacing:0}
+.aw-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.4)}
+@media (min-width:861px){.aw-t{font-size:var(--fs-s)}.aw-t b{font-size:var(--fs-base)}.award{padding:18px 24px 12px!important}}
+@media (prefers-reduced-motion:reduce){.aw-ball{animation:none}}
+.award svg.aw-ball{width:30px!important;height:30px!important;flex:none}.award svg.aw-ball path{stroke:#C32361!important}
 
 </style>
 </head>
@@ -1096,11 +1108,7 @@ div.award{cursor:default}
 
 <section class="hero" id="top">
 <div class="w">
-<div class="award" data-r style="--d:100">
-<svg viewBox="0 0 18 30" aria-hidden="true"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
-<svg class="dball" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#EA4C89"/><path d="M7.5 3.7c3.3 4 5.7 8.8 6.9 16.6M2.6 10.4c5.3.2 10.3-.9 15-4.3M4.4 18.4c3.2-4.7 8.5-6.5 16.9-4.9" fill="none" stroke="#B8255F" stroke-width="1.6" stroke-linecap="round"/></svg><span><b>Dribbble Select</b>Top branding agency</span>
-<svg viewBox="0 0 18 30" aria-hidden="true" style="transform:scaleX(-1)"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
-</div>
+<div class="award" data-r style="--d:100"><svg class="aw-ball" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#EA4C89"/><path d="M7.4 2.6c3.4 4.1 5.9 9 7.1 17.9M1.6 10.3c5.6.3 10.8-.8 15.6-4.5M3.6 18.8c3.3-4.9 8.8-6.8 17.6-5.1" fill="none" stroke="#C32361" stroke-width="1.7" stroke-linecap="round"/></svg><span class="aw-t"><b>Dribbble Select</b><span class="aw-dot"></span>Top branding agency</span></div>
 
 <h1 class="h1" id="h1" aria-label="Make your brand look as good as your business already is.">
 <span class="ln lm"><span class="li" style="--d:250"><span aria-hidden="true">Make your </span><span class="swrap"><button type="button" class="sw" id="bsw" role="switch" aria-checked="false" aria-label="Brand switch"><span class="knob"><img src="/sprint/a/8fa7ebfb6a.png" alt=""></span></button><span class="hint" aria-hidden="true"><em>flip it</em><svg viewBox="0 0 14 14"><path d="M7 1v11M2.5 7.5 7 12l4.5-4.5" fill="none" stroke="#10120F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><span aria-hidden="true"> <span class="bw"><i style="--i:0">b</i><i style="--i:1">r</i><i style="--i:2">a</i><i style="--i:3">n</i><i style="--i:4">d</i></span></span></span></span>
