@@ -195,22 +195,25 @@ button{font:inherit;color:inherit}
 .vz-opt .mono{font-size:10px}
 .vz-check{position:absolute;top:-10px;right:-6px;background:var(--lime);color:var(--ink);font:700 11px/1 var(--body);border-radius:999px;padding:5px 9px;transform:rotate(6deg)}
 .vz-sys{flex-direction:row}
-.vz-logo{flex:1;border-radius:14px;background:#F6F3EC;display:grid;place-items:center}
-.vz-logo img{width:62%;height:auto}
+.vz-logo{flex:1;border-radius:14px;background:#01262F;display:grid;place-items:center;overflow:hidden}
+.vz-logo img{width:90%;height:auto}
 .vz-col{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
 .vz-sw{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;height:56px}
-.vz-sw i{border-radius:10px;display:block;transform-origin:bottom}
-.vz-type{flex:1;border-radius:14px;background:var(--ink);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:10px 12px}
+.vz-sw i{border-radius:10px;display:block;transform-origin:bottom;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.vz-type{flex:1;border-radius:14px;background:#D2FD94;color:#01262F;display:flex;flex-direction:column;justify-content:center;padding:10px 12px}
 .vz-type b{font:500 40px/1 var(--display)}
 .vz-type .mono{font-size:10px;opacity:.7}
 .vz-revs{display:flex;gap:6px}
 .vz-revs .mono{font-size:10px;background:#EAF9C6;border-radius:999px;padding:4px 8px}
 .vz-done{margin-left:auto;background:var(--lime);color:var(--ink);border-radius:999px;padding:3px 8px}
-.vz-files{display:flex;flex-direction:column;gap:6px}
-.vz-file{position:relative;display:flex;align-items:center;gap:10px;background:#F6F3EC;border-radius:10px;padding:6px 8px;overflow:hidden}
-.vz-file b{font:600 9px/1 var(--mono);color:#fff;border-radius:6px;width:30px;height:22px;display:grid;place-items:center;flex:none}
-.vz-file .mono{font-size:12px}
-.vz-file::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--green);transform-origin:left;transform:scaleX(var(--p,1));opacity:var(--po,0);transition:transform .6s var(--e-out),opacity .3s .6s}
+.vz-files{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 6px;padding:6px 2px 4px;flex:1;align-content:center}
+.vz-file{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+.vz-file .mono{font-size:10px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.fi{position:relative;width:46px;height:58px;background:#fff;border-radius:6px 14px 6px 6px;box-shadow:0 0 0 1.5px #E3DFD5,0 6px 12px -6px rgba(16,18,15,.25);transition:transform .35s var(--e-spring)}
+.fi::before{content:"";position:absolute;top:0;right:0;width:14px;height:14px;background:#EDE9DF;border-radius:0 0 0 5px}
+.fi::after{content:"";position:absolute;left:9px;right:9px;top:14px;height:14px;background:repeating-linear-gradient(#E9E5DB 0 2px,transparent 2px 6px)}
+.fi b{position:absolute;left:-6px;bottom:8px;background:var(--c);color:#fff;font:700 9px/1 var(--mono);padding:4px 6px;border-radius:5px;letter-spacing:.02em}
+.vz-file:hover .fi{transform:translateY(-3px) rotate(-3deg)}
 .checkpoint{max-width:640px;margin:28px auto 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--green);color:var(--cream);border-radius:22px;padding:16px 16px 16px 16px;box-shadow:var(--sh-2)}
 .cp-dot{position:relative;width:52px;height:52px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;font:500 18px/1 var(--display);flex:none}
 .cp-dot::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--lime);opacity:0}
@@ -473,9 +476,12 @@ div.award{cursor:default}
 .m .st.in .vz-type{opacity:1;transform:none}
 .m .vz-revs .mono{opacity:0;transform:scale(.6);transition:transform .5s var(--e-spring),opacity .2s}
 .m .st.rev1 .vz-revs .mono:nth-child(1),.m .st.rev2 .vz-revs .mono:nth-child(2){opacity:1;transform:none}
-.m .vz-file{opacity:0;transform:translateX(-14px);--p:0;--po:1;transition:opacity .3s,transform .6s var(--e-out);transition-delay:calc(var(--k)*160ms + 300ms)}
+.m .vz-file{opacity:0;transform:translateY(-34px) rotate(calc((var(--k) - 2.5)*5deg)) scale(.85);transition:opacity .25s,transform .75s var(--e-spring);transition-delay:calc(var(--k)*130ms + 300ms)}
 .m .st.in .vz-file{opacity:1;transform:none}
-.m .st.in .vz-file::after{--p:1;transition-delay:calc(var(--k)*160ms + 420ms),calc(var(--k)*160ms + 1100ms);opacity:0}
+.m .fi b{transform:scale(0);transition:transform .45s var(--e-spring);transition-delay:calc(var(--k)*130ms + 750ms)}
+.m .st.in .fi b{transform:none}
+.m .st.done .vz-file .fi{animation:fbump .5s var(--e-out) calc(var(--k)*60ms) 1}
+@keyframes fbump{40%{transform:translateY(-4px)}}
 .m .vz-done{opacity:0;transform:scale(1.8) rotate(-12deg);transition:transform .5s var(--e-spring),opacity .2s}
 .m .st.done .vz-done{opacity:1;transform:none}
 .m .wire2{clip-path:inset(0 100% 0 0);transition:clip-path 1.1s var(--e-io) .5s}
@@ -595,9 +601,9 @@ div.award{cursor:default}
 <article class="st" id="st1" data-r style="--bg:var(--butter);--d:0"><span class="st-num" style="--r:-6deg">01</span><span class="pill">days 1–3</span><h3>Kickoff and two directions</h3><p>You tell me about your business, your customers and what bothers you about your current look. I study your market, then show you two directions on a live call.</p>
 <span class="viz" aria-hidden="true"><span class="vz-bar"><span class="vz-dot"></span><span class="mono">live call · day 3</span></span><span class="vz-two"><span class="vz-opt vz-a" style="background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt=""><span class="mono">direction a</span></span><span class="vz-opt vz-b" style="background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt=""><span class="mono" style="color:#fff">direction b</span><span class="vz-check">✓ picked</span></span></span></span></article>
 <article class="st" id="st2" data-r style="--bg:var(--pink);--d:150"><span class="st-num" style="--r:5deg">02</span><span class="pill">days 4–5</span><h3>The full system</h3><p>I turn that direction into the full system of logo, colours and type, with two rounds of revisions. You reply within a few hours on each round.</p>
-<span class="viz vz-sys" aria-hidden="true"><span class="vz-logo"><img src="/sprint/a/c332865ffa.svg" alt=""></span><span class="vz-col"><span class="vz-sw"><i style="background:#4DD6F5;--k:0"></i><i style="background:#FF5C8A;--k:1"></i><i style="background:#FFC22E;--k:2"></i><i style="background:#10120F;--k:3"></i></span><span class="vz-type"><b>Aa</b><span class="mono">headings · body</span></span><span class="vz-revs"><span class="mono">rev 1 ✓</span><span class="mono">rev 2 ✓</span></span></span></span></article>
+<span class="viz vz-sys" aria-hidden="true"><span class="vz-logo"><img src="/sprint/a/5s0t0logo.jpg" alt=""></span><span class="vz-col"><span class="vz-sw"><i style="background:#D2FD94;--k:0"></i><i style="background:#01262F;--k:1"></i><i style="background:#E2E9D8;--k:2"></i><i style="background:#93A790;--k:3"></i></span><span class="vz-type"><b>Aa</b><span class="mono">headings · body</span></span><span class="vz-revs"><span class="mono">rev 1 ✓</span><span class="mono">rev 2 ✓</span></span></span></span></article>
 <article class="st" id="st3" data-r style="--bg:var(--sky);--d:300"><span class="st-num" style="--r:-4deg">03</span><span class="pill">days 6–7</span><h3>Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p>
-<span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file" style="--k:0"><b style="background:#FF9A00">AI</b><span class="mono">logo.ai</span></span><span class="vz-file" style="--k:1"><b style="background:#00674F">SVG</b><span class="mono">logo.svg</span></span><span class="vz-file" style="--k:2"><b style="background:#4DA3FF">PNG</b><span class="mono">logo@2x.png</span></span><span class="vz-file" style="--k:3"><b style="background:#E5322D">PDF</b><span class="mono">brand-guide.pdf</span></span><span class="vz-file" style="--k:4"><b style="background:#E5322D">PDF</b><span class="mono">business-card.pdf</span></span><span class="vz-file" style="--k:5"><b style="background:#7A7D74">ZIP</b><span class="mono">social-kit.zip</span></span></span></span></article>
+<span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file" style="--k:0;--c:#FF9A00"><span class="fi"><b>AI</b></span><span class="mono">logo.ai</span></span><span class="vz-file" style="--k:1;--c:#00674F"><span class="fi"><b>SVG</b></span><span class="mono">logo.svg</span></span><span class="vz-file" style="--k:2;--c:#4DA3FF"><span class="fi"><b>PNG</b></span><span class="mono">logo.png</span></span><span class="vz-file" style="--k:3;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">guide.pdf</span></span><span class="vz-file" style="--k:4;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">cards.pdf</span></span><span class="vz-file" style="--k:5;--c:#7A7D74"><span class="fi"><b>ZIP</b></span><span class="mono">social.zip</span></span></span></span></article>
 </div>
 <div class="checkpoint" data-r><span class="cp-dot">D3</span><span class="cp-t"><b>Day 3 is the checkpoint.</b> You approve a direction, then pay the second half.</span><svg class="wire2" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 20 C 40 0, 80 40, 118 20" fill="none" stroke-width="2"/></svg><a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="process">Book a call <span class="ar">→</span></a></div>
 </div>
