@@ -1010,6 +1010,76 @@ div.award{cursor:default}
 .ticker .tk{color:#fff}
 .ticker .tk i,.ticker .tk i *{color:#fff!important;fill:#fff!important;stroke:#fff!important}
 
+/* checkpoint: black bar, white dot, colour stroke drawn from the dot to the button */
+.checkpoint{position:relative;background:radial-gradient(120% 160% at 0% 0%,#24252C 0%,#121318 45%,#0B0C0F 100%)!important;color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 2px rgba(16,18,15,.1),0 14px 30px -14px rgba(16,18,15,.35),
+    -14px 24px 40px -26px rgba(91,124,255,.45),14px 24px 40px -26px rgba(255,138,92,.45)!important}
+.checkpoint>*:not(.cp-wire){position:relative;z-index:1}
+.cp-dot{background:#fff!important;color:#0B0C0F!important;box-shadow:0 0 0 4px rgba(255,255,255,.08),0 0 18px rgba(185,139,255,.45)}
+.cp-dot::after{border:2px solid transparent!important;background:conic-gradient(from 0deg,#fff,#7FA2FF,#B98BFF,#FF7FB5,#FFA36B,#fff) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:1!important;animation:cpspin 4s linear infinite!important}
+@keyframes cpspin{to{transform:rotate(360deg)}}
+.cp-wire{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+.cp-wire path{fill:none;stroke:url(#cpg);stroke-linecap:round}
+.cp-base{stroke-width:1.5;opacity:.35;stroke-dasharray:var(--L) var(--L);stroke-dashoffset:var(--L);transition:stroke-dashoffset 1.6s var(--e-io) .4s}
+.checkpoint.in .cp-base{stroke-dashoffset:0}
+/* a bright pulse travels the wire, again and again */
+.cp-flow{stroke-width:2.5;filter:drop-shadow(0 0 4px rgba(185,139,255,.9));stroke-dasharray:60 calc(var(--L) * 1px);stroke-dashoffset:60;opacity:0}
+.checkpoint.in .cp-flow{opacity:1;animation:cpflow 2.8s var(--e-io) 1.8s infinite}
+@keyframes cpflow{from{stroke-dashoffset:60}to{stroke-dashoffset:calc(var(--L) * -1px)}}
+.checkpoint .b{background:#fff!important;color:#0B0C0F}
+.checkpoint .cp-t b{color:#fff}
+.checkpoint .cp-t{color:rgba(255,255,255,.72)}
+@media (prefers-reduced-motion:reduce){.cp-flow,.cp-dot::after{animation:none!important}.cp-base{transition:none;stroke-dashoffset:0}}
+
+/* =========================================================
+   Palette lock: black, white, and the multicolour gradient only.
+   No green, lime, pink or yellow accents anywhere.
+   ========================================================= */
+:root{--green:#0B0C0F;--green-2:#1A1B20;--lime:#FFFFFF;--pink:#FFFFFF;--butter:#FFFFFF;--sky:#FFFFFF;
+  --mc:linear-gradient(90deg,#3B6BFF,#7B5CFF 25%,#C04CF2 50%,#FF4F9A 75%,#FF6B3D)}
+/* pills: black, white or plain */
+.pill.lime{background:#fff;color:var(--ink);box-shadow:0 0 0 1px rgba(16,18,15,.08)}
+.pill.cream{background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+/* switches: the "on" track carries the gradient */
+.sw::before{background:var(--mc)!important}
+.tg{background:var(--mc)!important}
+.sw:focus-visible{outline-color:#7B5CFF}
+/* hero note */
+.tag em{background:var(--ink)!important}
+/* process illustrations */
+.vz-check{background:#fff;color:var(--ink);box-shadow:0 4px 10px -4px rgba(0,0,0,.4)}
+.vz-b{box-shadow:0 0 0 3px #fff}
+.m .st.picked .vz-b{box-shadow:0 0 0 3px #fff,0 8px 20px -8px rgba(123,92,255,.6)}
+.vz-revs .mono{background:#fff;box-shadow:0 0 0 1px rgba(16,18,15,.08)}
+.vz-done{background:var(--ink);color:#fff}
+/* price & add-on */
+.tick{background:var(--ink);color:#fff}
+.pcard .tick{background:#fff;color:#E0337A}
+.vs-me{color:var(--ink)}
+.mini{--bg:#fff!important;box-shadow:0 0 0 1px rgba(16,18,15,.06),0 8px 20px -12px rgba(16,18,15,.18)}
+.mini b{background:var(--mc);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+/* FAQ: open row stays white, the gradient ring marks it */
+.qa.open{background:#fff!important;box-shadow:0 0 0 1px rgba(16,18,15,.06),var(--sh-1)!important}
+.qa.open::after{opacity:.7}
+/* links, mobile bar, video label */
+.small a{color:var(--ink);text-decoration-color:#C04CF2}
+.mbar-t b{color:#fff}
+.mbar .b-lime{background:#fff;color:var(--ink)}
+.vid.playing:hover .vid-sound{background:#fff;color:var(--ink)}
+/* footer: black panel */
+.foot-panel{background:radial-gradient(120% 120% at 0% 0%,#24252C 0%,#121318 45%,#0B0C0F 100%)!important;color:#fff}
+.ulink{color:#fff;text-decoration-color:#C04CF2}
+/* checkpoint stroke only when the bar is one row */
+@media (max-width:860px){.cp-wire{display:none}}
+/* footer CTA: a white pill with a gradient rim glow, sitting on the black panel */
+.b-foot{margin-top:6px;background:#fff!important;color:var(--ink)!important;border:1.5px solid transparent;
+  background:linear-gradient(#fff,#fff) padding-box,var(--mc) border-box!important;
+  box-shadow:0 10px 28px -10px rgba(123,92,255,.55),-8px 8px 20px -12px rgba(59,107,255,.5),8px 8px 20px -12px rgba(255,107,61,.5)!important}
+.b-foot::before{display:none!important}
+.b-foot .ar{background:var(--ink)!important;color:#fff!important}
+@media (hover:hover){.b-foot:hover{--y:-2px;box-shadow:0 16px 36px -10px rgba(123,92,255,.65),-10px 12px 26px -12px rgba(59,107,255,.55),10px 12px 26px -12px rgba(255,107,61,.55)!important}}
+
 </style>
 </head>
 <body>
@@ -1090,7 +1160,7 @@ div.award{cursor:default}
 <div class="lift"><article class="st" id="st3" data-r style="--bg:var(--sky);--d:300"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>03</b></span><span class="pill">days 6–7</span><h3>Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p>
 <span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file" style="--k:0;--c:#FF9A00"><span class="fi"><b>AI</b></span><span class="mono">logo.ai</span></span><span class="vz-file" style="--k:1;--c:#00674F"><span class="fi"><b>SVG</b></span><span class="mono">logo.svg</span></span><span class="vz-file" style="--k:2;--c:#4DA3FF"><span class="fi"><b>PNG</b></span><span class="mono">logo.png</span></span><span class="vz-file" style="--k:3;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">guide.pdf</span></span><span class="vz-file" style="--k:4;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">cards.pdf</span></span><span class="vz-file" style="--k:5;--c:#7A7D74"><span class="fi"><b>ZIP</b></span><span class="mono">social.zip</span></span></span></span></article><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#C04CF2,#FF4F9A 35%,#FF6B3D 65%,#FFA20A)"></i></div>
 </div>
-<div class="checkpoint" data-r><span class="cp-dot">D3</span><span class="cp-t"><b>Day 3 is the checkpoint.</b> You approve a direction, then pay the second half.</span><svg class="wire2" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 20 C 40 0, 80 40, 118 20" fill="none" stroke-width="2"/></svg><a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="process">Book a call <span class="ar">→</span></a></div>
+<div class="checkpoint" data-r><svg class="cp-wire" aria-hidden="true"><defs><linearGradient id="cpg" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#7FA2FF"/><stop offset=".55" stop-color="#B98BFF"/><stop offset=".78" stop-color="#FF7FB5"/><stop offset="1" stop-color="#FFA36B"/></linearGradient></defs><path class="cp-base"/><path class="cp-flow"/></svg><span class="cp-dot">D3</span><span class="cp-t"><b>Day 3 is the checkpoint.</b> You approve a direction, then pay the second half.</span><a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="process">Book a call <span class="ar">→</span></a></div>
 </div>
 </section>
 
@@ -1177,7 +1247,7 @@ div.award{cursor:default}
 <footer class="foot" id="foot">
 <div class="foot-panel">
 <div class="foot-cols">
-<div data-r><span class="pill cream">looking for a brand?</span><p class="fbig">Brand Identity Sprint<br>7 days, $2,500 fixed</p><a class="ulink" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="footer">Book a call</a></div>
+<div data-r><span class="pill cream">looking for a brand?</span><p class="fbig">Brand Identity Sprint<br>7 days, $2,500 fixed</p><a class="b b-foot" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="footer">Book a call <span class="ar">→</span></a></div>
 <div data-r style="--d:100"><span class="pill cream">email</span><p class="fbig"><a href="mailto:hey@rohankumar.pro">hey@rohankumar.pro</a></p><p class="fsmall">I reply within 24 hours on working days.</p></div>
 </div>
 <div class="foot-word" id="fword"><div class="fw-mask"><svg viewBox="0 0 2308 464" role="img" aria-label="Rohan" style="width:100%;height:auto;display:block"><path fill="#FBF8F1" d="M0,17 L393,17 L393,184 L282,184 L440,342 L323,459 L165,301 L165,412 L0,412 L0,245 L103,245 L0,142ZM869,17 L1026,17 L1026,192 L1122,192 L1122,17 L1279,17 L1279,412 L1122,412 L1122,310 L1026,310 L1026,412 L869,412ZM1304,412 L1520,17 L1540,17 L1756,412 L1600,412 L1530,288 L1460,412ZM1780,17 L2190,17 L2190,412 L2033,412 L2033,175 L1937,175 L1937,412 L1780,412ZM2212,366 L2251,366 L2251,378 L2237,378 L2237,412 L2225,412 L2225,378 L2212,378ZM2258,412 L2258,366 L2275,366 L2283,390 L2291,366 L2308,366 L2308,412 L2296,412 L2296,390 L2288,412 L2278,412 L2270,390 L2270,412Z"/><path fill="#FBF8F1" fill-rule="evenodd" d="M634,0 A214.5,214.5 0 1 1 633.99,0 Z M634,148.5 A66,66 0 1 0 634.01,148.5 Z"/></svg></div><span class="stk" style="left:6%;top:30%;--r:-9deg;--k:0;background:#FFFFFF"><img src="/sprint/a/c332865ffa.svg" alt="" loading="lazy"></span><span class="stk" style="left:22%;top:2%;--r:7deg;--k:1;background:#FFFFFF"><img src="/sprint/a/5b53595d49.svg" alt="" loading="lazy"></span><span class="stk" style="left:38%;top:38%;--r:-5deg;--k:2;background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt="" loading="lazy"></span><span class="stk" style="left:52%;top:4%;--r:10deg;--k:3;background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt="" loading="lazy"></span><span class="stk" style="left:66%;top:36%;--r:-8deg;--k:4;background:#FF6A2B"><img src="/sprint/a/39012aa0a4.svg" alt="" loading="lazy"></span><span class="stk" style="left:79%;top:0%;--r:6deg;--k:5;background:#FFFFFF"><img src="/sprint/a/9fb0fa09d1.svg" alt="" loading="lazy"></span><span class="stk" style="left:91%;top:34%;--r:-6deg;--k:6;background:#D4F25C"><img src="/sprint/a/117f862455.svg" alt="" loading="lazy"></span></div>
@@ -1483,6 +1553,30 @@ div.award{cursor:default}
   }
   if(!reduce) requestAnimationFrame(frame); else arc();
 
+
+
+  /* ---------- checkpoint: a colour stroke runs from the D3 dot to the button ---------- */
+  (function(){
+    var cp=$('.checkpoint'); if(!cp) return;
+    var sv=$('.cp-wire',cp), base=$('.cp-base',sv), flow=$('.cp-flow',sv), g=$('#cpg'), dot=$('.cp-dot',cp), btn=$('.b',cp);
+    function lay(){
+      var r=cp.getBoundingClientRect(), a=dot.getBoundingClientRect(), b=btn.getBoundingClientRect();
+      sv.setAttribute('viewBox','0 0 '+r.width+' '+r.height);
+      var x1=a.right-r.left+4, y1=a.top-r.top+a.height/2, x2=b.left-r.left-6, y2=b.top-r.top+b.height/2, d;
+      if(Math.abs(y2-y1)<10){ /* one row: dip under the sentence */
+        var lo=r.height-12, mx=(x1+x2)/2;
+        d='M'+x1+' '+y1+' C '+(x1+40)+' '+lo+', '+(mx-60)+' '+lo+', '+mx+' '+lo+' S '+(x2-40)+' '+y2+', '+x2+' '+y2;
+      } else { /* stacked: drop from the dot down to the button */
+        x2=b.left-r.left+b.width/2; y2=b.top-r.top-6;
+        d='M'+(a.left-r.left+a.width/2)+' '+(a.bottom-r.top+4)+' C '+(a.left-r.left+a.width/2)+' '+(y2-20)+', '+x2+' '+(y1+20)+', '+x2+' '+y2;
+      }
+      base.setAttribute('d',d);flow.setAttribute('d',d);
+      g.setAttribute('x1',x1);g.setAttribute('x2',x2);g.setAttribute('y1',y1);g.setAttribute('y2',y2);
+      var L=base.getTotalLength();cp.style.setProperty('--L',L.toFixed(1));
+    }
+    lay(); if(d.fonts&&d.fonts.ready) d.fonts.ready.then(lay);
+    W.addEventListener('resize',function(){clearTimeout(lay.t);lay.t=setTimeout(lay,120)});
+  })();
 
   /* ---------- nav: hides going down, returns going up; marks the section ---------- */
   var nav=$('#nav'), ind=$('.nav-ind'), links=$$('.nl'), prevY=W.scrollY, ticking=false;
