@@ -27,8 +27,8 @@
    One system: tokens → base → components → sections → motion
    ========================================================= */
 :root{
-  --ground:#F2F2EF; --paper:#FFFFFF; --cream:#FBF8F1; --line:#E3E1DA;
-  --ink:#10120F; --ink-2:#3B3D36; --muted:#5E6058; --faint:#8A8C83;
+  --ground:#F3F1EC; --paper:#FFFFFF; --cream:#FBF8F1; --line:#E3E1DA;
+  --ink:#10120F; --ink-2:#3B3D36; --muted:#5E6058; --faint:#6B6D64;
   --green:#00674F; --green-2:#0B7A5E; --lime:#D4F25C; --butter:#FFE07A; --pink:#FFC2DA; --sky:#BFE3FF;
   --display:'coolvetica','DM Sans',system-ui,sans-serif;
   --body:'coolvetica','DM Sans',system-ui,-apple-system,sans-serif;
@@ -281,7 +281,7 @@ button{font:inherit;color:inherit}
 .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;align-items:baseline}
 .vs-h{font-size:12px;color:var(--faint)}.vs-me{color:var(--green)}
 .vs-old,.vs-new{font:500 24px/1.1 var(--display)}
-.vs-old{position:relative;justify-self:start;color:#A9A496}
+.vs-old{position:relative;justify-self:start;color:#8F8A7C}
 .vs-old::after{content:"";position:absolute;left:-3%;right:-3%;top:55%;height:2px;background:#A9A496;transform-origin:left;transform:scaleX(var(--strike,1));transition:transform .5s var(--e-io)}
 .minis{display:grid;grid-template-columns:1fr;gap:12px;flex:1}
 .mini{background:var(--bg);border-radius:22px;padding:18px;display:flex;flex-direction:row;align-items:center;gap:14px;font-size:14px;line-height:1.45;box-shadow:var(--sh-1)}
@@ -589,9 +589,9 @@ div.award{cursor:default}
    sits in a white tab that rises into that strip, like a folder.
    ========================================================= */
 .st{--hh:116px;--in:10px;background:#fff;padding:calc(var(--in) + var(--hh) + 18px) 22px 22px;box-shadow:0 0 0 1px rgba(16,18,15,.05),var(--sh-2)}
-#st1{--c1:#FFE58A;--c2:#FFB82E;--c3:#FF8A1F}
-#st2{--c1:#FFD3E6;--c2:#FF7DB4;--c3:#E8487F}
-#st3{--c1:#D6EEFF;--c2:#6DBBFF;--c3:#2F86F0}
+#st1{--c1:#F6FFC9;--c2:#D4F25C;--c3:#A9D83C}
+#st2{--c1:#E2F8EC;--c2:#8FE0B8;--c3:#3DBE8E}
+#st3{--c1:#7FD9B4;--c2:#12936E;--c3:#00674F}
 .st-head{position:absolute;top:var(--in);left:var(--in);right:var(--in);height:var(--hh);border-radius:calc(var(--r-l) - var(--in)) calc(var(--r-l) - var(--in)) 0 0;overflow:hidden;z-index:0;
   background:
     radial-gradient(60% 90% at var(--lx,18%) 10%,var(--c1),transparent 70%),
@@ -658,7 +658,7 @@ div.award{cursor:default}
    ========================================================= */
 .st,.vs,.vid{--bz:12px;
   box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 0 0 1px rgba(16,18,15,.05),0 14px 26px -16px rgba(16,18,15,.28),
-    0 0 0 var(--bz) #E9E8E3,0 0 0 calc(var(--bz) + 1px) rgba(16,18,15,.06),0 calc(var(--bz) + 18px) 40px -22px rgba(16,18,15,.3)}
+    0 0 0 var(--bz) #E8E5DD,0 0 0 calc(var(--bz) + 1px) rgba(16,18,15,.06),0 calc(var(--bz) + 18px) 40px -22px rgba(16,18,15,.3)}
 .stgrid{gap:44px}
 .pgrid{gap:40px}
 .vs{margin:12px 12px 0}
@@ -667,6 +667,12 @@ div.award{cursor:default}
 @media (min-width:1025px){.stgrid{gap:40px}}
 .minis{margin-top:14px}
 .minis .mini{margin:0 12px}
+
+/* colour pass: one family (green + lime) leads, warm neutrals carry the page,
+   pink is kept for the one urgent note (founding spots) only */
+.mini{--bg:#EEF6D2!important;box-shadow:inset 0 0 0 1px rgba(0,103,79,.12)}
+.mini b{color:var(--green)}
+#st3 .pill{background:rgba(255,255,255,.85)}
 
 </style>
 </head>
