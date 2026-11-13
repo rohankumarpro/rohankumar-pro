@@ -771,6 +771,16 @@ div.award{cursor:default}
 .lift-v{max-width:720px}
 .minis{margin-top:30px}
 
+/* live preview inside the video card */
+.vid-live{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .8s var(--e-out);background:#000}
+.vid-live iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid.playing .vid-live{opacity:1}
+.vid-sound{position:absolute;z-index:3;left:16px;bottom:16px;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;
+  background:rgba(16,18,15,.72);color:#fff;font:500 var(--fs-xs)/1 var(--body);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s var(--e-out)}
+.vid.playing .vid-sound{opacity:1;transform:none}
+.vid.playing:hover .vid-sound{background:var(--lime);color:var(--ink)}
+
 </style>
 </head>
 <body>
@@ -863,7 +873,7 @@ div.award{cursor:default}
 <p class="lead" data-r style="--d:200">A brand designer with 9+ years of work, from the first call to the final files. No hand-offs, no juniors, no surprise invoices.</p>
 <div class="chips"><span class="chip" data-r="pop" style="--d:300">9+ years</span><span class="chip" data-r="pop" style="--d:380">Dribbble Select</span><span class="chip" data-r="pop" style="--d:460">reply in 24h</span><span class="chip" data-r="pop" style="--d:540">PayPal, USD</span></div>
 </div>
-<div class="lift lift-v"><button type="button" class="vid" id="vid" data-r="tilt" style="--d:150" aria-label="Watch why clients hire me, 1 minute">
+<div class="lift lift-v"><button type="button" class="vid" id="vid" data-r="tilt" style="--d:150" aria-label="Watch why clients hire me, 1 minute"><span class="vid-live" aria-hidden="true"></span><span class="vid-sound" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 5h2.5L8 2v10L4.5 9H2z" fill="currentColor"/><path d="M10 4.5c1 1.4 1 3.6 0 5M11.8 3c1.8 2.3 1.8 5.7 0 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Watch with sound</span>
 <img src="/sprint/a/41843aaad2.jpg" alt="" loading="lazy" width="1280" height="720">
 <span class="vid-badge"><svg class="ring" viewBox="0 0 132 132" width="132" height="132" aria-hidden="true"><defs><path id="ring2" d="M66 66m-50 0a50 50 0 1 1 100 0a50 50 0 1 1 -100 0"/></defs><circle cx="66" cy="66" r="64" fill="#D4F25C"/><text font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="700" letter-spacing="2" fill="#10120F"><textPath href="#ring2">WATCH WHY CLIENTS HIRE ME • 1 MIN • </textPath></text></svg><span class="vid-play"><svg width="18" height="18" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#D4F25C"/></svg></span></span>
 </button><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#FF7A3D,#FFC2DA 50%,#D4F25C)"></i></div>
@@ -1100,8 +1110,9 @@ div.award{cursor:default}
   /* ---------- video: plays here, in a modal, never leaves the page ---------- */
   var vbtn=$('#vid'), vm=$('#vmodal'), vf=$('.vm-frame',vm), lastFocus=null;
   function vOpen(){
+    liveStop();
     lastFocus=d.activeElement; vm.hidden=false;
-    vf.innerHTML='<iframe src="https://fast.wistia.net/embed/iframe/uts63dyr58?autoPlay=true&muted=true&silentAutoPlay=allow&playsinline=true&videoFoam=false" title="Why clients hire Rohan" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    vf.innerHTML='<iframe src="https://fast.wistia.net/embed/iframe/uts63dyr58?autoPlay=true&silentAutoPlay=allow&playsinline=true&videoFoam=false" title="Why clients hire Rohan" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     requestAnimationFrame(function(){vm.classList.add('on')}); $('.vm-x',vm).focus(); d.body.style.overflow='hidden';
     try{W.clarity('event','video-open')}catch(e){}
   }
@@ -1109,6 +1120,21 @@ div.award{cursor:default}
     vm.classList.remove('on'); d.body.style.overflow='';
     setTimeout(function(){vm.hidden=true;vf.innerHTML=''},reduce?0:350);
     lastFocus&&lastFocus.focus();
+    setTimeout(liveStart,400);
+  }
+
+  /* the card itself plays the video muted while it is on screen; a click opens it with sound */
+  var live=$('.vid-live',vbtn), liveOn=false, liveSeen=false;
+  function liveStart(){
+    if(liveOn||!liveSeen||!vm.hidden) return; liveOn=true;
+    live.innerHTML='<iframe src="https://fast.wistia.net/embed/iframe/uts63dyr58?autoPlay=true&muted=true&silentAutoPlay=allow&endVideoBehavior=loop&playsinline=true&videoFoam=false&controlsVisibleOnLoad=false&playbar=false&playButton=false&smallPlayButton=false&volumeControl=false&fullscreenButton=false&settingsControl=false&qualityControl=false&playbackRateControl=false&chromeless=true" title="" tabindex="-1" allow="autoplay" loading="lazy"></iframe>';
+    var f=live.firstChild; f.addEventListener('load',function(){setTimeout(function(){vbtn.classList.add('playing')},900)});
+  }
+  function liveStop(){ liveOn=false; vbtn.classList.remove('playing'); live.innerHTML=''; }
+  if(!reduce && 'IntersectionObserver' in W){
+    new IntersectionObserver(function(es){es.forEach(function(e){
+      if(e.isIntersecting){liveSeen=true;liveStart()} else {liveSeen=false;liveStop()}
+    })},{threshold:.35}).observe(vbtn);
   }
   vbtn.addEventListener('click',vOpen);
   $('.vm-x',vm).addEventListener('click',vClose);
