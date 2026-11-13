@@ -674,6 +674,26 @@ div.award{cursor:default}
 .mini b{color:var(--green)}
 #st3 .pill{background:rgba(255,255,255,.85)}
 
+/* =========================================================
+   Radius pass: every nested corner is concentric.
+   inner radius = outer radius − the gap between them.
+   ========================================================= */
+/* process cards: card 44 → padding 24 → panel 20 → padding 12 → tiles 8 */
+.st{border-radius:44px;padding-left:24px;padding-right:24px;padding-bottom:24px}
+.st-head{border-radius:34px 34px 0 0}                 /* 44 − 10 inset */
+.st .viz{border-radius:20px;padding:12px}            /* 44 − 24 */
+.st .vz-opt,.st .vz-logo,.st .vz-type,.st .vz-sw i{border-radius:8px} /* 20 − 12 */
+@media (min-width:1025px){.st{padding-left:24px;padding-right:24px;padding-bottom:24px}}
+/* checkpoint: holds a circle and a pill 16px from the edge → 26 + 16 */
+.checkpoint{border-radius:42px}
+/* chat bubble: round avatar 10px from the edge → 22 + 10 */
+.bubble{border-radius:32px}
+/* FAQ rows: round toggle 14–16px from the edge → 16 + 14 */
+.qa{border-radius:30px}
+/* mobile booking bar: pill button 8px from the edge → 23 + 8 */
+.mbar{border-radius:31px}
+.qa.open{background:#EEF6D2!important;box-shadow:inset 0 0 0 1px rgba(0,103,79,.12),var(--sh-1)}
+
 </style>
 </head>
 <body>
