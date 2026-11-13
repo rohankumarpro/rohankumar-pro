@@ -960,23 +960,19 @@ div.award{cursor:default}
 .b-light{background:linear-gradient(180deg,#FFFFFF,#F4F3EE);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 5px rgba(16,18,15,.06),0 0 0 1px rgba(16,18,15,.07),0 12px 24px -14px rgba(16,18,15,.25)!important}
 
 /* =========================================================
-   Glass buttons: the pill is a live 3D render (see a/js/glass-button.js).
-   CSS only holds the label, the cast shadow and a fallback look.
+   Glass button: simple floating frosted glass.
    ========================================================= */
-.b-glass{--gx:78%;--gy:50%;--press:0;position:relative;isolation:isolate;overflow:visible;color:#34353D;
-  background:linear-gradient(180deg,#fff,#F2F1EE);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(16,18,15,.06),0 14px 28px -14px rgba(16,18,15,.3)}
+.b-glass{position:relative;isolation:isolate;color:var(--ink);
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.38));
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.55),inset 0 -1px 0 rgba(16,18,15,.05),
+    0 0 0 1px rgba(16,18,15,.06),0 2px 4px rgba(16,18,15,.04),0 12px 24px -10px rgba(16,18,15,.14),0 30px 50px -24px rgba(16,18,15,.18)!important;
+  transition:transform .45s var(--e-spring),box-shadow .45s var(--e-out)}
 .b-glass::before,.b-glass::after{display:none!important}
-.b-glass.gb-ready{background:transparent;box-shadow:none}
-.gb-cv{position:absolute;left:-26px;top:-26px;z-index:-1;pointer-events:none}
-/* the shadow it casts on the page: tightens and darkens as it is pressed */
-.b-glass.gb-ready{filter:drop-shadow(0 calc(16px - var(--press) * 10px) calc(22px - var(--press) * 12px) rgba(30,28,60,calc(.18 + var(--press) * .08)))}
-.b-glass .gl-t{position:relative;z-index:1;letter-spacing:-.005em;
-  background-image:radial-gradient(70px 60px at var(--gx) var(--gy),#fff 0%,#fff 35%,rgba(52,53,61,1) 100%);
-  background-size:100% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
-  transform:translateY(calc(var(--press) * 1.5px))}
-.b-glass .bolt{position:relative;z-index:1}
-.b-glass .bolt path{fill:#fff}
-.b-glass:hover{--y:0px}
+.b-glass .bolt path{fill:#7B5CFF}
+@media (hover:hover){.b-glass:hover{--y:-3px;box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.6),inset 0 -1px 0 rgba(16,18,15,.05),0 0 0 1px rgba(16,18,15,.06),0 4px 8px rgba(16,18,15,.05),0 20px 34px -12px rgba(16,18,15,.18),0 44px 64px -28px rgba(16,18,15,.22)!important}}
+.b-glass:active{--y:0px;box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(16,18,15,.08),0 2px 6px -2px rgba(16,18,15,.16)!important}
+#hero-cta .b-light{background:transparent!important;box-shadow:inset 0 0 0 1.5px rgba(16,18,15,.14)!important;-webkit-backdrop-filter:none;backdrop-filter:none}#hero-cta .b-light:hover{box-shadow:inset 0 0 0 1.5px rgba(16,18,15,.3)!important}
 
 </style>
 </head>
@@ -1336,8 +1332,6 @@ div.award{cursor:default}
   $$('.b-silk').forEach(silk);
 
 
-  /* glass buttons: wrap the label text so it can take the light */
-  $$('.b-glass').forEach(function(b){[].slice.call(b.childNodes).forEach(function(n){if(n.nodeType===3&&n.textContent.trim()){var s=d.createElement('span');s.className='gl-t';s.textContent=n.textContent.trim();b.replaceChild(s,n)}})});
   /* ---------- buttons: the light inside follows the pointer ---------- */
   $$('.b').forEach(function(b){
     b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.setProperty('--mx',(e.clientX-r.left)+'px');b.style.setProperty('--my',(e.clientY-r.top)+'px')});
@@ -1505,6 +1499,5 @@ div.award{cursor:default}
   ['work','week','rohan','price','faq','book'].forEach(function(id){var s=d.getElementById(id);s&&io.observe(s)});
 })();
 </script>
-<script type="module" src="/sprint/a/js/glass-button.js"></script>
 </body>
 </html>
