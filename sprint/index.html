@@ -781,6 +781,33 @@ div.award{cursor:default}
 .vid.playing .vid-sound{opacity:1;transform:none}
 .vid.playing:hover .vid-sound{background:var(--lime);color:var(--ink)}
 
+/* CTA: the message sits on a white disc laid over the inner edge of the card ring */
+.arc{z-index:0}
+.cta-disc{position:absolute;z-index:1;left:50%;top:570px;width:600px;height:600px;margin:-300px 0 0 -300px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 50% 35%,#FFFFFF 0%,#FBFAF6 60%,#F5F3EC 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.9),0 0 0 1px rgba(16,18,15,.04),0 2px 4px rgba(16,18,15,.04),0 12px 24px -8px rgba(16,18,15,.10),0 40px 80px -30px rgba(16,18,15,.22),0 0 0 10px rgba(255,255,255,.35)}
+.cta-in{z-index:2}
+@media (min-width:641px){.cta-disc{top:560px;width:620px;height:620px;margin:-310px 0 0 -310px}}
+@media (min-width:1025px){.cta-disc{top:710px;width:880px;height:880px;margin:-440px 0 0 -440px}}
+
+/* Dribbble Select badge: a dark lacquered pill, Dribbble-pink laurels, a light sweep across it */
+.award,.chip2{position:relative;overflow:hidden;isolation:isolate;color:#fff;
+  background:radial-gradient(120% 140% at 50% 0%,#3A3C37 0%,#1A1C18 55%,#0E0F0D 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -2px 6px rgba(0,0,0,.4),0 0 0 1px rgba(234,76,137,.35),0 10px 24px -10px rgba(234,76,137,.55),0 20px 40px -20px rgba(16,18,15,.5)}
+.award{padding:9px 18px}
+.award span{color:rgba(255,255,255,.62)}
+.award svg path,.award svg g{stroke:#EA4C89}
+.award b,.chip2 b{color:#fff}
+.chip2{color:rgba(255,255,255,.7)}
+.award::before,.chip2::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.28) 48%,rgba(255,180,210,.18) 52%,transparent 65%) no-repeat;background-size:250% 100%;background-position:150% 0;
+  animation:sheen 4.5s var(--e-io) 1.2s infinite}
+@keyframes sheen{0%,55%{background-position:150% 0}85%,100%{background-position:-50% 0}}
+.award .dot,.chip2 .dot{display:inline-block;width:14px;height:14px;border-radius:50%;flex:none}
+@media (prefers-reduced-motion:reduce){.award::before,.chip2::before{animation:none}}
+.chip2 .dball{flex:none;margin-right:2px}
+.award .dball{width:22px;height:22px;flex:none;margin-right:-2px}.award .dball path,.award .dball circle{stroke-width:1.6}.award .dball circle{stroke:none}.award .dball path{stroke:#B8255F}
+
 </style>
 </head>
 <body>
@@ -799,7 +826,7 @@ div.award{cursor:default}
 <div class="w">
 <div class="award" data-r style="--d:100">
 <svg viewBox="0 0 18 30" aria-hidden="true"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
-<span><b>Dribbble Select</b>Top branding agency</span>
+<svg class="dball" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#EA4C89"/><path d="M7.5 3.7c3.3 4 5.7 8.8 6.9 16.6M2.6 10.4c5.3.2 10.3-.9 15-4.3M4.4 18.4c3.2-4.7 8.5-6.5 16.9-4.9" fill="none" stroke="#B8255F" stroke-width="1.6" stroke-linecap="round"/></svg><span><b>Dribbble Select</b>Top branding agency</span>
 <svg viewBox="0 0 18 30" aria-hidden="true" style="transform:scaleX(-1)"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
 </div>
 
@@ -932,9 +959,9 @@ div.award{cursor:default}
 </section>
 
 <section id="book" class="cta">
-<div class="arc" aria-hidden="true"><div class="arc-spin"><span class="arc-card" style="--a:0.0deg"><img src="/sprint/a/m/arc-wuttaday.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:22.5deg"><img src="/sprint/a/m/arc-periodic.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:45.0deg"><img src="/sprint/a/m/arc-greenhouse.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:67.5deg"><img src="/sprint/a/m/arc-steven.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:90.0deg"><img src="/sprint/a/m/arc-ecosystem.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:112.5deg"><img src="/sprint/a/m/arc-timothy.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:135.0deg"><img src="/sprint/a/m/arc-rb.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:157.5deg"><img src="/sprint/a/m/arc-gruite.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:180.0deg"><img src="/sprint/a/m/arc-wagnum.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:202.5deg"><img src="/sprint/a/m/arc-bling.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:225.0deg"><img src="/sprint/a/m/arc-n.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:247.5deg"><img src="/sprint/a/m/arc-misfyt.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:270.0deg"><img src="/sprint/a/m/arc-s.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:292.5deg"><img src="/sprint/a/m/arc-tchoufa.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:315.0deg"><img src="/sprint/a/m/arc-abstract.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:337.5deg"><img src="/sprint/a/m/arc-reearth.jpg" alt="" loading="lazy" decoding="async"></span></div></div>
+<div class="arc" aria-hidden="true"><div class="arc-spin"><span class="arc-card" style="--a:0.0deg"><img src="/sprint/a/m/arc-wuttaday.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:22.5deg"><img src="/sprint/a/m/arc-periodic.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:45.0deg"><img src="/sprint/a/m/arc-greenhouse.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:67.5deg"><img src="/sprint/a/m/arc-steven.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:90.0deg"><img src="/sprint/a/m/arc-ecosystem.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:112.5deg"><img src="/sprint/a/m/arc-timothy.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:135.0deg"><img src="/sprint/a/m/arc-rb.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:157.5deg"><img src="/sprint/a/m/arc-gruite.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:180.0deg"><img src="/sprint/a/m/arc-wagnum.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:202.5deg"><img src="/sprint/a/m/arc-bling.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:225.0deg"><img src="/sprint/a/m/arc-n.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:247.5deg"><img src="/sprint/a/m/arc-misfyt.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:270.0deg"><img src="/sprint/a/m/arc-s.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:292.5deg"><img src="/sprint/a/m/arc-tchoufa.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:315.0deg"><img src="/sprint/a/m/arc-abstract.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:337.5deg"><img src="/sprint/a/m/arc-reearth.jpg" alt="" loading="lazy" decoding="async"></span></div></div><div class="cta-disc" aria-hidden="true"></div>
 <div class="cta-in">
-<span class="chip2" data-r><b>Dribbble Select</b> · top branding agency</span>
+<span class="chip2" data-r><svg class="dball" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#EA4C89"/><path d="M7.5 3.7c3.3 4 5.7 8.8 6.9 16.6M2.6 10.4c5.3.2 10.3-.9 15-4.3M4.4 18.4c3.2-4.7 8.5-6.5 16.9-4.9" fill="none" stroke="#B8255F" stroke-width="1.6" stroke-linecap="round"/></svg><b>Dribbble Select</b> · top branding agency</span>
 <h2 class="cta-h split" data-split>If you are looking for branding or rebranding, <span class="hl">I am here to help.</span></h2>
 <p class="lead" data-r style="--d:250">Book a 30-minute call. I reply within 24 hours on working days.</p>
 <div class="btnrow center" data-r style="--d:350"><a class="b b-dark b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="final">Book a call <span class="ar">→</span></a><a class="b b-light b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay-final">Start now · pay $750</a></div>
