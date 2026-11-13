@@ -1374,6 +1374,11 @@ div.award{cursor:default}
 .vz-opt.vz-img{padding:0;overflow:visible;background:transparent;aspect-ratio:4/3;display:block;align-self:center}
 .vz-opt.vz-img img{width:100%;height:100%;max-height:none;object-fit:cover;border-radius:inherit;display:block}
 .vz-opt.vz-img .vz-lab{position:absolute;left:6px;bottom:6px;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.88);color:#10120F;line-height:1;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+/* dark: lift cards clearly off the ground */
+:root[data-theme=dark]{--paper:#1C1D23;--raise:#26272E;--line:#33343C}
+:root[data-theme=dark] .st,:root[data-theme=dark] .vs,:root[data-theme=dark] .mini,:root[data-theme=dark] .qa.open{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 1px 0 rgba(255,255,255,.08),0 30px 60px -30px rgba(0,0,0,.9)!important}
+:root[data-theme=dark] .bx:not(.bx-a){border-color:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 20px 40px -24px rgba(0,0,0,.9)}
+:root[data-theme=dark] .qa{background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
 
 </style>
 </head>
