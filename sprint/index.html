@@ -974,6 +974,53 @@ div.award{cursor:default}
 .b-glass:active{--y:0px;box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(16,18,15,.08),0 2px 6px -2px rgba(16,18,15,.16)!important}
 #hero-cta .b-light{background:transparent!important;box-shadow:inset 0 0 0 1.5px rgba(16,18,15,.14)!important;-webkit-backdrop-filter:none;backdrop-filter:none}#hero-cta .b-light:hover{box-shadow:inset 0 0 0 1.5px rgba(16,18,15,.3)!important}
 
+/* =========================================================
+   Colourful CTA: the brand gradient, slowly flowing.
+   ========================================================= */
+.b-color{color:#fff;isolation:isolate;
+  background:linear-gradient(90deg,#3B6BFF,#7B5CFF 25%,#C04CF2 45%,#FF4F9A 65%,#FF6B3D 85%,#3B6BFF) 0 0/220% 100%;
+  animation:ctaflow 9s linear infinite;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 6px rgba(60,0,80,.25),0 0 0 1px rgba(120,60,200,.15),
+    -10px 12px 26px -16px rgba(59,107,255,.45),0 16px 28px -18px rgba(192,76,242,.45),10px 12px 26px -16px rgba(255,107,61,.45)!important}
+.b-color::before{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 55%)!important;padding:1px!important;animation:none!important;opacity:1}
+.b-color::after{background:radial-gradient(130px circle at var(--mx) var(--my),rgba(255,255,255,.3),transparent 70%)!important}
+.b-color .ar{background:rgba(255,255,255,.22)!important;color:#fff!important;animation:none!important}
+.b-color .bolt path{fill:#fff}
+@keyframes ctaflow{to{background-position:-220% 0}}
+@media (hover:hover){.b-color:hover{--y:-3px;animation-duration:3.5s;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(60,0,80,.25),0 0 0 1px rgba(120,60,200,.15),-14px 18px 34px -16px rgba(59,107,255,.5),0 24px 40px -20px rgba(192,76,242,.5),14px 18px 34px -16px rgba(255,107,61,.5)!important}}
+@media (prefers-reduced-motion:reduce){.b-color{animation:none}}
+
+/* =========================================================
+   The reveal at the end: a dark card rises out of black while
+   light blooms up from below it. Scroll drives everything.
+   ========================================================= */
+.reveal{position:relative;height:220vh;background:#050507;margin-top:-1px}
+.reveal::before{content:"";position:absolute;left:0;right:0;top:-30vh;height:30vh;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,7,0),#050507)}
+.rv-stick{position:sticky;top:0;height:100vh;overflow:hidden;display:grid;place-items:center;perspective:1400px}
+.rv-light{position:absolute;inset:0;width:100%;height:100%}
+.rv-card{--p:0;position:relative;width:min(86vw,560px);aspect-ratio:1.586;border-radius:clamp(18px,3vw,28px);
+  transform:translateY(calc((1 - var(--p)) * 38vh)) rotateX(calc((1 - var(--p)) * 24deg)) scale(calc(.9 + var(--p) * .1));transform-origin:50% 100%;
+  will-change:transform}
+.rv-face{position:absolute;inset:0;border-radius:inherit;overflow:hidden;
+  background:linear-gradient(170deg,#1A1C24 0%,#0D0F15 45%,#090A0F 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.1 + var(--p) * .25)),inset 0 0 0 1px rgba(255,255,255,.06),0 40px 80px -30px rgba(0,0,0,.9)}
+/* light from below washes up the face of the card */
+.rv-face::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:var(--p);
+  background:radial-gradient(95% 75% at 50% 132%,rgba(255,255,255,.9) 0%,rgba(205,185,255,.65) 22%,rgba(110,120,255,.5) 42%,rgba(80,90,255,.15) 62%,transparent 76%),
+             radial-gradient(40% 50% at 8% 120%,rgba(255,107,61,.35),transparent 70%),radial-gradient(40% 50% at 92% 120%,rgba(255,79,154,.35),transparent 70%)}
+/* fine brushed sheen across the top */
+.rv-face::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 30%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px)}
+/* chip and logo stamped into the card: dark fill, light catching the lower edge, shade on the upper */
+.rv-chip{position:absolute;left:9%;top:42%;width:13%;fill:#11131A;stroke:#2A2D37;stroke-width:1.4;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.22)) drop-shadow(0 -1px 0 rgba(0,0,0,.85))}
+.rv-logo{position:absolute;right:8%;top:11%;width:34%}
+.rv-logo svg path{fill:#0F1117}
+.rv-logo svg{filter:drop-shadow(0 1.2px 0 rgba(255,255,255,.28)) drop-shadow(0 -1px 0 rgba(0,0,0,.9)) drop-shadow(0 0 1px rgba(150,140,255,.25))}
+.rv-line{position:absolute;left:9%;bottom:12%;font:500 var(--fs-xs)/1 var(--body);letter-spacing:.06em;color:rgba(255,255,255,.28);text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){.rv-card{--p:1!important}}
+.rv-css .rv-stick{background:radial-gradient(60% 45% at 50% 100%,rgba(255,255,255,.85),rgba(120,110,255,.6) 35%,rgba(255,79,154,.25) 60%,transparent 80%)}
+
 </style>
 </head>
 <body>
@@ -1007,7 +1054,7 @@ div.award{cursor:default}
 <p class="hero-lead" data-r style="--d:750">I'm Rohan Kumar, a brand designer. In seven days I give your business a new brand identity for one fixed price, built around the business you already run.</p>
 
 <div class="btnrow" data-r style="--d:850" id="hero-cta">
-<a class="b b-glass b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="hero">Book a call <svg class="bolt" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8 1L3 8h4l-1 5 5-7H7z" fill="#D4F25C"/></svg></a>
+<a class="b b-color b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="hero">Book a call <svg class="bolt" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8 1L3 8h4l-1 5 5-7H7z" fill="#D4F25C"/></svg></a>
 <a class="b b-light b-big" href="#price">See the price</a>
 </div>
 <p class="hero-note" data-r style="--d:950">7 days · $2,500 fixed · <b>founding clients pay $1,500</b></p>
@@ -1109,7 +1156,7 @@ div.award{cursor:default}
 <div class="sec-top" data-r><span class="pill">faq</span></div>
 <h2 class="h2 split" data-split>Questions, <span class="hl">answered.</span></h2>
 <div class="bubble" data-r style="--d:200"><img src="/sprint/a/654ab10564.jpg" alt="" width="44" height="44" loading="lazy"><span>Still unsure? Ask me anything on the call.</span></div>
-<a class="b b-dark" data-r style="--d:300" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="faq">Book a call <span class="ar">→</span></a>
+<a class="b b-color" data-r style="--d:300" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="faq">Book a call <span class="ar">→</span></a>
 </div>
 <div class="faq-r" id="faq-list"><div class="qa open" data-r style="--tint:rgba(255,224,122,.62);--d:0"><button type="button" class="qa-q" aria-expanded="true" aria-controls="qa0"><span class="qa-n">01</span><span class="qa-t">What if I don't like either direction?</span><span class="qa-s" aria-hidden="true"></span></button><div class="qa-a" id="qa0" role="region"><div><p>I come back with new directions at no extra cost. Deposits are non-refundable.</p></div></div></div>
 <div class="qa" data-r style="--tint:rgba(217,245,122,.62);--d:60"><button type="button" class="qa-q" aria-expanded="false" aria-controls="qa1"><span class="qa-n">02</span><span class="qa-t">Who does the work?</span><span class="qa-s" aria-hidden="true"></span></button><div class="qa-a" id="qa1" role="region"><div><p>I do, from the first call to the final files.</p></div></div></div>
@@ -1130,7 +1177,7 @@ div.award{cursor:default}
 <span class="chip2" data-r><svg class="dball" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#EA4C89"/><path d="M7.5 3.7c3.3 4 5.7 8.8 6.9 16.6M2.6 10.4c5.3.2 10.3-.9 15-4.3M4.4 18.4c3.2-4.7 8.5-6.5 16.9-4.9" fill="none" stroke="#B8255F" stroke-width="1.6" stroke-linecap="round"/></svg><b>Dribbble Select</b> · top branding agency</span>
 <h2 class="cta-h split" data-split>If you are looking for branding or rebranding, <span class="hl">I am here to help.</span></h2>
 <p class="lead" data-r style="--d:250">Book a 30-minute call. I reply within 24 hours on working days.</p>
-<div class="btnrow center" data-r style="--d:350"><a class="b b-dark b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="final">Book a call <span class="ar">→</span></a><a class="b b-light b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay-final">Start now · pay $750</a></div>
+<div class="btnrow center" data-r style="--d:350"><a class="b b-color b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="final">Book a call <span class="ar">→</span></a><a class="b b-light b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay-final">Start now · pay $750</a></div>
 <p class="small" data-r style="--d:450">Not ready for a call? <a href="mailto:hey@rohankumar.pro?subject=Free%20brand%20teardown">Send me your website</a> and I'll reply with a short teardown of your brand, free.</p>
 </div>
 </section>
@@ -1148,6 +1195,7 @@ div.award{cursor:default}
 <p class="mono foot-copy">© 2026 Rohan Kumar · brand designer</p>
 </div>
 </footer>
+<section class="reveal" id="reveal" aria-label="Rohan Kumar, brand designer"><div class="rv-stick"><canvas class="rv-light" aria-hidden="true"></canvas><div class="rv-card" aria-hidden="true"><div class="rv-face"><svg class="rv-chip" viewBox="0 0 60 46" aria-hidden="true"><rect x="1" y="1" width="58" height="44" rx="9"/><path d="M1 16h18M1 30h18M41 16h18M41 30h18M19 1v44M41 1v44M19 23h22"/></svg><div class="rv-logo"><svg viewBox="0 0 2308 464" role="img" aria-label="Rohan" style="width:100%;height:auto;display:block"><path fill="#FBF8F1" d="M0,17 L393,17 L393,184 L282,184 L440,342 L323,459 L165,301 L165,412 L0,412 L0,245 L103,245 L0,142ZM869,17 L1026,17 L1026,192 L1122,192 L1122,17 L1279,17 L1279,412 L1122,412 L1122,310 L1026,310 L1026,412 L869,412ZM1304,412 L1520,17 L1540,17 L1756,412 L1600,412 L1530,288 L1460,412ZM1780,17 L2190,17 L2190,412 L2033,412 L2033,175 L1937,175 L1937,412 L1780,412ZM2212,366 L2251,366 L2251,378 L2237,378 L2237,412 L2225,412 L2225,378 L2212,378ZM2258,412 L2258,366 L2275,366 L2283,390 L2291,366 L2308,366 L2308,412 L2296,412 L2296,390 L2288,412 L2278,412 L2270,390 L2270,412Z"/><path fill="#FBF8F1" fill-rule="evenodd" d="M634,0 A214.5,214.5 0 1 1 633.99,0 Z M634,148.5 A66,66 0 1 0 634.01,148.5 Z"/></svg></div><span class="rv-line">brand designer · 7-day sprint</span></div></div></div></section>
 
 <div class="vmodal" id="vmodal" hidden><div class="vm-box"><button type="button" class="vm-x" aria-label="Close video">×</button><div class="vm-frame"></div></div></div>
 
@@ -1446,6 +1494,61 @@ div.award{cursor:default}
     spin.style.transform='rotate('+cur.toFixed(3)+'deg)';
   }
   if(!reduce) requestAnimationFrame(frame); else arc();
+
+
+  /* ---------- the reveal: scroll lifts the card and turns the light up ---------- */
+  (function(){
+    var sec=$('#reveal'); if(!sec) return;
+    var card=$('.rv-card',sec), cv=$('.rv-light',sec), gl=cv.getContext('webgl',{premultipliedAlpha:false,antialias:false});
+    var target=0, p=reduce?1:0, vel=0, raf=0, prog, uR,uP,uC,uT, t0=performance.now();
+    var FS=[
+     'precision highp float;uniform vec2 r;uniform float p;uniform vec4 c;uniform float t;',
+     'vec3 lin(vec3 s){return s*s;}',
+     'void main(){',
+     ' vec2 f=vec2(gl_FragCoord.x,r.y-gl_FragCoord.y);',             /* y down, in px */
+     ' float cx=c.x+c.z*.5, cw=c.z, yb=c.y+c.w;',                        /* card centre x, width, bottom */
+     ' float dy=f.y-yb, dx=f.x-cx, H=r.y;',
+     ' float below=smoothstep(-.03*H,.1*H,dy);',
+     ' float spread=cw*.42+max(dy,0.)*.95;',
+     ' float core=exp(-pow(dx/spread,2.)*1.6)*below*exp(-max(dy,0.)/(H*.55));',
+     ' float wrap=exp(-pow((abs(dx)-cw*.5)/(cw*.035),2.))*smoothstep(c.y+c.w*.35,yb,f.y)*(1.-smoothstep(yb-.02*H,yb+.025*H,f.y))*.38;', /* light licking up the card edges */
+     ' float I=(core+wrap)*p*(.92+.08*sin(t*.7));',
+     ' float k=clamp(abs(dx)/spread*1.1+max(dy,0.)/(H*.5),0.,1.);',       /* far from the core = colour, near = white */
+     ' float side=clamp(dx/cw*.7+.5,0.,1.);',
+     ' vec3 blue=vec3(.30,.42,1.),pink=vec3(1.,.36,.62),orng=vec3(1.,.48,.25),viol=vec3(.55,.36,1.);',
+     ' vec3 hue=mix(mix(blue,viol,smoothstep(0.,.5,side)),mix(pink,orng,smoothstep(.5,1.,side)),smoothstep(.35,.65,side));',
+     ' vec3 col=mix(vec3(1.,.97,1.),hue,smoothstep(.12,.75,k));',
+     ' col*=I*1.55; col=1.-exp(-col*1.7);',                                     /* soft tone curve, no clipping */
+     ' float n=fract(sin(dot(gl_FragCoord.xy+t,vec2(12.9898,78.233)))*43758.5453)-.5;',
+     ' col+=n*.018;',
+     ' gl_FragColor=vec4(col+vec3(.02,.02,.028),1.);',
+     '}'].join('\n');
+    if(gl){
+      var sh=function(ty,s){var o=gl.createShader(ty);gl.shaderSource(o,s);gl.compileShader(o);return o};
+      prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);
+      if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) gl=null;
+    }
+    if(gl){
+      gl.useProgram(prog);var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+      var la=gl.getAttribLocation(prog,'a');gl.enableVertexAttribArray(la);gl.vertexAttribPointer(la,2,gl.FLOAT,false,0,0);
+      uR=gl.getUniformLocation(prog,'r');uP=gl.getUniformLocation(prog,'p');uC=gl.getUniformLocation(prog,'c');uT=gl.getUniformLocation(prog,'t');
+    } else sec.classList.add('rv-css');
+    function size(){var dpr=Math.min(1.5,W.devicePixelRatio||1);cv.width=Math.round(cv.clientWidth*dpr);cv.height=Math.round(cv.clientHeight*dpr);if(gl)gl.viewport(0,0,cv.width,cv.height)}
+    function measure(){var r=sec.getBoundingClientRect(),vh=W.innerHeight;target=Math.max(0,Math.min(1,-r.top/(r.height-vh)));return r.bottom>0&&r.top<vh}
+    function frame(now){
+      var dt=Math.min(.033,(now-(frame.l||now))/1000);frame.l=now;
+      if(!reduce){var a=90*(target-p)-14*vel;vel+=a*dt;p+=vel*dt;}else p=1;   /* a spring, so the card has weight */
+      var e=Math.max(0,Math.min(1,p)); card.style.setProperty('--p',e.toFixed(4));
+      if(gl){var dpr=cv.width/cv.clientWidth,sr=cv.getBoundingClientRect(),cr=card.getBoundingClientRect();
+        gl.uniform2f(uR,cv.width,cv.height);gl.uniform1f(uP,e*e*(3-2*e));gl.uniform1f(uT,(now-t0)/1000);
+        gl.uniform4f(uC,(cr.left-sr.left)*dpr,(cr.top-sr.top)*dpr,cr.width*dpr,cr.height*dpr);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
+      if(measure()||Math.abs(target-p)>.001||Math.abs(vel)>.001) raf=requestAnimationFrame(frame); else raf=0;
+    }
+    function kick(){if(!raf){frame.l=0;raf=requestAnimationFrame(frame)}}
+    size();measure();kick();
+    W.addEventListener('scroll',function(){if(measure())kick()},{passive:true});
+    W.addEventListener('resize',function(){size();kick()});
+  })();
 
   /* ---------- nav: hides going down, returns going up; marks the section ---------- */
   var nav=$('#nav'), ind=$('.nav-ind'), links=$$('.nl'), prevY=W.scrollY, ticking=false;
