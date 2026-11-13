@@ -879,6 +879,54 @@ div.award{cursor:default}
 .qa::after{padding:1px}
 @media (hover:hover){.qa:hover::after{opacity:.6}}
 
+
+/* =========================================================
+   Silk buttons: a soft porcelain pill, lit from above, with
+   blurred colour light drifting inside it. On hover the light
+   swells toward the pointer and the label warms into it.
+   ========================================================= */
+.b-silk{--px:.78;--py:.5;color:#2B2C30;overflow:hidden;isolation:isolate;
+  background:linear-gradient(180deg,#FFFFFF 0%,#F7F6F3 55%,#EFEEEA 100%);
+  box-shadow:inset 0 2px 1px rgba(255,255,255,1),inset 0 -4px 8px rgba(16,18,15,.06),inset 0 0 0 1px rgba(255,255,255,.9),
+    0 0 0 1px rgba(16,18,15,.05),0 1px 1px rgba(16,18,15,.04),0 3px 4px -1px rgba(16,18,15,.05),0 10px 18px -8px rgba(16,18,15,.12),
+    0 26px 40px -20px rgba(16,18,15,.2),0 40px 70px -40px rgba(90,80,160,.28);
+  transition:transform .5s var(--e-spring),box-shadow .5s var(--e-out)}
+.b-silk::before,.b-silk::after{display:none}
+.silk{position:absolute;inset:0;z-index:-1;border-radius:inherit;overflow:hidden;pointer-events:none}
+.silk i{position:absolute;border-radius:50%;filter:blur(14px);opacity:.9;transition:transform 1.1s var(--e-out),opacity .6s;will-change:transform}
+.silk i:nth-child(1){width:46%;height:120%;left:52%;top:-55%;background:#5B8CFF;animation:sk1 7s ease-in-out infinite alternate}
+.silk i:nth-child(2){width:42%;height:110%;left:44%;top:45%;background:#FF7E9E;animation:sk2 8s ease-in-out infinite alternate}
+.silk i:nth-child(3){width:30%;height:100%;left:74%;top:-10%;background:#FFD2A8;animation:sk3 6s ease-in-out infinite alternate}
+.silk i:nth-child(4){width:30%;height:90%;left:60%;top:5%;background:#B38BFF;opacity:.7;animation:sk2 9s ease-in-out infinite alternate-reverse}
+@keyframes sk1{to{transform:translate(-14%,18%) scale(1.15)}}
+@keyframes sk2{to{transform:translate(12%,-22%) scale(.9)}}
+@keyframes sk3{to{transform:translate(-20%,12%) scale(1.2)}}
+/* glossy top sheen over the light */
+.b-silk .silk::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.75) 0%,rgba(255,255,255,.15) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.12) 100%)}
+.b-silk .sl-t{position:relative;background:linear-gradient(90deg,#9C8FB0 0%,#5F6170 38%,#4B4D58 55%,#FFFFFF 78%,#F4EEFF 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;background-size:160% 100%;background-position:100% 0;transition:background-position .9s var(--e-out)}
+.b-silk .ar{background:rgba(255,255,255,.55);color:#2B2C30;box-shadow:inset 0 1px 0 #fff,0 2px 6px -2px rgba(16,18,15,.2)}
+.b-silk .bolt path{fill:#7B5CFF}
+@media (hover:hover){
+  .b-silk:hover{--y:-3px;box-shadow:inset 0 2px 1px #fff,inset 0 -4px 8px rgba(16,18,15,.06),inset 0 0 0 1px rgba(255,255,255,.9),0 0 0 1px rgba(16,18,15,.05),0 2px 3px rgba(16,18,15,.05),0 14px 24px -10px rgba(16,18,15,.16),0 36px 56px -24px rgba(16,18,15,.22),0 50px 80px -40px rgba(120,90,220,.35)}
+  .b-silk:hover .silk i{transform:translate(calc((var(--px) - .78) * 120%),calc((var(--py) - .5) * 40%)) scale(1.35)}
+  .b-silk:hover .sl-t{background-position:40% 0}
+  .b-silk:hover .ar{background:#fff}
+}
+.b-silk:active{transform:translateY(1px) scale(.985);box-shadow:inset 0 2px 6px rgba(16,18,15,.12),0 0 0 1px rgba(16,18,15,.06),0 4px 10px -6px rgba(16,18,15,.2)}
+@media (prefers-reduced-motion:reduce){.silk i{animation:none}}
+/* the white secondary buttons step back so the silk button leads */
+.b-light{background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px rgba(16,18,15,.1),0 1px 2px rgba(16,18,15,.04)!important}
+.pcard .b-silk{color:#2B2C30}
+.silk i{filter:blur(16px);opacity:1}
+.silk i:nth-child(1){background:#2F6BFF;width:44%;left:50%}
+.silk i:nth-child(2){background:#FF4F7E;width:40%;left:46%}
+.silk i:nth-child(3){background:#FFB37A;width:26%;left:80%}
+.silk i:nth-child(4){background:#8A5CFF;opacity:.85;left:58%}
+.b-silk .silk::after{background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.1) 100%)}
+.b-silk .sl-t{background-image:linear-gradient(90deg,#A796BE 0%,#6A6C7A 32%,#555767 50%,#FFFFFF 66%,#FFFFFF 100%);-webkit-background-clip:text;background-clip:text}
+.b-silk .bolt path{fill:#fff}
+
 </style>
 </head>
 <body>
@@ -912,7 +960,7 @@ div.award{cursor:default}
 <p class="hero-lead" data-r style="--d:750">I'm Rohan Kumar, a brand designer. In seven days I give your business a new brand identity for one fixed price, built around the business you already run.</p>
 
 <div class="btnrow" data-r style="--d:850" id="hero-cta">
-<a class="b b-dark b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="hero">Book a call <svg class="bolt" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8 1L3 8h4l-1 5 5-7H7z" fill="#D4F25C"/></svg></a>
+<a class="b b-silk b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="hero">Book a call <svg class="bolt" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8 1L3 8h4l-1 5 5-7H7z" fill="#D4F25C"/></svg></a>
 <a class="b b-light b-big" href="#price">See the price</a>
 </div>
 <p class="hero-note" data-r style="--d:950">7 days · $2,500 fixed · <b>founding clients pay $1,500</b></p>
@@ -990,7 +1038,7 @@ div.award{cursor:default}
 <p class="p-note">Founding clients pay $1,500. Then $2,500.</p>
 <ul class="p-list"><li style="--k:0"><span class="tick">✓</span>Logo and its variations</li><li style="--k:1"><span class="tick">✓</span>Colour palette</li><li style="--k:2"><span class="tick">✓</span>Typefaces</li><li style="--k:3"><span class="tick">✓</span>One-page brand guide</li><li style="--k:4"><span class="tick">✓</span>Business card design</li><li style="--k:5"><span class="tick">✓</span>Social starter kit</li><li style="--k:6"><span class="tick">✓</span>Brand presentation with mockups</li><li style="--k:7"><span class="tick">✓</span>Source files in AI, SVG, PNG, PDF</li></ul>
 <div class="p-ctas">
-<a class="b b-lime b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay">Start now · pay $750 <span class="ar">→</span></a>
+<a class="b b-silk b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay">Start now · pay $750 <span class="ar">→</span></a>
 <a class="b b-ghost b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="price">Book a call first</a>
 </div>
 <p class="p-safe"><span class="tick">✓</span>Don't love either direction on Day 3? I make new ones at no extra cost. After you pay, I email you within 24 hours to set your kickoff.</p>
@@ -1014,7 +1062,7 @@ div.award{cursor:default}
 <div class="sec-top" data-r><span class="pill">faq</span></div>
 <h2 class="h2 split" data-split>Questions, <span class="hl">answered.</span></h2>
 <div class="bubble" data-r style="--d:200"><img src="/sprint/a/654ab10564.jpg" alt="" width="44" height="44" loading="lazy"><span>Still unsure? Ask me anything on the call.</span></div>
-<a class="b b-dark" data-r style="--d:300" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="faq">Book a call <span class="ar">→</span></a>
+<a class="b b-silk" data-r style="--d:300" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="faq">Book a call <span class="ar">→</span></a>
 </div>
 <div class="faq-r" id="faq-list"><div class="qa open" data-r style="--tint:rgba(255,224,122,.62);--d:0"><button type="button" class="qa-q" aria-expanded="true" aria-controls="qa0"><span class="qa-n">01</span><span class="qa-t">What if I don't like either direction?</span><span class="qa-s" aria-hidden="true"></span></button><div class="qa-a" id="qa0" role="region"><div><p>I come back with new directions at no extra cost. Deposits are non-refundable.</p></div></div></div>
 <div class="qa" data-r style="--tint:rgba(217,245,122,.62);--d:60"><button type="button" class="qa-q" aria-expanded="false" aria-controls="qa1"><span class="qa-n">02</span><span class="qa-t">Who does the work?</span><span class="qa-s" aria-hidden="true"></span></button><div class="qa-a" id="qa1" role="region"><div><p>I do, from the first call to the final files.</p></div></div></div>
@@ -1035,7 +1083,7 @@ div.award{cursor:default}
 <span class="chip2" data-r><svg class="dball" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#EA4C89"/><path d="M7.5 3.7c3.3 4 5.7 8.8 6.9 16.6M2.6 10.4c5.3.2 10.3-.9 15-4.3M4.4 18.4c3.2-4.7 8.5-6.5 16.9-4.9" fill="none" stroke="#B8255F" stroke-width="1.6" stroke-linecap="round"/></svg><b>Dribbble Select</b> · top branding agency</span>
 <h2 class="cta-h split" data-split>If you are looking for branding or rebranding, <span class="hl">I am here to help.</span></h2>
 <p class="lead" data-r style="--d:250">Book a 30-minute call. I reply within 24 hours on working days.</p>
-<div class="btnrow center" data-r style="--d:350"><a class="b b-dark b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="final">Book a call <span class="ar">→</span></a><a class="b b-light b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay-final">Start now · pay $750</a></div>
+<div class="btnrow center" data-r style="--d:350"><a class="b b-silk b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="final">Book a call <span class="ar">→</span></a><a class="b b-light b-big" href="https://www.paypal.com/ncp/payment/NL8E7CBYWWGTA" target="_blank" rel="noopener" data-cta="pay-final">Start now · pay $750</a></div>
 <p class="small" data-r style="--d:450">Not ready for a call? <a href="mailto:hey@rohankumar.pro?subject=Free%20brand%20teardown">Send me your website</a> and I'll reply with a short teardown of your brand, free.</p>
 </div>
 </section>
@@ -1175,6 +1223,15 @@ div.award{cursor:default}
   if(d.fonts && d.fonts.ready){Promise.race([d.fonts.ready,new Promise(function(r){setTimeout(r,600)})]).then(function(){requestAnimationFrame(heroIn)})}
   else heroIn();
 
+
+
+  /* ---------- silk buttons: soft white pill with drifting colour light inside ---------- */
+  $$('.b-silk').forEach(function(b){
+    [].slice.call(b.childNodes).forEach(function(n){ if(n.nodeType===3&&n.textContent.trim()){var s=d.createElement('span');s.className='sl-t';s.textContent=n.textContent.trim();b.replaceChild(s,n)} });
+    var l=d.createElement('span');l.className='silk';l.setAttribute('aria-hidden','true');l.innerHTML='<i></i><i></i><i></i><i></i>';b.insertBefore(l,b.firstChild);
+    b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.setProperty('--px',((e.clientX-r.left)/r.width).toFixed(3));b.style.setProperty('--py',((e.clientY-r.top)/r.height).toFixed(3))});
+    b.addEventListener('pointerleave',function(){b.style.removeProperty('--px');b.style.removeProperty('--py')});
+  });
 
   /* ---------- buttons: the light inside follows the pointer ---------- */
   $$('.b').forEach(function(b){
