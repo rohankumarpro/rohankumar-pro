@@ -869,6 +869,16 @@ div.award{cursor:default}
 .st:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(16,18,15,.04),var(--ai-shadow)!important}
 @media (prefers-reduced-motion:reduce){.b:hover::before,.b:hover .ar,.glow,.qa::after{animation:none}}
 
+/* softer: the colour should whisper, not shout */
+:root{--ai-shadow:-12px 12px 28px -16px rgba(10,132,255,.22),0 16px 30px -18px rgba(192,76,242,.2),12px 12px 28px -16px rgba(255,107,61,.22)}
+.glow{filter:blur(46px) saturate(1)!important}
+.lift>.in~.glow,.lift>.vid~.glow,.lift-p>.pcard.in~.glow{opacity:.32!important;transform:translateY(20px) scale(.92)!important}
+@media (hover:hover){.lift:hover>.glow{opacity:.45!important;transform:translateY(26px) scale(.95)!important}}
+.b:hover::before{opacity:.75;padding:1.5px}
+.b::after{background:radial-gradient(140px circle at var(--mx) var(--my),rgba(255,79,154,.14),rgba(123,92,255,.08) 40%,transparent 70%)}
+.qa::after{padding:1px}
+@media (hover:hover){.qa:hover::after{opacity:.6}}
+
 </style>
 </head>
 <body>
