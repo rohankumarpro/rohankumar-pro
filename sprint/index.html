@@ -715,6 +715,16 @@ div.award{cursor:default}
 .foot-panel{border-radius:48px}
 
 
+/* no grey frame: the cards float on a soft shadow in their own colour */
+.st,.vs,.vid{box-shadow:0 0 0 1px rgba(16,18,15,.04),0 2px 6px -2px var(--glow1),0 30px 60px -24px var(--glow2)}
+.st{--glow1:color-mix(in srgb,var(--c3) 30%,transparent);--glow2:color-mix(in srgb,var(--c2) 70%,transparent)}
+.vs{--glow1:rgba(0,103,79,.18);--glow2:rgba(170,215,60,.55)}
+.vid{--glow1:rgba(0,103,79,.2);--glow2:rgba(255,120,60,.45)}
+.vs,.vid{margin:0}
+.minis .mini{margin:0}
+@media (hover:hover){.st:hover{box-shadow:0 0 0 1px rgba(16,18,15,.04),0 2px 6px -2px var(--glow1),0 40px 70px -24px var(--glow2)}}
+.stgrid{gap:28px}.pgrid{gap:28px}@media (min-width:1025px){.stgrid{gap:28px}}
+
 </style>
 </head>
 <body>
