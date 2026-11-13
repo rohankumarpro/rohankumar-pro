@@ -808,6 +808,41 @@ div.award{cursor:default}
 .chip2 .dball{flex:none;margin-right:2px}
 .award .dball{width:22px;height:22px;flex:none;margin-right:-2px}.award .dball path,.award .dball circle{stroke-width:1.6}.award .dball circle{stroke:none}.award .dball path{stroke:#B8255F}
 
+/* highlighted words: a moving multicolour gradient (Apple Intelligence style) */
+@property --sh{syntax:'<length>';inherits:true;initial-value:0px}
+.hl,.h1 .end{--gw:600px;animation:gsh 7s linear infinite}
+.gtxt{background:linear-gradient(90deg,#0A84FF 0%,#7B5CFF 14%,#C04CF2 28%,#FF4F9A 42%,#FF6B3D 54%,#FF4F9A 66%,#C04CF2 78%,#7B5CFF 90%,#0A84FF 100%);
+  background-size:calc(var(--gw) * 2) 100%;background-position:calc(var(--sh) - var(--x,0px)) 0;background-repeat:repeat-x;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  padding-bottom:.08em;margin-bottom:-.08em}
+@keyframes gsh{from{--sh:0px}to{--sh:calc(var(--gw) * 2)}}
+@media (prefers-reduced-motion:reduce){.hl,.h1 .end{animation:none}}
+
+
+/* price card: a grainy colour field (blue top, magenta middle, orange below) with white type */
+.pcard{overflow:visible;color:#fff;background-color:#FF3F8E;
+  background-image:
+    radial-gradient(120% 70% at 50% 118%,#FF7A1A 0%,rgba(255,90,40,.85) 30%,transparent 62%),
+    radial-gradient(90% 60% at 50% 55%,#FF3D8B 0%,rgba(255,61,139,0) 70%),
+    radial-gradient(70% 55% at 85% -5%,#3E7BFF 0%,rgba(62,123,255,0) 70%),
+    radial-gradient(70% 55% at 10% -8%,#4C6BFF 0%,rgba(76,107,255,0) 70%),
+    linear-gradient(180deg,#7A5CFF 0%,#E04CC8 32%,#FF3F8E 55%,#FF5A3C 100%);
+  background-size:auto;isolation:isolate}
+.pcard::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;opacity:.28;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pcard>*:not(.p-sticker){position:relative}
+.pcard .p-price{background:linear-gradient(90deg,rgba(255,255,255,.62),#fff 30%,#fff 70%,rgba(255,255,255,.7));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.pcard .p-was{-webkit-text-fill-color:rgba(255,255,255,.6)}
+.pcard .pill,.pcard .pill.lime{background:rgba(255,255,255,.22);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pcard .tick{background:#fff;color:#E0337A}
+.pcard p,.pcard li{color:#fff}
+.pcard .b-lime{background:radial-gradient(130% 140% at 50% 0%,#FFFFFF 0%,#FFF4F8 60%,#FFE3EE 100%);color:#C0185E;--glow:rgba(120,0,50,.45);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -3px 8px rgba(200,40,100,.15),0 14px 30px -12px var(--glow)}
+.pcard .b-lime .ar{background:rgba(192,24,94,.1)}
+.pcard .b-ghost{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6)}
+.p-sticker{background:var(--ink)!important;color:#fff!important}
+.pcard{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 2px rgba(16,18,15,.1),0 8px 18px -8px rgba(120,20,60,.35)!important}
+
 </style>
 </head>
 <body>
@@ -848,11 +883,11 @@ div.award{cursor:default}
 <p class="worked" data-r style="--d:1050"><span class="mono">worked with</span> My11Circle · Khushi Kumar · Steven Soto · Timothy McIntosh</p>
 
 <div class="fan" id="fan" aria-label="Logos I designed" role="img">
-<div class="fc" style="--i:-3;--k:3"><img src="/sprint/a/90ab439b02.jpg" alt="" width="600" height="800" fetchpriority="high"></div>
-<div class="fc" style="--i:-2;--k:2"><img src="/sprint/a/a2e0f55f8a.jpg" alt="" width="600" height="800"></div>
+<div class="fc" style="--i:-3;--k:3"><img src="/sprint/a/fan-wuttaday.jpg" alt="" width="600" height="800" fetchpriority="high"></div>
+<div class="fc" style="--i:-2;--k:2"><img src="/sprint/a/fan-greenhouse.jpg" alt="" width="600" height="800"></div>
 <div class="fc" style="--i:-1;--k:1"><img src="/sprint/a/97d8cf60ef.jpg" alt="" width="600" height="800"></div>
-<div class="fc" style="--i:0;--k:0"><img src="/sprint/a/70fc423918.jpg" alt="" width="600" height="800"><span class="tag"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1l11 6-5 1.5L6 14z" fill="#10120F"/></svg><em>@stevensoto</em></span></div>
-<div class="fc" style="--i:1;--k:1"><img src="/sprint/a/5607c7d071.jpg" alt="" width="600" height="800"></div>
+<div class="fc" style="--i:0;--k:0"><img src="/sprint/a/70fc423918.jpg" alt="" width="600" height="800"></div>
+<div class="fc" style="--i:1;--k:1"><img src="/sprint/a/fan-rb.jpg" alt="" width="600" height="800"></div>
 <div class="fc" style="--i:2;--k:2"><img src="/sprint/a/c31fe9d876.jpg" alt="" width="600" height="800"></div>
 <div class="fc" style="--i:3;--k:3"><img src="/sprint/a/0f6555f669.jpg" alt="" width="600" height="800"></div>
 </div>
@@ -923,7 +958,7 @@ div.award{cursor:default}
 <a class="b b-ghost b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="price">Book a call first</a>
 </div>
 <p class="p-safe"><span class="tick">✓</span>Don't love either direction on Day 3? I make new ones at no extra cost. After you pay, I email you within 24 hours to set your kickoff.</p>
-</div><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#00674F,#3DBE8E 45%,#D4F25C)"></i></div>
+</div><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#4C6BFF,#FF3F8E 45%,#FF7A1A)"></i></div>
 <div class="pside">
 <div class="lift lift-vs"><div class="vs" id="vs" data-r style="--d:150">
 <span class="pill">next to an agency</span>
@@ -1031,6 +1066,19 @@ div.award{cursor:default}
     });
   },{rootMargin:'0px 0px -12% 0px',threshold:.12});
   $$('[data-r],.split,.st,#pcard,#vs,#pocket,#fword,.checkpoint').forEach(function(el){io.observe(el)});
+
+
+  /* ---------- gradient highlights: one gradient runs across each highlight, even when split into words ---------- */
+  function grad(){
+    $$('.hl,.h1 .end').forEach(function(h){
+      var r=h.getBoundingClientRect(); h.style.setProperty('--gw',Math.max(240,Math.round(r.width))+'px');
+      var parts=$$('.wd>span',h);
+      if(!parts.length){h.classList.add('gtxt');h.style.setProperty('--x','0px');return}
+      parts.forEach(function(p){var pr=p.parentNode.getBoundingClientRect();p.classList.add('gtxt');p.style.setProperty('--x',Math.round(pr.left-r.left)+'px')});
+    });
+  }
+  grad(); if(d.fonts&&d.fonts.ready) d.fonts.ready.then(grad);
+  var gT; W.addEventListener('resize',function(){clearTimeout(gT);gT=setTimeout(grad,150)});
 
   /* ---------- hero: lines rise, cards are dealt; the visitor turns the brand on ---------- */
   var h1=$('#h1'), fan=$('#fan'), bsw=$('#bsw'), tried=false, nudges=0, firstOn=false;
