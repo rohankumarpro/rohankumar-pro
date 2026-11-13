@@ -483,8 +483,6 @@ div.award{cursor:default}
 /* process stories */
 .m .st[data-r]{transform:translateY(50px) rotate(-1.5deg)}
 .m .st[data-r].in{transform:none}
-.m .st-num{transform:scale(0) rotate(-90deg);transition:transform .7s var(--e-spring) .35s}
-.m .st.in .st-num{transform:rotate(var(--r))}
 .m .vz-dot{animation:none}
 .m .st.live .vz-dot{animation:rec 1.4s ease-in-out infinite}
 @keyframes rec{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
@@ -548,6 +546,60 @@ div.award{cursor:default}
 
 .worked{margin:22px 0 0;max-width:300px;font:500 14px/1.4 var(--body);color:var(--ink-2)}
 .worked .mono{display:block;margin-bottom:6px;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.12em}
+
+/* =========================================================
+   Jelly buttons: a lit pill with a glass rim, a gloss on top,
+   a coloured glow under it and a light that follows the pointer.
+   ========================================================= */
+.b{--mx:50%;--my:50%;--glow:rgba(16,18,15,.45);border-radius:999px;isolation:isolate;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -2px 6px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.08),0 12px 26px -12px var(--glow);
+  transition:transform .35s var(--e-spring),box-shadow .35s var(--e-out),background .3s,color .3s}
+.b::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.05) 45%,rgba(255,255,255,.25));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.b::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;opacity:0;transition:opacity .35s var(--e-out);
+  background:radial-gradient(120px circle at var(--mx) var(--my),rgba(255,255,255,.32),transparent 70%)}
+.b:hover{--y:-2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -2px 6px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.08),0 18px 34px -12px var(--glow)}
+.b:hover::after{opacity:1}
+.b:active{--y:0px;transform:translateY(0) scale(.97);box-shadow:inset 0 2px 8px rgba(0,0,0,.28),0 4px 10px -6px var(--glow)}
+.b-dark{background:radial-gradient(140% 120% at 50% -20%,#3A3D36 0%,#10120F 55%);color:#fff;--glow:rgba(0,103,79,.55)}
+.b-lime{background:radial-gradient(130% 140% at 50% 0%,#EFFF9E 0%,#D4F25C 42%,#9FD63A 100%);color:#0B2A1E;--glow:rgba(110,170,20,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -3px 8px rgba(40,90,0,.25),0 1px 2px rgba(0,0,0,.08),0 14px 30px -12px var(--glow)}
+.b-lime:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -3px 8px rgba(40,90,0,.25),0 0 0 4px rgba(212,242,92,.28),0 20px 38px -12px var(--glow)}
+.b-light{background:linear-gradient(180deg,#FFFFFF,#F4F3EE);color:var(--ink);--glow:rgba(16,18,15,.25);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -2px 5px rgba(16,18,15,.06),0 0 0 1px rgba(16,18,15,.07),0 12px 24px -14px var(--glow)}
+.b-light::after{background:radial-gradient(120px circle at var(--mx) var(--my),rgba(212,242,92,.35),transparent 70%)}
+.b-ghost{background:rgba(251,248,241,.08);color:var(--cream);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);--glow:rgba(0,0,0,.25);
+  box-shadow:inset 0 0 0 1.5px rgba(251,248,241,.45),inset 0 1px 0 rgba(255,255,255,.2)}
+.b-ghost:hover{background:rgba(251,248,241,.14);box-shadow:inset 0 0 0 1.5px var(--cream),inset 0 1px 0 rgba(255,255,255,.25),0 14px 28px -14px var(--glow)}
+.checkpoint .b{background:linear-gradient(180deg,#FFFFFF,#F3EFE4);color:var(--ink);--glow:rgba(0,0,0,.35)}
+/* the arrow sits in its own little bubble and slides on hover */
+.b .ar{display:inline-grid;place-items:center;width:28px;height:28px;margin-right:-10px;border-radius:50%;background:rgba(255,255,255,.14);font-size:15px;line-height:1;
+  transition:transform .4s var(--e-spring),background .3s}
+.b-lime .ar{background:rgba(11,42,30,.1)}
+.b:hover .ar{transform:translateX(3px);background:rgba(255,255,255,.24)}
+.b-lime:hover .ar{background:rgba(11,42,30,.16)}
+.b-big .ar{width:34px;height:34px;margin-right:-14px}
+.mbar .b,.nav-cta{border-radius:999px}
+@media (prefers-reduced-motion:reduce){.b,.b .ar{transition:none}.b:active{transform:none}}
+
+/* =========================================================
+   Process cards: the step number lives in a folder tab cut
+   out of the card's corner, like a file you can pull out.
+   ========================================================= */
+.st-num{top:0;right:0;width:auto;height:auto;min-width:96px;padding:10px 14px 12px 16px;border-radius:0 0 0 22px;background:var(--ground);box-shadow:none;
+  display:flex;align-items:baseline;gap:6px;justify-content:flex-end;transform:none}
+.st-num::before,.st-num::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none;
+  background:radial-gradient(circle at 0 100%,transparent 21.5px,var(--ground) 22px)}
+.st-num::before{left:-22px;top:0}
+.st-num::after{right:0;bottom:-22px}
+.st-num em{font:500 11px/1 var(--mono);font-style:normal;color:var(--faint);letter-spacing:.04em}
+.st-num b{font:500 30px/1 var(--display);color:var(--ink)}
+.m .st .st-num{transform:none;opacity:1}
+.m .st .st-num b{display:inline-block;transform:translateY(12px);opacity:0;transition:transform .7s var(--e-spring) .35s,opacity .3s .35s}
+.m .st.in .st-num b{transform:none;opacity:1}
+.st:hover .st-num b{animation:numnudge .6s var(--e-spring)}
+@keyframes numnudge{40%{transform:translateY(-4px)}}
 
 </style>
 </head>
@@ -622,11 +674,11 @@ div.award{cursor:default}
 <div class="sec-top center" data-r><span class="pill">process</span><span class="pill ghost">one week, start to finish</span></div>
 <h2 class="h2 center split" data-split>Seven days, <span class="hl">start to finish.</span></h2>
 <div class="stgrid">
-<article class="st" id="st1" data-r style="--bg:var(--butter);--d:0"><span class="st-num" style="--r:-6deg">01</span><span class="pill">days 1–3</span><h3>Kickoff and two directions</h3><p>You tell me about your business, your customers and what bothers you about your current look. I study your market, then show you two directions on a live call.</p>
+<article class="st" id="st1" data-r style="--bg:var(--butter);--d:0"><span class="st-num"><em>step</em><b>01</b></span><span class="pill">days 1–3</span><h3>Kickoff and two directions</h3><p>You tell me about your business, your customers and what bothers you about your current look. I study your market, then show you two directions on a live call.</p>
 <span class="viz" aria-hidden="true"><span class="vz-bar"><span class="vz-dot"></span><span class="mono">live call · day 3</span></span><span class="vz-two"><span class="vz-opt vz-a" style="background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt=""><span class="mono">direction a</span></span><span class="vz-opt vz-b" style="background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt=""><span class="mono" style="color:#fff">direction b</span><span class="vz-check">✓ picked</span></span></span></span></article>
-<article class="st" id="st2" data-r style="--bg:var(--pink);--d:150"><span class="st-num" style="--r:5deg">02</span><span class="pill">days 4–5</span><h3>The full system</h3><p>I turn that direction into the full system of logo, colours and type, with two rounds of revisions. You reply within a few hours on each round.</p>
+<article class="st" id="st2" data-r style="--bg:var(--pink);--d:150"><span class="st-num"><em>step</em><b>02</b></span><span class="pill">days 4–5</span><h3>The full system</h3><p>I turn that direction into the full system of logo, colours and type, with two rounds of revisions. You reply within a few hours on each round.</p>
 <span class="viz vz-sys" aria-hidden="true"><span class="vz-logo"><img src="/sprint/a/5s0t0logo.jpg" alt=""></span><span class="vz-col"><span class="vz-sw"><i style="background:#D2FD94;--k:0"></i><i style="background:#01262F;--k:1"></i><i style="background:#E2E9D8;--k:2"></i><i style="background:#93A790;--k:3"></i></span><span class="vz-type"><b>Aa</b><span class="mono">headings · body</span></span><span class="vz-revs"><span class="mono">rev 1 ✓</span><span class="mono">rev 2 ✓</span></span></span></span></article>
-<article class="st" id="st3" data-r style="--bg:var(--sky);--d:300"><span class="st-num" style="--r:-4deg">03</span><span class="pill">days 6–7</span><h3>Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p>
+<article class="st" id="st3" data-r style="--bg:var(--sky);--d:300"><span class="st-num"><em>step</em><b>03</b></span><span class="pill">days 6–7</span><h3>Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p>
 <span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file" style="--k:0;--c:#FF9A00"><span class="fi"><b>AI</b></span><span class="mono">logo.ai</span></span><span class="vz-file" style="--k:1;--c:#00674F"><span class="fi"><b>SVG</b></span><span class="mono">logo.svg</span></span><span class="vz-file" style="--k:2;--c:#4DA3FF"><span class="fi"><b>PNG</b></span><span class="mono">logo.png</span></span><span class="vz-file" style="--k:3;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">guide.pdf</span></span><span class="vz-file" style="--k:4;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">cards.pdf</span></span><span class="vz-file" style="--k:5;--c:#7A7D74"><span class="fi"><b>ZIP</b></span><span class="mono">social.zip</span></span></span></span></article>
 </div>
 <div class="checkpoint" data-r><span class="cp-dot">D3</span><span class="cp-t"><b>Day 3 is the checkpoint.</b> You approve a direction, then pay the second half.</span><svg class="wire2" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 20 C 40 0, 80 40, 118 20" fill="none" stroke-width="2"/></svg><a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="process">Book a call <span class="ar">→</span></a></div>
@@ -831,6 +883,12 @@ div.award{cursor:default}
   });
   if(d.fonts && d.fonts.ready){Promise.race([d.fonts.ready,new Promise(function(r){setTimeout(r,600)})]).then(function(){requestAnimationFrame(heroIn)})}
   else heroIn();
+
+
+  /* ---------- buttons: the light inside follows the pointer ---------- */
+  $$('.b').forEach(function(b){
+    b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.setProperty('--mx',(e.clientX-r.left)+'px');b.style.setProperty('--my',(e.clientY-r.top)+'px')});
+  });
 
   /* ---------- pocket: on touch screens it opens by itself when seen ---------- */
   on('pocket',function(p){
