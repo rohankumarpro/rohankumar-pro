@@ -1198,6 +1198,25 @@ div.award{cursor:default}
 /* carousel: original boards untouched; card corner = the board's own corner (tile 24 + margin 24 at 1400) */
 .cs-slide{border-radius:calc(48 / 1400 * 100cqw)!important;background:#E7E5DE}
 .cs-slide .case-l{left:calc(40 / 1400 * 100cqw);bottom:calc(40 / 1400 * 100cqw)}
+/* buttons with an arrow bubble: bubble inset equally from top, bottom and right; label balanced */
+.b .ar{margin-right:0!important;flex:none}
+.b:has(.ar){padding-left:26px;padding-right:9px;gap:14px}
+.b-big:has(.ar){padding-left:30px;padding-right:13px;gap:16px}
+.mbar .b:has(.ar){padding-left:18px;padding-right:6px;gap:10px}
+.mbar .b .ar{width:30px;height:30px}
+.b-foot:has(.ar){padding-left:22px;padding-right:7px}
+/* wide buttons (stacked on phone / filling a column): keep the label centred with the arrow on the right */
+.p-ctas .b:has(.ar),.hero .btnrow .b:has(.ar){justify-content:space-between;padding-left:calc(13px + 34px + 16px)}
+.p-ctas .b:has(.ar) .sl-t,.p-ctas .b:has(.ar)>:not(.ar){flex:1;text-align:center}
+.cs-slide{border-radius:var(--csr,28px)!important}
+.cs-slide .case-l{left:var(--csr,28px);bottom:var(--csr,28px);transform:translate(-30%,-30%)}
+/* arrow bubble pinned to the right edge with equal inset; label centred in the button at any width */
+.b:has(.ar){--bub:28px;--ins:9px;position:relative;justify-content:center!important;padding-left:calc(var(--ins) + var(--bub) + 12px)!important;padding-right:calc(var(--ins) + var(--bub) + 12px)!important}
+.b-big:has(.ar){--bub:34px;--ins:13px}
+.mbar .b:has(.ar){--bub:30px;--ins:7px}
+.b-foot:has(.ar){--ins:7px}
+.b:has(.ar) .ar{position:absolute;right:var(--ins);top:50%;width:var(--bub)!important;height:var(--bub)!important;margin:0!important;translate:0 -50%}
+.b:hover:has(.ar) .ar{transform:translateX(3px)}
 
 </style>
 </head>
@@ -1775,6 +1794,11 @@ div.award{cursor:default}
   function bwLay(){var w=$('.bw');if(!w)return;var r=w.getBoundingClientRect();w.style.setProperty('--bwW',Math.round(r.width)+'px');
     $$('i',w).forEach(function(i){i.style.setProperty('--ix',Math.round(i.getBoundingClientRect().left-r.left)+'px')})}
   bwLay(); if(d.fonts&&d.fonts.ready) d.fonts.ready.then(bwLay); W.addEventListener('resize',function(){clearTimeout(bwLay.t);bwLay.t=setTimeout(bwLay,150)});
+
+
+  /* carousel corners: outer radius = board tile radius (24) + board margin (24), scaled to the card's real width */
+  function csR(){$$('.cs-slide').forEach(function(s){s.style.setProperty('--csr',(s.offsetWidth*48/1400).toFixed(2)+'px')})}
+  csR();W.addEventListener('resize',function(){clearTimeout(csR.t);csR.t=setTimeout(csR,100)});
 
   /* ---------- nav: hides going down, returns going up; marks the section ---------- */
   var nav=$('#nav'), ind=$('.nav-ind'), links=$$('.nl'), prevY=W.scrollY, ticking=false;
