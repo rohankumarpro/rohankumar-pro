@@ -750,6 +750,27 @@ div.award{cursor:default}
 .pcard,.checkpoint{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 1px rgba(16,18,15,.04),0 2px 2px rgba(16,18,15,.04),0 4px 4px rgba(16,18,15,.04),0 8px 8px rgba(16,18,15,.04),0 16px 16px rgba(16,18,15,.04),0 48px 70px -34px rgba(0,103,79,.6),0 80px 110px -60px rgba(0,140,100,.55)}
 .checkpoint{margin-top:44px}
 
+
+/* =========================================================
+   Colour-bloom shadows (the "dynamic shadow" technique):
+   the colour is not a box-shadow. A multi-colour gradient sits
+   behind each card, inset and pushed down, blurred hard. The
+   card itself keeps only a tiny neutral contact shadow.
+   ========================================================= */
+.lift{position:relative;isolation:isolate;display:flex;flex-direction:column}
+.lift>:not(.glow){position:relative;z-index:1;flex:1}
+.lift-vs{flex:1}
+.glow{position:absolute;z-index:0;left:10%;right:10%;top:30%;bottom:-2%;border-radius:48px;background:var(--g);
+  filter:blur(38px) saturate(1.35);opacity:0;transform:translateY(26px) scale(.9);pointer-events:none;
+  transition:opacity 1s var(--e-out),transform 1s var(--e-out)}
+.lift>.in~.glow,.lift>.vid~.glow,.lift-p>.pcard.in~.glow{opacity:.85;transform:translateY(22px) scale(.94)}
+@media (hover:hover){.lift:hover>.glow{opacity:1;transform:translateY(34px) scale(.98)}}
+.st,.vs,.vid,.pcard{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(16,18,15,.04),0 1px 2px rgba(16,18,15,.06),0 6px 14px -6px rgba(16,18,15,.12)!important}
+.pcard{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 2px rgba(16,18,15,.1),0 8px 18px -8px rgba(0,40,30,.35)!important}
+@media (hover:hover){.st:hover,.vs:hover{transform:translateY(-6px)}}
+.lift-v{max-width:720px}
+.minis{margin-top:30px}
+
 </style>
 </head>
 <body>
@@ -823,12 +844,12 @@ div.award{cursor:default}
 <div class="sec-top center" data-r><span class="pill">process</span><span class="pill ghost">one week, start to finish</span></div>
 <h2 class="h2 center split" data-split>Seven days, <span class="hl">start to finish.</span></h2>
 <div class="stgrid">
-<article class="st" id="st1" data-r style="--bg:var(--butter);--d:0"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>01</b></span><span class="pill">days 1–3</span><h3>Kickoff and two directions</h3><p>You tell me about your business, your customers and what bothers you about your current look. I study your market, then show you two directions on a live call.</p>
-<span class="viz" aria-hidden="true"><span class="vz-bar"><span class="vz-dot"></span><span class="mono">live call · day 3</span></span><span class="vz-two"><span class="vz-opt vz-a" style="background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt=""><span class="mono">direction a</span></span><span class="vz-opt vz-b" style="background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt=""><span class="mono" style="color:#fff">direction b</span><span class="vz-check">✓ picked</span></span></span></span></article>
-<article class="st" id="st2" data-r style="--bg:var(--pink);--d:150"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>02</b></span><span class="pill">days 4–5</span><h3>The full system</h3><p>I turn that direction into the full system of logo, colours and type, with two rounds of revisions. You reply within a few hours on each round.</p>
-<span class="viz vz-sys" aria-hidden="true"><span class="vz-logo"><img src="/sprint/a/5s0t0logo.jpg" alt=""></span><span class="vz-col"><span class="vz-sw"><i style="background:#D2FD94;--k:0"></i><i style="background:#01262F;--k:1"></i><i style="background:#E2E9D8;--k:2"></i><i style="background:#93A790;--k:3"></i></span><span class="vz-type"><b>Aa</b><span class="mono">headings · body</span></span><span class="vz-revs"><span class="mono">rev 1 ✓</span><span class="mono">rev 2 ✓</span></span></span></span></article>
-<article class="st" id="st3" data-r style="--bg:var(--sky);--d:300"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>03</b></span><span class="pill">days 6–7</span><h3>Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p>
-<span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file" style="--k:0;--c:#FF9A00"><span class="fi"><b>AI</b></span><span class="mono">logo.ai</span></span><span class="vz-file" style="--k:1;--c:#00674F"><span class="fi"><b>SVG</b></span><span class="mono">logo.svg</span></span><span class="vz-file" style="--k:2;--c:#4DA3FF"><span class="fi"><b>PNG</b></span><span class="mono">logo.png</span></span><span class="vz-file" style="--k:3;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">guide.pdf</span></span><span class="vz-file" style="--k:4;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">cards.pdf</span></span><span class="vz-file" style="--k:5;--c:#7A7D74"><span class="fi"><b>ZIP</b></span><span class="mono">social.zip</span></span></span></span></article>
+<div class="lift"><article class="st" id="st1" data-r style="--bg:var(--butter);--d:0"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>01</b></span><span class="pill">days 1–3</span><h3>Kickoff and two directions</h3><p>You tell me about your business, your customers and what bothers you about your current look. I study your market, then show you two directions on a live call.</p>
+<span class="viz" aria-hidden="true"><span class="vz-bar"><span class="vz-dot"></span><span class="mono">live call · day 3</span></span><span class="vz-two"><span class="vz-opt vz-a" style="background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt=""><span class="mono">direction a</span></span><span class="vz-opt vz-b" style="background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt=""><span class="mono" style="color:#fff">direction b</span><span class="vz-check">✓ picked</span></span></span></span></article><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#FFE07A,#D4F25C 45%,#7FDCB0)"></i></div>
+<div class="lift"><article class="st" id="st2" data-r style="--bg:var(--pink);--d:150"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>02</b></span><span class="pill">days 4–5</span><h3>The full system</h3><p>I turn that direction into the full system of logo, colours and type, with two rounds of revisions. You reply within a few hours on each round.</p>
+<span class="viz vz-sys" aria-hidden="true"><span class="vz-logo"><img src="/sprint/a/5s0t0logo.jpg" alt=""></span><span class="vz-col"><span class="vz-sw"><i style="background:#D2FD94;--k:0"></i><i style="background:#01262F;--k:1"></i><i style="background:#E2E9D8;--k:2"></i><i style="background:#93A790;--k:3"></i></span><span class="vz-type"><b>Aa</b><span class="mono">headings · body</span></span><span class="vz-revs"><span class="mono">rev 1 ✓</span><span class="mono">rev 2 ✓</span></span></span></span></article><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#D4F25C,#7FDCB0 50%,#5CC8F0)"></i></div>
+<div class="lift"><article class="st" id="st3" data-r style="--bg:var(--sky);--d:300"><span class="st-head" aria-hidden="true"><i></i></span><span class="st-num"><em>step</em><b>03</b></span><span class="pill">days 6–7</span><h3>Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p>
+<span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file" style="--k:0;--c:#FF9A00"><span class="fi"><b>AI</b></span><span class="mono">logo.ai</span></span><span class="vz-file" style="--k:1;--c:#00674F"><span class="fi"><b>SVG</b></span><span class="mono">logo.svg</span></span><span class="vz-file" style="--k:2;--c:#4DA3FF"><span class="fi"><b>PNG</b></span><span class="mono">logo.png</span></span><span class="vz-file" style="--k:3;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">guide.pdf</span></span><span class="vz-file" style="--k:4;--c:#E5322D"><span class="fi"><b>PDF</b></span><span class="mono">cards.pdf</span></span><span class="vz-file" style="--k:5;--c:#7A7D74"><span class="fi"><b>ZIP</b></span><span class="mono">social.zip</span></span></span></span></article><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#3DBE8E,#12936E 45%,#5CC8F0)"></i></div>
 </div>
 <div class="checkpoint" data-r><span class="cp-dot">D3</span><span class="cp-t"><b>Day 3 is the checkpoint.</b> You approve a direction, then pay the second half.</span><svg class="wire2" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 20 C 40 0, 80 40, 118 20" fill="none" stroke-width="2"/></svg><a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="process">Book a call <span class="ar">→</span></a></div>
 </div>
@@ -842,10 +863,10 @@ div.award{cursor:default}
 <p class="lead" data-r style="--d:200">A brand designer with 9+ years of work, from the first call to the final files. No hand-offs, no juniors, no surprise invoices.</p>
 <div class="chips"><span class="chip" data-r="pop" style="--d:300">9+ years</span><span class="chip" data-r="pop" style="--d:380">Dribbble Select</span><span class="chip" data-r="pop" style="--d:460">reply in 24h</span><span class="chip" data-r="pop" style="--d:540">PayPal, USD</span></div>
 </div>
-<button type="button" class="vid" id="vid" data-r="tilt" style="--d:150" aria-label="Watch why clients hire me, 1 minute">
+<div class="lift lift-v"><button type="button" class="vid" id="vid" data-r="tilt" style="--d:150" aria-label="Watch why clients hire me, 1 minute">
 <img src="/sprint/a/41843aaad2.jpg" alt="" loading="lazy" width="1280" height="720">
 <span class="vid-badge"><svg class="ring" viewBox="0 0 132 132" width="132" height="132" aria-hidden="true"><defs><path id="ring2" d="M66 66m-50 0a50 50 0 1 1 100 0a50 50 0 1 1 -100 0"/></defs><circle cx="66" cy="66" r="64" fill="#D4F25C"/><text font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="700" letter-spacing="2" fill="#10120F"><textPath href="#ring2">WATCH WHY CLIENTS HIRE ME • 1 MIN • </textPath></text></svg><span class="vid-play"><svg width="18" height="18" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#D4F25C"/></svg></span></span>
-</button>
+</button><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#FF7A3D,#FFC2DA 50%,#D4F25C)"></i></div>
 </div>
 </section>
 
@@ -854,7 +875,7 @@ div.award{cursor:default}
 <div class="sec-top center" data-r><span class="pill">price</span><span class="pill ghost">no hourly rates, no surprises</span></div>
 <h2 class="h2 center split" data-split>One sprint, <span class="hl">one fixed price.</span></h2>
 <div class="pgrid">
-<div class="pcard" id="pcard" data-r>
+<div class="lift lift-p"><div class="pcard" id="pcard" data-r>
 <span class="p-sticker">founding · only 3 spots</span>
 <span class="pill lime">brand identity sprint</span>
 <p class="p-price"><span class="p-num" id="pnum">$1,500</span><s class="p-was">$2,500</s></p>
@@ -865,12 +886,12 @@ div.award{cursor:default}
 <a class="b b-ghost b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="price">Book a call first</a>
 </div>
 <p class="p-safe"><span class="tick">✓</span>Don't love either direction on Day 3? I make new ones at no extra cost. After you pay, I email you within 24 hours to set your kickoff.</p>
-</div>
+</div><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#00674F,#3DBE8E 45%,#D4F25C)"></i></div>
 <div class="pside">
-<div class="vs" id="vs" data-r style="--d:150">
+<div class="lift lift-vs"><div class="vs" id="vs" data-r style="--d:150">
 <span class="pill">next to an agency</span>
 <div class="vs-grid"><span class="mono vs-h">agency</span><span class="mono vs-h vs-me">this sprint</span><s class="vs-old r1">$10,000+</s><b class="vs-new r1">$2,500</b><s class="vs-old r2">8–12 weeks</s><b class="vs-new r2">7 days</b><s class="vs-old r3">a team</s><b class="vs-new r3">just me</b></div>
-</div>
+</div><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#D4F25C,#7FDCB0 55%,#5CC8F0)"></i></div>
 <div class="minis">
 <div class="mini" data-r style="--bg:var(--pink);--d:450"><b>+$1,000</b><span>A one-page site on your new brand, in week two.</span></div>
 </div>
