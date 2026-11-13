@@ -1021,6 +1021,19 @@ div.award{cursor:default}
 @media (prefers-reduced-motion:reduce){.rv-card{--p:1!important}}
 .rv-css .rv-stick{background:radial-gradient(60% 45% at 50% 100%,rgba(255,255,255,.85),rgba(120,110,255,.6) 35%,rgba(255,79,154,.25) 60%,transparent 80%)}
 
+/* CTA v2: ink pill, thin gradient rim, soft colour glow below. Colour as an accent, not the fill. */
+.b-color{animation:none!important;color:#fff;
+  background:radial-gradient(120% 140% at 50% -10%,#2E3038 0%,#15161B 55%,#0D0E12 100%) padding-box,
+             linear-gradient(90deg,#5B7CFF,#9B6BFF,#FF6FA8,#FF8A5C) border-box!important;
+  border:1.5px solid transparent!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),
+    -12px 14px 26px -18px rgba(91,124,255,.55),0 18px 30px -20px rgba(155,107,255,.5),12px 14px 26px -18px rgba(255,138,92,.55)!important}
+.b-color::before{display:none!important}
+.b-color::after{background:radial-gradient(140px circle at var(--mx) var(--my),rgba(170,150,255,.22),transparent 70%)!important}
+.b-color .ar{background:rgba(255,255,255,.12)!important}
+.b-color .bolt path{fill:#B7A4FF}
+@media (hover:hover){.b-color:hover{--y:-2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),-16px 20px 32px -18px rgba(91,124,255,.6),0 26px 40px -22px rgba(155,107,255,.55),16px 20px 32px -18px rgba(255,138,92,.6)!important}}
+
 </style>
 </head>
 <body>
