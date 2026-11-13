@@ -1105,6 +1105,42 @@ div.award{cursor:default}
 .tg .tg-sk path:first-child{stroke-dashoffset:0;animation:sk 1.6s linear infinite}
 @keyframes sk{to{stroke-dashoffset:-12.4}}
 
+/* =========================================================
+   Work: a bento of real identity boards
+   ========================================================= */
+.work-head{display:grid;gap:18px;margin-bottom:34px}
+@media (min-width:1025px){.work-head{grid-template-columns:1.1fr .9fr;align-items:end;gap:60px}.work-head .lead{margin:0 0 6px}}
+.cases{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:641px){.cases{grid-template-columns:1fr 1fr}.case.big{grid-column:1 / -1}}
+@media (min-width:1025px){.cases{grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:18px}.case.big{grid-column:span 2;grid-row:span 2}}
+.case{position:relative;display:block;overflow:hidden;border-radius:28px;aspect-ratio:4/3;background:#E7E5DE;text-decoration:none;isolation:isolate;
+  box-shadow:0 0 0 1px rgba(16,18,15,.05),0 10px 24px -14px rgba(16,18,15,.25);transition:transform .5s var(--e-out),box-shadow .5s var(--e-out)}
+.case img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .9s var(--e-out)}
+.case-l{position:absolute;left:12px;bottom:12px;z-index:2;display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;
+  background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--ink);font-size:var(--fs-xs);
+  box-shadow:0 6px 16px -8px rgba(16,18,15,.35);transform:translateY(4px);opacity:.96;transition:transform .45s var(--e-out)}
+.case-l b{font:500 var(--fs-s)/1 var(--display)}
+.case-l span{color:var(--muted)}
+@media (hover:hover){
+  .case:hover{transform:translateY(-4px);box-shadow:0 0 0 1px rgba(16,18,15,.05),var(--ai-shadow)}
+  .case:hover img{transform:scale(1.04)}
+  .case:hover .case-l{transform:none}
+}
+
+/* =========================================================
+   Footer: a multicolour light follows the pointer behind the content
+   ========================================================= */
+.foot-panel{--fx:50%;--fy:60%;isolation:isolate}
+.foot-panel::before{content:"";position:absolute;inset:-20%;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s var(--e-out);
+  background:
+    radial-gradient(240px 240px at calc(var(--fx) - 120px) var(--fy),rgba(59,107,255,.55),transparent 70%),
+    radial-gradient(260px 260px at calc(var(--fx) + 110px) calc(var(--fy) + 40px),rgba(255,107,61,.45),transparent 70%),
+    radial-gradient(300px 300px at var(--fx) calc(var(--fy) - 50px),rgba(192,76,242,.55),transparent 70%),
+    radial-gradient(200px 200px at calc(var(--fx) + 40px) calc(var(--fy) + 90px),rgba(255,79,154,.45),transparent 70%);
+  filter:blur(30px)}
+@media (hover:hover){.foot-panel:hover::before{opacity:1}}
+.foot-panel>*{position:relative;z-index:1}
+
 </style>
 </head>
 <body>
@@ -1156,16 +1192,15 @@ div.award{cursor:default}
 
 <main id="main">
 <section id="work" class="sec">
-<div class="w work-row">
+<div class="w">
+<div class="work-head">
 <div>
 <div class="sec-top" data-r><span class="pill">work</span><span class="pill ghost">recent brand identities</span></div>
 <h2 class="h2 split" data-split>Brands I made <span class="hl">look the part.</span></h2>
-<p class="lead" data-r style="--d:200">Logos, colours, type and full systems for coaches, barbershops, supplement brands and apps. Point at the pocket, it's full.</p>
 </div>
-<div class="pocket" id="pocket" role="img" aria-label="A pocket full of brand identities I designed">
-<div class="pk-cards"><img class="pk-card" src="/sprint/a/m/ac004b7047.jpg" alt="" loading="lazy" style="--r:-9deg;--x:-170px;--xm:-90px;--k:0"><img class="pk-card" src="/sprint/a/m/72b3ae1b31.jpg" alt="" loading="lazy" style="--r:4deg;--x:-60px;--xm:-32px;--k:1"><img class="pk-card" src="/sprint/a/m/53d0ac725c.jpg" alt="" loading="lazy" style="--r:-3deg;--x:60px;--xm:32px;--k:2"><img class="pk-card" src="/sprint/a/m/2bbbe5a90d.jpg" alt="" loading="lazy" style="--r:8deg;--x:170px;--xm:90px;--k:3"></div>
-<div class="pk-front"><span class="mono pk-list">periodic / steven soto / tmj / gruite</span></div>
+<p class="lead" data-r style="--d:200">Logos, colours, type and full systems for coaches, barbershops, supplement brands and apps. Each one is a complete identity, not just a logo.</p>
 </div>
+<div class="cases"><a class="case big" href="#book" data-r style="--d:0"><img src="/sprint/a/72b3ae1b31.jpg" alt="Steven Soto brand identity" loading="lazy" width="1400" height="1050"><span class="case-l"><b>Steven Soto</b><span>personal brand</span></span></a><a class="case " href="#book" data-r style="--d:80"><img src="/sprint/a/53d0ac725c.jpg" alt="Timothy McIntosh Jr. brand identity" loading="lazy" width="1400" height="1050"><span class="case-l"><b>Timothy McIntosh Jr.</b><span>barbershop</span></span></a><a class="case " href="#book" data-r style="--d:160"><img src="/sprint/a/ac004b7047.jpg" alt="Periodic brand identity" loading="lazy" width="1400" height="1050"><span class="case-l"><b>Periodic</b><span>supplements · concept</span></span></a><a class="case " href="#book" data-r style="--d:240"><img src="/sprint/a/2bbbe5a90d.jpg" alt="Gruite brand identity" loading="lazy" width="1400" height="1050"><span class="case-l"><b>Gruite</b><span>adaptogens · concept</span></span></a><a class="case " href="#book" data-r style="--d:320"><img src="/sprint/a/64dd9ce8ff.jpg" alt="ReEarth brand identity" loading="lazy" width="1400" height="1050"><span class="case-l"><b>ReEarth</b><span>landscaping</span></span></a></div>
 </div>
 </section>
 
@@ -1606,6 +1641,14 @@ div.award{cursor:default}
     if(reduce){tg.classList.add('done');return}
     function cycle(){tg.classList.remove('done');setTimeout(function(){tg.classList.add('done')},900)}
     setTimeout(function(){cycle();setInterval(cycle,5200)},1800);
+  })();
+
+
+  /* ---------- footer: light follows the pointer ---------- */
+  (function(){var fp=$('.foot-panel');if(!fp||reduce)return;var raf=0,x=0,y=0,cx=0,cy=0;
+    function tick(){cx+=(x-cx)*.12;cy+=(y-cy)*.12;fp.style.setProperty('--fx',cx.toFixed(1)+'px');fp.style.setProperty('--fy',cy.toFixed(1)+'px');
+      raf=(Math.abs(x-cx)>.5||Math.abs(y-cy)>.5)?requestAnimationFrame(tick):0}
+    fp.addEventListener('pointermove',function(e){var r=fp.getBoundingClientRect();x=e.clientX-r.left;y=e.clientY-r.top;if(!cx&&!cy){cx=x;cy=y}if(!raf)raf=requestAnimationFrame(tick)});
   })();
 
   /* ---------- nav: hides going down, returns going up; marks the section ---------- */
