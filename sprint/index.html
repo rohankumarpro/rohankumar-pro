@@ -1091,6 +1091,19 @@ div.award{cursor:default}
 @media (min-width:861px){.aw-t{font-size:var(--fs-s)}.aw-t b{font-size:var(--fs-base)}.award{padding:18px 24px 12px!important}}
 @media (prefers-reduced-motion:reduce){.aw-ball{animation:none}}
 .award svg.aw-ball{width:30px!important;height:30px!important;flex:none}.award svg.aw-ball path{stroke:#C32361!important}
+/* business switch: idea (sketch) → logo */
+.tg{background:#E2DFD6!important;width:1.45em;transition:background .6s var(--e-io)!important;animation:none!important}
+.tg::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--mc);opacity:0;transition:opacity .7s var(--e-io)}
+.tg.done::before{opacity:1}
+.tg i{z-index:1;width:.54em!important;height:.54em!important;top:.06em!important;left:.06em!important;background:#fff;
+  transform:translateX(0)!important;transition:transform .8s cubic-bezier(.65,0,.25,1.15)!important;display:grid;place-items:center;overflow:hidden}
+.tg.done i{transform:translateX(.79em)!important}
+.tg i svg{position:absolute;inset:6%;width:88%;height:88%;transition:opacity .45s,transform .6s var(--e-spring)}
+.tg .tg-lg{opacity:0;transform:scale(.4) rotate(-40deg)}
+.tg.done .tg-lg{opacity:1;transform:none;transition-delay:.45s}
+.tg.done .tg-sk{opacity:0;transform:scale(1.3);transition-delay:.25s}
+.tg .tg-sk path:first-child{stroke-dashoffset:0;animation:sk 1.6s linear infinite}
+@keyframes sk{to{stroke-dashoffset:-12.4}}
 
 </style>
 </head>
@@ -1113,7 +1126,7 @@ div.award{cursor:default}
 <h1 class="h1" id="h1" aria-label="Make your brand look as good as your business already is.">
 <span class="ln lm"><span class="li" style="--d:250"><span aria-hidden="true">Make your </span><span class="swrap"><button type="button" class="sw" id="bsw" role="switch" aria-checked="false" aria-label="Brand switch"><span class="knob"><img src="/sprint/a/8fa7ebfb6a.png" alt=""></span></button><span class="hint" aria-hidden="true"><em>flip it</em><svg viewBox="0 0 14 14"><path d="M7 1v11M2.5 7.5 7 12l4.5-4.5" fill="none" stroke="#10120F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><span aria-hidden="true"> <span class="bw"><i style="--i:0">b</i><i style="--i:1">r</i><i style="--i:2">a</i><i style="--i:3">n</i><i style="--i:4">d</i></span></span></span></span>
 <span class="ln lm" aria-hidden="true"><span class="li" style="--d:370">look as good as your</span></span>
-<span class="ln" aria-hidden="true"><span class="lm" style="display:inline-block"><span class="li" style="--d:490">business <span class="tg"><i></i></span> <span class="end">already is.</span></span></span><span class="end-anchor" style="position:relative;display:inline-block;width:0;height:.8em;vertical-align:baseline"><svg class="wire" viewBox="0 0 80 118" aria-hidden="true"><path d="M20 2 C 70 20, 76 70, 34 112" fill="none" stroke="#10120F" stroke-width="2"/></svg><span class="tag tag-r"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1l11 6-5 1.5L6 14z" fill="#10120F"/></svg><em>your brand, 7 days later</em></span></span></span>
+<span class="ln" aria-hidden="true"><span class="lm" style="display:inline-block"><span class="li" style="--d:490">business <span class="tg" title="idea to logo"><i><svg class="tg-sk" viewBox="0 0 40 40" aria-hidden="true"><path d="M20.5 6.2c6.8-.4 13 4.6 13.4 12.6.4 7.6-5.6 14.1-13.5 14.3C12.7 33.5 6.3 27.6 6.1 20 5.9 13 11 6.6 19.2 6.4" fill="none" stroke="#6B6D74" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3.2 3"/><path d="M14 25.5 20 13l6.2 12.6M16.4 21h7.3" fill="none" stroke="#6B6D74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="tg-lg" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="tglg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B6BFF"/><stop offset=".5" stop-color="#C04CF2"/><stop offset="1" stop-color="#FF6B3D"/></linearGradient></defs><circle cx="20" cy="20" r="14" fill="url(#tglg)"/><path d="M14.2 26.4 20 13.2l5.8 13.2M16.6 21.4h6.8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span> <span class="end">already is.</span></span></span><span class="end-anchor" style="position:relative;display:inline-block;width:0;height:.8em;vertical-align:baseline"><svg class="wire" viewBox="0 0 80 118" aria-hidden="true"><path d="M20 2 C 70 20, 76 70, 34 112" fill="none" stroke="#10120F" stroke-width="2"/></svg><span class="tag tag-r"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1l11 6-5 1.5L6 14z" fill="#10120F"/></svg><em>your brand, 7 days later</em></span></span></span>
 <svg class="spark s1" width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><path d="M19 3c1 9 4 13 16 16-12 3-15 7-16 16-1-9-4-13-16-16 12-3 15-7 16-16z" fill="none" stroke="#10120F" stroke-width="1.8" stroke-linejoin="round"/></svg>
 <svg class="spark s2" width="44" height="30" viewBox="0 0 44 30" aria-hidden="true"><path d="M3 20c6-14 14-14 12-4s10 6 12-6 10 4 14-2" fill="none" stroke="#10120F" stroke-width="1.8" stroke-linecap="round"/></svg>
 </h1>
@@ -1584,6 +1597,15 @@ div.award{cursor:default}
     }
     lay(); if(d.fonts&&d.fonts.ready) d.fonts.ready.then(lay);
     W.addEventListener('resize',function(){clearTimeout(lay.t);lay.t=setTimeout(lay,120)});
+  })();
+
+
+  /* ---------- business switch: a pencil sketch slides over and becomes a finished mark ---------- */
+  (function(){
+    var tg=$('.tg'); if(!tg) return;
+    if(reduce){tg.classList.add('done');return}
+    function cycle(){tg.classList.remove('done');setTimeout(function(){tg.classList.add('done')},900)}
+    setTimeout(function(){cycle();setInterval(cycle,5200)},1800);
   })();
 
   /* ---------- nav: hides going down, returns going up; marks the section ---------- */
