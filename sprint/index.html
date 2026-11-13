@@ -89,10 +89,13 @@ button{font:inherit;color:inherit}
 .nav.hide{transform:translateY(-120%)}
 .nav-in{pointer-events:auto;position:relative;display:flex;align-items:center;gap:2px;padding:5px;border-radius:999px;background:rgba(255,255,255,.82);
   -webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),var(--sh-1)}
-.brand{display:inline-flex;align-items:center;gap:8px;padding:0 10px 0 2px;text-decoration:none;min-height:40px}
-.brand img:first-child{width:34px;height:34px;transition:transform .6s var(--e-spring)}
-.brand:hover img:first-child{transform:rotate(-360deg)}
-.brand img:last-child{height:13px;width:auto}
+.brand{display:inline-flex;align-items:center;padding:0 6px 0 2px;text-decoration:none;min-height:40px;perspective:300px}
+.coin{position:relative;display:block;width:36px;height:36px;transform-style:preserve-3d;animation:coin 9s var(--e-io) 2.5s infinite}
+.coin img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.coin .cb{transform:rotateY(180deg) scale(1.06)}
+.brand:hover .coin{animation-play-state:paused}
+@keyframes coin{0%,40%{transform:rotateY(0)}48%,88%{transform:rotateY(180deg)}96%,100%{transform:rotateY(360deg)}}
+@media (prefers-reduced-motion:reduce){.coin{animation:none}.coin .cb{transform:none;opacity:0;transition:opacity .2s}.brand:hover .coin .cb{opacity:1}}
 .nl{display:none;position:relative;z-index:1;font-size:14px;font-weight:500;text-decoration:none;color:var(--ink-2);padding:0 14px;min-height:40px;align-items:center;border-radius:999px;transition:color var(--t-1)}
 .nl:hover,.nl.on{color:var(--ink)}
 .nav-ind{display:none;position:absolute;z-index:0;top:5px;height:40px;border-radius:999px;background:#ECEAE3;opacity:0;transition:transform var(--t-2) var(--e-out),width var(--t-2) var(--e-out),opacity var(--t-1)}
@@ -350,7 +353,7 @@ div.award{cursor:default}
    ========================================================= */
 .btnrow .b{flex:1 1 auto}
 @media (max-width:380px){
-  .brand img:last-child{display:none}
+  
   .pk-card{width:160px;margin-left:-80px;--xx:calc(var(--xm)*.8)}
 }
 @media (min-width:641px){
@@ -524,7 +527,7 @@ div.award{cursor:default}
 <header class="nav" id="nav">
 <nav class="nav-in" aria-label="Main">
 <span class="nav-ind" aria-hidden="true"></span>
-<a class="brand" href="#top" aria-label="Rohan Kumar, back to top"><img src="/sprint/a/8fa7ebfb6a.png" alt="" width="34" height="34"><img src="/sprint/a/701b6501d2.png" alt="Rohan" width="65" height="13"></a>
+<a class="brand" href="#top" aria-label="Rohan Kumar, back to top"><span class="coin"><img class="cf" src="/sprint/a/8fa7ebfb6a.png" alt="" width="36" height="36"><img class="cb" src="/sprint/a/654ab10564.jpg" alt="" width="36" height="36"></span></a>
 <a class="nl" href="#work">Work</a><a class="nl" href="#week">Process</a><a class="nl" href="#price">Price</a><a class="nl" href="#faq">FAQ</a>
 <a class="b b-dark nav-cta" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" data-cta="nav">Book a call</a>
 </nav>
