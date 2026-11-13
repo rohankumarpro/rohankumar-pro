@@ -857,6 +857,27 @@ button{font:inherit;color:inherit}
   W.addEventListener('resize',onScroll);
   onScroll();
 })();
+/* ---------- Microsoft Clarity: same project as the rest of rohankumar.pro.
+   Only on the live domain, never for the owner (noTrack), tagged page=sprint,
+   with one event per button so each path (call / pay) can be counted. ---------- */
+(function(){
+  var d=document,W=window;
+  if(!/^(www\.)?rohankumar\.pro$/.test(location.hostname)) return;
+  try{ if(localStorage.getItem('noTrack')==='1') return; }catch(e){}
+  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(W,d,'clarity','script','yrz7r3hbnx');
+  function cl(){try{W.clarity.apply(null,arguments)}catch(e){}}
+  cl('set','page','sprint');
+  d.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('[data-cta]'); if(!a) return;
+    var k=a.getAttribute('data-cta'); cl('event',(/^pay/.test(k)?'pay-':'call-')+k);
+  },true);
+  d.querySelectorAll('.qa-q').forEach(function(b,i){b.addEventListener('click',function(){cl('event','faq-'+(i+1))})});
+  var seen={};
+  var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting&&!seen[x.target.id]){seen[x.target.id]=1;cl('event','seen-'+x.target.id)}})},{threshold:.4});
+  ['work','week','rohan','price','faq','book'].forEach(function(id){var s=d.getElementById(id);s&&io.observe(s)});
+})();
 </script>
 </body>
 </html>
