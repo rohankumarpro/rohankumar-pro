@@ -650,7 +650,23 @@ div.award{cursor:default}
 .mono,.pill{letter-spacing:.01em}
 /* price side column: the comparison card takes the height, the add-on stays its own size */
 .minis{flex:none}
-@media (min-width:1025px){.vs{flex:1;justify-content:space-between;padding:30px}.vs-old,.vs-new{font-size:40px!important}.vs-grid{row-gap:14px}}
+@media (min-width:1025px){.vs{flex:1;justify-content:center;gap:26px;padding:30px}.vs-old,.vs-new{font-size:40px!important}.vs-grid{row-gap:14px}}
+
+/* =========================================================
+   Bezel cards: a white card seated in a soft grey frame,
+   like a device widget. Used where a card stands on its own.
+   ========================================================= */
+.st,.vs,.vid{--bz:12px;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 0 0 1px rgba(16,18,15,.05),0 14px 26px -16px rgba(16,18,15,.28),
+    0 0 0 var(--bz) #E9E8E3,0 0 0 calc(var(--bz) + 1px) rgba(16,18,15,.06),0 calc(var(--bz) + 18px) 40px -22px rgba(16,18,15,.3)}
+.stgrid{gap:44px}
+.pgrid{gap:40px}
+.vs{margin:12px 12px 0}
+.vid{margin:12px}
+@media (hover:hover){.st:hover{transform:translateY(-4px)}}
+@media (min-width:1025px){.stgrid{gap:40px}}
+.minis{margin-top:14px}
+.minis .mini{margin:0 12px}
 
 </style>
 </head>
@@ -982,7 +998,7 @@ div.award{cursor:default}
   var vbtn=$('#vid'), vm=$('#vmodal'), vf=$('.vm-frame',vm), lastFocus=null;
   function vOpen(){
     lastFocus=d.activeElement; vm.hidden=false;
-    vf.innerHTML='<iframe src="https://fast.wistia.net/embed/iframe/uts63dyr58?autoPlay=true&playsinline=true&videoFoam=false" title="Why clients hire Rohan" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    vf.innerHTML='<iframe src="https://fast.wistia.net/embed/iframe/uts63dyr58?autoPlay=true&muted=true&silentAutoPlay=allow&playsinline=true&videoFoam=false" title="Why clients hire Rohan" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     requestAnimationFrame(function(){vm.classList.add('on')}); $('.vm-x',vm).focus(); d.body.style.overflow='hidden';
     try{W.clarity('event','video-open')}catch(e){}
   }
