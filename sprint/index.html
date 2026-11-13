@@ -725,6 +725,31 @@ div.award{cursor:default}
 @media (hover:hover){.st:hover{box-shadow:0 0 0 1px rgba(16,18,15,.04),0 2px 6px -2px var(--glow1),0 40px 70px -24px var(--glow2)}}
 .stgrid{gap:28px}.pgrid{gap:28px}@media (min-width:1025px){.stgrid{gap:28px}}
 
+/* lifted cards: a stack of soft neutral shadows (contact → ambient) plus a wide
+   coloured bloom far below, so the card reads as floating well above the page */
+.st,.vs,.vid{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 0 0 1px rgba(16,18,15,.035),
+    0 1px 1px rgba(16,18,15,.03),
+    0 2px 2px rgba(16,18,15,.03),
+    0 4px 4px rgba(16,18,15,.03),
+    0 8px 8px rgba(16,18,15,.03),
+    0 16px 16px rgba(16,18,15,.03),
+    0 32px 32px -8px rgba(16,18,15,.04),
+    0 48px 70px -34px var(--glow2),
+    0 80px 110px -60px var(--glow2);
+  transition:transform .6s var(--e-out),box-shadow .6s var(--e-out)}
+.st{--glow2:color-mix(in srgb,var(--c2) 85%,transparent)}
+.vs{--glow2:rgba(160,210,50,.7)}
+.vid{--glow2:rgba(255,120,60,.55)}
+@media (hover:hover){
+  .st:hover,.vs:hover{transform:translateY(-8px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px rgba(16,18,15,.035),0 2px 2px rgba(16,18,15,.03),0 4px 4px rgba(16,18,15,.03),0 8px 8px rgba(16,18,15,.03),0 16px 16px rgba(16,18,15,.03),0 32px 32px -8px rgba(16,18,15,.04),0 64px 80px -34px var(--glow2),0 100px 120px -60px var(--glow2)}}
+.stgrid{padding-bottom:30px}
+.pcard,.checkpoint{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 1px rgba(16,18,15,.04),0 2px 2px rgba(16,18,15,.04),0 4px 4px rgba(16,18,15,.04),0 8px 8px rgba(16,18,15,.04),0 16px 16px rgba(16,18,15,.04),0 48px 70px -34px rgba(0,103,79,.6),0 80px 110px -60px rgba(0,140,100,.55)}
+.checkpoint{margin-top:44px}
+
 </style>
 </head>
 <body>
