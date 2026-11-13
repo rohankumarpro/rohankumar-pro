@@ -1426,6 +1426,15 @@ div.award{cursor:default}
   :root[data-theme=dark] .stats-sec.deck .bx[data-pos="2"]{filter:blur(3px) brightness(1.25)}
   :root[data-theme=dark] .stats-sec.deck .bx[data-pos="3"]{filter:blur(5px) brightness(1.35)}
 }
+/* hero fan: the tapped card comes to the front and lifts */
+.fc{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.fan .fc.top{z-index:30!important;--lift:30px}
+@media (max-width:820px){.fan .fc,.pk-card{border-radius:16px!important}}
+/* phones: full-width arrow buttons centre text + arrow together, no reserved empty side */
+@media (max-width:820px){
+  .btnrow .b:has(.ar),.pcard .b:has(.ar),.cta .b:has(.ar),.checkpoint .b:has(.ar){padding-left:24px!important;padding-right:calc(var(--ins) + 4px)!important;gap:12px!important;justify-content:center!important}
+  .btnrow .b:has(.ar) .ar,.pcard .b:has(.ar) .ar,.cta .b:has(.ar) .ar,.checkpoint .b:has(.ar) .ar{position:static!important;translate:none!important}
+}
 
 </style>
 </head>
@@ -1992,7 +2001,7 @@ div.award{cursor:default}
             set:function(v){on=v;try{localStorage.setItem('rk-sound',v?'on':'off')}catch(e){}}, isOn:function(){return on}};
   })();
   d.addEventListener('click',function(e){
-    var t=e.target.closest('.b,.cs-btn,.qa-q,.qa button,.vid,.vm-x,.nl,.brand,.case,.cs-slide,.snd');
+    var t=e.target.closest('.b,.fc,.cs-btn,.qa-q,.qa button,.vid,.vm-x,.nl,.brand,.case,.cs-slide,.snd');
     if(!t) return;
     if(t.matches('#bsw')) return;
     if(t.matches('.vid,[data-cal-link]')) FEEL.open(); else FEEL.tap();
@@ -2069,6 +2078,11 @@ if(mq.addEventListener)mq.addEventListener('change',upd);
 cards.forEach(function(c){c.addEventListener('click',function(){if(!mq.matches)return;var span=sec.offsetHeight-innerHeight,top=sec.getBoundingClientRect().top+scrollY,k=(cur+1)%n;
 scrollTo({top:top+span*(k+.5)/n,behavior:'smooth'})})});
 upd()})();
+/* ---------- hero fan: tap or click a card to bring it to the front ---------- */
+(function(){var fan=document.getElementById('fan');if(!fan)return;
+fan.addEventListener('click',function(e){var c=e.target.closest('.fc');if(!c)return;var was=c.classList.contains('top');
+fan.querySelectorAll('.fc.top').forEach(function(x){x.classList.remove('top')});if(!was)c.classList.add('top')});
+document.addEventListener('click',function(e){if(!e.target.closest('#fan'))fan.querySelectorAll('.fc.top').forEach(function(x){x.classList.remove('top')})})})();
 /* ---------- nav: hides going down, returns going up; marks the section ---------- */
   var nav=$('#nav'), ind=$('.nav-ind'), links=$$('.nl'), prevY=W.scrollY, ticking=false;
   var mbar=$('#mbar'), heroCta=$('#hero-cta'), book=$('#book'), foot=$('#foot');
