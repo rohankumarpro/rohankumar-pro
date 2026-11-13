@@ -1221,6 +1221,48 @@ div.award{cursor:default}
 .b:hover .ar svg{transform:translateX(2px)}
 .b:hover:has(.ar) .ar{transform:none}
 .checkpoint .b .ar{background:#0B0C0F!important;color:#fff!important}
+/* CTA disc: light colour bloom around it, strongest below (as if lit from above), soft and slow */
+.cta-glow{position:absolute;z-index:1;left:50%;top:570px;width:600px;height:600px;margin:-300px 0 0 -300px;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 200deg,#3B6BFF,#7B5CFF,#C04CF2,#FF4F9A,#FF6B3D,#FFA20A,#3B6BFF);
+  filter:blur(38px) saturate(1.1);opacity:.32;transform:translateY(22px) scale(1.02);animation:ctaglow 14s linear infinite}
+@keyframes ctaglow{to{rotate:360deg}}
+@media (min-width:641px){.cta-glow{top:560px;width:620px;height:620px;margin:-310px 0 0 -310px}}
+@media (min-width:1025px){.cta-glow{top:710px;width:880px;height:880px;margin:-440px 0 0 -440px;filter:blur(48px)}}
+.cta-disc{box-shadow:inset 0 2px 0 rgba(255,255,255,.95),0 0 0 1px rgba(16,18,15,.035),0 2px 4px rgba(16,18,15,.03),0 18px 36px -18px rgba(16,18,15,.12)!important}
+@media (prefers-reduced-motion:reduce){.cta-glow{animation:none}}
+.cta-glow{opacity:.5;transform:translateY(26px) scale(1.07)}
+/* hand-drawn "watch this" note pointing at the video (desktop, where there's room) */
+.watch-doodle{display:none}
+@media (min-width:1181px){
+  .lift-v{position:relative}
+  .watch-doodle{display:block;position:absolute;z-index:3;right:-150px;top:-96px;width:150px;pointer-events:none}
+  .watch-doodle em{position:absolute;right:-6px;top:0;font:500 var(--fs-m)/1 var(--display);font-style:normal;color:var(--ink);transform:rotate(-6deg);white-space:nowrap}
+  .watch-doodle svg{position:absolute;left:0;top:26px;width:110px;height:100px}
+  .wd-line{stroke-dasharray:140;stroke-dashoffset:140;transition:stroke-dashoffset 1.1s var(--e-io) .5s}
+  .wd-head{stroke-dasharray:44;stroke-dashoffset:44;transition:stroke-dashoffset .35s var(--e-out) 1.5s}
+  .watch-doodle em{opacity:0;transition:opacity .4s .3s,transform .6s var(--e-spring) .3s}
+  .lift-v:has(.vid.in) .wd-line,.lift-v:has(.vid.in) .wd-head{stroke-dashoffset:0}
+  .lift-v:has(.vid.in) .watch-doodle em{opacity:1}
+  .lift-v:has(.vid.in) .watch-doodle{animation:wdbob 3.2s ease-in-out 2.2s infinite}
+}
+@keyframes wdbob{50%{transform:translate(-4px,4px)}}
+@media (prefers-reduced-motion:reduce){.wd-line,.wd-head{stroke-dashoffset:0!important}.watch-doodle em{opacity:1!important}.watch-doodle{animation:none!important}}
+@media (min-width:1181px){
+  .lift.lift-v>.watch-doodle{position:absolute!important;z-index:4!important;right:-118px;top:-118px;width:150px;height:140px;flex:none}
+  .watch-doodle em{right:0;top:0}
+  .watch-doodle svg{left:6px;top:30px;width:104px;height:96px}
+}
+@media (max-width:1180px){
+  .lift.lift-v{position:relative}
+  .lift.lift-v>.watch-doodle{display:block;position:absolute!important;z-index:4!important;right:14px;top:-62px;width:160px;height:66px;pointer-events:none;flex:none}
+  .watch-doodle em{position:absolute;right:0;top:0;font:500 var(--fs-m)/1 var(--display);font-style:normal;color:var(--ink);transform:rotate(-6deg);white-space:nowrap;opacity:0;transition:opacity .4s .3s}
+  .watch-doodle svg{position:absolute;left:0;top:4px;width:64px;height:58px}
+  .wd-line{stroke-dasharray:140;stroke-dashoffset:140;transition:stroke-dashoffset 1.1s var(--e-io) .5s}
+  .wd-head{stroke-dasharray:44;stroke-dashoffset:44;transition:stroke-dashoffset .35s var(--e-out) 1.5s}
+  .lift-v:has(.vid.in) .wd-line,.lift-v:has(.vid.in) .wd-head{stroke-dashoffset:0}
+  .lift-v:has(.vid.in) .watch-doodle em{opacity:1}
+}
+@media (max-width:1180px) and (prefers-reduced-motion:reduce){.wd-line,.wd-head{stroke-dashoffset:0!important}.watch-doodle em{opacity:1!important}}
 
 </style>
 </head>
@@ -1307,7 +1349,7 @@ div.award{cursor:default}
 <p class="lead" data-r style="--d:200">A brand designer with 9+ years of work, from the first call to the final files. No hand-offs, no juniors, no surprise invoices.</p>
 <div class="chips"><span class="chip" data-r="pop" style="--d:300">9+ years</span><span class="chip" data-r="pop" style="--d:380">Dribbble Select</span><span class="chip" data-r="pop" style="--d:460">reply in 24h</span><span class="chip" data-r="pop" style="--d:540">PayPal, USD</span></div>
 </div>
-<div class="lift lift-v"><button type="button" class="vid" id="vid" data-r="tilt" style="--d:150" aria-label="Watch why clients hire me, 1 minute"><span class="vid-live" aria-hidden="true"></span><span class="vid-sound" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 5h2.5L8 2v10L4.5 9H2z" fill="currentColor"/><path d="M10 4.5c1 1.4 1 3.6 0 5M11.8 3c1.8 2.3 1.8 5.7 0 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Watch with sound</span>
+<div class="lift lift-v"><span class="watch-doodle" aria-hidden="true"><em>watch this</em><svg viewBox="0 0 120 110" fill="none" stroke="#111216" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path class="wd-line" d="M96 6C104 34 92 58 64 72 46 81 30 86 14 98"/><path class="wd-head" d="M13 80 13 99 32 99"/></svg></span><button type="button" class="vid" id="vid" data-r="tilt" style="--d:150" aria-label="Watch why clients hire me, 1 minute"><span class="vid-live" aria-hidden="true"></span><span class="vid-sound" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 5h2.5L8 2v10L4.5 9H2z" fill="currentColor"/><path d="M10 4.5c1 1.4 1 3.6 0 5M11.8 3c1.8 2.3 1.8 5.7 0 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Watch with sound</span>
 <img src="/sprint/a/41843aaad2.jpg" alt="" loading="lazy" width="1280" height="720">
 <span class="vid-badge"><svg class="ring" viewBox="0 0 132 132" width="132" height="132" aria-hidden="true"><defs><path id="ring2" d="M66 66m-50 0a50 50 0 1 1 100 0a50 50 0 1 1 -100 0"/></defs><circle cx="66" cy="66" r="64" fill="#D4F25C"/><text font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="700" letter-spacing="2" fill="#10120F"><textPath href="#ring2">WATCH WHY CLIENTS HIRE ME • 1 MIN • </textPath></text></svg><span class="vid-play"><svg width="18" height="18" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#D4F25C"/></svg></span></span>
 </button><i class="glow" aria-hidden="true" style="--g:linear-gradient(90deg,#0A84FF,#C04CF2 45%,#FF6B3D)"></i></div>
@@ -1366,7 +1408,7 @@ div.award{cursor:default}
 </section>
 
 <section id="book" class="cta">
-<div class="arc" aria-hidden="true"><div class="arc-spin"><span class="arc-card" style="--a:0.0deg"><img src="/sprint/a/m/arc-wuttaday.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:22.5deg"><img src="/sprint/a/m/arc-periodic.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:45.0deg"><img src="/sprint/a/m/arc-greenhouse.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:67.5deg"><img src="/sprint/a/m/arc-steven.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:90.0deg"><img src="/sprint/a/m/arc-ecosystem.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:112.5deg"><img src="/sprint/a/m/arc-timothy.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:135.0deg"><img src="/sprint/a/m/arc-rb.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:157.5deg"><img src="/sprint/a/m/arc-gruite.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:180.0deg"><img src="/sprint/a/m/arc-wagnum.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:202.5deg"><img src="/sprint/a/m/arc-bling.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:225.0deg"><img src="/sprint/a/m/arc-n.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:247.5deg"><img src="/sprint/a/m/arc-misfyt.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:270.0deg"><img src="/sprint/a/m/arc-s.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:292.5deg"><img src="/sprint/a/m/arc-tchoufa.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:315.0deg"><img src="/sprint/a/m/arc-abstract.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:337.5deg"><img src="/sprint/a/m/arc-reearth.jpg" alt="" loading="lazy" decoding="async"></span></div></div><div class="cta-disc" aria-hidden="true"></div>
+<div class="arc" aria-hidden="true"><div class="arc-spin"><span class="arc-card" style="--a:0.0deg"><img src="/sprint/a/m/arc-wuttaday.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:22.5deg"><img src="/sprint/a/m/arc-periodic.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:45.0deg"><img src="/sprint/a/m/arc-greenhouse.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:67.5deg"><img src="/sprint/a/m/arc-steven.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:90.0deg"><img src="/sprint/a/m/arc-ecosystem.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:112.5deg"><img src="/sprint/a/m/arc-timothy.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:135.0deg"><img src="/sprint/a/m/arc-rb.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:157.5deg"><img src="/sprint/a/m/arc-gruite.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:180.0deg"><img src="/sprint/a/m/arc-wagnum.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:202.5deg"><img src="/sprint/a/m/arc-bling.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:225.0deg"><img src="/sprint/a/m/arc-n.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:247.5deg"><img src="/sprint/a/m/arc-misfyt.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:270.0deg"><img src="/sprint/a/m/arc-s.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:292.5deg"><img src="/sprint/a/m/arc-tchoufa.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:315.0deg"><img src="/sprint/a/m/arc-abstract.jpg" alt="" loading="lazy" decoding="async"></span><span class="arc-card" style="--a:337.5deg"><img src="/sprint/a/m/arc-reearth.jpg" alt="" loading="lazy" decoding="async"></span></div></div><div class="cta-glow" aria-hidden="true"></div><div class="cta-disc" aria-hidden="true"></div>
 <div class="cta-in">
 <span class="chip2" data-r><svg class="dball" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#EA4C89"/><path d="M7.5 3.7c3.3 4 5.7 8.8 6.9 16.6M2.6 10.4c5.3.2 10.3-.9 15-4.3M4.4 18.4c3.2-4.7 8.5-6.5 16.9-4.9" fill="none" stroke="#B8255F" stroke-width="1.6" stroke-linecap="round"/></svg><b>Dribbble Select</b> · top branding agency</span>
 <h2 class="cta-h split" data-split>If you are looking for branding or rebranding, <span class="hl">I am here to help.</span></h2>
