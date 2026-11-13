@@ -116,15 +116,35 @@ button{font:inherit;color:inherit}
 .h1 .li{display:block}
 .h1 .end{position:relative;color:var(--green)}
 /* the brand switch: a pill track with the logo as knob */
-.sw{display:inline-block;vertical-align:middle;position:relative;width:1.55em;height:.8em;margin:0 .06em;border-radius:999px;transform:translateY(-.05em);background:#E2DFD6;overflow:hidden;box-shadow:inset 0 -6px 14px rgba(0,0,0,.06)}
-.sw::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,#D4F25C,#3DDC97);transform-origin:left;transform:scaleX(var(--fill,1));transition:transform .9s var(--e-io)}
+.swrap{display:inline-block;vertical-align:middle;position:relative;margin:0 .06em;transform:translateY(-.05em)}
+.sw{display:block;position:relative;width:1.55em;height:.8em;padding:0;border:0;font:inherit;cursor:pointer;border-radius:999px;background:#E2DFD6;overflow:hidden;box-shadow:inset 0 -6px 14px rgba(0,0,0,.06);-webkit-tap-highlight-color:transparent}
+.sw:focus-visible{outline:3px solid var(--green);outline-offset:4px}
+.sw::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,#D4F25C,#3DDC97);transform-origin:left;transform:scaleX(var(--fill,0));transition:transform .7s var(--e-io)}
 .sw .knob{position:absolute;top:.07em;left:.07em;width:.66em;height:.66em;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 6px 14px -4px rgba(0,60,40,.45);
-  transform:translateX(var(--kx,.75em)) rotate(var(--kr,360deg));transition:transform .9s var(--e-io)}
+  transform:translateX(var(--kx,0em)) rotate(var(--kr,0deg));transition:transform .7s var(--e-io)}
 .sw .knob img{width:86%;height:86%}
-.tg{display:inline-block;vertical-align:middle;position:relative;width:1.3em;height:.66em;margin:0 .04em;border-radius:999px;transform:translateY(-.05em);background:var(--tgb,var(--green));transition:background .5s var(--e-io)}
-.tg i{position:absolute;top:.08em;left:.08em;width:.5em;height:.5em;border-radius:50%;background:#fff;box-shadow:0 4px 10px -3px rgba(0,0,0,.35);transform:translateX(var(--tx,.64em));transition:transform .5s var(--e-spring)}
-.h1.off .sw{--fill:0}.h1.off .sw .knob{--kx:0em;--kr:0deg}
-.h1.off .tg{--tgb:#D9D6CC}.h1.off .tg i{--tx:0em}
+.sw:hover .knob{--kx:.1em}
+.sw:active .knob{width:.74em}
+.h1.on .sw{--fill:1}
+.h1.on .sw .knob{--kx:.75em;--kr:360deg}
+.h1.on .sw:hover .knob{--kx:.65em;--kr:360deg}
+.h1.nudge .sw .knob{animation:nudge .9s var(--e-io)}
+@keyframes nudge{30%{transform:translateX(.22em)}55%{transform:translateX(.04em)}75%{transform:translateX(.12em)}}
+.bw{display:inline-block;color:#C5C1B6;transition:color .6s var(--e-io)}
+.h1.on .bw{color:var(--ink);animation:bwpop .6s var(--e-spring)}
+@keyframes bwpop{40%{transform:scale(1.06) rotate(-1.5deg)}}
+.hint{position:absolute;left:50%;bottom:calc(100% + 2px);display:flex;flex-direction:column;align-items:center;gap:1px;margin-left:-40px;width:80px;pointer-events:none;font:600 12px/1 var(--body);letter-spacing:0;white-space:nowrap;transition:opacity .3s,transform .4s var(--e-out)}
+.hint em{font-style:normal;background:var(--ink);color:#fff;padding:5px 9px;border-radius:999px}
+.hint svg{width:12px;height:12px}
+@media (min-width:861px){.hint{font-size:14px;bottom:calc(100% + 6px)}.hint em{padding:6px 11px}.hint svg{width:14px;height:14px}}
+.hint{opacity:0;transform:translateY(6px)}
+.h1.done .hint{opacity:1;transform:none}
+.h1.done.tried .hint{opacity:0;transform:translateY(6px)}
+.h1.done .lm{overflow:visible}
+.tg{display:inline-block;vertical-align:middle;position:relative;width:1.3em;height:.66em;margin:0 .04em;border-radius:999px;transform:translateY(-.05em);background:var(--green)}
+.tg i{position:absolute;top:.08em;left:.08em;width:.5em;height:.5em;border-radius:50%;background:#fff;box-shadow:0 4px 10px -3px rgba(0,0,0,.35);transform:translateX(.64em)}
+.h1.on .tg{animation:tgok .7s var(--e-spring) .45s}
+@keyframes tgok{40%{transform:translateY(-.05em) scale(1.1);box-shadow:0 0 0 .08em rgba(61,220,151,.45)}}
 .wire{position:absolute;left:100%;top:30%;width:200px;height:150px;overflow:visible;pointer-events:none}
 .wire path{stroke-dasharray:6 7}
 .tag{position:absolute;display:inline-flex;align-items:flex-start;gap:2px;font:600 14px/1 var(--body);letter-spacing:0;white-space:nowrap}
@@ -547,8 +567,8 @@ div.award{cursor:default}
 <svg viewBox="0 0 18 30" aria-hidden="true" style="transform:scaleX(-1)"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
 </div>
 
-<h1 class="h1 off" id="h1" aria-label="Make your brand look as good as your business already is.">
-<span class="ln lm" aria-hidden="true"><span class="li" style="--d:250">Make your <span class="sw"><span class="knob"><img src="/sprint/a/8fa7ebfb6a.png" alt=""></span></span> brand</span></span>
+<h1 class="h1" id="h1" aria-label="Make your brand look as good as your business already is.">
+<span class="ln lm"><span class="li" style="--d:250"><span aria-hidden="true">Make your </span><span class="swrap"><button type="button" class="sw" id="bsw" role="switch" aria-checked="false" aria-label="Brand switch"><span class="knob"><img src="/sprint/a/8fa7ebfb6a.png" alt=""></span></button><span class="hint" aria-hidden="true"><em>flip it</em><svg viewBox="0 0 14 14"><path d="M7 1v11M2.5 7.5 7 12l4.5-4.5" fill="none" stroke="#10120F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><span aria-hidden="true"> <span class="bw">brand</span></span></span></span>
 <span class="ln lm" aria-hidden="true"><span class="li" style="--d:370">look as good as your</span></span>
 <span class="ln" aria-hidden="true"><span class="lm" style="display:inline-block"><span class="li" style="--d:490">business <span class="tg"><i></i></span> <span class="end">already is.</span></span></span><span class="end-anchor" style="position:relative;display:inline-block;width:0;height:.8em;vertical-align:baseline"><svg class="wire" viewBox="0 0 80 118" aria-hidden="true"><path d="M20 2 C 70 20, 76 70, 34 112" fill="none" stroke="#10120F" stroke-width="2"/></svg><span class="tag tag-r"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1l11 6-5 1.5L6 14z" fill="#10120F"/></svg><em>your brand, 7 days later</em></span></span></span>
 <svg class="spark s1" width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><path d="M19 3c1 9 4 13 16 16-12 3-15 7-16 16-1-9-4-13-16-16 12-3 15-7 16-16z" fill="none" stroke="#10120F" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -749,27 +769,35 @@ div.award{cursor:default}
   },{rootMargin:'0px 0px -12% 0px',threshold:.12});
   $$('[data-r],.split,.st,#pcard,#vs,#pocket,#fword,.checkpoint').forEach(function(el){io.observe(el)});
 
-  /* ---------- hero: lines rise, brand switches on, cards are dealt ---------- */
-  var h1=$('#h1'), fan=$('#fan');
+  /* ---------- hero: lines rise, cards are dealt; the visitor turns the brand on ---------- */
+  var h1=$('#h1'), fan=$('#fan'), bsw=$('#bsw'), tried=false, nudges=0, firstOn=false;
   function heroIn(){
     h1.classList.add('in');
-    // the switch flips once the first line has landed: the brand turns on
-    later(function(){h1.classList.remove('off')},1050);
-    later(function(){$$('.spark').forEach(function(s){s.classList.add('in')})},1300);
-    later(function(){var w=$('.wire');w&&w.classList.add('in')},1500);
-    later(function(){var t=$('.tag-r');t&&t.classList.add('in')},2500);
     fan.classList.add('in');
     later(function(){fan.classList.add('dealt')},2200);
+    later(function(){h1.classList.add('done')},1700);
+    later(nudge,2600);
   }
+  // until someone tries it, the knob gives a small push now and then (three times at most)
+  function nudge(){
+    if(tried||reduce||nudges>=3) return;
+    if(h1.getBoundingClientRect().bottom>0){nudges++;h1.classList.add('nudge');setTimeout(function(){h1.classList.remove('nudge')},950)}
+    setTimeout(nudge,4200);
+  }
+  bsw.addEventListener('click',function(){
+    tried=true; h1.classList.add('tried');
+    var on=!h1.classList.contains('on');
+    h1.classList.toggle('on',on); bsw.setAttribute('aria-checked',on?'true':'false');
+    if(on&&!firstOn){ firstOn=true;
+      // the brand now matches the business: sparkles, then the note
+      later(function(){$$('.spark').forEach(function(s){s.classList.add('in')})},250);
+      later(function(){var w=$('.wire');w&&w.classList.add('in')},450);
+      later(function(){var t=$('.tag-r');t&&t.classList.add('in')},1300);
+    }
+    try{W.clarity('event',on?'brand-on':'brand-off')}catch(e){}
+  });
   if(d.fonts && d.fonts.ready){Promise.race([d.fonts.ready,new Promise(function(r){setTimeout(r,600)})]).then(function(){requestAnimationFrame(heroIn)})}
   else heroIn();
-  // hovering the headline flips the switches off and on again
-  var flipT;
-  h1.addEventListener('mouseenter',function(){
-    if(reduce||h1.classList.contains('off')) return;
-    h1.classList.add('off');clearTimeout(flipT);
-    flipT=setTimeout(function(){h1.classList.remove('off')},520);
-  });
 
   /* ---------- pocket: on touch screens it opens by itself when seen ---------- */
   on('pocket',function(p){
