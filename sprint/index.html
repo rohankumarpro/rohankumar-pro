@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="canonical" href="https://rohankumar.pro/sprint">
+<meta property="og:url" content="https://rohankumar.pro/sprint">
+<title>Rohan Kumar — Brand Identity Sprint: a new brand in 7 days</title>
+<meta name="description" content="Rohan Kumar, brand designer. A full brand identity in 7 days for one fixed price: logo, colours, type, brand guide and source files.">
+<meta property="og:title" content="Brand Identity Sprint by Rohan Kumar">
+<meta property="og:image" content="https://rohankumar.pro/sprint/a/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:description" content="A full brand identity in 7 days, for one fixed price.">
+<link rel="icon" href="/sprint/a/favicon.png">
+
+<link rel="stylesheet" href="https://use.typekit.net/fvp2kyt.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&amp;family=JetBrains+Mono:wght@400;600;700&amp;family=Instrument+Serif:ital@0;1&amp;family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF8F1}
+html{scroll-behavior:smooth}
+.rk a{color:inherit}
+.disp{font-family:'Bricolage Grotesque',system-ui,sans-serif}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-10px) rotate(calc(var(--r,0deg) + 2deg))}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes ribbon{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,103,79,.45)}50%{box-shadow:0 0 0 7px rgba(0,103,79,0)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.bob{animation:bob 6s ease-in-out infinite}
+.sticker{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.sticker:hover{transform:rotate(0deg) scale(1.08)!important;animation-play-state:paused}
+.tile{transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.tile:hover{transform:translateY(-14px) rotate(0deg)!important}
+.tile img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.tile:hover img{transform:scale(1.06)}
+.btn{transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s}
+.btn:hover{transform:translateY(-3px)}
+.card{transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+.card:hover{transform:translateY(-6px) rotate(-.6deg)}
+.tab{transition:transform .3s cubic-bezier(.3,1.5,.5,1),background .3s}
+.tab:hover{transform:translateX(6px)}
+.panel{animation:rise .5s cubic-bezier(.2,.7,.2,1)}
+.walls{-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.wall{overflow:hidden}
+.track{display:flex;gap:16px;width:max-content;animation:ribbon 46s linear infinite}
+.wall.rev .track{animation-direction:reverse;animation-duration:52s}
+.walls:hover .track{animation-play-state:paused}
+.logo{position:relative;width:300px;aspect-ratio:4/3;border-radius:24px;overflow:hidden;flex:none;transition:transform .4s cubic-bezier(.3,1.5,.5,1)}
+.logo::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(16,18,15,.08);pointer-events:none}
+.logo:hover{transform:translateY(-8px) rotate(-1.5deg)}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.herowrap{position:relative;overflow:hidden;background:#FBF8F1}
+.herogrid{position:absolute;inset:0;background-image:linear-gradient(#E9E3D6 1px,transparent 1px),linear-gradient(90deg,#E9E3D6 1px,transparent 1px);background-size:56px 56px;background-position:center top;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 70%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 50% 70%,#000 20%,transparent 75%);pointer-events:none}
+.pillnav{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);box-shadow:0 1px 2px rgba(16,18,15,.06),0 6px 16px -8px rgba(16,18,15,.18);border-radius:999px;padding:5px;box-shadow:0 8px 24px -16px rgba(16,18,15,.35)}
+.pillnav .nl{font-size:14px;font-weight:500;text-decoration:none;color:#3B3D36;padding:10px 14px;border-radius:999px;transition:background .2s}
+.pillnav .nl:hover{background:#F1EDE3;color:#10120F}
+.chip{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:#10120F;font-size:14px;line-height:1.25;text-align:center}
+.chip b{font-weight:700;font-family:'Bricolage Grotesque',sans-serif;font-size:18px}
+.chip svg{width:24px;height:40px}
+.hh{position:relative;margin:28px 0 0;font-size:clamp(46px,7.4vw,104px);line-height:1.02;letter-spacing:-.045em;font-weight:700;display:flex;flex-direction:column;align-items:center}
+.hh .ln{display:block;white-space:nowrap}
+.slider{display:inline-block;vertical-align:middle;position:relative;width:1.55em;height:.8em;border-radius:999px;background:linear-gradient(90deg,#D4F25C,#3DDC97);margin:0 .06em;transform:translateY(-.04em);box-shadow:inset 0 -6px 14px rgba(0,80,60,.18)}
+.slider .knob{position:absolute;top:.07em;left:.07em;width:.66em;height:.66em;border-radius:50%;background:#fff;box-shadow:0 6px 14px -4px rgba(0,60,40,.45);display:grid;place-items:center;animation:slide 4.5s cubic-bezier(.65,0,.35,1) infinite}
+.slider .knob img{width:86%;height:86%;display:block}
+@keyframes slide{0%,15%{transform:translateX(0) rotate(0)}45%,65%{transform:translateX(.75em) rotate(360deg)}95%,100%{transform:translateX(0) rotate(0)}}
+.toggle{display:inline-block;vertical-align:middle;position:relative;width:1.3em;height:.66em;border-radius:999px;background:#E2DDD1;transform:translateY(-.04em);animation:tgbg 4.5s ease-in-out infinite}
+.toggle .tk{position:absolute;top:.08em;left:.08em;width:.5em;height:.5em;border-radius:50%;background:#fff;box-shadow:0 4px 10px -3px rgba(0,0,0,.35);animation:tgk 4.5s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes tgbg{0%,30%{background:#E2DDD1}45%,90%{background:#00674F}100%{background:#E2DDD1}}
+@keyframes tgk{0%,30%{transform:translateX(0)}45%,90%{transform:translateX(.64em)}100%{transform:translateX(0)}}
+.hh .end{position:relative;color:#00674F}
+.wire{position:absolute;left:100%;top:30%;width:200px;height:150px;overflow:visible}
+.dash{animation:dash 1.6s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-26}}
+.tag{position:absolute;display:inline-flex;align-items:flex-start;gap:2px;font-family:'DM Sans',sans-serif;letter-spacing:0;font-weight:600;line-height:1;white-space:nowrap}
+.tag em{font-style:normal;font-size:14px;background:#00674F;color:#fff;padding:7px 11px;border-radius:999px 999px 999px 4px;margin-top:12px}
+.tag-r{left:calc(100% + 160px);top:calc(30% + 104px);animation:bob 5s ease-in-out infinite}
+.spark{position:absolute;animation:twinkle 3.2s ease-in-out infinite}
+.s1{left:-60px;top:12%}.s2{right:-70px;top:2%;animation-delay:-1.4s}
+@keyframes twinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(.8) rotate(12deg)}}
+.fan{position:relative;width:100%;max-width:1180px;height:360px;margin-top:28px}
+.fc{position:absolute;left:50%;bottom:-24px;width:220px;height:300px;margin-left:-110px;border-radius:30px;overflow:hidden;transform-origin:50% 100%;transform:translateX(calc(var(--i)*150px)) translateY(calc(var(--i)*var(--i)*9px)) rotate(calc(var(--i)*6deg));z-index:calc(10 - var(--i)*var(--i));box-shadow:0 30px 50px -28px rgba(16,18,15,.55);transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.fc img{width:100%;height:100%;object-fit:cover;display:block}
+.fan:hover .fc{transform:translateX(calc(var(--i)*168px)) translateY(calc(var(--i)*var(--i)*11px)) rotate(calc(var(--i)*7.5deg))}
+.fan .fc:hover{transform:translateX(calc(var(--i)*168px)) translateY(calc(var(--i)*var(--i)*11px - 34px)) rotate(calc(var(--i)*7.5deg))}
+.fc .tag-c{left:50%;top:18px;translate:-50% 0;flex-direction:row}
+.fc .tag-c em{background:#FFFFFF;color:#10120F;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
+@media (max-width:720px){.fc{width:140px;height:190px;margin-left:-70px;bottom:-50px;transform:translateX(calc(var(--i)*70px)) translateY(calc(var(--i)*var(--i)*6px)) rotate(calc(var(--i)*7deg))}.fan{height:260px;margin-top:40px}.hh .ln{white-space:normal}}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:.02em}
+.wrap2{max-width:1240px;margin:0 auto;padding:0 32px;position:relative}
+.sec{padding:110px 0;position:relative}
+.sec-grid{background-image:linear-gradient(#ECE6DA 1px,transparent 1px),linear-gradient(90deg,#ECE6DA 1px,transparent 1px);background-size:56px 56px}
+.sec-top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.pill{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;background:#10120F;color:#FBF8F1;font-size:12px;text-transform:lowercase}
+.pill-ghost{background:#EDE7DA;color:#3B3D36}
+.pill-ink{background:#10120F;color:#fff;align-self:flex-start}
+.pill-lime{background:#D4F25C;color:#10120F}
+.pill-cream{background:#FBF8F1;color:#00674F}
+.h2{margin:0;font-size:clamp(40px,5.4vw,76px);line-height:1;letter-spacing:-.045em;font-weight:700}
+.h2.center,.center{text-align:center}
+.h2.center{margin:0 auto 56px;max-width:900px}
+.hl{color:#00674F}
+.hl-lime{color:#D4F25C}
+.lead{font-size:19px;line-height:1.55;color:#55574F;max-width:520px;margin:20px 0 0}
+.lead-light{color:#C9CCC2}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.btnrow.center{justify-content:center}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-size:16px;font-weight:600;padding:0 22px;min-height:50px;border-radius:12px;transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;box-sizing:border-box}
+.b:hover{transform:translateY(-2px)}
+.b:active{transform:translateY(1px) scale(.98)}
+.rk a.b-dark,.b-dark{background:#10120F;color:#fff}
+.rk a.b-light,.b-light{background:#fff;color:#10120F;box-shadow:0 1px 2px rgba(16,18,15,.06),0 6px 16px -8px rgba(16,18,15,.18)}
+.rk a.b-lime,.b-lime{background:#D4F25C;color:#10120F}
+.b-wide{width:100%}
+.b-big{min-height:60px;font-size:18px;padding:0 32px}
+.chip{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;background:#fff;color:#10120F;font-size:12px;box-shadow:0 1px 2px rgba(16,18,15,.06)}
+.chip-dark{background:#1E211D;color:#E8EBE2;box-shadow:none}
+/* ticker */
+.ticker{background:#F1ECE1;overflow:hidden;padding:11px 0}
+.ticker--dark{background:#10120F;color:#D4F25C;border-color:#10120F}
+.tk-track{display:flex;gap:22px;width:max-content;animation:ribbon 40s linear infinite;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:.06em;white-space:nowrap}
+.tk-star{color:#00674F}.ticker--dark .tk-star{color:#FFC2DA}
+/* pocket */
+.pocket-row{display:flex;flex-wrap:wrap;gap:48px;align-items:center}
+.pocket-copy{flex:1 1 380px;min-width:0}
+.pocket{flex:1.3 1 520px;min-width:0;position:relative;height:440px;display:block;text-decoration:none;color:#10120F}
+.pk-cards{position:absolute;left:0;right:0;top:0;height:440px}
+.pk-card{position:absolute;left:50%;top:70px;width:300px;aspect-ratio:4/3;object-fit:cover;border-radius:16px;margin-left:-150px;box-shadow:0 18px 36px -18px rgba(16,18,15,.5);transform:translateX(var(--x)) rotate(var(--r));transition:transform .6s cubic-bezier(.2,.9,.25,1.2)}
+.pocket:hover .pk-card{transform:translateX(calc(var(--x)*1.12)) translateY(-70px) rotate(calc(var(--r)*1.3))}
+.pk-card:nth-child(2){transition-delay:.04s}.pk-card:nth-child(3){transition-delay:.08s}.pk-card:nth-child(4){transition-delay:.12s}
+.pk-front{position:absolute;left:0;right:0;bottom:0;height:270px;border-radius:30px;background-color:#FFFDF8;background-image:linear-gradient(#E8E2D4 1px,transparent 1px),linear-gradient(90deg,#E8E2D4 1px,transparent 1px);background-size:22px 22px;box-shadow:0 30px 60px -30px rgba(16,18,15,.45),inset 0 2px 0 #fff;box-shadow:0 1px 2px rgba(16,18,15,.06),0 6px 16px -8px rgba(16,18,15,.18)}
+.pk-front::before{content:"";position:absolute;inset:12px;border:2px dashed #CFC7B5;border-radius:22px;pointer-events:none}
+.pk-label{position:absolute;left:28px;top:-1px;transform:translateY(-50%);background:#10120F;color:#fff;border-radius:999px;padding:9px 16px;font-weight:600;font-size:15px;box-shadow:0 10px 20px -10px rgba(16,18,15,.5)}
+.pk-list{position:absolute;right:28px;bottom:26px;font-size:12px;color:#6B6D64}
+.wkgrid{margin-top:72px;display:grid;grid-template-columns:repeat(3,1fr);gap:36px 22px}
+.wk{display:flex;flex-direction:column;gap:14px;text-decoration:none;color:#10120F}
+.wk-img{display:block;border-radius:24px;overflow:hidden;aspect-ratio:4/3;box-shadow:0 1px 2px rgba(16,18,15,.06),0 16px 32px -20px rgba(16,18,15,.35);transition:transform .35s cubic-bezier(.3,1.5,.5,1)}
+.wk-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.wk:hover .wk-img{transform:translateY(-4px)}
+.wk:hover .wk-img img{transform:scale(1.04)}
+.wk-meta{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 4px}
+.wk-meta b{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.02em}
+.wk-meta .mono{font-size:12px;color:#6B6D64}
+/* steps */
+.stgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.st{position:relative;background:var(--bg);border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 2px rgba(16,18,15,.06),0 12px 28px -14px rgba(16,18,15,.22);transition:transform .3s cubic-bezier(.3,1.5,.5,1),box-shadow .3s}
+.st:hover{transform:translateY(-4px);box-shadow:0 2px 4px rgba(16,18,15,.06),0 22px 40px -18px rgba(16,18,15,.3)}
+.st h3{margin:6px 0 0;font-size:30px;line-height:1.05;letter-spacing:-.035em;font-weight:700}
+.st p{margin:0;font-size:15px;line-height:1.55}
+.st-img{display:block;margin-top:auto;border-radius:16px;overflow:hidden;aspect-ratio:4/3}
+.st-img img{width:100%;height:100%;object-fit:cover;display:block}
+.st-num{position:absolute;right:18px;top:-18px;width:58px;height:58px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(16,18,15,.06),0 12px 28px -14px rgba(16,18,15,.22);display:grid;place-items:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;transform:rotate(var(--r))}
+.viz{display:flex;flex-direction:column;gap:10px;margin-top:auto;background:#fff;border-radius:18px;padding:12px;box-shadow:0 1px 2px rgba(16,18,15,.06),0 12px 26px -16px rgba(16,18,15,.3);min-height:220px;box-sizing:border-box}
+.vz-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#55574F}
+.vz-dot{width:8px;height:8px;border-radius:50%;background:#E5322D;animation:pulse2 1.6s infinite}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.3}}
+.vz-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.vz-opt{position:relative;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 8px}
+.vz-opt img{width:52%;height:auto;max-height:90px;object-fit:contain}
+.vz-opt .mono{font-size:10px}
+.vz-pick{box-shadow:0 0 0 3px #D4F25C}
+.vz-check{position:absolute;top:-10px;right:-6px;background:#D4F25C;color:#10120F;font-size:11px;font-weight:700;border-radius:999px;padding:4px 9px;transform:rotate(6deg)}
+.vz-sys{flex-direction:row}
+.vz-logo{flex:1;border-radius:14px;background:#F6F3EC;display:grid;place-items:center}
+.vz-logo img{width:62%;height:auto}
+.vz-col{flex:1;display:flex;flex-direction:column;gap:8px}
+.vz-sw{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;height:56px}
+.vz-sw i{border-radius:10px;display:block}
+.vz-type{flex:1;border-radius:14px;background:#10120F;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:10px 12px}
+.vz-type b{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;line-height:1;letter-spacing:-.04em}
+.vz-type .mono{font-size:10px;opacity:.7}
+.vz-revs{display:flex;gap:6px}
+.vz-revs .mono{font-size:10px;background:#EAF9C6;border-radius:999px;padding:4px 8px}
+.vz-done{margin-left:auto;background:#D4F25C;color:#10120F;border-radius:999px;padding:3px 8px}
+.vz-files{display:flex;flex-direction:column;gap:6px}
+.vz-file{display:flex;align-items:center;gap:10px;background:#F6F3EC;border-radius:10px;padding:6px 8px}
+.vz-file b{font-family:'JetBrains Mono',monospace;font-size:9px;color:#fff;border-radius:6px;width:30px;height:22px;display:grid;place-items:center}
+.vz-file .mono{font-size:12px}
+.checkpoint{margin-top:28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#00674F;color:#FBF8F1;border-radius:22px;padding:18px 20px 18px 18px}
+.checkpoint b{font-weight:700}
+.cp-dot{width:52px;height:52px;border-radius:50%;background:#D4F25C;color:#10120F;display:grid;place-items:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;flex:none}
+.checkpoint>span:nth-child(2){flex:1 1 300px;font-size:17px}
+.wire2{width:120px;height:40px;flex:none}
+.checkpoint .wire2 path{stroke:#D4F25C}
+.rk .checkpoint a.b-dark{background:#FBF8F1;color:#10120F}
+/* dark designer */
+.sec-dark{background:#10120F;color:#FBF8F1}
+.rohan-row{display:flex;flex-wrap:wrap;gap:56px;align-items:center}
+.rohan-copy{flex:1 1 420px;min-width:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px}
+.vid{flex:1.2 1 520px;min-width:0;position:relative;display:block;border-radius:28px;overflow:hidden;aspect-ratio:16/9;transform:rotate(1.5deg);box-shadow:0 40px 80px -40px rgba(0,0,0,.8);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.vid:hover{transform:rotate(0) translateY(-4px)}
+.vid img{width:100%;height:100%;object-fit:cover;display:block}
+.vid-badge{position:absolute;left:50%;top:50%;width:132px;height:132px;margin:-66px 0 0 -40px}
+.spin{animation:spin 14s linear infinite;position:absolute;inset:0}
+.vid-play{position:absolute;inset:40px;border-radius:50%;background:#10120F;display:grid;place-items:center}
+/* price */
+.pgrid{display:flex;flex-wrap:wrap;gap:20px;align-items:stretch}
+.pcard{flex:1.15 1 420px;min-width:0;position:relative;background:#00674F;color:#FBF8F1;border-radius:32px;padding:34px;display:flex;flex-direction:column;gap:16px;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:28px 28px}
+.p-sticker{position:absolute;right:24px;top:-16px;background:#FFC2DA;color:#10120F;box-shadow:0 10px 20px -10px rgba(16,18,15,.45);border-radius:999px;padding:8px 14px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;transform:rotate(5deg)}
+.pcard .pill-lime{align-self:flex-start}
+.p-price{margin:6px 0 0;font-size:clamp(64px,8vw,104px);line-height:.9;letter-spacing:-.05em;font-weight:800}
+.p-price s{font-size:.26em;letter-spacing:0;font-weight:500;opacity:.6;vertical-align:middle}
+.p-note{margin:0;font-size:15px;opacity:.85}
+.p-list{list-style:none;margin:6px 0 10px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;font-size:15px}
+.p-list li{display:flex;gap:10px;align-items:center}
+.tick{width:22px;height:22px;border-radius:50%;background:#D4F25C;color:#10120F;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.pside{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.vs{background:#fff;box-shadow:0 1px 2px rgba(16,18,15,.06),0 12px 28px -14px rgba(16,18,15,.22);border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:18px}
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;align-items:baseline}
+.vs-h{font-size:12px;color:#6B6D64}.vs-me{color:#00674F}
+.vs-grid s{font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;letter-spacing:-.03em;color:#A9A496}
+.vs-grid b{font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;letter-spacing:-.03em}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;flex:1}
+.mini{background:var(--bg);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.45}
+.mini b{font-size:26px;letter-spacing:-.03em}
+/* faq */
+.faq-row{display:flex;flex-wrap:wrap;gap:56px}
+.faq-l{flex:1 1 320px;align-self:flex-start;position:sticky;top:40px;display:flex;flex-direction:column;gap:22px;align-items:flex-start}
+.faq-l .sec-top{margin-bottom:0}
+.bubble{display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px 20px 20px 6px;padding:10px 16px 10px 10px;font-size:15px;font-weight:500;max-width:340px;box-shadow:0 1px 2px rgba(16,18,15,.06),0 12px 28px -14px rgba(16,18,15,.22)}
+.bubble img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.faq-r{flex:2 1 560px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.qa{border-radius:20px;box-shadow:0 1px 2px rgba(16,18,15,.05),0 8px 20px -14px rgba(16,18,15,.2);overflow:hidden;transition:background .3s}
+.qa-q{width:100%;display:flex;align-items:center;gap:16px;padding:18px 20px;background:transparent;border:0;font:inherit;font-size:18px;font-weight:600;color:#10120F;text-align:left;cursor:pointer;min-height:44px}
+.qa-n{font-size:12px;color:#6B6D64;flex:none}
+.qa-t{flex:1}
+.qa-s{flex:none;width:32px;height:32px;border-radius:50%;background:#10120F;color:#fff;display:grid;place-items:center;font-size:18px}
+.qa-a{margin:0;padding:0 20px 20px 56px;font-size:16px;line-height:1.6}
+/* cta arc */
+.cta{position:relative;overflow:hidden;height:1000px;background:#FBF8F1}
+.arc{position:absolute;left:50%;top:660px;width:0;height:0}
+.arc-card{position:absolute;left:-95px;top:-120px;width:190px;height:240px;border-radius:28px;overflow:hidden;transform:rotate(var(--a)) translateY(-500px);box-shadow:0 24px 40px -24px rgba(16,18,15,.5);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.arc-card img{width:100%;height:100%;object-fit:cover;display:block}
+.arc-spin{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}
+@keyframes arcspin{from{transform:rotate(-50deg)}to{transform:rotate(50deg)}}
+
+.cta-in{position:relative;z-index:2;text-align:center;max-width:720px;margin:0 auto;padding:420px 24px 0;display:flex;flex-direction:column;align-items:center}
+.chip2{font-size:14px;color:#10120F;text-decoration:none;background:#fff;box-shadow:0 1px 2px rgba(16,18,15,.06),0 6px 16px -8px rgba(16,18,15,.18);border-radius:999px;padding:8px 14px}
+.chip2 b{font-family:'Bricolage Grotesque',sans-serif}
+.cta-h{margin:22px 0 0;font-size:clamp(38px,4.6vw,62px);line-height:1.02;letter-spacing:-.045em;font-weight:700}
+.cta .lead{margin:18px auto 0}
+.small{font-size:14px;color:#6B6D64;margin:18px 0 0}
+.rk .small a{color:#00674F}
+/* footer */
+.foot{padding:24px}
+.foot-panel{position:relative;background:#00674F;color:#FBF8F1;border-radius:36px;padding:56px 56px 28px;overflow:hidden}
+.foot-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;position:relative;z-index:2}
+.fbig{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:-.02em;margin:16px 0 10px}
+.rk .fbig a{color:#FBF8F1;text-decoration:none}.fbig a:hover{text-decoration:underline}
+.fsmall{font-size:13px;opacity:.75;margin:0}
+.rk .ulink{color:#D4F25C;font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.foot-word{position:relative;margin-top:64px}
+
+.stk{position:absolute;width:104px;height:104px;border-radius:26px;display:grid;place-items:center;transform:rotate(var(--r));box-shadow:0 2px 4px rgba(0,0,0,.12),0 18px 30px -12px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+.stk:hover{transform:rotate(0) scale(1.12)}
+.stk img{width:60%;height:60%;object-fit:contain;display:block}
+.foot-copy{margin:22px 0 0;font-size:12px;opacity:.7;position:relative;z-index:2}
+@media (max-width:860px){
+.wkgrid,.stgrid,.minis{grid-template-columns:1fr}
+.foot-cols{grid-template-columns:1fr}
+.p-list{grid-template-columns:1fr}
+.pocket{height:420px}.pk-card{width:200px;margin-left:-100px}
+.cta{height:820px}.arc{top:560px}.cta-in{padding-top:330px}.arc-card{width:120px;height:150px;left:-60px;top:-75px;transform:rotate(var(--a)) translateY(-330px)}
+.stk{width:52px;height:52px;border-radius:14px}
+.foot-panel{padding:36px 22px 20px}
+}
+.nav a:hover{text-decoration:underline;text-underline-offset:4px}
+input:focus{outline:2px solid #00674F;outline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid #10120F;outline-offset:3px}
+@media (max-width:720px){.hide-sm{display:none!important}.wgrid{grid-template-columns:1fr!important}.wk{grid-column:auto!important}.logo{width:220px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ===== DESIGN SYSTEM v1: tokens ===== */
+.rk{--ink:#10120F;--ink-2:#3B3D36;--muted:#55574F;--cream:#FBF8F1;--green:#00674F;--lime:#D4F25C;--butter:#FFE07A;--pink:#FFC2DA;--sky:#BFE3FF;--mint:#CDEFE0;
+--r-sm:12px;--r-md:22px;--r-lg:30px;--r-pill:999px;--s-1:8px;--s-2:12px;--s-3:16px;--s-4:24px;--s-5:32px;--s-6:56px;--s-7:96px;
+--glass:rgba(255,255,255,.42);--glass-strong:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.7);--glass-dark:rgba(16,18,15,.38);--glass-dark-edge:rgba(255,255,255,.16);
+--blur:blur(22px) saturate(180%);--hl:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(255,255,255,.18);
+--sh-1:0 1px 2px rgba(16,18,15,.06),0 8px 24px -12px rgba(16,18,15,.22);--sh-2:0 2px 6px rgba(16,18,15,.05),0 24px 48px -20px rgba(16,18,15,.32)}
+/* glass */
+.pillnav,.chip,.chip2,.bubble,.vs,.st-num,.pk-front,.qa,.viz,.mini,.st,.stk{-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.pillnav{background:var(--glass)!important;box-shadow:var(--hl),var(--sh-1)!important;outline:1px solid var(--glass-edge);outline-offset:-1px}
+.pillnav .nl:hover{background:rgba(255,255,255,.55)}
+.chip,.chip2,.bubble,.viz,.st-num{background:var(--glass-strong);box-shadow:var(--hl),var(--sh-1);outline:1px solid var(--glass-edge);outline-offset:-1px}
+.chip-dark{background:var(--glass-dark);color:#F2F4EC;outline:1px solid var(--glass-dark-edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.rk a.b-light,.herowrap a.btn[href="#price"]{background:var(--glass-strong)!important;box-shadow:var(--hl),var(--sh-1)!important;outline:1px solid var(--glass-edge);outline-offset:-1px;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.st{background:color-mix(in srgb,var(--bg) 52%,rgba(255,255,255,.18));box-shadow:var(--hl),var(--sh-2);outline:1px solid var(--glass-edge);outline-offset:-1px}
+.mini{background:color-mix(in srgb,var(--bg) 50%,rgba(255,255,255,.2));box-shadow:var(--hl),var(--sh-1);outline:1px solid var(--glass-edge);outline-offset:-1px}
+.vz-logo,.vz-file{background:rgba(255,255,255,.6)}
+.vs{background:var(--glass);box-shadow:var(--hl),var(--sh-2);outline:1px solid var(--glass-edge);outline-offset:-1px}
+.qa{box-shadow:var(--hl),var(--sh-1);outline:1px solid var(--glass-edge);outline-offset:-1px}
+.pk-front{background-color:rgba(255,253,248,.5)!important;background-image:none!important;box-shadow:var(--hl),var(--sh-2)!important}
+.pcard{background-color:rgba(0,103,79,.78);background-image:none;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),var(--sh-2);outline:1px solid rgba(255,255,255,.18);outline-offset:-1px}
+.checkpoint{background:rgba(0,103,79,.82);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),var(--sh-2)}
+.ticker{background:rgba(255,255,255,.55);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.ticker--dark{background:#10120F}
+/* ===== muted grey ground ===== */
+.rk{background:#F2F2EF!important}
+body{background:#F2F2EF}
+.herogrid,.herowrap::before{display:none;content:none}
+.herowrap{background:#F2F2EF}
+.sec{padding:110px 0;background:#F2F2EF}
+.sec>.wrap2{position:relative;z-index:2;max-width:1240px;padding:0 32px;background:none;box-shadow:none;outline:0;border-radius:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+#rohan{background:#F2F2EF;color:#10120F}
+#rohan .hl-lime{color:#00674F}
+#rohan .lead-light{color:#55574F}
+#rohan .chip-dark{background:#FFFFFF;color:#10120F;outline:0;box-shadow:none}
+.cta{background:#F2F2EF;color:#10120F;height:1420px}
+.arc{top:710px}
+.cta .cta-h{font-size:clamp(34px,3.8vw,52px)}
+.cta-in{box-sizing:border-box;margin:0 auto;padding:520px 24px 0;max-width:620px;background:none;box-shadow:none;outline:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.ticker{background:#E7E7E2}
+.ticker--dark{background:#10120F}
+.foot{padding:24px;background:#F2F2EF}
+.foot-panel{background:#00674F;border-radius:36px}
+.hl,.hl-lime{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.02em;font-size:1.1em}
+.sec-grid{background-image:none}
+@media (max-width:760px){.sec{padding:72px 0}.cta{height:1000px}.arc{top:500px}.cta-in{padding-top:360px}.foot{padding:12px}}
+
+/* ===== TYPE SYSTEM: Fields (Adam Ladd), kit qro2lkz =====
+   Fields Display  -> big type only (optical display cut: tighter, sharper)
+     Black 900     -> numbers that sell: price, step badges, stats
+     ExtraBold 800 -> hero headline (one loud moment)
+     SemiBold 600  -> section headlines (calmer than hero)
+     Regular 400   -> highlight words inside headlines (weight contrast replaces italic)
+   Fields (text)   -> mid sizes where the display cut gets fragile
+     Bold 700      -> card titles, footer lines, labels with weight
+     Regular 400   -> lead paragraphs (the "voice" lines under headlines)
+   DM Sans         -> UI + long reading: nav, buttons, chips, FAQ answers, body
+   JetBrains Mono  -> tiny labels / tickers (unchanged) */
+.rk .disp,.rk h1,.rk h2,.cta-h{font-family:'fields-display',Georgia,serif!important;letter-spacing:-.025em}
+.rk h1,.rk .hh{font-weight:800!important;letter-spacing:-.035em;line-height:.98}
+.rk h2,.rk .h2,.cta-h{font-weight:600!important;letter-spacing:-.03em;line-height:1.02}
+.hl,.hl-lime{font-family:'fields-display',Georgia,serif!important;font-style:normal;font-weight:400!important;font-size:1em;letter-spacing:-.02em}
+.p-price,.st-num,.cp-dot,.chip b,.vs-grid s,.vs-grid b{font-family:'fields-display',Georgia,serif!important;font-weight:900!important;letter-spacing:-.03em}
+.rk h3,.fbig,.wk-meta b,.p-sticker,.vz-type b,.chip2 b{font-family:'fields',Georgia,serif!important;font-weight:700!important;letter-spacing:-.01em}
+.lead{font-family:'fields',Georgia,serif;font-weight:400;font-size:21px;line-height:1.45;letter-spacing:0}
+.qa-q{font-family:'fields',Georgia,serif;font-weight:700;letter-spacing:-.005em}
+
+/* ===== TYPE SYSTEM v2: Superpop Variable (Resistenza), kit pvs4gzc, wght 200-700 =====
+   Superpop = every voice that sells: h1, h2, highlights, prices, numbers, h3, CTA, questions.
+   DM Sans = reading text (lead, body). Fields no longer used for display. */
+.rk .disp,.rk h1,.rk h2,.cta-h,.hl,.hl-lime,.p-price,.st-num,.cp-dot,.chip b,.vs-grid s,.vs-grid b,
+.rk h3,.fbig,.wk-meta b,.p-sticker,.vz-type b,.chip2 b,.qa-q{font-family:'superpop-variable','DM Sans',system-ui,sans-serif!important;font-style:normal}
+.rk h1,.rk .hh{font-weight:700!important;letter-spacing:-.01em;line-height:1.02;font-size:clamp(40px,6.1vw,88px)!important}
+.rk h2,.rk .h2,.cta-h{font-weight:700!important;letter-spacing:-.015em;line-height:1.04}
+.hl,.hl-lime{font-weight:300!important;letter-spacing:-.01em}
+.p-price,.st-num,.cp-dot,.chip b,.vs-grid s,.vs-grid b{font-weight:700!important;letter-spacing:-.02em}
+.rk h3,.fbig,.wk-meta b,.p-sticker,.vz-type b,.chip2 b,.qa-q{font-weight:600!important;letter-spacing:0}
+.lead{font-family:'DM Sans',system-ui,sans-serif!important;font-weight:400;font-size:20px;line-height:1.5}
+
+/* ===== TYPE SYSTEM v3: Coolvetica (Ray Larabie / Typodermic), kit fvp2kyt =====
+   400 Book, 500 Regular (+italic), 700 Bold, 900 Heavy. Display voice everywhere it sells; DM Sans for reading. */
+.rk .disp,.rk h1,.rk h2,.cta-h,.hl,.hl-lime,.p-price,.st-num,.cp-dot,.chip b,.vs-grid s,.vs-grid b,
+.rk h3,.fbig,.wk-meta b,.p-sticker,.vz-type b,.chip2 b,.qa-q{font-family:'coolvetica','DM Sans',system-ui,sans-serif!important}
+.rk h1,.rk .hh{font-weight:500!important;letter-spacing:-.01em;line-height:.95;font-size:clamp(48px,7.6vw,112px)!important}
+.rk h2,.rk .h2,.cta-h{font-weight:500!important;letter-spacing:-.005em;line-height:1}
+.hl,.hl-lime{font-weight:500!important;font-style:normal!important;letter-spacing:-.005em}
+.p-price,.st-num,.cp-dot,.chip b,.vs-grid s,.vs-grid b{font-weight:500!important;letter-spacing:0}
+.rk h3,.fbig,.wk-meta b,.p-sticker,.vz-type b,.chip2 b,.qa-q{font-weight:500!important;letter-spacing:.005em}
+</style>
+
+</head>
+<body style="margin:0">
+
+<div class="rk" style="font-family: 'DM Sans', system-ui, sans-serif; color: #10120F; background: #FBF8F1; font-size: 18px; line-height: 1.5; min-width: 0; overflow: hidden">
+
+<div class="herowrap">
+<div class="herogrid" aria-hidden="true"></div>
+<header style="position: relative; z-index: 5; display: flex; justify-content: center; padding: 22px 20px 0">
+<nav class="pillnav" aria-label="Main">
+<a href="#top" aria-label="Rohan Kumar, home" style="display: inline-flex; align-items: center; gap: 8px; padding: 0 10px 0 4px; text-decoration: none"><img src="/sprint/a/8fa7ebfb6a.png" alt="" style="width: 34px; height: 34px; display: block"><img src="/sprint/a/701b6501d2.png" alt="Rohan" style="height: 13px; width: auto; display: block"></a>
+<a class="nl hide-sm" href="#work">Work</a><a class="nl hide-sm" href="#week">Process</a><a class="nl hide-sm" href="#price">Price</a><a class="nl hide-sm" href="#faq">FAQ</a>
+<a class="btn" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" style="margin-left: 6px; display: inline-flex; align-items: center; text-decoration: none; background: #10120F; color: #FFFFFF; font-size: 14px; font-weight: 600; padding: 0 18px; min-height: 40px; border-radius: 999px">Book a call</a>
+</nav>
+</header>
+
+<section id="top" style="position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 56px 32px 0; display: flex; flex-direction: column; align-items: center; text-align: center">
+<a href="https://dribbble.com/rohankumarpro" target="_blank" rel="noopener" class="chip">
+<svg width="18" height="30" viewBox="0 0 18 30" aria-hidden="true"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
+<span><b>Dribbble Select</b><br>Top branding agency</span>
+<svg width="18" height="30" viewBox="0 0 18 30" aria-hidden="true" style="transform: scaleX(-1)"><g fill="none" stroke="#10120F" stroke-width="1.6" stroke-linecap="round"><path d="M14 28C6 24 3 15 6 4"/><path d="M6 8c-3-1-4-3-4-5M5.2 13c-3 0-4.6-1.5-5-3.6M5.6 18.5C3 19 1.2 18 0.6 16M8 23.5c-2.5 1-4.5.5-5.6-1"/></g></svg>
+</a>
+
+<h1 class="disp hh">
+<span class="ln">Make your <span class="slider" aria-hidden="true"><span class="knob"><img src="/sprint/a/8fa7ebfb6a.png" alt=""></span></span> brand</span>
+<span class="ln">look as good as your</span>
+<span class="ln">business <span class="toggle" aria-hidden="true"><span class="tk"></span></span> <span class="end">already is.<svg class="wire wire-r hide-sm" viewBox="0 0 200 150" aria-hidden="true"><path d="M6 40 C 70 40, 90 120, 170 118" fill="none" stroke="#10120F" stroke-width="2" stroke-dasharray="6 7" class="dash"/></svg><span class="tag tag-r hide-sm"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1l11 6-5 1.5L6 14z" fill="#10120F"/></svg><em>your brand, 7 days later</em></span></span></span>
+<svg class="spark s1 hide-sm" width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><path d="M19 3c1 9 4 13 16 16-12 3-15 7-16 16-1-9-4-13-16-16 12-3 15-7 16-16z" fill="none" stroke="#10120F" stroke-width="1.8" stroke-linejoin="round"/></svg>
+<svg class="spark s2 hide-sm" width="44" height="30" viewBox="0 0 44 30" aria-hidden="true"><path d="M3 20c6-14 14-14 12-4s10 6 12-6 10 4 14-2" fill="none" stroke="#10120F" stroke-width="1.8" stroke-linecap="round"/></svg>
+</h1>
+
+<p style="margin: 26px 0 0; max-width: 540px; font-size: 19px; line-height: 1.55; color: #55574F">I'm Rohan Kumar, a brand designer. In seven days I give your business a new brand identity for one fixed price, built around the business you already run.</p>
+
+<div style="margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
+<a class="btn" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; background: #10120F; color: #FFFFFF; font-size: 17px; font-weight: 600; padding: 0 26px; min-height: 54px; border-radius: 12px">Book a call <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8 1L3 8h4l-1 5 5-7H7z" fill="#D4F25C"/></svg></a>
+<a class="btn" href="#price" style="display: inline-flex; align-items: center; text-decoration: none; background: #FFFFFF; box-shadow: 0 1px 2px rgba(16,18,15,.06), 0 6px 16px -8px rgba(16,18,15,.18); font-size: 17px; font-weight: 600; padding: 0 26px; min-height: 54px; border-radius: 12px; box-sizing: border-box">See the price</a>
+</div>
+<p style="margin: 14px 0 0; font-size: 14px; color: #6B6D64">7 days · $2,500 fixed · founding clients pay $1,500</p>
+
+<div class="fan" aria-label="Logos I designed">
+<div class="fc" style="--i:-3"><img src="/sprint/a/90ab439b02.jpg" alt="Wuttaday logo"></div>
+<div class="fc" style="--i:-2"><img src="/sprint/a/a2e0f55f8a.jpg" alt="Greenhouse logo"></div>
+<div class="fc" style="--i:-1"><img src="/sprint/a/97d8cf60ef.jpg" alt="Ecosystem logo"></div>
+<div class="fc" style="--i:0"><img src="/sprint/a/70fc423918.jpg" alt="Steven Soto logo"><span class="tag tag-c"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1l11 6-5 1.5L6 14z" fill="#10120F"/></svg><em>@stevensoto</em></span></div>
+<div class="fc" style="--i:1"><img src="/sprint/a/5607c7d071.jpg" alt="AJ monogram"></div>
+<div class="fc" style="--i:2"><img src="/sprint/a/c31fe9d876.jpg" alt="Wagnum logo"></div>
+<div class="fc" style="--i:3"><img src="/sprint/a/0f6555f669.jpg" alt="N monogram"></div>
+</div>
+</section>
+</div>
+
+<div class="ticker" aria-hidden="true"><div class="tk-track"><span>BRAND IDENTITY SPRINT</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>LOGO</span><span class="tk-star" aria-hidden="true">✺</span><span>COLOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>TYPE</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND GUIDE</span><span class="tk-star" aria-hidden="true">✺</span><span>SOURCE FILES</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND IDENTITY SPRINT</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>LOGO</span><span class="tk-star" aria-hidden="true">✺</span><span>COLOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>TYPE</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND GUIDE</span><span class="tk-star" aria-hidden="true">✺</span><span>SOURCE FILES</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND IDENTITY SPRINT</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>LOGO</span><span class="tk-star" aria-hidden="true">✺</span><span>COLOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>TYPE</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND GUIDE</span><span class="tk-star" aria-hidden="true">✺</span><span>SOURCE FILES</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND IDENTITY SPRINT</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>LOGO</span><span class="tk-star" aria-hidden="true">✺</span><span>COLOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>TYPE</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND GUIDE</span><span class="tk-star" aria-hidden="true">✺</span><span>SOURCE FILES</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND IDENTITY SPRINT</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>LOGO</span><span class="tk-star" aria-hidden="true">✺</span><span>COLOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>TYPE</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND GUIDE</span><span class="tk-star" aria-hidden="true">✺</span><span>SOURCE FILES</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND IDENTITY SPRINT</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>LOGO</span><span class="tk-star" aria-hidden="true">✺</span><span>COLOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>TYPE</span><span class="tk-star" aria-hidden="true">✺</span><span>BRAND GUIDE</span><span class="tk-star" aria-hidden="true">✺</span><span>SOURCE FILES</span><span class="tk-star" aria-hidden="true">✺</span></div></div>
+<main>
+<section id="work" class="sec">
+<div class="wrap2">
+<div class="sec-top"><span class="mono pill">work</span><span class="mono pill pill-ghost">recent brand identities</span></div>
+<div class="pocket-row">
+<div class="pocket-copy">
+<h2 class="disp h2">Brands I made <span class="hl">look the part.</span></h2>
+<p class="lead">Logos, colours, type and full systems for coaches, barbershops, supplement brands and apps. Point at the pocket, it's full.</p>
+<div class="btnrow"><a class="b b-dark" href="https://dribbble.com/rohankumarpro" target="_blank" rel="noopener">See it on Dribbble ↗</a><a class="b b-light" href="https://www.behance.net/rohankumarpro" target="_blank" rel="noopener">Behance ↗</a></div>
+</div>
+<a class="pocket" href="https://dribbble.com/rohankumarpro" target="_blank" rel="noopener" aria-label="View my work on Dribbble">
+<div class="pk-cards"><img class="pk-card" src="/sprint/a/ac004b7047.jpg" alt="" style="--r:-9deg;--x:-170px"><img class="pk-card" src="/sprint/a/72b3ae1b31.jpg" alt="" style="--r:4deg;--x:-60px"><img class="pk-card" src="/sprint/a/53d0ac725c.jpg" alt="" style="--r:-3deg;--x:60px"><img class="pk-card" src="/sprint/a/2bbbe5a90d.jpg" alt="" style="--r:8deg;--x:170px"></div>
+<div class="pk-front"><span class="pk-label">View my works</span><span class="mono pk-list">periodic / steven soto / tmj / gruite</span></div>
+</a>
+</div>
+</div>
+</section>
+<section id="week" class="sec sec-grid">
+<div class="wrap2">
+<div class="sec-top"><span class="mono pill">process</span><span class="mono pill pill-ghost">one week, start to finish</span></div>
+<h2 class="disp h2 center">Seven days, <span class="hl">start to finish.</span></h2>
+<div class="stgrid"><article class="st" style="--bg:#FFE07A"><span class="st-num" style="--r:-6deg">01</span><span class="mono pill pill-ink">days 1–3</span><h3 class="disp">Kickoff and two directions</h3><p>You tell me about your business, your customers and what bothers you about your current look. I study your market, then show you two directions on a live call.</p><span class="viz" aria-hidden="true"><span class="vz-bar"><span class="vz-dot"></span><span class="mono">live call · day 3</span></span><span class="vz-two"><span class="vz-opt" style="background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt=""><span class="mono">direction a</span></span><span class="vz-opt vz-pick" style="background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt=""><span class="mono" style="color:#fff">direction b</span><span class="vz-check">✓ picked</span></span></span></span></article><article class="st" style="--bg:#FFC2DA"><span class="st-num" style="--r:5deg">02</span><span class="mono pill pill-ink">days 4–5</span><h3 class="disp">The full system</h3><p>I turn that direction into the full system of logo, colours and type, with two rounds of revisions. You reply within a few hours on each round.</p><span class="viz vz-sys" aria-hidden="true"><span class="vz-logo"><img src="/sprint/a/c332865ffa.svg" alt=""></span><span class="vz-col"><span class="vz-sw"><i style="background:#4DD6F5"></i><i style="background:#FF5C8A"></i><i style="background:#FFC22E"></i><i style="background:#10120F"></i></span><span class="vz-type"><b>Aa</b><span class="mono">headings · body</span></span><span class="vz-revs"><span class="mono">rev 1 ✓</span><span class="mono">rev 2 ✓</span></span></span></span></article><article class="st" style="--bg:#BFE3FF"><span class="st-num" style="--r:-4deg">03</span><span class="mono pill pill-ink">days 6–7</span><h3 class="disp">Put to work, then handed over</h3><p>I put it to work on your business card, social profiles and real mockups, and write your brand guide. Then every file is yours.</p><span class="viz" aria-hidden="true"><span class="vz-bar"><span class="mono">handover/</span><span class="vz-done mono">✓ yours</span></span><span class="vz-files"><span class="vz-file"><b style="background:#FF9A00">AI</b><span class="mono">logo.ai</span></span><span class="vz-file"><b style="background:#00674F">SVG</b><span class="mono">logo.svg</span></span><span class="vz-file"><b style="background:#4DA3FF">PNG</b><span class="mono">logo@2x.png</span></span><span class="vz-file"><b style="background:#E5322D">PDF</b><span class="mono">brand-guide.pdf</span></span><span class="vz-file"><b style="background:#E5322D">PDF</b><span class="mono">business-card.pdf</span></span><span class="vz-file"><b style="background:#7A7D74">ZIP</b><span class="mono">social-kit.zip</span></span></span></span></article></div>
+<div class="checkpoint"><span class="cp-dot">D3</span><span><b>Day 3 is the checkpoint.</b> You approve a direction, then pay the second half.</span><svg class="wire2" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 20 C 40 0, 80 40, 118 20" fill="none" stroke="#10120F" stroke-width="2" stroke-dasharray="6 7" class="dash"/></svg><a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener">Book a call</a></div>
+</div>
+</section>
+<div class="ticker ticker--dark" aria-hidden="true"><div class="tk-track"><span>WHY CLIENTS HIRE ME</span><span class="tk-star" aria-hidden="true">✺</span><span>9+ YEARS</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>EVERY STEP DONE BY ME</span><span class="tk-star" aria-hidden="true">✺</span><span>REPLY IN 24 HOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>WHY CLIENTS HIRE ME</span><span class="tk-star" aria-hidden="true">✺</span><span>9+ YEARS</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>EVERY STEP DONE BY ME</span><span class="tk-star" aria-hidden="true">✺</span><span>REPLY IN 24 HOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>WHY CLIENTS HIRE ME</span><span class="tk-star" aria-hidden="true">✺</span><span>9+ YEARS</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>EVERY STEP DONE BY ME</span><span class="tk-star" aria-hidden="true">✺</span><span>REPLY IN 24 HOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>WHY CLIENTS HIRE ME</span><span class="tk-star" aria-hidden="true">✺</span><span>9+ YEARS</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>EVERY STEP DONE BY ME</span><span class="tk-star" aria-hidden="true">✺</span><span>REPLY IN 24 HOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>WHY CLIENTS HIRE ME</span><span class="tk-star" aria-hidden="true">✺</span><span>9+ YEARS</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>EVERY STEP DONE BY ME</span><span class="tk-star" aria-hidden="true">✺</span><span>REPLY IN 24 HOURS</span><span class="tk-star" aria-hidden="true">✺</span><span>WHY CLIENTS HIRE ME</span><span class="tk-star" aria-hidden="true">✺</span><span>9+ YEARS</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>EVERY STEP DONE BY ME</span><span class="tk-star" aria-hidden="true">✺</span><span>REPLY IN 24 HOURS</span><span class="tk-star" aria-hidden="true">✺</span></div></div>
+<section id="rohan" class="sec sec-dark">
+<div class="wrap2 rohan-row">
+<div class="rohan-copy">
+<div class="sec-top"><span class="mono pill pill-lime">about</span></div>
+<h2 class="disp h2">Hi, I'm Rohan. <span class="hl-lime">I do every step myself.</span></h2>
+<p class="lead lead-light">A brand designer with 9+ years of work, from the first call to the final files. No hand-offs, no juniors, no surprise invoices.</p>
+<div class="chips"><span class="mono chip chip-dark">9+ years</span><span class="mono chip chip-dark">Dribbble Select</span><span class="mono chip chip-dark">reply in 24h</span><span class="mono chip chip-dark">PayPal, USD</span></div>
+</div>
+<a class="vid" href="https://youtu.be/7Jl174uwGq0" target="_blank" rel="noopener" aria-label="Watch why clients hire me, 1 minute">
+<img src="/sprint/a/41843aaad2.jpg" alt="Rohan Kumar pitch video">
+<span class="vid-badge"><svg viewBox="0 0 132 132" width="132" height="132" aria-hidden="true" class="spin"><defs><path id="ring2" d="M66 66m-50 0a50 50 0 1 1 100 0a50 50 0 1 1 -100 0"></path></defs><circle cx="66" cy="66" r="64" fill="#D4F25C"></circle><text font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="700" letter-spacing="2" fill="#10120F"><textPath href="#ring2">WATCH WHY CLIENTS HIRE ME • 1 MIN • </textPath></text></svg><span class="vid-play"><svg width="18" height="18" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#D4F25C"></path></svg></span></span>
+</a>
+</div>
+</section>
+<section id="price" class="sec">
+<div class="wrap2">
+<div class="sec-top"><span class="mono pill">price</span><span class="mono pill pill-ghost">no hourly rates, no surprises</span></div>
+<h2 class="disp h2 center">One sprint, <span class="hl">one fixed price.</span></h2>
+<div class="pgrid">
+<div class="pcard">
+<span class="p-sticker">founding · [X] of 3 left</span>
+<span class="mono pill pill-lime">brand identity sprint</span>
+<p class="p-price disp">$1,500 <s>$2,500</s></p>
+<p class="p-note">Founding clients pay $1,500. Then $2,500.</p>
+<ul class="p-list"><li><span class="tick">✓</span>Logo and its variations</li><li><span class="tick">✓</span>Colour palette</li><li><span class="tick">✓</span>Typefaces</li><li><span class="tick">✓</span>One-page brand guide</li><li><span class="tick">✓</span>Business card design</li><li><span class="tick">✓</span>Social starter kit</li><li><span class="tick">✓</span>Brand presentation with mockups</li><li><span class="tick">✓</span>Source files in AI, SVG, PNG, PDF</li></ul>
+<a class="b b-lime b-wide" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener">Book a call →</a>
+</div>
+<div class="pside">
+<div class="vs">
+<span class="mono pill pill-ink">next to an agency</span>
+<div class="vs-grid"><span class="mono vs-h">agency</span><span class="mono vs-h vs-me">this sprint</span><s>$10,000+</s><b>$2,500</b><s>8–12 weeks</s><b>7 days</b><s>a team</s><b>just me</b></div>
+</div>
+<div class="minis">
+<div class="mini" style="--bg:#FFE07A"><b class="disp">½ + ½</b><span>Half now, half on Day 3, through PayPal in US dollars.</span></div>
+<div class="mini" style="--bg:#BFE3FF"><b class="disp">↺</b><span>New directions at no extra cost if none land.</span></div>
+<div class="mini" style="--bg:#FFC2DA"><b class="disp">+$1,000</b><span>A one-page site on your new brand, in week two.</span></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="faq" class="sec sec-grid">
+<div class="wrap2 faq-row">
+<div class="faq-l">
+<div class="sec-top"><span class="mono pill">faq</span></div>
+<h2 class="disp h2">Questions, <span class="hl">answered.</span></h2>
+<div class="bubble"><img src="/sprint/a/654ab10564.jpg" alt="Rohan Kumar"><span>Still unsure? Ask me anything on the call.</span></div>
+<a class="b b-dark" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener">Book a call</a>
+</div>
+<div class="faq-r">
+<div class="qa" data-i="0"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">01</span><span class="qa-t">What if I don't like either direction?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>I come back with new directions at no extra cost. Deposits are non-refundable.</p></div>
+<div class="qa" data-i="1"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">02</span><span class="qa-t">Who does the work?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>I do, from the first call to the final files.</p></div>
+<div class="qa" data-i="2"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">03</span><span class="qa-t">How many revisions do I get?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>Two rounds on the direction you pick. If a mistake is mine, fixing it doesn't use up a round.</p></div>
+<div class="qa" data-i="3"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">04</span><span class="qa-t">Do I own the files?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>Yes. All rights and source files are yours once the final payment is in.</p></div>
+<div class="qa" data-i="4"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">05</span><span class="qa-t">What if the week slips?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>The 7 days run on working days from the kickoff call. If we go for new directions, or a reply takes longer, I tell you the new handover date that same day.</p></div>
+<div class="qa" data-i="5"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">06</span><span class="qa-t">Do I need to buy fonts?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>I pick typefaces that are free for commercial use, or I tell you the licence cost before you choose.</p></div>
+<div class="qa" data-i="6"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">07</span><span class="qa-t">How do I pay?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>Through PayPal, in US dollars. You get an invoice for each half.</p></div>
+<div class="qa" data-i="7"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">08</span><span class="qa-t">When can we talk?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>I reply within 24 hours on working days, and our calls happen in your working hours.</p></div>
+<div class="qa" data-i="8"><button type="button" aria-expanded="false" class="qa-q"><span class="mono qa-n">09</span><span class="qa-t">Can you do other design work?</span><span class="qa-s">+</span></button><p class="qa-a" hidden>Yes, including packaging, presentation decks and social content. Tell me what you need on the call.</p></div>
+
+</div>
+</div>
+</section>
+<section id="book" class="cta">
+<div class="arc" aria-hidden="true"><div class="arc-spin"><span class="arc-card" style="--a:0.0deg"><img src="/sprint/a/787e92fb85.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:22.5deg"><img src="/sprint/a/ac004b7047.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:45.0deg"><img src="/sprint/a/f275dbc2e2.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:67.5deg"><img src="/sprint/a/72b3ae1b31.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:90.0deg"><img src="/sprint/a/9f3989893f.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:112.5deg"><img src="/sprint/a/53d0ac725c.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:135.0deg"><img src="/sprint/a/9fd62a8150.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:157.5deg"><img src="/sprint/a/2bbbe5a90d.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:180.0deg"><img src="/sprint/a/a75308d2cf.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:202.5deg"><img src="/sprint/a/7d808aa7ad.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:225.0deg"><img src="/sprint/a/7633f0353c.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:247.5deg"><img src="/sprint/a/9549dcea5f.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:270.0deg"><img src="/sprint/a/acbec9de9a.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:292.5deg"><img src="/sprint/a/6a5bc9fe91.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:315.0deg"><img src="/sprint/a/b7d1892429.jpg" alt="" loading="lazy"></span><span class="arc-card" style="--a:337.5deg"><img src="/sprint/a/64dd9ce8ff.jpg" alt="" loading="lazy"></span></div></div>
+<div class="cta-in">
+<a href="https://dribbble.com/rohankumarpro" target="_blank" rel="noopener" class="chip2"><b>Dribbble Select</b> · top branding agency</a>
+<h2 class="disp cta-h">If you are looking for branding or rebranding, <span class="hl">I am here to help.</span></h2>
+<p class="lead">Book a 30-minute call. I reply within 24 hours on working days.</p>
+<div class="btnrow center"><a class="b b-dark b-big" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener">Book a call →</a></div>
+<p class="small">Not ready for a call? <a href="mailto:hey@rohankumar.pro?subject=Free%20brand%20teardown">Send me your website</a> and I'll reply with a short teardown of your brand, free.</p>
+</div>
+</section>
+</main>
+<div class="ticker" aria-hidden="true"><div class="tk-track"><span>BOOK A CALL</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>HEY@ROHANKUMAR.PRO</span><span class="tk-star" aria-hidden="true">✺</span><span>BOOK A CALL</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>HEY@ROHANKUMAR.PRO</span><span class="tk-star" aria-hidden="true">✺</span><span>BOOK A CALL</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>HEY@ROHANKUMAR.PRO</span><span class="tk-star" aria-hidden="true">✺</span><span>BOOK A CALL</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>HEY@ROHANKUMAR.PRO</span><span class="tk-star" aria-hidden="true">✺</span><span>BOOK A CALL</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>HEY@ROHANKUMAR.PRO</span><span class="tk-star" aria-hidden="true">✺</span><span>BOOK A CALL</span><span class="tk-star" aria-hidden="true">✺</span><span>7 DAYS</span><span class="tk-star" aria-hidden="true">✺</span><span>$2,500 FIXED</span><span class="tk-star" aria-hidden="true">✺</span><span>DRIBBBLE SELECT</span><span class="tk-star" aria-hidden="true">✺</span><span>HEY@ROHANKUMAR.PRO</span><span class="tk-star" aria-hidden="true">✺</span></div></div>
+<footer class="foot">
+<div class="foot-panel">
+<div class="foot-cols">
+<div><span class="mono pill pill-cream">looking for a brand?</span><p class="fbig">Brand Identity Sprint<br>7 days, $2,500 fixed</p><a class="ulink" href="https://cal.com/rohankumarpro/30min" target="_blank" rel="noopener">Book a call</a></div>
+<div><span class="mono pill pill-cream">email</span><p class="fbig"><a href="mailto:hey@rohankumar.pro">hey@rohankumar.pro</a></p><p class="fsmall">I reply within 24 hours on working days.</p></div>
+<div><span class="mono pill pill-cream">elsewhere</span><p class="fbig"><a href="https://dribbble.com/rohankumarpro">Dribbble</a><br><a href="https://www.behance.net/rohankumarpro">Behance</a><br><a href="https://www.instagram.com/rohankumarpro/">Instagram</a></p></div>
+</div>
+<div class="foot-word"><svg viewBox="0 0 2308 464" role="img" aria-label="Rohan" style="width:100%;height:auto;display:block"><path fill="#FBF8F1" fill-rule="evenodd" d="M245.9,385.7L168.2,307.8L166.9,308.2L165.5,308.7L165.2,359.0L165.0,409.3L163.9,410.7L162.8,412.0L81.4,412.0L0.0,412.0L0.0,328.5L0.0,245.0L51.5,245.0L103.0,245.0L103.0,243.7L103.0,242.5L52.5,192.0L2.0,141.5L1.0,141.2L0.0,140.8L0.0,78.9L0.0,17.0L195.3,17.0L390.6,17.0L391.8,18.2L393.0,19.4L393.0,100.5L393.0,181.6L391.8,182.8L390.6,184.0L336.4,184.0L282.1,184.0L281.4,185.1L280.7,186.2L360.5,266.0L440.2,345.8L439.9,346.9L439.5,348.0L381.6,406.0L323.7,464.0L323.6,463.8L323.5,463.7L245.9,385.7ZM607.0,427.9L597.5,427.0L595.4,426.1L593.3,425.2L588.4,424.5L583.5,423.9L576.5,421.8L569.5,419.8L564.5,417.9L559.5,416.0L558.1,416.0L556.8,416.0L553.1,414.1L549.5,412.3L539.7,407.4L529.9,402.5L525.2,399.8L520.5,397.1L518.5,396.2L516.5,395.2L511.0,391.1L505.5,387.0L502.1,384.3L498.6,381.5L490.0,373.8L481.4,366.2L474.9,358.8L468.4,351.5L462.9,344.5L457.4,337.5L455.4,334.6L453.5,331.7L451.9,329.1L450.3,326.5L448.1,322.8L446.0,319.0L443.9,315.2L441.8,311.5L441.1,310.5L440.4,309.5L438.1,303.5L435.8,297.5L434.0,293.5L432.2,289.5L430.2,283.0L428.1,276.5L426.2,269.5L424.2,262.5L422.0,250.2L419.7,237.8L419.7,214.7L419.7,191.5L422.0,180.0L424.2,168.5L425.0,164.5L425.9,160.5L427.6,154.5L429.2,148.5L430.0,147.5L430.8,146.5L431.5,143.0L432.3,139.5L434.1,135.5L435.9,131.5L440.4,122.0L445.0,112.5L447.9,107.5L450.9,102.5L451.8,100.5L452.8,98.4L456.2,94.0L459.6,89.5L462.2,85.6L464.8,81.8L470.2,75.6L475.5,69.5L482.0,63.0L488.5,56.5L495.0,50.8L501.5,45.1L506.2,42.0L510.8,38.9L512.0,37.5L513.2,36.0L514.1,36.0L514.9,36.0L519.2,33.1L523.5,30.2L527.1,28.2L530.7,26.2L532.9,25.1L535.0,24.0L537.0,23.0L539.0,22.0L540.8,21.1L542.5,20.2L547.0,18.2L551.5,16.2L556.5,14.3L561.5,12.3L566.5,10.6L571.5,8.9L577.5,7.4L583.5,5.9L593.5,4.1L603.5,2.4L605.7,1.2L607.9,0.0L633.7,0.0L659.6,0.0L660.8,1.2L662.0,2.4L672.7,4.1L683.5,5.8L690.0,7.5L696.5,9.1L699.7,10.5L702.8,12.0L704.4,12.0L706.0,12.0L709.2,14.0L712.5,16.0L714.3,16.0L716.2,16.0L718.7,18.0L721.3,20.0L722.6,20.0L723.9,20.0L729.9,23.0L735.9,26.1L736.5,27.0L737.1,28.0L738.5,28.0L739.9,28.0L749.2,34.2L758.5,40.4L768.5,48.4L778.5,56.4L785.0,63.0L791.4,69.5L800.0,80.1L808.5,90.7L811.5,95.6L814.5,100.4L816.1,102.9L817.7,105.5L820.0,109.5L822.3,113.5L825.3,119.5L828.2,125.5L830.0,129.5L831.8,133.5L833.8,139.0L835.8,144.5L837.0,148.0L838.2,151.5L839.2,155.5L840.3,159.5L842.0,166.0L843.8,172.5L844.9,181.0L846.1,189.5L847.2,198.5L848.2,207.5L847.7,220.5L847.1,233.5L845.0,247.5L842.9,261.5L841.4,265.8L840.0,270.1L840.0,271.4L840.0,272.7L837.5,280.6L835.0,288.5L833.5,291.2L832.0,293.8L832.0,295.0L832.0,296.3L829.9,300.9L827.8,305.5L826.9,307.2L826.0,309.0L825.1,310.8L824.1,312.5L823.6,314.0L823.0,315.5L820.8,319.2L818.5,322.9L814.6,329.2L810.6,335.5L810.0,336.0L809.4,336.5L806.2,341.5L802.9,346.5L797.7,352.5L792.5,358.4L786.5,364.9L780.5,371.3L769.5,380.3L758.6,389.2L754.6,391.9L750.7,394.5L748.1,396.2L745.5,397.9L741.8,400.0L738.0,402.0L734.2,404.0L730.5,406.0L729.0,406.9L727.5,407.8L719.8,411.4L712.1,415.0L711.1,415.0L710.1,415.0L704.7,417.3L699.4,419.7L695.5,420.4L691.5,421.1L687.0,422.6L682.5,424.0L671.5,426.0L660.5,428.1L638.5,428.5L616.5,428.9L607.0,427.9ZM870.2,410.8L869.0,409.6L869.0,215.3L869.0,21.0L871.0,19.0L873.0,17.0L947.9,17.0L1022.9,17.0L1024.4,18.6L1026.0,20.1L1026.0,105.0L1026.0,189.9L1028.0,191.0L1029.9,192.0L1076.7,191.8L1123.5,191.5L1124.0,105.5L1124.5,19.5L1125.3,18.2L1126.1,17.0L1202.6,17.0L1279.0,17.0L1280.0,19.6L1281.0,22.1L1281.0,215.9L1281.0,409.6L1279.8,410.8L1278.6,412.0L1201.8,412.0L1125.0,412.0L1124.8,411.8L1124.5,411.5L1124.0,361.0L1123.5,310.5L1076.1,310.2L1028.7,310.0L1027.4,311.1L1026.0,312.2L1026.0,361.5L1026.0,410.8L1024.4,411.4L1022.8,412.0L947.1,412.0L871.4,412.0L870.2,410.8ZM1304.3,410.4L1303.7,408.9L1305.9,406.6L1308.0,404.4L1308.0,402.9L1308.0,401.5L1310.0,399.0L1312.0,396.5L1312.0,395.6L1312.0,394.7L1313.4,393.1L1314.8,391.5L1319.3,383.0L1323.7,374.5L1327.0,368.5L1330.3,362.5L1332.2,359.0L1334.1,355.5L1336.5,351.5L1339.0,347.5L1339.6,346.0L1340.1,344.5L1341.2,342.6L1342.2,340.7L1344.1,337.4L1346.0,334.0L1347.9,330.6L1349.8,327.3L1350.9,325.1L1352.0,323.0L1353.2,320.8L1354.4,318.5L1355.7,315.8L1357.1,313.0L1358.0,312.5L1358.8,312.0L1362.0,305.3L1365.3,298.5L1368.6,293.2L1372.0,288.0L1372.0,286.5L1372.0,285.1L1372.9,284.6L1373.8,284.0L1375.9,279.8L1378.0,275.5L1380.5,271.5L1383.0,267.5L1383.6,266.0L1384.1,264.5L1385.2,262.6L1386.2,260.7L1388.1,257.4L1390.0,254.0L1391.9,250.6L1393.8,247.3L1395.1,244.9L1396.3,242.5L1397.3,240.5L1398.3,238.5L1399.4,236.5L1400.5,234.5L1401.7,233.0L1402.8,231.5L1407.5,222.5L1412.2,213.5L1414.1,210.8L1416.0,208.2L1416.0,206.7L1416.0,205.1L1416.9,204.6L1417.8,204.0L1419.9,199.8L1422.0,195.5L1423.3,193.5L1424.5,191.5L1426.2,188.8L1428.0,186.2L1428.0,184.9L1428.0,183.7L1429.4,182.1L1430.7,180.5L1433.6,175.0L1436.4,169.5L1438.2,166.8L1440.0,164.2L1440.0,163.1L1440.0,162.0L1443.6,156.4L1447.2,150.8L1451.7,142.2L1456.2,133.5L1458.1,130.8L1460.0,128.2L1460.0,126.7L1460.0,125.1L1460.9,124.6L1461.8,124.0L1463.9,119.8L1466.0,115.5L1467.3,113.5L1468.5,111.5L1470.2,108.8L1472.0,106.2L1472.0,104.9L1472.0,103.7L1473.4,102.1L1474.7,100.5L1478.5,93.5L1482.2,86.5L1485.7,80.0L1489.3,73.5L1490.0,72.5L1490.8,71.5L1495.5,62.5L1500.2,53.5L1502.1,50.8L1504.0,48.2L1504.0,47.0L1504.0,45.8L1505.8,43.2L1507.5,40.5L1508.7,38.5L1510.0,36.5L1511.8,33.0L1513.7,29.5L1516.5,24.3L1519.3,19.0L1520.4,18.1L1521.5,17.2L1529.8,16.9L1538.2,16.6L1540.1,19.0L1541.9,21.5L1543.1,24.5L1544.4,27.5L1548.2,33.3L1552.0,39.1L1552.0,39.8L1552.0,40.5L1554.5,45.4L1556.9,50.2L1557.9,51.4L1558.8,52.5L1564.0,62.5L1569.3,72.5L1570.5,74.0L1571.7,75.5L1574.7,81.5L1577.7,87.5L1580.0,91.5L1582.3,95.5L1584.8,100.0L1587.3,104.5L1590.7,110.5L1594.1,116.5L1594.9,118.0L1595.8,119.5L1598.2,124.5L1600.5,129.5L1601.6,131.0L1602.8,132.5L1606.2,139.0L1609.7,145.5L1612.0,149.5L1614.3,153.5L1618.0,160.5L1621.7,167.5L1623.8,171.0L1625.9,174.5L1631.5,185.0L1637.2,195.5L1638.6,197.1L1640.0,198.7L1640.0,200.1L1640.0,201.6L1640.9,202.6L1641.8,203.5L1644.5,208.5L1647.2,213.5L1650.5,219.5L1653.7,225.5L1656.4,230.0L1659.0,234.5L1662.1,240.5L1665.2,246.5L1667.4,250.2L1669.5,253.8L1675.3,264.7L1681.2,275.5L1682.6,277.1L1684.0,278.7L1684.0,279.9L1684.0,281.1L1685.7,283.6L1687.3,286.1L1688.9,289.0L1690.5,291.9L1694.1,298.7L1697.7,305.5L1700.0,309.5L1702.4,313.5L1705.7,319.9L1709.0,326.3L1709.9,327.4L1710.7,328.5L1715.0,336.5L1719.2,344.5L1722.7,350.5L1726.1,356.5L1726.9,358.0L1727.7,359.5L1728.9,361.9L1730.2,364.3L1732.3,367.9L1734.3,371.5L1738.0,378.5L1741.7,385.5L1744.0,389.5L1746.4,393.5L1749.7,400.0L1753.1,406.4L1754.6,408.2L1756.2,409.9L1755.5,410.9L1754.9,412.0L1677.6,412.0L1600.3,412.0L1598.7,410.2L1597.1,408.5L1596.1,406.0L1595.0,403.5L1592.0,398.5L1589.0,393.5L1585.9,387.5L1582.8,381.5L1580.6,377.8L1578.5,374.2L1572.7,363.3L1566.8,352.5L1565.4,350.9L1564.0,349.3L1564.0,347.9L1564.0,346.4L1563.1,345.5L1562.2,344.5L1559.5,339.5L1556.8,334.5L1553.5,328.5L1550.3,322.5L1548.0,318.5L1545.7,314.5L1541.9,307.5L1538.1,300.5L1534.8,294.2L1531.6,288.0L1530.1,288.0L1528.5,288.0L1526.1,292.8L1523.6,297.5L1522.4,299.0L1521.2,300.5L1516.5,309.5L1511.8,318.5L1509.9,321.2L1508.0,323.8L1508.0,325.3L1508.0,326.9L1507.1,327.4L1506.2,328.0L1504.1,332.2L1502.0,336.5L1500.7,338.5L1499.5,340.5L1497.8,343.2L1496.0,345.8L1496.0,347.1L1496.0,348.3L1494.6,349.9L1493.3,351.5L1490.4,357.0L1487.6,362.5L1485.8,365.2L1484.0,367.8L1484.0,368.9L1484.0,370.0L1480.4,375.6L1476.8,381.2L1472.3,389.8L1467.8,398.5L1465.9,401.2L1464.0,403.8L1464.0,405.0L1464.0,406.2L1461.9,409.1L1459.9,412.0L1382.4,412.0L1304.9,412.0L1304.3,410.4ZM1779.5,411.1L1779.0,410.2L1779.0,214.9L1779.0,19.7L1780.1,18.3L1781.2,17.0L1984.1,17.0L2186.9,17.0L2188.4,18.6L2190.0,20.1L2190.0,215.5L2190.0,410.8L2188.4,411.4L2186.8,412.0L2111.1,412.0L2035.4,412.0L2034.2,410.8L2033.0,409.6L2033.0,293.0L2033.0,176.4L2031.8,175.2L2030.6,174.0L1983.8,174.0L1937.1,174.0L1936.0,175.9L1935.0,177.9L1935.0,294.0L1935.0,410.1L1934.5,411.1L1933.9,412.0L1857.0,412.0L1780.1,412.0L1779.5,411.1ZM2225.5,410.9L2224.8,409.9L2224.9,394.7L2225.0,379.5L2224.1,378.1L2223.2,376.7L2219.8,376.8L2216.5,376.9L2214.2,376.4L2211.9,375.9L2212.2,371.2L2212.5,366.5L2230.4,366.2L2248.2,366.0L2249.6,367.1L2251.0,368.2L2251.0,371.4L2251.0,374.6L2249.8,375.8L2248.6,377.0L2243.8,377.0L2239.1,377.0L2238.0,379.0L2236.9,381.0L2237.1,395.5L2237.2,409.9L2236.5,410.9L2235.9,412.0L2231.0,412.0L2226.1,412.0L2225.5,410.9ZM2257.5,411.0L2256.9,409.9L2257.0,389.3L2257.1,368.6L2258.2,367.3L2259.2,366.0L2265.5,366.0L2271.8,366.0L2273.8,367.8L2275.8,369.5L2277.0,374.0L2278.2,378.5L2279.4,383.5L2280.7,388.5L2282.1,388.5L2283.5,388.5L2285.7,382.0L2287.8,375.5L2287.9,373.4L2288.0,371.3L2290.1,368.6L2292.1,366.0L2300.1,366.0L2308.0,366.0L2308.0,389.0L2308.0,412.1L2302.2,411.8L2296.5,411.5L2296.0,401.8L2295.5,392.2L2294.8,391.4L2294.0,390.7L2293.5,391.2L2293.0,391.7L2290.9,400.1L2288.8,408.5L2287.8,410.2L2286.9,412.0L2282.5,412.0L2278.1,412.0L2277.4,410.9L2276.7,409.8L2275.9,406.6L2275.1,403.5L2273.1,398.0L2271.1,392.5L2269.8,392.5L2268.5,392.5L2268.8,401.4L2269.1,410.3L2267.8,411.1L2266.5,412.0L2262.3,412.0L2258.1,412.0L2257.5,411.0ZM641.5,280.1L650.5,279.2L654.5,277.5L658.5,275.8L660.3,274.8L662.1,273.9L667.8,270.9L673.5,267.8L677.8,263.7L682.1,259.5L686.1,254.4L690.1,249.2L692.6,243.9L695.2,238.7L697.0,231.6L698.8,224.5L699.5,219.0L700.1,213.5L699.1,207.5L698.1,201.5L696.9,197.0L695.8,192.5L693.8,188.0L691.9,183.5L691.2,182.4L690.5,181.3L687.6,177.0L684.8,172.7L680.1,168.0L675.4,163.3L669.8,159.7L664.1,156.1L659.3,154.1L654.5,152.2L648.5,150.3L642.5,148.5L632.5,148.6L622.5,148.7L615.0,151.3L607.5,153.8L603.9,155.4L600.3,156.9L599.0,158.4L597.8,160.0L596.8,160.0L595.8,160.0L591.4,163.6L586.9,167.3L582.1,173.4L577.2,179.5L574.7,185.0L572.2,190.5L570.4,194.5L568.6,198.5L568.2,213.1L567.8,227.7L569.9,232.5L572.0,237.3L572.0,239.0L572.0,240.8L576.7,248.4L581.4,256.1L588.5,262.8L595.6,269.5L598.6,271.0L601.5,272.4L604.2,274.2L606.8,276.0L608.5,276.0L610.1,276.0L613.1,277.6L616.2,279.1L622.3,279.9L628.5,280.7L630.5,280.8L632.5,280.9L641.5,280.1Z"/></svg><span class="stk" style="left:6%;top:30%;--r:-9deg;background:#FFFFFF"><img src="/sprint/a/c332865ffa.svg" alt=""></span><span class="stk" style="left:22%;top:2%;--r:7deg;background:#FFFFFF"><img src="/sprint/a/5b53595d49.svg" alt=""></span><span class="stk" style="left:38%;top:38%;--r:-5deg;background:#FFC2DA"><img src="/sprint/a/54cf8f7b0c.svg" alt=""></span><span class="stk" style="left:52%;top:4%;--r:10deg;background:#1B1E5E"><img src="/sprint/a/f8719f6e48.svg" alt=""></span><span class="stk" style="left:66%;top:36%;--r:-8deg;background:#FF6A2B"><img src="/sprint/a/39012aa0a4.svg" alt=""></span><span class="stk" style="left:79%;top:0%;--r:6deg;background:#FFFFFF"><img src="/sprint/a/9fb0fa09d1.svg" alt=""></span><span class="stk" style="left:91%;top:34%;--r:-6deg;background:#D4F25C"><img src="/sprint/a/117f862455.svg" alt=""></span></div>
+<p class="mono foot-copy">© 2026 Rohan Kumar · brand designer</p>
+</div>
+</footer>
+
+<script>
+(function(){
+var tints=['rgba(255,224,122,.62)','rgba(217,245,122,.62)','rgba(255,194,218,.62)','rgba(191,227,255,.62)'];
+var items=[].slice.call(document.querySelectorAll('.faq-r .qa'));
+function set(open){items.forEach(function(el,i){var o=i===open;el.style.background=o?tints[i%4]:'rgba(255,255,255,.5)';el.querySelector('.qa-q').setAttribute('aria-expanded',o);el.querySelector('.qa-s').textContent=o?'\u2212':'+';el.querySelector('.qa-a').hidden=!o;});cur=open;}
+var cur=0;set(0);
+items.forEach(function(el,i){el.querySelector('.qa-q').addEventListener('click',function(){set(cur===i?-1:i);});});
+var el=document.querySelector('.arc-spin'),sec=el&&el.closest('.cta'),c=null;
+function tick(){if(el&&sec){var r=sec.getBoundingClientRect(),vh=window.innerHeight;var p=Math.min(1,Math.max(0,(vh-r.top)/(vh+r.height)));var t=-70+140*p;c=c===null?t:c+(t-c)*.1;el.style.transform='rotate('+c.toFixed(3)+'deg)';}requestAnimationFrame(tick);}
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
