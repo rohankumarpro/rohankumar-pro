@@ -885,47 +885,77 @@ div.award{cursor:default}
    blurred colour light drifting inside it. On hover the light
    swells toward the pointer and the label warms into it.
    ========================================================= */
-.b-silk{--px:.78;--py:.5;color:#2B2C30;overflow:hidden;isolation:isolate;
   background:linear-gradient(180deg,#FFFFFF 0%,#F7F6F3 55%,#EFEEEA 100%);
   box-shadow:inset 0 2px 1px rgba(255,255,255,1),inset 0 -4px 8px rgba(16,18,15,.06),inset 0 0 0 1px rgba(255,255,255,.9),
     0 0 0 1px rgba(16,18,15,.05),0 1px 1px rgba(16,18,15,.04),0 3px 4px -1px rgba(16,18,15,.05),0 10px 18px -8px rgba(16,18,15,.12),
     0 26px 40px -20px rgba(16,18,15,.2),0 40px 70px -40px rgba(90,80,160,.28);
   transition:transform .5s var(--e-spring),box-shadow .5s var(--e-out)}
-.b-silk::before,.b-silk::after{display:none}
-.silk{position:absolute;inset:0;z-index:-1;border-radius:inherit;overflow:hidden;pointer-events:none}
-.silk i{position:absolute;border-radius:50%;filter:blur(14px);opacity:.9;transition:transform 1.1s var(--e-out),opacity .6s;will-change:transform}
-.silk i:nth-child(1){width:46%;height:120%;left:52%;top:-55%;background:#5B8CFF;animation:sk1 7s ease-in-out infinite alternate}
-.silk i:nth-child(2){width:42%;height:110%;left:44%;top:45%;background:#FF7E9E;animation:sk2 8s ease-in-out infinite alternate}
-.silk i:nth-child(3){width:30%;height:100%;left:74%;top:-10%;background:#FFD2A8;animation:sk3 6s ease-in-out infinite alternate}
-.silk i:nth-child(4){width:30%;height:90%;left:60%;top:5%;background:#B38BFF;opacity:.7;animation:sk2 9s ease-in-out infinite alternate-reverse}
-@keyframes sk1{to{transform:translate(-14%,18%) scale(1.15)}}
-@keyframes sk2{to{transform:translate(12%,-22%) scale(.9)}}
-@keyframes sk3{to{transform:translate(-20%,12%) scale(1.2)}}
 /* glossy top sheen over the light */
-.b-silk .silk::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.75) 0%,rgba(255,255,255,.15) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.12) 100%)}
-.b-silk .sl-t{position:relative;background:linear-gradient(90deg,#9C8FB0 0%,#5F6170 38%,#4B4D58 55%,#FFFFFF 78%,#F4EEFF 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;background-size:160% 100%;background-position:100% 0;transition:background-position .9s var(--e-out)}
-.b-silk .ar{background:rgba(255,255,255,.55);color:#2B2C30;box-shadow:inset 0 1px 0 #fff,0 2px 6px -2px rgba(16,18,15,.2)}
-.b-silk .bolt path{fill:#7B5CFF}
 @media (hover:hover){
-  .b-silk:hover{--y:-3px;box-shadow:inset 0 2px 1px #fff,inset 0 -4px 8px rgba(16,18,15,.06),inset 0 0 0 1px rgba(255,255,255,.9),0 0 0 1px rgba(16,18,15,.05),0 2px 3px rgba(16,18,15,.05),0 14px 24px -10px rgba(16,18,15,.16),0 36px 56px -24px rgba(16,18,15,.22),0 50px 80px -40px rgba(120,90,220,.35)}
-  .b-silk:hover .silk i{transform:translate(calc((var(--px) - .78) * 120%),calc((var(--py) - .5) * 40%)) scale(1.35)}
-  .b-silk:hover .sl-t{background-position:40% 0}
-  .b-silk:hover .ar{background:#fff}
 }
-.b-silk:active{transform:translateY(1px) scale(.985);box-shadow:inset 0 2px 6px rgba(16,18,15,.12),0 0 0 1px rgba(16,18,15,.06),0 4px 10px -6px rgba(16,18,15,.2)}
 @media (prefers-reduced-motion:reduce){.silk i{animation:none}}
 /* the white secondary buttons step back so the silk button leads */
 .b-light{background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px rgba(16,18,15,.1),0 1px 2px rgba(16,18,15,.04)!important}
-.pcard .b-silk{color:#2B2C30}
-.silk i{filter:blur(16px);opacity:1}
-.silk i:nth-child(1){background:#2F6BFF;width:44%;left:50%}
-.silk i:nth-child(2){background:#FF4F7E;width:40%;left:46%}
-.silk i:nth-child(3){background:#FFB37A;width:26%;left:80%}
-.silk i:nth-child(4){background:#8A5CFF;opacity:.85;left:58%}
-.b-silk .silk::after{background:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.08) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.1) 100%)}
-.b-silk .sl-t{background-image:linear-gradient(90deg,#A796BE 0%,#6A6C7A 32%,#555767 50%,#FFFFFF 66%,#FFFFFF 100%);-webkit-background-clip:text;background-clip:text}
+
+/* process strips: three different colours along the gradient story, each card's shadow in its own colour */
+#st1{--c1:#D9E6FF;--c2:#6E9BFF;--c3:#3B6BFF;--sh:59,107,255}
+#st2{--c1:#F1DEFF;--c2:#B57BFF;--c3:#8A4DF0;--sh:138,77,240}
+#st3{--c1:#FFE3D6;--c2:#FF8A6B;--c3:#FF5C7A;--sh:255,92,122}
+#st1 .pill,#st2 .pill,#st3 .pill{background:rgba(255,255,255,.75)}
+.lift:has(#st1)>.glow{--g:linear-gradient(90deg,#6E9BFF,#3B6BFF)!important;background-image:linear-gradient(90deg,#6E9BFF,#3B6BFF)!important}
+.lift:has(#st2)>.glow{background-image:linear-gradient(90deg,#B57BFF,#8A4DF0)!important}
+.lift:has(#st3)>.glow{background-image:linear-gradient(90deg,#FF8A6B,#FF5C7A)!important}
+.st{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(16,18,15,.04),0 2px 4px rgba(var(--sh),.06),0 14px 28px -14px rgba(var(--sh),.22)!important}
+.st:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(16,18,15,.04),0 2px 4px rgba(var(--sh),.08),0 22px 40px -16px rgba(var(--sh),.32)!important}
+.lift:has(.st)>.glow{opacity:.4}
+
+
+/* =========================================================
+   Silk buttons v2 — porcelain pill + WebGL light field.
+   ========================================================= */
+.b-silk{--cx:80%;--cy:50%;--hv:0;position:relative;isolation:isolate;overflow:hidden;color:#33343B;border-radius:999px;
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAF9F7 48%,#F1F0EC 100%);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,1),
+    inset 0 -1.5px 0 rgba(16,18,15,.06),
+    inset 0 -10px 18px -10px rgba(16,18,15,.10),
+    0 0 0 .5px rgba(16,18,15,.10),
+    0 1px 1px rgba(16,18,15,.05),
+    0 2px 3px -1px rgba(16,18,15,.06),
+    0 8px 14px -6px rgba(16,18,15,.10),
+    0 22px 34px -16px rgba(16,18,15,.16),
+    0 44px 64px -36px rgba(16,18,15,.18);
+  transform:translateY(var(--y));
+  transition:transform .6s cubic-bezier(.2,.9,.25,1.1),box-shadow .6s cubic-bezier(.2,.8,.2,1)}
+.b-silk::before,.b-silk::after{content:"";display:block;position:absolute;pointer-events:none;border-radius:inherit}
+/* glass gloss: a soft specular band across the top half */
+.b-silk::before{inset:1px 1px 50% 1px;z-index:2;padding:0;animation:none;opacity:1;
+  background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.28) 55%,rgba(255,255,255,0) 100%);
+  -webkit-mask:none;mask:none;border-radius:999px 999px 40% 40% / 999px 999px 100% 100%}
+/* rim: a thin lit edge, brighter at the top */
+.b-silk::after{inset:0;z-index:3;opacity:1;padding:1px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.2) 50%,rgba(16,18,15,.06));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.silk-cv{position:absolute;inset:0;width:100%;height:100%;z-index:0;border-radius:inherit;pointer-events:none;filter:saturate(1.05)}
+.silk-fallback{background:radial-gradient(60% 120% at 82% 30%,rgba(70,130,255,.85),transparent 60%),radial-gradient(55% 110% at 70% 95%,rgba(255,105,140,.85),transparent 60%),radial-gradient(40% 90% at 96% 50%,rgba(255,200,155,.9),transparent 60%),linear-gradient(180deg,#fff,#F1F0EC)}
+/* label: ink copy, plus a white copy revealed only where the light is */
+.b-silk .sl-t{position:relative;z-index:1;letter-spacing:-.005em;--slx:120%;--sly:50%;--slr:60px;
+  background-image:radial-gradient(var(--slr) calc(var(--slr) * 1.1) at var(--slx) var(--sly),#FFFFFF 0%,#FFFFFF 38%,#C9C3E6 62%,#3A3B44 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.b-silk .ar{position:relative;z-index:1;background:rgba(255,255,255,.55);color:#2B2C30;box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(16,18,15,.12),0 4px 10px -4px rgba(16,18,15,.25);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.b-silk .bolt{position:relative;z-index:1}
 .b-silk .bolt path{fill:#fff}
+@media (hover:hover){
+  .b-silk:hover{--y:-2px;box-shadow:inset 0 1.5px 0 #fff,inset 0 -1.5px 0 rgba(16,18,15,.06),inset 0 -10px 18px -10px rgba(16,18,15,.10),0 0 0 .5px rgba(16,18,15,.10),0 1px 1px rgba(16,18,15,.05),0 4px 6px -2px rgba(16,18,15,.07),0 14px 22px -8px rgba(16,18,15,.12),0 32px 46px -18px rgba(16,18,15,.18),0 54px 80px -40px rgba(110,90,220,.28)}
+  .b-silk:hover .ar{background:#fff;transform:translateX(3px)}
+}
+.b-silk:active{--y:0px;transition-duration:.12s;box-shadow:inset 0 2px 5px rgba(16,18,15,.14),inset 0 -1px 0 rgba(255,255,255,.6),0 0 0 .5px rgba(16,18,15,.12),0 2px 4px -2px rgba(16,18,15,.15)}
+.b-silk:focus-visible{outline:2px solid #7B5CFF;outline-offset:3px}
+/* silk buttons keep their own gloss and rim on hover (no gradient ring) */
+.b-silk:hover::before{background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.28) 55%,rgba(255,255,255,0) 100%);animation:none;padding:0;opacity:1}
+.b-silk:hover::after{opacity:1;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.2) 50%,rgba(16,18,15,.06))}
+.b-silk:hover .ar{animation:none;color:#2B2C30}
+.b-silk .bolt path{fill:#7B5CFF}
 
 </style>
 </head>
@@ -1225,13 +1255,64 @@ div.award{cursor:default}
 
 
 
-  /* ---------- silk buttons: soft white pill with drifting colour light inside ---------- */
-  $$('.b-silk').forEach(function(b){
+  /* ---------- silk buttons: a WebGL light field inside a porcelain pill ----------
+     A small fragment shader paints soft, domain-warped colour light (blue, violet,
+     rose, peach) that lives on the right of the pill, drifts on its own and leans
+     toward the pointer. The label is drawn twice: ink everywhere, and a white copy
+     masked to exactly where the light is, so the text turns white over the colour. */
+  var SILK_VS='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var SILK_FS=[
+   'precision highp float;uniform vec2 r;uniform float t;uniform vec2 c;uniform float h;',
+   'vec3 lin(vec3 s){return pow(s,vec3(2.2));}',
+   'float blob(vec2 p,vec2 o,float s){vec2 d=p-o;return exp(-dot(d,d)/(s*s));}',
+   'void main(){',
+   ' vec2 uv=gl_FragCoord.xy/r; float ar=r.x/r.y; vec2 p=vec2(uv.x*ar,uv.y);',
+   ' vec2 C=vec2(c.x*ar,c.y);',
+   ' vec2 q=p+0.07*vec2(sin(p.y*5.+t*.9),cos(p.x*4.-t*.7))+0.04*vec2(sin(p.x*9.-t*1.3),cos(p.y*8.+t));',
+   ' float s=.85+.2*h;',
+   ' vec2 b1=C+vec2(-.05+.08*sin(t*.6),.42+.06*cos(t*.5));',
+   ' vec2 b2=C+vec2(-.30+.08*cos(t*.45),-.40+.05*sin(t*.7));',
+   ' vec2 b3=C+vec2(.48+.05*sin(t*.8),.0+.08*cos(t*.4));',
+   ' vec2 b4=C+vec2(-.12+.06*cos(t*.55),.05*sin(t*.9));',
+   ' float w1=blob(q,b1,s*.95), w2=blob(q,b2,s), w3=blob(q,b3,s*.85), w4=blob(q,b4,s*.75);',
+   ' vec3 c1=lin(vec3(.22,.48,1.)), c2=lin(vec3(1.,.36,.52)), c3=lin(vec3(1.,.74,.52)), c4=lin(vec3(.58,.40,1.));',
+   ' float W=w1+w2+w3+w4+1e-4; float e1=pow(w1,6.),e2=pow(w2,6.),e3=pow(w3,6.),e4=pow(w4,6.); vec3 col=(c1*e1+c2*e2+c3*e3+c4*e4)/(e1+e2+e3+e4+1e-6);',
+   ' float a=1.-exp(-W*.8);',
+   ' col=pow(col,vec3(1./2.2));',
+   ' float n=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5; col+=n/255.*2.;',
+   ' gl_FragColor=vec4(col*a,a);',
+   '}'].join('\n');
+  function silk(b){
     [].slice.call(b.childNodes).forEach(function(n){ if(n.nodeType===3&&n.textContent.trim()){var s=d.createElement('span');s.className='sl-t';s.textContent=n.textContent.trim();b.replaceChild(s,n)} });
-    var l=d.createElement('span');l.className='silk';l.setAttribute('aria-hidden','true');l.innerHTML='<i></i><i></i><i></i><i></i>';b.insertBefore(l,b.firstChild);
-    b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.setProperty('--px',((e.clientX-r.left)/r.width).toFixed(3));b.style.setProperty('--py',((e.clientY-r.top)/r.height).toFixed(3))});
-    b.addEventListener('pointerleave',function(){b.style.removeProperty('--px');b.style.removeProperty('--py')});
-  });
+    var lab=$('.sl-t',b), labX=0, labY=0, bw=1, bh=1;
+    function labPos(){var rb=b.getBoundingClientRect(),rl=lab?lab.getBoundingClientRect():rb;labX=rl.left-rb.left;labY=rl.top-rb.top;bw=rb.width;bh=rb.height}
+    var cv=d.createElement('canvas');cv.className='silk-cv';cv.setAttribute('aria-hidden','true');b.insertBefore(cv,b.firstChild);
+    var gl=cv.getContext('webgl',{premultipliedAlpha:true,antialias:false,alpha:true});
+    if(!gl){b.classList.add('silk-fallback');return}
+    function sh(type,src){var o=gl.createShader(type);gl.shaderSource(o,src);gl.compileShader(o);return o}
+    var pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,SILK_VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,SILK_FS));gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){b.classList.add('silk-fallback');return}
+    gl.useProgram(pr);var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    var loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    var uR=gl.getUniformLocation(pr,'r'),uT=gl.getUniformLocation(pr,'t'),uC=gl.getUniformLocation(pr,'c'),uH=gl.getUniformLocation(pr,'h');
+    var rest={x:.80,y:.5},tgt={x:.80,y:.5},cur={x:.80,y:.5},hv=0,hvT=0,vis=false,raf=0,t0=performance.now(),last=t0,W0=0,H0=0;
+    function size(){labPos();var r=b.getBoundingClientRect(),dpr=Math.min(2,W.devicePixelRatio||1);W0=Math.round(r.width*dpr);H0=Math.round(r.height*dpr);if(cv.width!==W0||cv.height!==H0){cv.width=W0;cv.height=H0}gl.viewport(0,0,W0,H0)}
+    function draw(now){
+      var dt=Math.min(.05,(now-last)/1000);last=now;
+      var k=1-Math.exp(-dt*6); cur.x+=(tgt.x-cur.x)*k; cur.y+=(tgt.y-cur.y)*k; hv+=(hvT-hv)*(1-Math.exp(-dt*5));
+      gl.uniform2f(uR,W0,H0);gl.uniform1f(uT,reduce?0:(now-t0)/1000);gl.uniform2f(uC,cur.x,1-cur.y);gl.uniform1f(uH,hv);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      if(lab){lab.style.setProperty('--slx',(cur.x*bw-labX).toFixed(1)+'px');lab.style.setProperty('--sly',(cur.y*bh-labY).toFixed(1)+'px');lab.style.setProperty('--slr',(bw*(.30+.06*hv)).toFixed(1)+'px')}
+      if(vis&&!reduce) raf=requestAnimationFrame(draw); else raf=0;
+    }
+    function go(){if(!raf){last=performance.now();raf=requestAnimationFrame(draw)}}
+    size();draw(performance.now());
+    if('IntersectionObserver' in W) new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis){size();go()}}).observe(b); else {vis=true;go()}
+    W.addEventListener('resize',function(){size();if(reduce)draw(performance.now())});
+    b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();tgt.x=Math.max(.2,Math.min(.95,(e.clientX-r.left)/r.width));tgt.y=(e.clientY-r.top)/r.height;hvT=1;if(reduce)draw(performance.now());});
+    b.addEventListener('pointerleave',function(){tgt.x=rest.x;tgt.y=rest.y;hvT=0;if(reduce)draw(performance.now())});
+  }
+  $$('.b-silk').forEach(silk);
 
   /* ---------- buttons: the light inside follows the pointer ---------- */
   $$('.b').forEach(function(b){
